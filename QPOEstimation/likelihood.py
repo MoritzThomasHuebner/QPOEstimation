@@ -35,18 +35,18 @@ class QPLikelihood(Likelihood):
     alpha = ParameterAccessor('alpha')
     alpha_1 = ParameterAccessor('alpha_1')
     alpha_2 = ParameterAccessor('alpha_2')
-    log_beta = ParameterAccessor('log_beta')
-    log_sigma = ParameterAccessor('log_sigma')
+    beta = ParameterAccessor('beta')
+    sigma = ParameterAccessor('sigma')
     rho = ParameterAccessor('rho')
     delta = ParameterAccessor('delta')
-    log_amplitude = ParameterAccessor('log_amplitude')
-    log_width = ParameterAccessor('log_width')
+    amplitude = ParameterAccessor('amplitude')
+    width = ParameterAccessor('width')
     central_frequency = ParameterAccessor('central_frequency')
 
     def __init__(self, frequencies, amplitudes, frequency_mask, noise_model='red_noise'):
         super(QPLikelihood, self).__init__(
-            parameters=dict(alpha=0, alpha_1=0, alpha_2=0, log_beta=0, log_sigma=0, delta=0, rho=0,
-                            log_amplitude=0, log_width=0, central_frequency=127))
+            parameters=dict(alpha=0, alpha_1=0, alpha_2=0, beta=0, sigma=0, delta=0, rho=0,
+                            amplitude=0, width=0, central_frequency=127))
         self.frequencies = frequencies
         self.amplitudes = amplitudes
         self.frequency_mask = frequency_mask
@@ -84,22 +84,6 @@ class QPLikelihood(Likelihood):
     @property
     def lorentzian(self):
         return lorentzian(self.frequencies, self.amplitude, self.central_frequency, self.width)
-
-    @property
-    def beta(self):
-        return np.exp(self.log_beta)
-
-    @property
-    def sigma(self):
-        return np.exp(self.log_sigma)
-
-    @property
-    def amplitude(self):
-        return np.exp(self.log_amplitude)
-
-    @property
-    def width(self):
-        return np.exp(self.log_width)
 
     @property
     def model(self):
