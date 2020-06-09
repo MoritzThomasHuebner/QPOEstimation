@@ -6,8 +6,8 @@ from copy import deepcopy
 def get_red_noise_prior():
     prior = bilby.core.prior.PriorDict()
     prior['alpha'] = bilby.core.prior.Uniform(0, 10, name='alpha')
-    prior['beta'] = bilby.core.prior.LogUniform(0.01, 10, name='beta')
-    prior['sigma'] = bilby.core.prior.LogUniform(1e-4, 1, name='sigma')
+    prior['beta'] = bilby.core.prior.LogUniform(1e-6, 10, name='beta')
+    prior['sigma'] = bilby.core.prior.LogUniform(1e-5, 1, name='sigma')
     return prior
 
 
@@ -19,7 +19,7 @@ def get_qpo_prior(frequencies=None):
         df = frequencies[1] - frequencies[0]
         max_frequency = frequencies[-1]
     prior = bilby.core.prior.PriorDict()
-    prior['amplitude'] = bilby.core.prior.LogUniform(0.1, 100, name='amplitude')
+    prior['amplitude'] = bilby.core.prior.LogUniform(1e-4, 100, name='amplitude')
     prior['width'] = bilby.core.prior.Uniform(5*df/np.pi, 100, name='width') # 5 time FWHM as a minimum
     prior['central_frequency'] = bilby.core.prior.Uniform(1.0, max_frequency, name='central_frequency')
     # prior['offset'] = bilby.core.prior.Uniform(0, 1, name='offset')
