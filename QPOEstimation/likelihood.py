@@ -14,8 +14,8 @@ def broken_power_law_noise(frequencies, alpha_1, alpha_2, beta, delta, rho):
     return beta*frequencies**(-alpha_1) * (1 + (frequencies/delta)**((alpha_2-alpha_1)/rho))**(-rho)
 
 
-def lorentzian(frequencies, amplitude, central_frequency, width):
-    return amplitude * (width ** 2 / ((frequencies - central_frequency) ** 2 + width ** 2)) / np.pi / width
+def lorentzian(frequencies, amplitude, central_frequency, width, offset):
+    return amplitude * (width ** 2 / ((frequencies - central_frequency) ** 2 + width ** 2)) / np.pi / width + offset
 
 
 class ParameterAccessor(object):
@@ -42,11 +42,12 @@ class QPLikelihood(Likelihood):
     amplitude = ParameterAccessor('amplitude')
     width = ParameterAccessor('width')
     central_frequency = ParameterAccessor('central_frequency')
+    offset = ParameterAccessor('offset')
 
     def __init__(self, frequencies, amplitudes, frequency_mask, noise_model='red_noise'):
         super(QPLikelihood, self).__init__(
             parameters=dict(alpha=0, alpha_1=0, alpha_2=0, beta=0, sigma=0, delta=0, rho=0,
-                            amplitude=0, width=0, central_frequency=127))
+                            amplitude=0, width=0, central_frequency=127, offset=0))
         self.frequencies = frequencies
         self.amplitudes = amplitudes
         self.frequency_mask = frequency_mask
@@ -83,11 +84,11 @@ class QPLikelihood(Likelihood):
 
     @property
     def lorentzian(self):
-        return lorentzian(self.frequencies, self.amplitude, self.central_frequency, self.width)
+        return lorentzian(self.frequencies, self.amplitude, self.central_frequency, self.width, self.offset)
 
     @property
     def model(self):
-        return self.lorentzian
+        return np.sqrt(self.lorentzian)
 
     @property
     def residual(self):
@@ -108,6 +109,10 @@ class PeriodogramQPOLikelihood(QPLikelihood):
         self._periodogram = periodogram
         self.frequency_mask = frequency_mask
         self.noise_model = noise_model
+
+    @property
+    def model(self):
+        return self.lorentzian
 
     @property
     def periodogram(self):
