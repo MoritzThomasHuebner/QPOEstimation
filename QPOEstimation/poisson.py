@@ -1,6 +1,6 @@
 import numpy as np
-import stingray
 from scipy.stats import poisson
+
 
 def poisson_process(times, func, **func_params):
     dt = times[1] - times[0]
