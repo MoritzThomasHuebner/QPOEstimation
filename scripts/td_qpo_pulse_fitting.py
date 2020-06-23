@@ -28,9 +28,10 @@ plt.show()
 
 reduced_nbins = len(reduced_times)
 
-
-priors = generate_qpo_prior_dict(t_start=t_start, t_end=t_end, max_burst_amplitude=1e6, max_n_bursts=5,
-                                 max_qpo_amplitude=1e6, max_n_qpos=0, max_background=1e3, max_frequency=nbins/T)
+max_n_bursts = 1
+max_n_qpos = 1
+priors = generate_qpo_prior_dict(t_start=t_start, t_end=t_end, max_burst_amplitude=1e6, max_n_bursts=max_n_bursts,
+                                 max_qpo_amplitude=1e6, max_n_qpos=max_n_qpos, max_background=1e3, max_frequency=nbins/T)
 
 likelihood = bilby.core.likelihood.PoissonLikelihood(x=reduced_times, y=reduced_binned_data, func=burst_qpo_model_norm)
 
@@ -39,11 +40,18 @@ likelihood = bilby.core.likelihood.PoissonLikelihood(x=reduced_times, y=reduced_
 outdir = 'time_domain_real_data'
 label = 'slab_spike'
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir, label=label,
-                           sampler='dynesty', nlive=500, sample='rslice', resume=False, check_point_plot=True)
+                           sampler='dynesty', nlive=250, sample='rslice', resume=False, clean=True, check_point_plot=True)
 
 
 # result = bilby.core.result.Result.from_json(f'{outdir}/{label}_result.json')
-result.plot_corner()
+for i in range(max_n_bursts):
+    parameters = [f'amplitude_{i}', f't_max_{i}', f'sigma_{i}', f'skewness_{i}']
+    if i == 0:
+        parameters.append('background')
+    result.plot_corner(parameters, filename=f'{label}_corner_{i}')
+for i in range(max_n_qpos):
+    result.plot_corner(parameters=[f'amplitude_qpo_{i}, frequency_{i}, t_qpo_{i}, decay_time_{i}, phase_{i}'],
+                       filename=f'{label}_corner_qpo_{i}')
 
 max_like_params = result.posterior.iloc[-1]
 plt.plot(reduced_times, reduced_binned_data)
