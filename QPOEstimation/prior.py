@@ -59,10 +59,18 @@ class SlabSpikePrior(bilby.core.prior.Prior):
 
     def rescale(self, val):
         self.test_valid_for_rescaling(val)
-        if val >= self.spike_height:
-            return self.minimum + (val - self.spike_height) / (1 - self.spike_height) * (self.maximum - self.minimum)
-        else:
-            return self.minimum
+        if isinstance(val, (float, int)):
+            val = [val]
+        res = np.zeros(len(val))
+        for i, v in enumerate(val):
+            if v >= self.spike_height:
+                res[i] = self.minimum + (v - self.spike_height) / (1 - self.spike_height) \
+                         * (self.maximum - self.minimum)
+            else:
+                res[i] = self.minimum
+        if len(res) == 1:
+            return res[0]
+        return res
 
     def prob(self, val):
         return ((val >= self.minimum) & (val <= self.maximum)) * (self.spike_height + (1 - self.spike_height) / (self.maximum - self.minimum))
@@ -71,22 +79,75 @@ class SlabSpikePrior(bilby.core.prior.Prior):
         return np.log(self.prob(val))
 
 
+def generic_condition_func(reference_params, amplitude):
+    if isinstance(amplitude, (float, int)):
+        if amplitude == 0:
+            return dict(minimum=0, maximum=1e-12)
+        return dict(minimum=reference_params['minimum'], maximum=reference_params['maximum'])
+    else:
+        res = dict(minimum=reference_params['minimum'], maximum=reference_params['maximum'])
+        res['maximum'][np.where(amplitude == 0)[0]] = reference_params['minimum'][np.where(amplitude == 0)[0]] + 1e-12
+        return res
+
+
 def generate_qpo_prior_dict(t_start, t_end, max_burst_amplitude=1e5, max_n_bursts=1, max_qpo_amplitude=1e5,
-                            max_n_qpos=1, max_background=1e4, max_frequency=1e3, ):
+                            max_n_qpos=1, max_background=1e4, max_frequency=1e3):
     max_sigma = t_end - t_start
     T = max_sigma
-    priors = bilby.core.prior.PriorDict(dict())
+    priors = bilby.core.prior.ConditionalPriorDict(dict())
     priors['background_rate'] = bilby.core.prior.LogUniform(minimum=1, maximum=max_background, name='background')
+
+    def condition_func_0(reference_params, amplitude_0):
+        return generic_condition_func(reference_params, amplitude_0)
+
+    def condition_func_1(reference_params, amplitude_1):
+        return generic_condition_func(reference_params, amplitude_1)
+
+    def condition_func_2(reference_params, amplitude_2):
+        return generic_condition_func(reference_params, amplitude_2)
+
+    def condition_func_3(reference_params, amplitude_3):
+        return generic_condition_func(reference_params, amplitude_3)
+
+    def condition_func_4(reference_params, amplitude_4):
+        return generic_condition_func(reference_params, amplitude_4)
+
+    def condition_func_qpo_0(reference_params, amplitude_qpo_0):
+        return generic_condition_func(reference_params, amplitude_qpo_0)
+
+    def condition_func_qpo_1(reference_params, amplitude_qpo_1):
+        return generic_condition_func(reference_params, amplitude_qpo_1)
+
+    condition_funcs = [condition_func_0, condition_func_1, condition_func_2, condition_func_3, condition_func_4]
+    condition_funcs_qpo = [condition_func_qpo_0, condition_func_qpo_1]
+
     for i in range(max_n_bursts):
-        priors[f'amplitude_{i}'] = SlabSpikePrior(minimum=0, maximum=max_burst_amplitude, spike_height=1 - 1/(i + i), name=f'amplitude_{i}')
-        priors[f't_max_{i}'] = bilby.core.prior.Uniform(minimum=t_start, maximum=t_end, name=f't_max_{i}')
-        priors[f'sigma_{i}'] = bilby.core.prior.LogUniform(minimum=1e-4, maximum=max_sigma, name=f'sigma_{i}')
-        priors[f'skewness_{i}'] = bilby.core.prior.Uniform(minimum=0, maximum=100, name=f's_{i}')
+        priors[f'amplitude_{i}'] = SlabSpikePrior(minimum=0, maximum=max_burst_amplitude, spike_height=1 - 1 / (i + 1),
+                                                  name=f'amplitude_{i}')
+        priors[f't_max_{i}'] = bilby.core.prior.ConditionalUniform(condition_func=condition_funcs[i], minimum=t_start, maximum=t_end, name=f't_max_{i}')
+        priors[f'sigma_{i}'] = bilby.core.prior.ConditionalUniform(condition_func=condition_funcs[i], minimum=1e-4, maximum=max_sigma, name=f'sigma_{i}')
+        priors[f'skewness_{i}'] = bilby.core.prior.ConditionalUniform(condition_func=condition_funcs[i], minimum=0, maximum=100, name=f's_{i}')
+    for i in range(max_n_bursts, 5):
+        priors[f'amplitude_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'amplitude_{i}')
+        priors[f't_max_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f't_max_{i}')
+        priors[f'sigma_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f'sigma_{i}')
+        priors[f'skewness_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f's_{i}')
     for i in range(max_n_qpos):
-        priors['amplitude_qpo'] = SlabSpikePrior(minimum=0, maximum=max_qpo_amplitude, name='amplitude_qpo')
-        # priors['offset'] = bilby.core.prior.LogUniform(minimum=1/nbins/T, maximum=1e9, name='offset')
-        # priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='phase')
-        priors['frequency'] = bilby.core.prior.LogUniform(minimum=10 / T, maximum=max_frequency, name='frequency')
-        priors['t_0'] = bilby.core.prior.Uniform(minimum=t_start, maximum=t_end, name='t_0')
-        priors['decay_time'] = bilby.core.prior.LogUniform(minimum=1/max_frequency, maximum=T, name='decay_time')
-        priors['phase'] = bilby.core.prior.DeltaFunction(peak=0, name='phase')
+        # priors[f'offset_{i}'] = bilby.core.prior.LogUniform(minimum=1/nbins/T, maximum=1e9, name=f'offset_{i}')
+        # priors[f'phase_{i}'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name=f'phase_{i}')
+        priors[f'amplitude_qpo_{i}'] = SlabSpikePrior(minimum=0, maximum=max_qpo_amplitude,
+                                                      spike_height=1 - 1 / (i + 2),
+                                                      name=f'amplitude_qpo_{i}')
+        priors[f'frequency_{i}'] = bilby.core.prior.ConditionalUniform(condition_func=condition_funcs_qpo[i], minimum=10 / T, maximum=max_frequency, name=f'frequency_{i}')
+        priors[f't_qpo_{i}'] = bilby.core.prior.ConditionalUniform(condition_func=condition_funcs_qpo[i], minimum=t_start, maximum=t_end, name=f't_qpo_{i}')
+        priors[f'decay_time_{i}'] = bilby.core.prior.ConditionalUniform(condition_func=condition_funcs_qpo[i], minimum=1 / max_frequency, maximum=T, name=f'decay_time_{i}')
+        priors[f'phase_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'phase_{i}')
+    for i in range(max_n_qpos, 2):
+        # priors[f'offset_{i}'] = bilby.core.prior.LogUniform(minimum=1/nbins/T, maximum=1e9, name=f'offset_{i}')
+        # priors[f'phase_{i}'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name=f'phase_{i}')
+        priors[f'amplitude_qpo_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'amplitude_qpo_{i}')
+        priors[f'frequency_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f'frequency_{i}')
+        priors[f't_qpo_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f't_qpo_{i}')
+        priors[f'decay_time_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f'decay_time_{i}')
+        priors[f'phase_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'phase_{i}')
+    return priors
