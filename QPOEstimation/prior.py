@@ -75,7 +75,7 @@ def generate_qpo_prior_dict(t_start, t_end, max_burst_amplitude=1e5, max_n_burst
                             max_n_qpos=1, max_background=1e4, max_frequency=1e3, ):
     max_sigma = t_end - t_start
     T = max_sigma
-    priors = bilby.core.prior.ConditionalPriorDict(dict())
+    priors = bilby.core.prior.PriorDict(dict())
     priors['background_rate'] = bilby.core.prior.LogUniform(minimum=1, maximum=max_background, name='background')
     for i in range(max_n_bursts):
         priors[f'amplitude_{i}'] = SlabSpikePrior(minimum=0, maximum=max_burst_amplitude, spike_height=1 - 1/(i + i), name=f'amplitude_{i}')
