@@ -27,7 +27,7 @@ def qpo_shot(times, offset, amplitude, frequency, t_qpo, phase, decay_time):
         return np.zeros(len(times))
     res = np.zeros(len(times))
     idxs = [np.where(times >= t_qpo)][0]
-    res[idxs] = (offset + amplitude * np.cos(2 * np.pi * frequency * (times[idxs] - t_qpo) + phase)) * np.exp(
+    res[idxs] = 0.5*amplitude*(1 + np.cos(2 * np.pi * frequency * (times[idxs] - t_qpo) + phase))/2 * np.exp(
         -(times[idxs] - t_qpo) / decay_time)
     return res
 

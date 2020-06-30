@@ -92,7 +92,7 @@ def generate_qpo_prior_dict(t_start, t_end, max_burst_amplitude=1e5, max_n_burst
                             max_n_qpos=1, max_background=1e4, max_frequency=1e3):
     max_sigma = t_end - t_start
     T = max_sigma
-    priors = bilby.core.prior.PriorDict(dict())
+    priors = bilby.core.prior.ConditionalPriorDict(dict())
     priors['background_rate'] = bilby.core.prior.LogUniform(minimum=1, maximum=max_background, name='background')
 
     # def condition_func_0(reference_params, amplitude_0):
@@ -123,8 +123,8 @@ def generate_qpo_prior_dict(t_start, t_end, max_burst_amplitude=1e5, max_n_burst
         priors[f'amplitude_{i}'] = SlabSpikePrior(minimum=0, maximum=max_burst_amplitude, spike_height=1 - 1 / (i + 1),
                                                   name=f'amplitude_{i}')
         priors[f't_max_{i}'] = bilby.core.prior.Uniform(minimum=t_start, maximum=t_end, name=f't_max_{i}')
-        priors[f'sigma_{i}'] = bilby.core.prior.Uniform(minimum=1e-4, maximum=max_sigma, name=f'sigma_{i}')
-        priors[f'skewness_{i}'] = bilby.core.prior.Uniform(minimum=0, maximum=100, name=f's_{i}')
+        priors[f'sigma_{i}'] = bilby.core.prior.LogUniform(minimum=1e-4, maximum=max_sigma, name=f'sigma_{i}')
+        priors[f'skewness_{i}'] = bilby.core.prior.LogUniform(minimum=1e-4, maximum=100, name=f's_{i}')
     for i in range(max_n_bursts, 5):
         priors[f'amplitude_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'amplitude_{i}')
         priors[f't_max_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f't_max_{i}')

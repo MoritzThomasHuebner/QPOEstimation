@@ -85,11 +85,11 @@ class QPLikelihood(Likelihood):
         return np.sum(-self.residual ** 2 / psd / 2 - np.log(2 * np.pi * psd) / 2)
 
 
-class PeriodogramQPOLikelihood(QPLikelihood):
+class WhittleLikelihood(QPLikelihood):
 
     def __init__(self, frequencies, periodogram, frequency_mask, noise_model='red_noise'):
-        super(PeriodogramQPOLikelihood, self).__init__(frequencies=frequencies, frequency_mask=frequency_mask,
-                                                       noise_model=noise_model, amplitudes=None)
+        super(WhittleLikelihood, self).__init__(frequencies=frequencies, frequency_mask=frequency_mask,
+                                                noise_model=noise_model, amplitudes=None)
         del self.amplitudes
         self.frequencies = frequencies
         self._periodogram = periodogram
