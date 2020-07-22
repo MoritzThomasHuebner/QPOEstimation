@@ -16,8 +16,8 @@ nbins = int((fits_data[1].data['TIME'][-1] - fits_data[1].data['TIME'][0]) / bin
 binned_data, _ = np.histogram(tte_data, nbins)
 times = bin_width * np.arange(0, nbins)
 
-t_start = 58
-t_end = 62
+t_start = 3293.5
+t_end = 3294.5
 T = t_end - t_start
 
 idxs = np.where(np.logical_and(times > t_start, times < t_end))[0]

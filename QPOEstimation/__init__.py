@@ -1,1 +1,1 @@
-from . import likelihood, gbm, prior, injection, poisson
+from . import likelihood, gbm, prior, injection, poisson, functions
