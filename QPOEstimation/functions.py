@@ -113,5 +113,39 @@ def merged_qpo_model(times, amplitude_spike, amplitude_qpo, t_spike, t_qpo, f_qp
     envelope = np.zeros(len(times))
     envelope[before_burst_indices] = amplitude_spike * np.exp((times[before_burst_indices] - t_spike) / decay_time)
     envelope[after_burst_indices] = amplitude_spike * np.exp(-(times[after_burst_indices] - t_spike) / decay_time / skewness)
-    envelope[after_qpo_indices] += amplitude_qpo * np.cos(2 * np.pi * f_qpo * times[after_qpo_indices] + phase) * np.exp(-(times[after_qpo_indices] - t_qpo) / decay_time / skewness)
+    if amplitude_qpo != 0:
+        envelope[after_qpo_indices] += amplitude_qpo * np.cos(2 * np.pi * f_qpo * times[after_qpo_indices] + phase) * np.exp(-(times[after_qpo_indices] - t_spike) / decay_time / skewness)
     return envelope
+
+
+def merged_qpo_model_multi(
+        times, background_rate,
+        amplitude_spike_0, amplitude_qpo_0, t_spike_0, t_qpo_0, f_qpo_0, phase_0, decay_time_0, skewness_0,
+        amplitude_spike_1, amplitude_qpo_1, t_spike_1, t_qpo_1, f_qpo_1, phase_1, decay_time_1, skewness_1,
+        amplitude_spike_2, amplitude_qpo_2, t_spike_2, t_qpo_2, f_qpo_2, phase_2, decay_time_2, skewness_2,
+        amplitude_spike_3, amplitude_qpo_3, t_spike_3, t_qpo_3, f_qpo_3, phase_3, decay_time_3, skewness_3,
+        amplitude_spike_4, amplitude_qpo_4, t_spike_4, t_qpo_4, f_qpo_4, phase_4, decay_time_4, skewness_4, **kwargs):
+    res = merged_qpo_model(times, amplitude_spike_0, amplitude_qpo_0, t_spike_0, t_qpo_0, f_qpo_0, phase_0, decay_time_0, skewness_0) + \
+          merged_qpo_model(times, amplitude_spike_1, amplitude_qpo_1, t_spike_1, t_qpo_1, f_qpo_1, phase_1, decay_time_1, skewness_1) + \
+          merged_qpo_model(times, amplitude_spike_2, amplitude_qpo_2, t_spike_2, t_qpo_2, f_qpo_2, phase_2, decay_time_2, skewness_2) + \
+          merged_qpo_model(times, amplitude_spike_3, amplitude_qpo_3, t_spike_3, t_qpo_3, f_qpo_3, phase_3, decay_time_3, skewness_3) + \
+          merged_qpo_model(times, amplitude_spike_4, amplitude_qpo_4, t_spike_4, t_qpo_4, f_qpo_4, phase_4, decay_time_4, skewness_4) + background_rate
+    return res
+
+def merged_qpo_model_multi_norm(
+        times, background_rate,
+        amplitude_spike_0, amplitude_qpo_0, t_spike_0, t_qpo_0, f_qpo_0, phase_0, decay_time_0, skewness_0,
+        amplitude_spike_1, amplitude_qpo_1, t_spike_1, t_qpo_1, f_qpo_1, phase_1, decay_time_1, skewness_1,
+        amplitude_spike_2, amplitude_qpo_2, t_spike_2, t_qpo_2, f_qpo_2, phase_2, decay_time_2, skewness_2,
+        amplitude_spike_3, amplitude_qpo_3, t_spike_3, t_qpo_3, f_qpo_3, phase_3, decay_time_3, skewness_3,
+        amplitude_spike_4, amplitude_qpo_4, t_spike_4, t_qpo_4, f_qpo_4, phase_4, decay_time_4, skewness_4, **kwargs):
+    res = merged_qpo_model_multi(times, background_rate,
+                           amplitude_spike_0, amplitude_qpo_0, t_spike_0, t_qpo_0, f_qpo_0, phase_0, decay_time_0, skewness_0,
+                           amplitude_spike_1, amplitude_qpo_1, t_spike_1, t_qpo_1, f_qpo_1, phase_1, decay_time_1, skewness_1,
+                           amplitude_spike_2, amplitude_qpo_2, t_spike_2, t_qpo_2, f_qpo_2, phase_2, decay_time_2, skewness_2,
+                           amplitude_spike_3, amplitude_qpo_3, t_spike_3, t_qpo_3, f_qpo_3, phase_3, decay_time_3, skewness_3,
+                           amplitude_spike_4, amplitude_qpo_4, t_spike_4, t_qpo_4, f_qpo_4, phase_4, decay_time_4, skewness_4)
+    T = times[-1] - times[0]
+    nbin = len(times)
+    norm = nbin/T
+    return res / norm
