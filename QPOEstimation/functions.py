@@ -104,14 +104,14 @@ def burst_qpo_model_norm(times, background_rate=0,
                            **kwargs) / norm
 
 
-def merged_qpo_model(times, a_spike, a_qpo, t_spike, t_qpo, f_qpo, phase, decay_time, skewness):
-    if a_spike == 0:
+def merged_qpo_model(times, amplitude_spike, amplitude_qpo, t_spike, t_qpo, f_qpo, phase, decay_time, skewness):
+    if amplitude_spike == 0:
         return np.zeros(len(times))
     before_burst_indices = np.where(times <= t_spike)
     after_burst_indices = np.where(times > t_spike)
     after_qpo_indices = np.where(times > t_qpo)
     envelope = np.zeros(len(times))
-    envelope[before_burst_indices] = a_spike * np.exp((times[before_burst_indices] - t_spike)/decay_time)
-    envelope[after_burst_indices] = a_spike * np.exp(-(times[after_burst_indices] - t_spike) / decay_time / skewness)
-    envelope[after_qpo_indices] += a_qpo * np.cos(2*np.pi*f_qpo*times[after_qpo_indices] + phase) * np.exp(-(times[after_qpo_indices] - t_qpo) / decay_time / skewness)
+    envelope[before_burst_indices] = amplitude_spike * np.exp((times[before_burst_indices] - t_spike) / decay_time)
+    envelope[after_burst_indices] = amplitude_spike * np.exp(-(times[after_burst_indices] - t_spike) / decay_time / skewness)
+    envelope[after_qpo_indices] += amplitude_qpo * np.cos(2 * np.pi * f_qpo * times[after_qpo_indices] + phase) * np.exp(-(times[after_qpo_indices] - t_qpo) / decay_time / skewness)
     return envelope

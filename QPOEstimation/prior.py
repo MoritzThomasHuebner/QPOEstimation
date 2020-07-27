@@ -79,6 +79,9 @@ class SlabSpikePrior(bilby.core.prior.Prior):
         return np.log(self.prob(val))
 
 
+ConditionalSlabSpikePrior = bilby.core.prior.conditional_prior_factory(SlabSpikePrior)
+
+
 def generic_condition_func(reference_params, amplitude):
     if isinstance(amplitude, (float, int)):
         if amplitude == 0:
@@ -88,12 +91,81 @@ def generic_condition_func(reference_params, amplitude):
         return dict(minimum=reference_params['minimum'], maximum=reference_params['maximum'])
 
 
-def generate_qpo_prior_dict(t_start, t_end, max_burst_amplitude=1e5, max_n_bursts=1, max_qpo_amplitude=1e5,
-                            max_n_qpos=1, max_background=1e4, max_frequency=1e3):
-    max_sigma = t_end - t_start
-    T = max_sigma
+def generic_condition_func_amplitude_qpo(reference_params, amplitude_spike):
+    if isinstance(amplitude_spike, int):
+        if amplitude_spike == 0:
+            reference_params["spike_height"] = 1
+        else:
+            reference_params['maximum'] = amplitude_spike
+    else:
+        reference_params["spike_height"][np.where(amplitude_spike==0)] = 1
+        reference_params["maximum"] = amplitude_spike
+    return reference_params
+
+
+def generic_t_qpo_condition_func(reference_params, t_spike, decay_time, skewness):
+    reference_params['minimum'] = t_spike
+    reference_params['maximum'] = t_spike + 2*decay_time*skewness
+
+
+def generic_f_qpo_condition_func(reference_params, decay_time, skewness):
+    reference_params['minimum'] = decay_time * skewness
+
+
+def amplitude_qpo_condition_func_0(reference_params, amplitude_spike_0):
+    generic_condition_func_amplitude_qpo(reference_params, amplitude_spike_0)
+def amplitude_qpo_condition_func_1(reference_params, amplitude_spike_1):
+    generic_condition_func_amplitude_qpo(reference_params, amplitude_spike_1)
+def amplitude_qpo_condition_func_2(reference_params, amplitude_spike_2):
+    generic_condition_func_amplitude_qpo(reference_params, amplitude_spike_2)
+def amplitude_qpo_condition_func_3(reference_params, amplitude_spike_3):
+    generic_condition_func_amplitude_qpo(reference_params, amplitude_spike_3)
+def amplitude_qpo_condition_func_4(reference_params, amplitude_spike_4):
+    generic_condition_func_amplitude_qpo(reference_params, amplitude_spike_4)
+
+
+def t_qpo_condition_func_0(reference_params, t_spike_0, decay_time_0, skewness_0):
+    generic_t_qpo_condition_func(reference_params, t_spike_0, decay_time_0, skewness_0)
+def t_qpo_condition_func_1(reference_params, t_spike_1, decay_time_1, skewness_1):
+    generic_t_qpo_condition_func(reference_params, t_spike_1, decay_time_1, skewness_1)
+def t_qpo_condition_func_2(reference_params, t_spike_2, decay_time_2, skewness_2):
+    generic_t_qpo_condition_func(reference_params, t_spike_2, decay_time_2, skewness_2)
+def t_qpo_condition_func_3(reference_params, t_spike_3, decay_time_3, skewness_3):
+    generic_t_qpo_condition_func(reference_params, t_spike_3, decay_time_3, skewness_3)
+def t_qpo_condition_func_4(reference_params, t_spike_4, decay_time_4, skewness_4):
+    generic_t_qpo_condition_func(reference_params, t_spike_4, decay_time_4, skewness_4)
+
+
+def f_qpo_condition_func_0(reference_params, decay_time_0, skewness_0):
+    generic_f_qpo_condition_func(reference_params, decay_time_0, skewness_0)
+def f_qpo_condition_func_1(reference_params, decay_time_1, skewness_1):
+    generic_f_qpo_condition_func(reference_params, decay_time_1, skewness_1)
+def f_qpo_condition_func_2(reference_params, decay_time_2, skewness_2):
+    generic_f_qpo_condition_func(reference_params, decay_time_2, skewness_2)
+def f_qpo_condition_func_3(reference_params, decay_time_3, skewness_3):
+    generic_f_qpo_condition_func(reference_params, decay_time_3, skewness_3)
+def f_qpo_condition_func_4(reference_params, decay_time_4, skewness_4):
+    generic_f_qpo_condition_func(reference_params, decay_time_4, skewness_4)
+
+
+amplitude_qpo_condition_funcs = [amplitude_qpo_condition_func_0, amplitude_qpo_condition_func_1,
+                                 amplitude_qpo_condition_func_2, amplitude_qpo_condition_func_3,
+                                 amplitude_qpo_condition_func_4]
+t_qpo_condition_funcs = [t_qpo_condition_func_0, t_qpo_condition_func_1,
+                         t_qpo_condition_func_2, t_qpo_condition_func_3,
+                         t_qpo_condition_func_4]
+f_qpo_condition_funcs = [f_qpo_condition_func_0, f_qpo_condition_func_1,
+                         f_qpo_condition_func_2, f_qpo_condition_func_3,
+                         f_qpo_condition_func_4]
+
+
+def generate_qpo_prior_dict(t_start, t_end, max_burst_amplitude=1e5, max_n_bursts=1,
+                            max_background=1e4, max_frequency=1e3):
+    max_decay_time = t_end - t_start
     priors = bilby.core.prior.ConditionalPriorDict(dict())
     priors['background_rate'] = bilby.core.prior.LogUniform(minimum=1, maximum=max_background, name='background')
+
+
 
     # def condition_func_0(reference_params, amplitude_0):
     #     return generic_condition_func(reference_params, amplitude_0)
@@ -120,32 +192,28 @@ def generate_qpo_prior_dict(t_start, t_end, max_burst_amplitude=1e5, max_n_burst
     # condition_funcs_qpo = [condition_func_qpo_0, condition_func_qpo_1]
 
     for i in range(max_n_bursts):
-        priors[f'amplitude_{i}'] = SlabSpikePrior(minimum=0, maximum=max_burst_amplitude, spike_height=1 - 1 / (i + 1),
-                                                  name=f'amplitude_{i}')
-        priors[f't_max_{i}'] = bilby.core.prior.Uniform(minimum=t_start, maximum=t_end, name=f't_max_{i}')
-        priors[f'sigma_{i}'] = bilby.core.prior.LogUniform(minimum=1e-4, maximum=max_sigma, name=f'sigma_{i}')
+        spike_height = 1 - 1 / (i + 1)
+        spike_height_qpo = 1 - 1 / (i + 2)
+        priors[f'amplitude_spike_{i}'] = SlabSpikePrior(minimum=0, maximum=max_burst_amplitude,
+                                                        spike_height=spike_height, name=f'amplitude_spike_{i}')
+        priors[f't_spike_{i}'] = bilby.core.prior.Uniform(minimum=t_start, maximum=t_end, name=f't_spike_{i}')
+        priors[f'amplitude_qpo_{i}'] = ConditionalSlabSpikePrior(
+            condition_func=amplitude_qpo_condition_funcs[i], minimum=0, maximum=max_burst_amplitude,
+            spike_height=spike_height_qpo, name=f'amplitude_qpo_{i}')
+        priors[f't_qpo_{i}'] = bilby.core.prior.ConditionalUniform(
+            condition_func=t_qpo_condition_funcs[i], minimum=t_start, maximum=t_end, name=f't_qpo_{i}')
+        priors[f'phase_{i}'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name=f'phase_{i}')
+        priors[f'decay_time_{i}'] = bilby.core.prior.LogUniform(minimum=1e-4, maximum=max_decay_time, name=f'tau_{i}')
         priors[f'skewness_{i}'] = bilby.core.prior.LogUniform(minimum=1e-4, maximum=100, name=f's_{i}')
+        priors[f'f_qpo_{i}'] = bilby.core.prior.ConditionalLogUniform(condition_func=f_qpo_condition_funcs[i],
+                                                                      minimum=t_start, maximum=t_end, name=f't_qpo_{i}')
     for i in range(max_n_bursts, 5):
-        priors[f'amplitude_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'amplitude_{i}')
-        priors[f't_max_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f't_max_{i}')
-        priors[f'sigma_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f'sigma_{i}')
-        priors[f'skewness_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f's_{i}')
-    for i in range(max_n_qpos):
-        # priors[f'offset_{i}'] = bilby.core.prior.LogUniform(minimum=1/nbins/T, maximum=1e9, name=f'offset_{i}')
-        # priors[f'phase_{i}'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name=f'phase_{i}')
-        priors[f'amplitude_qpo_{i}'] = SlabSpikePrior(minimum=0, maximum=max_qpo_amplitude,
-                                                      spike_height=1 - 1 / (i + 2),
-                                                      name=f'amplitude_qpo_{i}')
-        priors[f'frequency_{i}'] = bilby.core.prior.Uniform(minimum=10 / T, maximum=max_frequency, name=f'frequency_{i}')
-        priors[f't_qpo_{i}'] = bilby.core.prior.Uniform(minimum=t_start, maximum=t_end, name=f't_qpo_{i}')
-        priors[f'decay_time_{i}'] = bilby.core.prior.Uniform(minimum=1 / max_frequency, maximum=T, name=f'decay_time_{i}')
-        priors[f'phase_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'phase_{i}')
-    for i in range(max_n_qpos, 2):
-        # priors[f'offset_{i}'] = bilby.core.prior.LogUniform(minimum=1/nbins/T, maximum=1e9, name=f'offset_{i}')
-        # priors[f'phase_{i}'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name=f'phase_{i}')
+        priors[f'amplitude_spike_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'amplitude_spike_{i}')
+        priors[f't_spike_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f't_spike_{i}')
         priors[f'amplitude_qpo_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'amplitude_qpo_{i}')
-        priors[f'frequency_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f'frequency_{i}')
         priors[f't_qpo_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f't_qpo_{i}')
-        priors[f'decay_time_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f'decay_time_{i}')
         priors[f'phase_{i}'] = bilby.core.prior.DeltaFunction(peak=0, name=f'phase_{i}')
+        priors[f'decay_time_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f'tau_{i}')
+        priors[f'skewness_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f's_{i}')
+        priors[f'f_qpo_{i}'] = bilby.core.prior.DeltaFunction(peak=1, name=f't_qpo_{i}')
     return priors
