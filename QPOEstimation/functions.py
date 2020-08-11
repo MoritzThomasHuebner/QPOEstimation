@@ -1,9 +1,6 @@
 import numpy as np
 
-import bilby
 import stingray
-
-from QPOEstimation.prior import SlabSpikePrior
 
 
 def red_noise(frequencies, alpha, beta):
@@ -31,6 +28,15 @@ def qpo_shot(times, offset, amplitude, frequency, t_qpo, phase, decay_time):
         -(times[idxs] - t_qpo) / decay_time)
     return res
 
+def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, **kwargs):
+    qpo = np.zeros(len(times))
+    indices = np.where(times > start_time)
+    qpo[indices] = amplitude * np.exp(-(times[indices] - start_time)/decay_time) * np.cos(2*np.pi*frequency*(times[indices] - start_time) + phase)
+    signal = qpo
+    T = times[-1] - times[0]
+    nbin = len(times)
+    norm = nbin/T
+    return signal/norm
 
 def gaussian(x, mu, sigma):
     return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)

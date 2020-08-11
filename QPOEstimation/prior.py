@@ -1,3 +1,5 @@
+from bilby.core.prior.analytical import SlabSpikePrior
+from bilby.core.prior.conditional import ConditionalSlabSpikePrior
 import bilby
 import numpy as np
 
@@ -48,36 +50,36 @@ def get_full_prior(noise_model='red_noise', frequencies=None):
     return prior
 
 
-class SlabSpikePrior(bilby.core.prior.Prior):
-
-    def __init__(self, name=None, latex_label=None, unit=None, minimum=0.,
-                 maximum=1., spike_height=0.5, check_range_nonzero=True, boundary=None):
-        super().__init__(name=name, latex_label=latex_label, unit=unit, minimum=minimum,
-                         maximum=maximum, check_range_nonzero=check_range_nonzero, boundary=boundary)
-        self.spike_loc = minimum
-        self.spike_height = spike_height
-
-    def rescale(self, val):
-        if isinstance(val, (float, int)):
-            val = [val]
-        res = np.zeros(len(val))
-        for i, v in enumerate(val):
-            if v >= self.spike_height:
-                res[i] = self.minimum + (v - self.spike_height) / (1 - self.spike_height) * (self.maximum - self.minimum)
-            else:
-                res[i] = self.spike_loc
-        if len(res) == 1:
-            return res[0]
-        return res
-
-    def prob(self, val):
-        return ((val >= self.minimum) & (val <= self.maximum)) * (self.spike_height + (1 - self.spike_height) / (self.maximum - self.minimum))
-
-    def ln_prob(self, val):
-        return np.log(self.prob(val))
-
-
-ConditionalSlabSpikePrior = bilby.core.prior.conditional_prior_factory(SlabSpikePrior)
+# class SlabSpikePrior(bilby.core.prior.Prior):
+#
+#     def __init__(self, name=None, latex_label=None, unit=None, minimum=0.,
+#                  maximum=1., spike_height=0.5, check_range_nonzero=True, boundary=None):
+#         super().__init__(name=name, latex_label=latex_label, unit=unit, minimum=minimum,
+#                          maximum=maximum, check_range_nonzero=check_range_nonzero, boundary=boundary)
+#         self.spike_loc = minimum
+#         self.spike_height = spike_height
+#
+#     def rescale(self, val):
+#         if isinstance(val, (float, int)):
+#             val = [val]
+#         res = np.zeros(len(val))
+#         for i, v in enumerate(val):
+#             if v >= self.spike_height:
+#                 res[i] = self.minimum + (v - self.spike_height) / (1 - self.spike_height) * (self.maximum - self.minimum)
+#             else:
+#                 res[i] = self.spike_loc
+#         if len(res) == 1:
+#             return res[0]
+#         return res
+#
+#     def prob(self, val):
+#         return ((val >= self.minimum) & (val <= self.maximum)) * (self.spike_height + (1 - self.spike_height) / (self.maximum - self.minimum))
+#
+#     def ln_prob(self, val):
+#         return np.log(self.prob(val))
+#
+#
+# ConditionalSlabSpikePrior = bilby.core.prior.conditional_prior_factory(SlabSpikePrior)
 
 
 def generic_condition_func(reference_params, amplitude):
