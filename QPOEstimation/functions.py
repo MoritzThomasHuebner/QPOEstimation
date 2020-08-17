@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 
 import stingray
@@ -29,12 +30,15 @@ def qpo_shot(times, offset, amplitude, frequency, t_qpo, phase, decay_time):
     return res
 
 def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, **kwargs):
-    qpo = np.zeros(len(times))
-    indices = np.where(times > start_time)
-    qpo[indices] = amplitude * np.exp(-(times[indices] - start_time)/decay_time) * np.cos(2*np.pi*frequency*(times[indices] - start_time) + phase)
+    t = deepcopy(times)
+    t -= times[0]
+    start_time -= times[0]
+    qpo = np.zeros(len(t))
+    indices = np.where(t > start_time)
+    qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
     signal = qpo
-    T = times[-1] - times[0]
-    nbin = len(times)
+    T = t[-1] - t[0]
+    nbin = len(t)
     norm = nbin/T
     return signal/norm
 
