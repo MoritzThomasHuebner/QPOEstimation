@@ -1,7 +1,7 @@
 import numpy as np
 from bilby.core.likelihood import Likelihood
 
-from QPOEstimation.functions import red_noise, white_noise, broken_power_law_noise, lorentzian
+from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 
 
 class ParameterAccessor(object):

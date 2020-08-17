@@ -1,1 +1,1 @@
-from . import likelihood, gbm, prior, injection, poisson, functions, smoothing
+from . import likelihood, gbm, prior, injection, poisson, smoothing, model

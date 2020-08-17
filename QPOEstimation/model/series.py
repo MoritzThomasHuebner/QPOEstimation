@@ -1,49 +1,7 @@
 from copy import deepcopy
+
 import numpy as np
-
 import stingray
-
-
-def red_noise(frequencies, alpha, beta):
-    return beta * frequencies ** (-alpha)
-
-
-def white_noise(frequencies, sigma):
-    return sigma * np.ones(len(frequencies))
-
-
-def broken_power_law_noise(frequencies, alpha_1, alpha_2, beta, delta, rho):
-    return beta * frequencies ** (-alpha_1) * (1 + (frequencies / delta) ** ((alpha_2 - alpha_1) / rho)) ** (-rho)
-
-
-def lorentzian(frequencies, amplitude, central_frequency, width, offset):
-    return amplitude * (width ** 2 / ((frequencies - central_frequency) ** 2 + width ** 2)) / np.pi / width + offset
-
-
-def qpo_shot(times, offset, amplitude, frequency, t_qpo, phase, decay_time):
-    if amplitude == 0:
-        return np.zeros(len(times))
-    res = np.zeros(len(times))
-    idxs = [np.where(times >= t_qpo)][0]
-    res[idxs] = amplitude*(1 + np.cos(2 * np.pi * frequency * (times[idxs] - t_qpo) + phase)) * np.exp(
-        -(times[idxs] - t_qpo) / decay_time)
-    return res
-
-def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, **kwargs):
-    t = deepcopy(times)
-    t -= times[0]
-    start_time -= times[0]
-    qpo = np.zeros(len(t))
-    indices = np.where(t > start_time)
-    qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
-    signal = qpo
-    T = t[-1] - t[0]
-    nbin = len(t)
-    norm = nbin/T
-    return signal/norm
-
-def gaussian(x, mu, sigma):
-    return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)
 
 
 def burst_envelope(times, amplitude, t_max, sigma, skewness):
@@ -142,6 +100,7 @@ def merged_qpo_model_multi(
           merged_qpo_model(times, amplitude_spike_4, amplitude_qpo_4, t_spike_4, t_qpo_4, f_qpo_4, phase_4, decay_time_4, skewness_4) + background_rate
     return res
 
+
 def merged_qpo_model_multi_norm(
         times, background_rate,
         amplitude_spike_0, amplitude_qpo_0, t_spike_0, t_qpo_0, f_qpo_0, phase_0, decay_time_0, skewness_0,
@@ -159,3 +118,57 @@ def merged_qpo_model_multi_norm(
     nbin = len(times)
     norm = nbin/T
     return res / norm
+
+
+def qpo_shot(times, offset, amplitude, frequency, t_qpo, phase, decay_time):
+    if amplitude == 0:
+        return np.zeros(len(times))
+    res = np.zeros(len(times))
+    idxs = [np.where(times >= t_qpo)][0]
+    res[idxs] = amplitude*(1 + np.cos(2 * np.pi * frequency * (times[idxs] - t_qpo) + phase)) * np.exp(
+        -(times[idxs] - t_qpo) / decay_time)
+    return res
+
+
+def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, **kwargs):
+    t = deepcopy(times)
+    t -= times[0]
+    start_time -= times[0]
+    qpo = np.zeros(len(t))
+    indices = np.where(t > start_time)
+    qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
+    signal = qpo
+    T = t[-1] - t[0]
+    nbin = len(t)
+    norm = nbin/T
+    return signal/norm
+
+
+def norm_gaussian(x, mu, sigma):
+    return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)
+
+
+def sine_gaussian(t, mu, sigma, amplitude, frequency, phase, **kwargs):
+    return np.sin(2*np.pi*t*frequency + phase) * norm_gaussian(x=t, mu=mu, sigma=sigma) * amplitude
+
+
+def hermite_sine_gaussian(time_array, mu, sigma, amplitude, frequency, phase, c_0=0, c_1=0, c_2=0, c_3=0, c_4=0, c_5=0, c_6=0, c_7=0, c_8=0, **kwargs):
+    t = deepcopy(time_array)
+    hermite = hermite_model(t, mu, sigma, c_0, c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8, **kwargs)
+    signal = sine_gaussian(t, mu, sigma, amplitude, frequency, phase) * hermite
+    signal[np.where(signal < 0)] = 0
+    return signal
+
+
+def hermite_model(time_array, mu, sigma, c_0=0, c_1=0, c_2=0, c_3=0, c_4=0, c_5=0, c_6=0, c_7=0, c_8=0, **kwargs):
+    poly = np.polynomial.hermite.Hermite([c_0, c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8])
+    return poly((time_array - mu)/sigma/np.sqrt(2))
+
+
+def two_frequency_model(time_array, mu_1, mu_2, sigma_1, sigma_2, amplitude_1, amplitude_2, frequency_1, frequency_2, phase_1, phase_2, **kwargs):
+    t = deepcopy(time_array)
+    signal_1 = sine_gaussian(t, mu_1, sigma_1, amplitude_1, frequency_1, phase_1)
+    signal_2 = sine_gaussian(t, mu_2, sigma_2, amplitude_2, frequency_2, phase_2)
+    signal = signal_1 + signal_2
+    signal[np.where(signal < 0)] = 0
+    return signal

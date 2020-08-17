@@ -1,6 +1,6 @@
 import matplotlib
 
-from QPOEstimation.functions import burst_qpo_model_norm
+from QPOEstimation.model.series import burst_qpo_model_norm
 
 matplotlib.use("Qt5Agg")
 
