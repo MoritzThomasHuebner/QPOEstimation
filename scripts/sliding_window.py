@@ -1,19 +1,11 @@
-from copy import deepcopy
 from astropy.io import fits
 
 import bilby
-import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import stingray
 
 from QPOEstimation.smoothing import two_sided_exponential_smoothing
 from QPOEstimation.likelihood import PoissonLikelihoodWithBackground
-from QPOEstimation.prior.slabspike import SlabSpikePrior
-from QPOEstimation.prior.psd import get_full_prior
-from QPOEstimation.poisson import poisson_process
 from QPOEstimation.model.series import *
-matplotlib.use("Qt5Agg")
 import sys
 
 run_id = int(sys.argv[1])
