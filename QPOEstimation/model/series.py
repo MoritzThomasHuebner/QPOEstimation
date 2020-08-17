@@ -146,6 +146,20 @@ def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, 
 
     return qpo
 
+
+def two_sided_qpo_shot(times, peak_time, amplitude, decay_time, frequency, phase, **kwargs):
+    t = deepcopy(times)
+    t -= times[0]
+    peak_time -= times[0]
+    qpo = np.zeros(len(t))
+    falling_indices = np.where(t > peak_time)
+    qpo[falling_indices] = amplitude * np.exp(-(t[falling_indices] - peak_time) / decay_time) * \
+                   np.cos(2 * np.pi * frequency * (t[falling_indices] - peak_time) + phase)
+    rising_indices = np.where(t < peak_time)
+    qpo[rising_indices] = amplitude * np.exp(+(t[rising_indices] - peak_time) / decay_time) * \
+                   np.cos(2 * np.pi * frequency * (t[rising_indices] - peak_time) + phase)
+    return qpo
+
 def norm_gaussian(x, mu, sigma, **kwargs):
     return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)
 
