@@ -78,25 +78,24 @@ plt.clf()
 
 
 priors = bilby.core.prior.PriorDict()
-priors['start_time'] = bilby.core.prior.Uniform(minimum=start, maximum=stop, name='start_time')
+# priors['start_time'] = bilby.core.prior.Uniform(minimum=start, maximum=stop, name='start_time')
+priors['peak_time'] = bilby.core.prior.Uniform(minimum=start, maximum=stop, name='start_time')
 priors['amplitude'] = bilby.core.prior.LogUniform(minimum=0.01, maximum=10, name='amplitude')
-priors['decay_time'] = bilby.core.prior.Uniform(minimum=-1, maximum=1, name='decay_time')
+priors['decay_time'] = bilby.core.prior.LogUniform(minimum=1/256, maximum=2, name='decay_time')
 priors['frequency'] = bilby.core.prior.LogUniform(minimum=10, maximum=128, name='frequency')
 priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='phase')
 
 
-likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=zeroed_qpo_shot, background=truncated_background)
+likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=two_sided_qpo_shot, background=truncated_background)
 label = f'{run_id}'
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-                           label=label, sampler='dynesty', nlive=300, resume=True)
+                           label=label, sampler='dynesty', nlive=300, resume=False)
 result.plot_corner()
 
 max_like_params = result.posterior.iloc[-1]
-print(max_like_params)
-
 
 plt.plot(t, c - truncated_background, label='background subtracted data')
-plt.plot(t, zeroed_qpo_shot(t, background=truncated_background, **max_like_params), label='max_likelihood')
+plt.plot(t, two_sided_qpo_shot(t, background=truncated_background, **max_like_params), label='max_likelihood')
 plt.legend()
 plt.savefig(f"{outdir}/max_like_fit_{run_id}")
 plt.clf()
