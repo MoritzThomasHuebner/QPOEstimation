@@ -18,7 +18,7 @@ def readfile(filename):
     return filecontents
 
 
-VERSION = '0.1'
+VERSION = '0.2'
 
 setup(name='QPOEstimation',
       description='Estimating QPOs in red noise',
@@ -26,7 +26,7 @@ setup(name='QPOEstimation',
       author_email='moritz.huebner@monash.edu',
       license="MIT",
       version=VERSION,
-      packages=['QPOEstimation'],
+      packages=['QPOEstimation', 'QPOEstimation.prior', 'QPOEstimation.model'],
       package_dir={'QPOEstimation': 'QPOEstimation'},
       package_data={},
       python_requires='>=3.5',

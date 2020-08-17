@@ -1,1 +1,1 @@
-from . import psd, series
+from . import psd, series, slabspike
