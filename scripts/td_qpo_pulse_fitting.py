@@ -1,6 +1,8 @@
 import matplotlib
+import numpy as np
 
 from QPOEstimation.model.series import burst_qpo_model_norm
+from QPOEstimation.prior.series import generate_qpo_prior_dict
 
 matplotlib.use("Qt5Agg")
 
@@ -34,9 +36,7 @@ max_burst_amplitude = 1e6
 max_background = 1e3
 max_qpo_amplitude = 10000
 priors = generate_qpo_prior_dict(t_start=t_start, t_end=t_end, max_burst_amplitude=max_burst_amplitude,
-                                 max_n_bursts=max_n_bursts,
-                                 max_qpo_amplitude=max_qpo_amplitude, max_n_qpos=max_n_qpos,
-                                 max_background=max_background, max_frequency=nbins / T)
+                                 max_n_bursts=max_n_bursts, max_background=max_background)
 
 priors[f'amplitude_1'].spike_height = 0.01
 # priors[f'amplitude_2'].spike_height = 0.0

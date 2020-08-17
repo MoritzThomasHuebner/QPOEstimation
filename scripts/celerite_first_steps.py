@@ -5,23 +5,10 @@ from celerite import terms
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+from QPOEstimation.likelihood import CeleriteLikelihood
+
 np.random.seed(42)
-
-
-class CeleriteLikelihood(bilby.likelihood.Likelihood):
-
-    def __init__(self, gp, y):
-        parameters = gp.get_parameter_dict()
-        self.gp = gp
-        self.y = y
-        super().__init__(parameters)
-
-    def log_likelihood(self):
-        # self.gp.set_parameter_vector(vector=self.parameters)
-        for name, value in self.parameters.items():
-            self.gp.set_parameter(name=name, value=value)
-        return self.gp.log_likelihood(self.y)
-
 
 t = np.sort(np.append(
     np.random.uniform(0, 3.8, 57),

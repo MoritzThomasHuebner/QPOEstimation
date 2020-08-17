@@ -1,5 +1,7 @@
+import bilby
 import numpy as np
 from bilby.core.likelihood import Likelihood
+from celerite import terms
 
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 
@@ -83,3 +85,37 @@ class WhittleLikelihood(Likelihood):
             return broken_power_law_noise(frequencies=self.frequencies, alpha_1=self.alpha_1,
                                           alpha_2=self.alpha_2, beta=self.beta, delta=self.delta, rho=self.rho) \
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
+
+
+class CeleriteLikelihood(bilby.likelihood.Likelihood):
+
+    def __init__(self, gp, y):
+        parameters = gp.get_parameter_dict()
+        self.gp = gp
+        self.y = y
+        super().__init__(parameters)
+
+    def log_likelihood(self):
+        # self.gp.set_parameter_vector(vector=self.parameters)
+        for name, value in self.parameters.items():
+            self.gp.set_parameter(name=name, value=value)
+        return self.gp.log_likelihood(self.y)
+
+
+class QPOTerm(terms.Term):
+    parameter_names = ("log_a", "log_b", "log_c", "log_P")
+
+    def get_real_coefficients(self, params):
+        log_a, log_b, log_c, log_P = params
+        b = np.exp(log_b)
+        return (
+            np.exp(log_a) * (1.0 + b) / (2.0 + b), np.exp(log_c),
+        )
+
+    def get_complex_coefficients(self, params):
+        log_a, log_b, log_c, log_P = params
+        b = np.exp(log_b)
+        return (
+            np.exp(log_a) / (2.0 + b), 0.0,
+            np.exp(log_c), 2*np.pi*np.exp(-log_P),
+        )
