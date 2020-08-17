@@ -9,7 +9,7 @@ from QPOEstimation.model.series import *
 import sys
 
 run_id = int(sys.argv[1])
-
+period_number = int(sys.argv[2])
 
 fits_data = fits.open('data/SGR_1806_20/event_4ms.lc.gz')
 times = fits_data[1].data["TIME"]
@@ -41,7 +41,6 @@ for period in interpulse_periods:
     period_freqs = np.append(period_freqs, ps.freq)
     period_powers = np.append(period_powers, ps.power)
 
-period_number = 2
 
 start = interpulse_periods[period_number][0]
 
@@ -66,7 +65,7 @@ background_c = background_c.astype(int)
 alpha = 0.02
 background = two_sided_exponential_smoothing(background_c, alpha)
 
-outdir = "sliding_window"
+outdir = f"sliding_window/period_{period_number}"
 
 # truncate background
 truncated_background_start = np.where(background_t == t[0])[0][0]
@@ -80,16 +79,16 @@ plt.clf()
 
 priors = bilby.core.prior.PriorDict()
 priors['start_time'] = bilby.core.prior.Uniform(minimum=start, maximum=stop, name='start_time')
-priors['amplitude'] = bilby.core.prior.Uniform(minimum=0.01, maximum=10, name='amplitude')
-priors['decay_time'] = bilby.core.prior.Uniform(minimum=0, maximum=1, name='decay_time')
-priors['frequency'] = bilby.core.prior.Uniform(minimum=10, maximum=128, name='frequency')
+priors['amplitude'] = bilby.core.prior.LogUniform(minimum=0.01, maximum=10, name='amplitude')
+priors['decay_time'] = bilby.core.prior.Uniform(minimum=-1, maximum=1, name='decay_time')
+priors['frequency'] = bilby.core.prior.LogUniform(minimum=10, maximum=128, name='frequency')
 priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='phase')
 
 
 likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=zeroed_qpo_shot, background=truncated_background)
 label = f'{run_id}'
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-                           label=label, sampler='dynesty', nlive=300, resume=False)
+                           label=label, sampler='dynesty', nlive=300, resume=True)
 result.plot_corner()
 
 max_like_params = result.posterior.iloc[-1]
@@ -99,5 +98,5 @@ print(max_like_params)
 plt.plot(t, c - truncated_background, label='background subtracted data')
 plt.plot(t, zeroed_qpo_shot(t, background=truncated_background, **max_like_params), label='max_likelihood')
 plt.legend()
-plt.savefig(f"{outdir}/{run_id}_max_like_fit")
+plt.savefig(f"{outdir}/max_like_fit_{run_id}")
 plt.clf()

@@ -6,4 +6,4 @@
 #SBATCH --time=60:00
 #SBATCH --mem-per-cpu=1G
 
-srun python sliding_window.py ${1}
+srun python sliding_window.py ${1} ${2}

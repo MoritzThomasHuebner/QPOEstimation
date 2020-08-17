@@ -135,9 +135,15 @@ def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, 
     t -= times[0]
     start_time -= times[0]
     qpo = np.zeros(len(t))
-    indices = np.where(t > start_time)
-    qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * \
-                   np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
+    if decay_time > 0:
+        indices = np.where(t > start_time)
+        qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * \
+                       np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
+    if decay_time <= 0:
+        indices = np.where(t < start_time)
+        qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * \
+                       np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
+
     return qpo
 
 def norm_gaussian(x, mu, sigma, **kwargs):
