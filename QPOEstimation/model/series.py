@@ -138,12 +138,7 @@ def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, 
     indices = np.where(t > start_time)
     qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * \
                    np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
-    signal = qpo
-    T = t[-1] - t[0]
-    nbin = len(t)
-    norm = nbin/T
-    return signal/norm
-
+    return qpo
 
 def norm_gaussian(x, mu, sigma, **kwargs):
     return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)
