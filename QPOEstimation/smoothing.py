@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def moving_average(ys, n=64):
     res = np.zeros(len(ys))
     for i in range(len(ys)):
@@ -13,6 +14,7 @@ def moving_average(ys, n=64):
             indices = np.arange(i - n, i + n, 1)
             res[i] = np.mean(ys[indices])
     return res
+
 
 def exponential_smoothing(ys, alpha):
     s = np.zeros(len(ys))
