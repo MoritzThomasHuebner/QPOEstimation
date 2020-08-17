@@ -44,7 +44,7 @@ for period in interpulse_periods:
 
 start = interpulse_periods[period_number][0]
 
-segment_length = 0.3
+segment_length = 0.6
 segment_step = 0.1
 
 start = start + run_id*segment_step
