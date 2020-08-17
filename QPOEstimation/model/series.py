@@ -144,12 +144,17 @@ def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, 
     return signal/norm
 
 
-def norm_gaussian(x, mu, sigma):
+def norm_gaussian(x, mu, sigma, **kwargs):
     return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)
 
 
+def sine_model(t, amplitude, frequency, phase, **kwargs):
+    return amplitude * np.sin(2*np.pi*t*frequency + phase)
+
+
 def sine_gaussian(t, mu, sigma, amplitude, frequency, phase, **kwargs):
-    return np.sin(2*np.pi*t*frequency + phase) * norm_gaussian(x=t, mu=mu, sigma=sigma) * amplitude
+    return sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) \
+           * norm_gaussian(x=t, mu=mu, sigma=sigma)
 
 
 def hermite_sine_gaussian(time_array, mu, sigma, amplitude, frequency, phase, c_0=0, c_1=0, c_2=0, c_3=0, c_4=0, c_5=0, c_6=0, c_7=0, c_8=0, **kwargs):
