@@ -2,6 +2,7 @@ import bilby
 import numpy as np
 from bilby.core.likelihood import Likelihood
 from celerite import terms
+from scipy.special import gammaln
 
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 
@@ -119,3 +120,21 @@ class QPOTerm(terms.Term):
             np.exp(log_a) / (2.0 + b), 0.0,
             np.exp(log_c), 2*np.pi*np.exp(-log_P),
         )
+
+
+class PoissonLikelihoodWithBackground(bilby.core.likelihood.PoissonLikelihood):
+
+    def __init__(self, x, y, func, background):
+        super(PoissonLikelihoodWithBackground, self).__init__(x=x, y=y, func=func)
+        self.background = background
+
+    def noise_log_likelihood(self):
+        return self._eval_log_likelihood(self.background)
+
+    def log_likelihood(self):
+        rate = self.func(self.x, **self.model_parameters) + self.background
+        rate[np.where(rate <= 0)] = 1e-30
+        return self._eval_log_likelihood(rate)
+
+    def _eval_log_likelihood(self, rate):
+        return np.sum(-rate + self.y * np.log(rate) - gammaln(self.y + 1))
