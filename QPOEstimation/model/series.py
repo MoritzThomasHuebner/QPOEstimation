@@ -136,7 +136,8 @@ def zeroed_qpo_shot(times, start_time, amplitude, decay_time, frequency, phase, 
     start_time -= times[0]
     qpo = np.zeros(len(t))
     indices = np.where(t > start_time)
-    qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
+    qpo[indices] = amplitude * np.exp(-(t[indices] - start_time) / decay_time) * \
+                   np.cos(2 * np.pi * frequency * (t[indices] - start_time) + phase)
     signal = qpo
     T = t[-1] - t[0]
     nbin = len(t)
