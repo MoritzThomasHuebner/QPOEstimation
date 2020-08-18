@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 import numpy as np
+from scipy.signal.windows import tukey
 import stingray
 
 
@@ -160,6 +161,7 @@ def two_sided_qpo_shot(times, peak_time, amplitude, decay_time, frequency, phase
                    np.cos(2 * np.pi * frequency * (t[rising_indices] - peak_time) + phase)
     return qpo
 
+
 def norm_gaussian(x, mu, sigma, **kwargs):
     return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)
 
@@ -173,11 +175,44 @@ def sine_gaussian(t, mu, sigma, amplitude, frequency, phase, **kwargs):
            * norm_gaussian(x=t, mu=mu, sigma=sigma)
 
 
+def elevated_sine_gaussian(t, mu, sigma, amplitude, frequency, phase, elevation, **kwargs):
+    return (sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation)\
+           * norm_gaussian(x=t, mu=mu, sigma=sigma)
+
+
+def squared_sine(t, amplitude, frequency, phase, **kwargs):
+    return sine_model(t=t, amplitude=amplitude, frequency=frequency/2, phase=phase)**2
+
+
+def elevated_double_sine_gaussian(t, mu_1, mu_2, sigma_1, sigma_2, amplitude, frequency, phase, elevation, balance, **kwargs):
+    return (sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation)\
+           * (norm_gaussian(x=t, mu=mu_1, sigma=sigma_1) + balance*norm_gaussian(x=t, mu=mu_2, sigma=sigma_2))
+
+
+def transient_elevated_sine(t, amplitude, frequency, phase, t_start, t_stop, elevation, alpha, **kwargs):
+    res = np.zeros(len(t))
+    indices = np.where(np.logical_and(t_start < t, t < t_stop))
+    window = tukey(len(indices[0]), alpha)
+    res[indices] += window
+    res *= sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation
+    return res
+
+
 def hermite_sine_gaussian(time_array, mu, sigma, amplitude, frequency, phase, c_0=0, c_1=0, c_2=0, c_3=0, c_4=0, c_5=0, c_6=0, c_7=0, c_8=0, **kwargs):
     t = deepcopy(time_array)
     hermite = hermite_model(t, mu, sigma, c_0, c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8, **kwargs)
     signal = sine_gaussian(t, mu, sigma, amplitude, frequency, phase) * hermite
     signal[np.where(signal < 0)] = 0
+    return signal
+
+
+def hermite_elevated_sine_gaussian(time_array, mu, sigma, amplitude, frequency, phase, elevation, c_0, c_1, c_2, c_3,
+                                   c_4, c_5, c_6, c_7, c_8, **kwargs):
+    t = deepcopy(time_array)
+    hermite = hermite_model(time_array=t, mu=mu, sigma=sigma, c_0=c_0, c_1=c_1, c_2=c_2, c_3=c_3, c_4=c_4,
+                            c_5=c_5, c_6=c_6, c_7=c_7, c_8=c_8,  **kwargs)
+    signal = elevated_sine_gaussian(t=t, mu=mu, sigma=sigma, amplitude=amplitude,
+                                    frequency=frequency, phase=phase, elevation=elevation) * hermite
     return signal
 
 
