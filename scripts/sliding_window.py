@@ -97,7 +97,7 @@ priors = bilby.core.prior.PriorDict()
 priors['amplitude'] = bilby.core.prior.Uniform(minimum=0.10, maximum=100, name='amplitude')
 priors['frequency'] = bilby.core.prior.LogUniform(minimum=10, maximum=128, name='frequency')
 priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='phase')
-# priors['elevation'] = bilby.core.prior.LogUniform(minimum=0.01, maximum=100, name='elevation')
+priors['elevation'] = bilby.core.prior.LogUniform(minimum=0.01, maximum=100, name='elevation')
 # priors['balance'] = bilby.core.prior.LogUniform(minimum=0.01, maximum=100, name='balance')
 # priors['c_0'] = SlabSpikePrior(minimum=-10, maximum=10, spike_loc=0, spike_height=0.0, name='c_0')
 # priors['c_1'] = SlabSpikePrior(minimum=-10, maximum=10, spike_loc=0, spike_height=0.9999, name='c_1')
@@ -128,7 +128,7 @@ priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='pha
 # mu, sigma, amplitude, frequency, phase, elevation
 # mu, sigma, amplitude, frequency, phase, elevation, c_0, c_1, c_2
 
-likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=squared_sine, background=truncated_background)
+likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=elevated_sine, background=truncated_background)
 label = f'{run_id}'
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=300, sample='rwalk', resume=False)
@@ -138,7 +138,7 @@ max_like_params = result.posterior.iloc[-1]
 # max_like_params = dict(amplitude=0, frequency=29, phase=0, mu=241.05, sigma=0.1, elevation=1, c_0=1, c_1=-0, c_2=1, c_3=0, c_4=-0.0)
 
 plt.plot(t, c - truncated_background, label='background subtracted data')
-plt.plot(t, squared_sine(t, **max_like_params), label='max_likelihood')
+plt.plot(t, elevated_sine(t, **max_like_params), label='max_likelihood')
 plt.legend()
 plt.savefig(f"{outdir}/max_like_fit_{label}")
 plt.clf()

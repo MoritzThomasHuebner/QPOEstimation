@@ -176,8 +176,16 @@ def sine_gaussian(t, mu, sigma, amplitude, frequency, phase, **kwargs):
 
 
 def elevated_sine_gaussian(t, mu, sigma, amplitude, frequency, phase, elevation, **kwargs):
-    return (sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation)\
+    return elevated_sine(t=t, amplitude=amplitude, frequency=frequency, phase=phase, elevation=elevation) \
            * norm_gaussian(x=t, mu=mu, sigma=sigma)
+
+
+def elevated_sine(t, amplitude, frequency, phase, elevation, **kwargs):
+    return sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation
+
+
+def elevated_squared_sine(t, amplitude, frequency, phase, elevation, **kwargs):
+    return sine_model(t=t, amplitude=amplitude, frequency=frequency/2, phase=phase)**2 + elevation
 
 
 def squared_sine(t, amplitude, frequency, phase, **kwargs):
