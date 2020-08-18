@@ -166,7 +166,9 @@ def norm_gaussian(x, mu, sigma, **kwargs):
     return np.exp(-(x - mu) ** 2. / (2 * sigma ** 2.)) / np.sqrt(2 * np.pi * sigma ** 2)
 
 
-def sine_model(t, amplitude, frequency, phase, **kwargs):
+def sine_model(times, amplitude, frequency, phase, **kwargs):
+    t = deepcopy(times)
+    t -= times[0]
     return amplitude * np.sin(2*np.pi*t*frequency + phase)
 
 
