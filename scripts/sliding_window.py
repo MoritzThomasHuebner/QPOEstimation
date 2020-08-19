@@ -11,10 +11,10 @@ from QPOEstimation.likelihood import PoissonLikelihoodWithBackground
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm
 
-# run_id = int(sys.argv[1])
-# period_number = int(sys.argv[2])
-run_id = 19
-period_number = 6
+run_id = int(sys.argv[1])
+period_number = int(sys.argv[2])
+# run_id = 19
+# period_number = 6
 
 fits_data = fits.open('data/SGR_1806_20/event_4ms.lc.gz')
 times = fits_data[1].data["TIME"]
@@ -138,7 +138,7 @@ priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-3.7, maximum
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 label = f'{run_id}_qpo'
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-                           label=label, sampler='dynesty', nlive=200, sample='rwalk', resume=False)
+                           label=label, sampler='dynesty', nlive=1000, sample='rwalk', resume=False)
 result.plot_corner()
 
 
