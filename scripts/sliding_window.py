@@ -99,7 +99,7 @@ kernel = burst_shape_term
 
 bounds = dict(log_a=(0, 50), log_b=(0, 50), log_c=(-3.0, 3.0), log_P=(-15, 15))
 qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=0.0, bounds=bounds)
-kernel += qpo_term
+# kernel += qpo_term
 
 params_dict = kernel.get_parameter_dict()
 for param in params_dict:
@@ -117,15 +117,15 @@ print("parameter_bounds:\n{0}\n".format(gp.get_parameter_bounds()))
 print(gp.get_parameter_dict())
 
 priors = bilby.core.prior.PriorDict()
-priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='terms[0]:log_S0')
-priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='terms[0]:log_Q')
-priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='terms[0]:log_omega0')
+priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='terms[0]:log_S0')
+priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='terms[0]:log_Q')
+priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='terms[0]:log_omega0')
 # priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=1/np.sqrt(2), name='terms[2]:log_Q')
 # priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(50), maximum=-np.log(10), name='terms[1]:log_P')
-priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
-priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-5, name='terms[1]:log_b')
-priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-3, maximum=6, name='terms[1]:log_c')
-priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-3.7, maximum=-2.5, name='terms[1]:log_P')
+# priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
+# priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-5, name='terms[1]:log_b')
+# priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-3, maximum=6, name='terms[1]:log_c')
+# priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-3.7, maximum=-2.5, name='terms[1]:log_P')
 
 
 
@@ -137,24 +137,24 @@ priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-3.7, maximum
 
 # likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=sine_model, background=truncated_background)
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
-label = f'{run_id}_qpo'
+label = f'{run_id}_no_qpo'
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=1000, sample='rwalk', resume=False)
 result.plot_corner()
 
 
-frequency_samples = []
-for i, sample in enumerate(result.posterior.iloc):
-    frequency_samples.append(1 / np.exp(sample['kernel:terms[1]:log_P']))
-
-plt.hist(frequency_samples, bins="fd", density=True)
-plt.xlabel('frequency [Hz]')
-plt.ylabel('normalised PDF')
-median = np.median(frequency_samples)
-percentiles = np.percentile(frequency_samples, [16, 84])
-plt.title(f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-plt.savefig(f"{outdir}/frequency_posterior_{label}")
-plt.clf()
+# frequency_samples = []
+# for i, sample in enumerate(result.posterior.iloc):
+#     frequency_samples.append(1 / np.exp(sample['kernel:terms[1]:log_P']))
+#
+# plt.hist(frequency_samples, bins="fd", density=True)
+# plt.xlabel('frequency [Hz]')
+# plt.ylabel('normalised PDF')
+# median = np.median(frequency_samples)
+# percentiles = np.percentile(frequency_samples, [16, 84])
+# plt.title(f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+# plt.savefig(f"{outdir}/frequency_posterior_{label}")
+# plt.clf()
 
 
 x = np.linspace(t[0], t[-1], 5000)
