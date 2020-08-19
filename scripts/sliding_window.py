@@ -131,7 +131,7 @@ likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 label = f'{run_id}_qpo'
 # outdir = "test"
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-                           label=label, sampler='dynesty', nlive=300, sample='rwalk', resume=True)
+                           label=label, sampler='dynesty', nlive=300, sample='rwalk', resume=False)
 result.plot_corner()
 
 
