@@ -1,1 +1,1 @@
-from . import likelihood, prior, poisson, smoothing, model
+from . import likelihood, prior, poisson, smoothing, model, stabilisation
