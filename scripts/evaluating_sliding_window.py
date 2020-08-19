@@ -11,9 +11,11 @@ for i in range(31):
     mean_log_bfs.append(mean_log_bf)
     for j in range(9):
         try:
-            res = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_result.json")
-            mean_log_bf += res.log_bayes_factor / 9
-            print(f"{j} {i}: {res.log_bayes_factor}")
+            res_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_qpo_result.json")
+            res_no_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_no_qpo_result.json")
+            log_bf = res_qpo.log_evidence - res_no_qpo.log_evidence
+            mean_log_bf += log_bf
+            print(f"{j} {i}: {log_bf}")
         except Exception:
             pass
     print(f"{i}: {mean_log_bf}")
