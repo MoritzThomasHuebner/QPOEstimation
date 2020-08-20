@@ -141,7 +141,7 @@ priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.16, maximu
 # priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
 # priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
 # priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
-priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
+# priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 label = f'{run_id}_one_qpo'
