@@ -53,13 +53,21 @@ for j in range(9):
     plt.legend()
     plt.xlabel("Data segment")
     plt.ylabel("ln BF")
-    plt.savefig("one_qpo_log_bfs")
-    plt.clf()
+plt.savefig("one_qpo_log_bfs")
+plt.clf()
 
 for j in range(9):
     plt.plot(segments, period_two_log_bf_data[j], label=f'period_{j}')
     plt.legend()
     plt.xlabel("Data segment")
     plt.ylabel("ln BF")
-    plt.savefig("two_qpo_log_bfs")
-    plt.clf()
+plt.savefig("two_qpo_log_bfs")
+plt.clf()
+
+for j in range(9):
+    plt.plot(segments, np.array(period_two_log_bf_data[j]) - np.array(period_one_log_bf_data[j]), label=f'period_{j}')
+    plt.legend()
+    plt.xlabel("Data segment")
+    plt.ylabel("ln BF")
+plt.savefig("two_v_one_qpo_log_bfs")
+plt.clf()
