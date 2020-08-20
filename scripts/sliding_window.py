@@ -74,7 +74,7 @@ c = c.astype(int)
 # alpha = 0.08
 # background = two_sided_exponential_smoothing(background_c, alpha)
 
-outdir = f"sliding_window/period_{period_number}/one_qpo"
+outdir = f"sliding_window/period_{period_number}/two_qpo"
 
 # truncate background
 # truncated_background_start = np.where(background_t == t[0])[0][0]
@@ -92,17 +92,14 @@ stabilised_variance = np.ones(len(stabilised_counts))
 Q = 1.0 / np.sqrt(2.0)
 w0 = 3.0
 S0 = np.var(stabilised_counts) / (w0 * Q)
-# bounds = dict(log_S0=(-15, 40), log_Q=(np.log(1/np.sqrt(2)), np.log(1/np.sqrt(2))), log_omega0=(-40, 15))
-burst_shape_term = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))#, bounds=bounds)
+
+burst_shape_term = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
 kernel = burst_shape_term
 
-# bounds = dict(log_a=(-15, 15), log_b=(-15, 15), log_c=(-6.0, 6.0), log_P=(-4.85, -2.0))
-qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)#, bounds=bounds)
+qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 kernel += qpo_term
 qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-# kernel += qpo_term
-
-# qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=0.0, bounds=bounds)
+kernel += qpo_term
 
 params_dict = kernel.get_parameter_dict()
 for param in params_dict:
@@ -136,12 +133,11 @@ priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, max
 priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
 priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
 priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-2.0, name='terms[1]:log_P')
-# priors['kernel:terms[2]:log_a'] = SlabSpikePrior(minimum=-5, maximum=15, spike_loc=-5, spike_height=0.2, name='terms[2]:log_a')
-# priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
-# priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
-# priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
-# priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
+priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.16, maximum=-2.0, name='terms[1]:log_P')
+priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
+priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
+priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
+priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
 # priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
