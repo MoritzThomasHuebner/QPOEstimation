@@ -74,7 +74,7 @@ c = c.astype(int)
 # alpha = 0.08
 # background = two_sided_exponential_smoothing(background_c, alpha)
 
-outdir = f"sliding_window/period_{period_number}/two_qpo"
+outdir = f"sliding_window/period_{period_number}/no_qpo"
 
 # truncate background
 # truncated_background_start = np.where(background_t == t[0])[0][0]
