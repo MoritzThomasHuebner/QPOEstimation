@@ -34,9 +34,9 @@ for j in range(9):
     log_bfs_two_qpo = []
     for i in range(31):
         try:
-            res_no_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_no_qpo_result.json")
-            res_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_one_qpo_result.json")
-            res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_two_qpo_result.json")
+            res_no_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/no_qpo/{i}_no_qpo_result.json")
+            res_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/one_qpo/{i}_one_qpo_result.json")
+            res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/two_qpo/{i}_two_qpo_result.json")
             log_bf_one_qpo = res_qpo.log_evidence - res_no_qpo.log_evidence
             log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
         except Exception:
