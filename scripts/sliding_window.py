@@ -125,7 +125,8 @@ def log_P_fraction(sample):
     return res
 
 
-priors = bilby.core.prior.PriorDict(conversion_function=log_P_fraction)
+priors = bilby.core.prior.PriorDict()
+# priors = bilby.core.prior.PriorDict(conversion_function=log_P_fraction)
 priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='terms[0]:log_S0')
 priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='terms[0]:log_Q')
 priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='terms[0]:log_omega0')
