@@ -38,12 +38,13 @@ for j in range(9):
             res_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_one_qpo_result.json")
             res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{j}/{i}_two_qpo_result.json")
             log_bf_one_qpo = res_qpo.log_evidence - res_no_qpo.log_evidence
-            log_bfs_one_qpo.append(log_bf_one_qpo)
             log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
-            log_bfs_two_qpo.append(log_bf_two_qpo)
-            print(f"{j} {i}: {log_bf_one_qpo}")
         except Exception:
-            pass
+            log_bf_one_qpo = np.nan
+            log_bf_two_qpo = np.nan
+        log_bfs_one_qpo.append(log_bf_one_qpo)
+        log_bfs_two_qpo.append(log_bf_two_qpo)
+        print(f"{j} {i}: {log_bf_one_qpo}")
     period_one_log_bf_data.append(deepcopy(log_bfs_one_qpo))
     period_two_log_bf_data.append(deepcopy(log_bfs_two_qpo))
 
