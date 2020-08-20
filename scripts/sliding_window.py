@@ -100,7 +100,7 @@ kernel = burst_shape_term
 qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)#, bounds=bounds)
 kernel += qpo_term
 qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-kernel += qpo_term
+# kernel += qpo_term
 
 # qpo_term = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=0.0, bounds=bounds)
 
@@ -136,15 +136,15 @@ priors['kernel:terms[1]:log_a'] = SlabSpikePrior(minimum=-5, maximum=15, spike_l
 priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
 priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
 priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.16, maximum=-2.0, name='terms[1]:log_P')
-priors['kernel:terms[2]:log_a'] = SlabSpikePrior(minimum=-5, maximum=15, spike_loc=-5, spike_height=0.2, name='terms[2]:log_a')
+# priors['kernel:terms[2]:log_a'] = SlabSpikePrior(minimum=-5, maximum=15, spike_loc=-5, spike_height=0.2, name='terms[2]:log_a')
 # priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
-priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
-priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
-priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
+# priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
+# priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
+# priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
 priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
-label = f'{run_id}_two_qpo'
+label = f'{run_id}_one_qpo'
 # outdir = "test"
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=300, sample='rwalk', resume=False)
