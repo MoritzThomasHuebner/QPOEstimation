@@ -141,7 +141,7 @@ priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximu
 # priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
-label = f'{run_id}_one_qpo'
+label = f'{run_id}_two_qpo'
 # outdir = "test"
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=300, sample='rwalk', resume=False)
