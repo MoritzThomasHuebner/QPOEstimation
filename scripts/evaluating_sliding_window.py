@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
-# segments = np.arange(0, 31)
+segments = np.arange(0, 38)
 mean_log_bfs = []
 
 # for i in range(31):
@@ -32,7 +32,7 @@ period_two_log_bf_data = []
 for period in range(43):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
-    for run_id in range(31):
+    for run_id in range(38):
         try:
             res_no_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/no_qpo/{run_id}_result.json")
             res_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/one_qpo/{run_id}_result.json")
@@ -47,7 +47,7 @@ for period in range(43):
         print(f"{period} {run_id}: {log_bf_one_qpo}")
     np.savetxt(f'log_bfs_period_{period}', np.array(log_bf_one_qpo))
     plt.plot(log_bf_one_qpo)
-    plt.savefig(f'log_bfs_period_{period}')
+    plt.savefig(segments, f'log_bfs_period_{period}')
     plt.clf()
     # period_one_log_bf_data.append(deepcopy(log_bfs_one_qpo))
     # period_two_log_bf_data.append(deepcopy(log_bfs_two_qpo))
