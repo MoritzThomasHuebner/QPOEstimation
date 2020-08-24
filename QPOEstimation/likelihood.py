@@ -100,7 +100,10 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         # self.gp.set_parameter_vector(vector=self.parameters)
         for name, value in self.parameters.items():
             self.gp.set_parameter(name=name, value=value)
-        return self.gp.log_likelihood(self.y)
+        try:
+            return self.gp.log_likelihood(self.y)
+        except Exception:
+            return -np.inf
 
 
 class QPOTerm(terms.Term):
