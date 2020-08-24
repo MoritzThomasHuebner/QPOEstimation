@@ -70,7 +70,7 @@ c = counts[indices]
 c = c.astype(int)
 
 
-outdir = f"sliding_window/period_{period_number}/one_qpo"
+outdir = f"sliding_window/period_{period_number}/two_qpo"
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -80,7 +80,9 @@ Q = 1.0 / np.sqrt(2.0)
 w0 = 3.0
 S0 = np.var(stabilised_counts) / (w0 * Q)
 
-kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) \
+         + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)\
+         + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 
 params_dict = kernel.get_parameter_dict()
 
@@ -114,10 +116,10 @@ priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name=
 priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
 priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.16, maximum=-2.0, name='terms[1]:log_P')
 
-# priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
-# priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
-# priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
-# priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
+priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
+priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
+priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
+priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
 # priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
@@ -146,17 +148,18 @@ for term in [1, 2]:
         continue
 
 
-x = np.linspace(t[0], t[-1], 5000)
-pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
-pred_std = np.sqrt(pred_var)
-plt.legend()
-
 max_like_params = result.posterior.iloc[-1]
 for name, value in max_like_params.items():
     try:
         gp.set_parameter(name=name, value=value)
     except ValueError:
         continue
+
+
+x = np.linspace(t[0], t[-1], 5000)
+pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
+pred_std = np.sqrt(pred_var)
+plt.legend()
 
 # import matplotlib
 # matplotlib.use('Qt5Agg')
