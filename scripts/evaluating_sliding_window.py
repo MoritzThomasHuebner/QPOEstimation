@@ -26,27 +26,54 @@ mean_log_bfs = []
 # plt.plot(segments, mean_log_bfs)
 # plt.show()
 
+import numpy as np
+
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
 for period in range(43):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
+    max_likelihood_frequency = []
     for run_id in range(38):
         try:
             res_no_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/no_qpo/{run_id}_result.json")
-            res_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/one_qpo/{run_id}_result.json")
+            res_one_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/one_qpo/{run_id}_result.json")
+            res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_result.json")
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_two_qpo_result.json")
-            log_bf_one_qpo = res_qpo.log_evidence - res_no_qpo.log_evidence
-            # log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
+            log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+            log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
+            max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
+            max_likelihood_frequency.append(1 / np.exp(max_likelihood_sample_one_qpo[f'kernel:terms[1]:log_P']))
         except Exception:
             log_bf_one_qpo = np.nan
             log_bf_two_qpo = np.nan
+            max_likelihood_frequency = np.nan
         log_bfs_one_qpo.append(log_bf_one_qpo)
+        log_bfs_two_qpo.append(log_bf_two_qpo)
         # log_bfs_two_qpo.append(log_bf_two_qpo)
-        print(f"{period} {run_id}: {log_bf_one_qpo}")
-    np.savetxt(f'log_bfs_period_{period}', np.array(log_bfs_one_qpo))
-    plt.plot(segments, log_bfs_one_qpo)
+        print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
+        print(f"{period} {run_id} two qpo: {log_bf_two_qpo}")
+    np.savetxt(f'log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
+    np.savetxt(f'log_bfs_period_two_qpo_{period}', np.array(log_bfs_two_qpo))
+
+    fig, ax1 = plt.subplots()
+
+    color = 'tab:red'
+    ax1.set_xlabel('segment number')
+    ax1.set_ylabel('ln BF', color=color)
+    ax1.plot(segments, log_bfs_one_qpo, color=color, ls='solid', label='One QPOs')
+    ax1.plot(segments, log_bfs_two_qpo, color='orange', ls='dashed', label='Two QPOs')
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    color = 'tab:blue'
+    ax2.set_ylabel('frequency [Hz]', color=color)  # we already handled the x-label with ax1
+    ax2.plot(segments, max_likelihood_frequency, color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
     plt.savefig(f'log_bfs_period_{period}')
     plt.clf()
     # period_one_log_bf_data.append(deepcopy(log_bfs_one_qpo))
