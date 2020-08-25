@@ -34,7 +34,8 @@ period_two_log_bf_data = []
 for period in range(43):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
-    max_likelihood_frequency = []
+    mean_frequency = []
+    std_frequency = []
     for run_id in range(38):
         try:
             res_no_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/no_qpo/{run_id}_result.json")
@@ -43,12 +44,16 @@ for period in range(43):
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_two_qpo_result.json")
             log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
             log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
-            max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
-            max_likelihood_frequency.append(1 / np.exp(max_likelihood_sample_one_qpo[f'kernel:terms[1]:log_P']))
+            # max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
+            # mean_frequency.append(1 / np.exp(max_likelihood_sample_one_qpo[f'kernel:terms[1]:log_P']))
+            log_P_samples = np.array(res_one_qpo.posterior['kernel:terms[1]:log_P'])
+            frequency_samples = 1 / np.exp(log_P_samples)
+            mean_frequency.append(np.mean(frequency_samples))
+            std_frequency.append(np.std(frequency_samples))
         except Exception:
             log_bf_one_qpo = np.nan
             log_bf_two_qpo = np.nan
-            max_likelihood_frequency = np.nan
+            mean_frequency = np.nan
         log_bfs_one_qpo.append(log_bf_one_qpo)
         log_bfs_two_qpo.append(log_bf_two_qpo)
         # log_bfs_two_qpo.append(log_bf_two_qpo)
@@ -70,7 +75,9 @@ for period in range(43):
 
     color = 'tab:blue'
     ax2.set_ylabel('frequency [Hz]', color=color)  # we already handled the x-label with ax1
-    ax2.plot(segments, max_likelihood_frequency, color=color)
+    ax2.plot(segments, mean_frequency, color=color)
+    plt.fill_between(segments, mean_frequency + std_frequency, mean_frequency - std_frequency, color=color, alpha=0.3,
+                     edgecolor="none")
     ax2.tick_params(axis='y', labelcolor=color)
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
