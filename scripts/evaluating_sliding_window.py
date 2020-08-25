@@ -63,7 +63,7 @@ for period in range(43):
     ax1.set_xlabel('segment number')
     ax1.set_ylabel('ln BF', color=color)
     ax1.plot(segments, log_bfs_one_qpo, color=color, ls='solid', label='One QPOs')
-    ax1.plot(segments, log_bfs_two_qpo, color='orange', ls='dashed', label='Two QPOs')
+    ax1.plot(segments, log_bfs_two_qpo, color=color, ls='dotted', label='Two QPOs')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
@@ -74,6 +74,7 @@ for period in range(43):
     ax2.tick_params(axis='y', labelcolor=color)
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    ax1.legend()
     plt.savefig(f'log_bfs_period_{period}')
     plt.clf()
     # period_one_log_bf_data.append(deepcopy(log_bfs_one_qpo))
