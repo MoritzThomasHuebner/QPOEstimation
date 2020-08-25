@@ -56,7 +56,6 @@ for period in range(43):
             mean_frequency = np.nan
         log_bfs_one_qpo.append(log_bf_one_qpo)
         log_bfs_two_qpo.append(log_bf_two_qpo)
-        # log_bfs_two_qpo.append(log_bf_two_qpo)
         print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
         print(f"{period} {run_id} two qpo: {log_bf_two_qpo}")
     np.savetxt(f'log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
@@ -76,6 +75,8 @@ for period in range(43):
     color = 'tab:blue'
     ax2.set_ylabel('frequency [Hz]', color=color)  # we already handled the x-label with ax1
     ax2.plot(segments, mean_frequency, color=color)
+    mean_frequency = np.array(mean_frequency)
+    std_frequency = np.array(std_frequency)
     plt.fill_between(segments, mean_frequency + std_frequency, mean_frequency - std_frequency, color=color, alpha=0.3,
                      edgecolor="none")
     ax2.tick_params(axis='y', labelcolor=color)
