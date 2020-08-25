@@ -31,7 +31,7 @@ import numpy as np
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-for period in range(43):
+for period in range(14, 43):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
     mean_frequency = []
@@ -53,7 +53,7 @@ for period in range(43):
         except Exception:
             log_bf_one_qpo = np.nan
             log_bf_two_qpo = np.nan
-            mean_frequency = np.nan
+            mean_frequency.append(np.nan)
         log_bfs_one_qpo.append(log_bf_one_qpo)
         log_bfs_two_qpo.append(log_bf_two_qpo)
         print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
