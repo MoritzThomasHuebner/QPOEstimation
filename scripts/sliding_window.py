@@ -44,7 +44,7 @@ t = times[indices]
 c = counts[indices]
 c = c.astype(int)
 
-outdir = f"sliding_window_fine/period_{period_number}/one_qpo"
+outdir = f"sliding_window_fine/period_{period_number}/no_qpo"
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -54,7 +54,7 @@ Q = 1.0 / np.sqrt(2.0)
 w0 = 3.0
 S0 = np.var(stabilised_counts) / (w0 * Q)
 
-kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) #+ QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 
 params_dict = kernel.get_parameter_dict()
 
@@ -62,18 +62,17 @@ gp = celerite.GP(kernel, mean=np.mean(stabilised_counts))
 gp.compute(t, stabilised_variance)  # You always need to call compute once.
 
 priors = bilby.core.prior.PriorDict()
-# priors = bilby.core.prior.PriorDict(conversion_function=log_P_fraction)
-# priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='log_S0')
-# priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='log_omega0')
-# priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
+priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='log_S0')
+priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='log_omega0')
+priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
 
-priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='terms[0]:log_S0')
-priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
-priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='terms[0]:log_omega0')
-priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
-priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
-priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-2.0, name='terms[1]:log_P')
+# priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='terms[0]:log_S0')
+# priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
+# priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='terms[0]:log_omega0')
+# priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
+# priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
+# priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
+# priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-2.0, name='terms[1]:log_P')
 
 # priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
 # priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
