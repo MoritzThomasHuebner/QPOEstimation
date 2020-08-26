@@ -8,14 +8,13 @@ from celerite import terms
 
 from QPOEstimation.stabilisation import anscombe, bar_lev
 from QPOEstimation.model.series import *
-from QPOEstimation.prior.slabspike import SlabSpikePrior
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm
 
 run_id = int(sys.argv[1])
 period_number = int(sys.argv[2])
 
-# run_id = 0
-# period_number = 0
+# run_id = 113
+# period_number = 1
 
 fits_data = fits.open('data/SGR_1806_20/event_4ms.lc.gz')
 times = fits_data[1].data["TIME"]
@@ -55,8 +54,8 @@ for i in range(44):
 
 start = interpulse_periods[period_number][0]
 
-segment_length = 1.0
-segment_step = pulse_period / 38.0
+segment_length = 0.2
+segment_step = 0.05  # requires 151 steps
 
 start = start + run_id*segment_step
 stop = start + segment_length
@@ -69,8 +68,15 @@ t = times[indices]
 c = counts[indices]
 c = c.astype(int)
 
+# plt.plot(t - t[0], c)
+# plt.xlabel('time [s]')
+# plt.ylabel('counts')
+# plt.savefig('sliding_window/pulse_period')
+# plt.clf()
+# assert False
 
-outdir = f"sliding_window/period_{period_number}/two_qpo"
+
+outdir = f"sliding_window_fine/period_{period_number}/one_qpo"
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -81,8 +87,8 @@ w0 = 3.0
 S0 = np.var(stabilised_counts) / (w0 * Q)
 
 kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) \
-         + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)\
-         + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+         + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)#\
+         # + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 
 params_dict = kernel.get_parameter_dict()
 
@@ -116,10 +122,10 @@ priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name=
 priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
 priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-2.0, name='terms[1]:log_P')
 
-priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
-priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
-priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
-priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
+# priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
+# priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
+# priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
+# priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
 # priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
@@ -127,7 +133,7 @@ label = f'{run_id}'
 
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=300, sample='rwalk', resume=False)
-# result.plot_corner()
+result.plot_corner()
 # result = bilby.result.read_in_result(outdir=outdir, label=label)
 
 for term in [1, 2]:
