@@ -85,7 +85,7 @@ label = f'{run_id}'
 
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=300, sample='rwalk', resume=False, plot=False)
-result.plot_corner()
+# result.plot_corner()
 # result = bilby.result.read_in_result(outdir=outdir, label=label)
 
 # for term in [1, 2]:
