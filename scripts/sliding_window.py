@@ -29,28 +29,7 @@ times -= times[0]
 pulse_period = 7.56  # see papers
 interpulse_periods = []
 for i in range(44):
-    # interpulse_periods.append((193.3 + i*pulse_period, 196.3 + i*pulse_period))
     interpulse_periods.append((16.0 + i * pulse_period, 16.0 + (i + 1) * pulse_period))
-
-# concat_times = np.array([])
-# concat_counts = np.array([])
-# period_freqs = np.array([])
-# period_powers = np.array([])
-# period_times = np.array([])
-# period_counts = np.array([])
-
-# for period in interpulse_periods:
-#     start = period[0]
-#     stop = period[1]
-#     t = times[np.where(np.logical_and(times > start, times < stop))]
-#     c = counts[np.where(np.logical_and(times > start, times < stop))]
-#     concat_times = np.append(concat_times, t)
-#     concat_counts = np.append(concat_counts, c)
-#     lc = stingray.Lightcurve(t - t[0], c)
-#     ps = stingray.Powerspectrum(lc)
-#     period_freqs = np.append(period_freqs, ps.freq)
-#     period_powers = np.append(period_powers, ps.power)
-
 
 start = interpulse_periods[period_number][0]
 
@@ -60,20 +39,10 @@ segment_step = 0.05  # requires 151 steps
 start = start + run_id * segment_step
 stop = start + segment_length
 
-# background_start = start - 0.4
-# background_stop = stop + 0.4
 indices = np.where(np.logical_and(times > start, times < stop))
 t = times[indices]
 c = counts[indices]
 c = c.astype(int)
-
-# plt.plot(t - t[0], c)
-# plt.xlabel('time [s]')
-# plt.ylabel('counts')
-# plt.savefig('sliding_window/pulse_period')
-# plt.clf()
-# assert False
-
 
 outdir = f"sliding_window_fine/period_{period_number}/one_qpo"
 
@@ -85,27 +54,12 @@ Q = 1.0 / np.sqrt(2.0)
 w0 = 3.0
 S0 = np.var(stabilised_counts) / (w0 * Q)
 
-kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) \
-         + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)  # \
-# + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 
 params_dict = kernel.get_parameter_dict()
 
-gp = celerite.GP(kernel, mean=np.mean(counts))
+gp = celerite.GP(kernel, mean=np.mean(stabilised_counts))
 gp.compute(t, stabilised_variance)  # You always need to call compute once.
-
-# print("Initial log likelihood: {0}".format(gp.log_likelihood(stabilised_counts)))
-# print("parameter_dict:\n{0}\n".format(gp.get_parameter_dict()))
-# print("parameter_names:\n{0}\n".format(gp.get_parameter_names()))
-# print("parameter_vector:\n{0}\n".format(gp.get_parameter_vector()))
-# print("parameter_bounds:\n{0}\n".format(gp.get_parameter_bounds()))
-# print(gp.get_parameter_dict())
-
-# def log_P_fraction(sample):
-#     res = deepcopy(sample)
-#     res['log_P_fraction'] = sample['kernel:terms[1]:log_P']/sample['kernel:terms[2]:log_P']
-#     return res
-
 
 priors = bilby.core.prior.PriorDict()
 # priors = bilby.core.prior.PriorDict(conversion_function=log_P_fraction)
@@ -125,7 +79,6 @@ priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximu
 # priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
 # priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
 # priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-4.16, name='terms[2]:log_P')
-# priors['log_P_fraction'] = bilby.core.prior.Constraint(minimum=0, maximum=1)
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 label = f'{run_id}'
