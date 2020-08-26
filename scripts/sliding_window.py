@@ -129,14 +129,12 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
 # plt.clf()
 
 # clean up
-
-os.remove(f"{outdir}/{label}_checkpoint_run.png")
-os.remove(f"{outdir}/{label}_checkpoint_stats.png")
-os.remove(f"{outdir}/{label}_checkpoint_trace.png")
-os.remove(f"{outdir}/{label}_corner.png")
-os.remove(f"{outdir}/{label}_dynesty.pickle")
-os.remove(f"{outdir}/{label}_resume.pickle")
-os.remove(f"{outdir}/{label}_samples.dat")
+for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_corner.png',
+                  '_dynesty.pickle', '_resume.pickle', '_samples.dat']:
+    try:
+        os.remove(f"{outdir}/{label}{extension}")
+    except Exception:
+        pass
 
 # max_like_params = dict(amplitude=0, frequency=29, phase=0, mu=241.05, sigma=0.1, elevation=1, c_0=1, c_1=-0, c_2=1, c_3=0, c_4=-0.0)
 
