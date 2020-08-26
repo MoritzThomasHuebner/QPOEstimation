@@ -13,9 +13,11 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm
 
 run_id = int(sys.argv[1])
 period_number = int(sys.argv[2])
+n_qpos = int(sys.argv[3])
 
-# run_id = 113
-# period_number = 1
+# run_id = 2
+# period_number = 11
+# n_qpos = 1
 
 fits_data = fits.open('data/SGR_1806_20/event_4ms.lc.gz')
 times = fits_data[1].data["TIME"]
@@ -44,7 +46,12 @@ t = times[indices]
 c = counts[indices]
 c = c.astype(int)
 
-outdir = f"sliding_window_fine/period_{period_number}/no_qpo"
+if n_qpos == 0:
+    outdir = f"sliding_window_fine/period_{period_number}/no_qpo"
+elif n_qpos == 1:
+    outdir = f"sliding_window_fine/period_{period_number}/one_qpo"
+else:
+    raise ValueError
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -54,25 +61,29 @@ Q = 1.0 / np.sqrt(2.0)
 w0 = 3.0
 S0 = np.var(stabilised_counts) / (w0 * Q)
 
-kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0)) #+ QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+for i in range(n_qpos):
+    kernel += QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 
 params_dict = kernel.get_parameter_dict()
 
-gp = celerite.GP(kernel, mean=np.mean(stabilised_counts))
+gp = celerite.GP(kernel)
 gp.compute(t, stabilised_variance)  # You always need to call compute once.
 
 priors = bilby.core.prior.PriorDict()
-priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='log_S0')
-priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='log_omega0')
-priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
 
-# priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=40, name='terms[0]:log_S0')
-# priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
-# priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-40, maximum=15, name='terms[0]:log_omega0')
-# priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
-# priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
-# priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-# priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-2.0, name='terms[1]:log_P')
+if n_qpos == 0:
+    priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_S0')
+    priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_omega0')
+    priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
+elif n_qpos == 1:
+    priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='terms[0]:log_S0')
+    priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
+    priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='terms[0]:log_omega0')
+    priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
+    priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
+    priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
+    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.85, maximum=-2.0, name='terms[1]:log_P')
 
 # priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
 # priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
@@ -111,12 +122,12 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
 #         gp.set_parameter(name=name, value=value)
 #     except ValueError:
 #         continue
-
+#
 # x = np.linspace(t[0], t[-1], 5000)
 # pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
 # pred_std = np.sqrt(pred_var)
 # plt.legend()
-
+#
 # color = "#ff7f0e"
 # plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
 # plt.plot(x, pred_mean, color=color, label='Prediction')
