@@ -27,11 +27,11 @@ mean_log_bfs = []
 # plt.show()
 
 import numpy as np
-
+n_periods = 44
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-for period in range(0, 44):
+for period in range(n_periods):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
     mean_frequency = []
