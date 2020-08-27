@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
-segments = np.arange(0, 38)
+segments = np.arange(0, 151)
 mean_log_bfs = []
 
 # for i in range(31):
@@ -36,7 +36,7 @@ for period in range(0, 44):
     log_bfs_two_qpo = []
     mean_frequency = []
     std_frequency = []
-    for run_id in range(151):
+    for run_id in range(len(segments)):
         try:
             res_no_qpo = bilby.result.read_in_result(f"sliding_window_fine/period_{period}/no_qpo/{run_id}_result.json")
             res_one_qpo = bilby.result.read_in_result(f"sliding_window_fine/period_{period}/one_qpo/{run_id}_result.json")
