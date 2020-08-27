@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
-segments = np.arange(0, 151)
+segments = np.arange(0, 28)
 mean_log_bfs = []
 
 # for i in range(31):
@@ -27,9 +27,11 @@ mean_log_bfs = []
 # plt.show()
 
 import numpy as np
-n_periods = 44
+n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
+
+outdir = 'sliding_window_goodxenon'
 
 for period in range(n_periods):
     log_bfs_one_qpo = []
@@ -38,8 +40,8 @@ for period in range(n_periods):
     std_frequency = []
     for run_id in range(len(segments)):
         try:
-            res_no_qpo = bilby.result.read_in_result(f"sliding_window_fine/period_{period}/no_qpo/{run_id}_result.json")
-            res_one_qpo = bilby.result.read_in_result(f"sliding_window_fine/period_{period}/one_qpo/{run_id}_result.json")
+            res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/{run_id}_result.json")
+            res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/{run_id}_result.json")
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_result.json")
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_two_qpo_result.json")
             log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
@@ -59,7 +61,7 @@ for period in range(n_periods):
         # log_bfs_two_qpo.append(log_bf_two_qpo)
         print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
         # print(f"{period} {run_id} two qpo: {log_bf_two_qpo}")
-    np.savetxt(f'sliding_window_fine/log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
+    np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
     # np.savetxt(f'log_bfs_period_two_qpo_{period}', np.array(log_bfs_two_qpo))
 
     fig, ax1 = plt.subplots()
@@ -84,7 +86,7 @@ for period in range(n_periods):
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     ax1.legend()
-    plt.savefig(f'sliding_window_fine/log_bfs_period_{period}')
+    plt.savefig(f'{outdir}/log_bfs_period_{period}')
     plt.clf()
     # period_one_log_bf_data.append(deepcopy(log_bfs_one_qpo))
     # period_two_log_bf_data.append(deepcopy(log_bfs_two_qpo))
