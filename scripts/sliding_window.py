@@ -11,13 +11,13 @@ from QPOEstimation.stabilisation import anscombe, bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
+# run_id = int(sys.argv[1])
+# period_number = int(sys.argv[2])
+# n_qpos = int(sys.argv[3])
 
-# run_id = 2
-# period_number = 11
-# n_qpos = 1
+run_id = 20
+period_number = 20
+n_qpos = 1
 
 data = np.loadtxt('data/sgr1806_128Hz.dat')
 times = data[:, 0]
@@ -27,12 +27,12 @@ counts = data[:, 1]
 pulse_period = 7.56  # see papers
 interpulse_periods = []
 for i in range(47):
-    interpulse_periods.append((16.0 + i * pulse_period, 16.0 + (i + 1) * pulse_period))
+    interpulse_periods.append((10.0 + i * pulse_period, 10.0 + (i + 1) * pulse_period))
 
 start = interpulse_periods[period_number][0]
 
 segment_length = 1.0
-segment_step = 0.5
+segment_step = 0.27  # Requires 28 steps
 
 start = start + run_id * segment_step
 stop = start + segment_length
