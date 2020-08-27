@@ -36,4 +36,4 @@ for c in candidates:
     starts.append(c.start)
     stops.append(c.stop)
 
-np.savetxt('candidates.txt', np.array([starts, stops]))
+np.savetxt('candidates.txt', np.array([starts, stops]).T)
