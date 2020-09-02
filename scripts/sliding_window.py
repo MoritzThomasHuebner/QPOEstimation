@@ -32,7 +32,7 @@ for i in range(47):
 start = interpulse_periods[period_number][0]
 
 segment_length = 1.0
-segment_step = 0.27  # Requires 28 steps
+segment_step = 0.135  # Requires 56 steps
 
 start = start + run_id * segment_step
 stop = start + segment_length
