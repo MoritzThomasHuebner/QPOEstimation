@@ -3,7 +3,7 @@ from itertools import groupby
 from operator import itemgetter
 import numpy as np
 
-n_periods = 44
+n_periods = 47
 
 
 Candidate = namedtuple('Candidate', ['period_number', 'index_range', 'start', 'stop'])
@@ -17,15 +17,15 @@ def ranges(nums):
 candidates = []
 pulse_period = 7.56  # see papers
 for i in range(n_periods):
-    log_bfs = np.loadtxt(f'sliding_window_fine/log_bfs_period_one_qpo_{i}')
+    log_bfs = np.loadtxt(f'sliding_window_goodxenon/log_bfs_period_one_qpo_{i}')
     candidate_indices = np.where(log_bfs > 0.0)[0]
     rs = ranges(candidate_indices)
     for r in rs:
         if r[1] - r[0] >= 3:
             candidates.append(Candidate(
                 period_number=i, index_range=(r[0], r[1]),
-                start=r[0] * 0.05 + i * pulse_period,
-                stop=r[0] * 0.05 + 0.2 + i * pulse_period))
+                start=r[0] * 0.27 + 10.0 + i * pulse_period,
+                stop=r[1] * 0.27 + 1.0 + 10.0 + i * pulse_period))
 
 
 starts = []
@@ -36,4 +36,4 @@ for c in candidates:
     starts.append(c.start)
     stops.append(c.stop)
 
-np.savetxt('candidates.txt', np.array([starts, stops]).T)
+np.savetxt('candidates_goodxenon.txt', np.array([starts, stops]).T)
