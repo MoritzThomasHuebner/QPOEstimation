@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
-segments = np.arange(0, 28)
+segments = np.arange(0, 56)
 mean_log_bfs = []
 
 # for i in range(31):
