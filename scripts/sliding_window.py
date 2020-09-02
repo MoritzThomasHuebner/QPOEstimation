@@ -19,7 +19,7 @@ n_qpos = int(sys.argv[3])
 # period_number = 20
 # n_qpos = 1
 
-data = np.loadtxt('data/sgr1806_128Hz.dat')
+data = np.loadtxt('data/sgr1806_256Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
 
@@ -88,12 +88,12 @@ elif n_qpos == 2:
     priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
     priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
     priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(32), maximum=-np.log(5),
+    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(128), maximum=-np.log(2),
                                                                name='terms[1]:log_P')
     priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
     priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
     priors['kernel:terms[2]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[2]:log_c')
-    priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(32), maximum=-np.log(5),
+    priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(128), maximum=-np.log(2),
                                                                name='terms[2]:log_P')
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
