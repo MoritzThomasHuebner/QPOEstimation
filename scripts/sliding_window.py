@@ -15,11 +15,11 @@ run_id = int(sys.argv[1])
 period_number = int(sys.argv[2])
 n_qpos = int(sys.argv[3])
 
-# run_id = 20
-# period_number = 20
+# run_id = 9
+# period_number = 2
 # n_qpos = 1
 
-data = np.loadtxt('data/sgr1806_32Hz.dat')
+data = np.loadtxt(f'data/sgr1806_64Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
 
@@ -43,11 +43,11 @@ c = counts[indices]
 c = c.astype(int)
 
 if n_qpos == 0:
-    outdir = f"sliding_window_32Hz/period_{period_number}/no_qpo"
+    outdir = f"sliding_window_below_16Hz/period_{period_number}/no_qpo"
 elif n_qpos == 1:
-    outdir = f"sliding_window_32Hz/period_{period_number}/one_qpo"
+    outdir = f"sliding_window_below_16Hz/period_{period_number}/one_qpo"
 else:
-    outdir = f"sliding_window_32Hz/period_{period_number}/two_qpo"
+    outdir = f"sliding_window_below_16Hz/period_{period_number}/two_qpo"
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -100,12 +100,13 @@ elif n_qpos == 2:
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 label = f'{run_id}'
+# label = f'testing_{freq}'
 
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=300, sample='rwalk',
                            resume=False, plot=False, clean=True)
-# result.plot_corner()
 # result = bilby.result.read_in_result(outdir=outdir, label=label)
+# result.plot_corner()
 
 # for term in [1, 2]:
 #     try:
@@ -124,7 +125,7 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
 #         plt.clf()
 #     except Exception:
 #         continue
-
+#
 # max_like_params = result.posterior.iloc[-1]
 # for name, value in max_like_params.items():
 #     try:
@@ -144,17 +145,17 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
 #                  edgecolor="none")
 # plt.xlabel("time [s]")
 # plt.ylabel("variance stabilised data")
-# plt.show()
+# # plt.show()
 # plt.savefig(f"{outdir}/max_like_fit_{label}")
 # plt.clf()
 
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_corner.png',
-                  '_dynesty.pickle', '_resume.pickle', '_samples.dat']:
-    try:
-        os.remove(f"{outdir}/{label}{extension}")
-    except Exception:
-        pass
+# for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_corner.png',
+#                   '_dynesty.pickle', '_resume.pickle', '_samples.dat']:
+#     try:
+#         os.remove(f"{outdir}/{label}{extension}")
+#     except Exception:
+#         pass
 
 # max_like_params = dict(amplitude=0, frequency=29, phase=0, mu=241.05, sigma=0.1, elevation=1, c_0=1, c_1=-0, c_2=1, c_3=0, c_4=-0.0)
 
