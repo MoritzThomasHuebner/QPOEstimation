@@ -17,7 +17,7 @@ def ranges(nums):
 candidates = []
 pulse_period = 7.56  # see papers
 for i in range(n_periods):
-    log_bfs = np.loadtxt(f'sliding_window_goodxenon/log_bfs_period_one_qpo_{i}')
+    log_bfs = np.loadtxt(f'sliding_window_32Hz/log_bfs_period_one_qpo_{i}')
     candidate_indices = np.where(log_bfs > 0.0)[0]
     rs = ranges(candidate_indices)
     for r in rs:
@@ -36,4 +36,4 @@ for c in candidates:
     starts.append(c.start)
     stops.append(c.stop)
 
-np.savetxt('candidates_goodxenon.txt', np.array([starts, stops]).T)
+np.savetxt('candidates_32Hz.txt', np.array([starts, stops]).T)

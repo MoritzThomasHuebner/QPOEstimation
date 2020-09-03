@@ -31,7 +31,7 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-outdir = 'sliding_window_goodxenon'
+outdir = 'sliding_window_32Hz'
 
 for period in range(n_periods):
     log_bfs_one_qpo = []
