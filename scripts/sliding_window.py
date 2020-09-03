@@ -19,7 +19,7 @@ n_qpos = int(sys.argv[3])
 # period_number = 2
 # n_qpos = 1
 
-data = np.loadtxt(f'data/sgr1806_64Hz.dat')
+data = np.loadtxt(f'data/sgr1806_256Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
 
@@ -42,12 +42,14 @@ t = times[indices]
 c = counts[indices]
 c = c.astype(int)
 
+band = '16_32Hz'
+
 if n_qpos == 0:
-    outdir = f"sliding_window_below_16Hz/period_{period_number}/no_qpo"
+    outdir = f"sliding_window_{band}/period_{period_number}/no_qpo"
 elif n_qpos == 1:
-    outdir = f"sliding_window_below_16Hz/period_{period_number}/one_qpo"
+    outdir = f"sliding_window_{band}/period_{period_number}/one_qpo"
 else:
-    outdir = f"sliding_window_below_16Hz/period_{period_number}/two_qpo"
+    outdir = f"sliding_window_{band}/period_{period_number}/two_qpo"
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -81,7 +83,7 @@ elif n_qpos == 1:
     priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
     priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
     priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(16), maximum=-np.log(5), name='terms[1]:log_P')
+    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(32), maximum=-np.log(16), name='terms[1]:log_P')
     # priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.15, maximum=-2.0, name='terms[1]:log_P')
 elif n_qpos == 2:
     priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='terms[0]:log_S0')
@@ -150,12 +152,12 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
 # plt.clf()
 
 # clean up
-# for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_corner.png',
-#                   '_dynesty.pickle', '_resume.pickle', '_samples.dat']:
-#     try:
-#         os.remove(f"{outdir}/{label}{extension}")
-#     except Exception:
-#         pass
+for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_corner.png',
+                  '_dynesty.pickle', '_resume.pickle', '_samples.dat']:
+    try:
+        os.remove(f"{outdir}/{label}{extension}")
+    except Exception:
+        pass
 
 # max_like_params = dict(amplitude=0, frequency=29, phase=0, mu=241.05, sigma=0.1, elevation=1, c_0=1, c_1=-0, c_2=1, c_3=0, c_4=-0.0)
 
