@@ -11,25 +11,27 @@ from QPOEstimation.stabilisation import anscombe, bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
+# run_id = int(sys.argv[1])
+# period_number = int(sys.argv[2])
+# n_qpos = int(sys.argv[3])
 
 # run_id = 9
 # period_number = 2
 # n_qpos = 1
 
-# candidate_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
+candidate_id = int(sys.argv[1])
+n_qpos = int(sys.argv[2])
 
-n_qpos = 1
-candidate_id = 79
+# n_qpos = 1
+# candidate_id = 79
 
 
 # data = np.loadtxt(f'data/sgr1806_256Hz.dat')
 data = np.loadtxt(f'data/sgr1806_64Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
+
+candidates = True
 
 if candidates:
     candidates = np.loadtxt('candidates_below_16Hz.txt')
