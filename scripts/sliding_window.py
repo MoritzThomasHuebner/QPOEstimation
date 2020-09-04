@@ -139,10 +139,12 @@ else:
     label = f'{run_id}'
 # label = f'testing_{freq}'
 
-result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-                           label=label, sampler='dynesty', nlive=1000, sample='rwalk',
-                           resume=True, plot=False)
-# result = bilby.result.read_in_result(outdir=outdir, label=label)
+try:
+    result = bilby.result.read_in_result(outdir=outdir, label=label)
+except Exception:
+    result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
+                               label=label, sampler='dynesty', nlive=1000, sample='rwalk',
+                               resume=True, plot=False)
 # result.plot_corner()
 
 for term in [1, 2]:
