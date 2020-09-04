@@ -19,23 +19,45 @@ n_qpos = int(sys.argv[3])
 # period_number = 2
 # n_qpos = 1
 
-data = np.loadtxt(f'data/sgr1806_256Hz.dat')
+# candidate_id = int(sys.argv[1])
+# n_qpos = int(sys.argv[2])
+
+n_qpos = 1
+candidate_id = 79
+
+
+# data = np.loadtxt(f'data/sgr1806_256Hz.dat')
+data = np.loadtxt(f'data/sgr1806_64Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
 
+if candidates:
+    candidates = np.loadtxt('candidates_below_16Hz.txt')
+    start = candidates[candidate_id][0]
+    stop = candidates[candidate_id][1]
+    seglen = stop - start
+    print(seglen)
 
-pulse_period = 7.56  # see papers
-interpulse_periods = []
-for i in range(47):
-    interpulse_periods.append((10.0 + i * pulse_period, 10.0 + (i + 1) * pulse_period))
+    if seglen < 1:
+        extend = 1 - seglen
+        start -= extend/2
+        stop += extend/2
 
-start = interpulse_periods[period_number][0]
+    segment_length = stop - start
+else:
 
-segment_length = 1.0
-segment_step = 0.135  # Requires 56 steps
+    pulse_period = 7.56  # see papers
+    interpulse_periods = []
+    for i in range(47):
+        interpulse_periods.append((10.0 + i * pulse_period, 10.0 + (i + 1) * pulse_period))
 
-start = start + run_id * segment_step
-stop = start + segment_length
+    start = interpulse_periods[period_number][0]
+
+    segment_length = 1.0
+    segment_step = 0.135  # Requires 56 steps
+
+    start = start + run_id * segment_step
+    stop = start + segment_length
 
 indices = np.where(np.logical_and(times > start, times < stop))
 t = times[indices]
@@ -44,12 +66,20 @@ c = c.astype(int)
 
 band = '16_32Hz'
 
-if n_qpos == 0:
-    outdir = f"sliding_window_{band}/period_{period_number}/no_qpo"
-elif n_qpos == 1:
-    outdir = f"sliding_window_{band}/period_{period_number}/one_qpo"
+if candidates:
+    if n_qpos == 0:
+        outdir = f"sliding_window_{band}_candidates/no_qpo"
+    elif n_qpos == 1:
+        outdir = f"sliding_window_{band}_candidates/one_qpo"
+    else:
+        outdir = f"sliding_window_{band}_candidates/two_qpo"
 else:
-    outdir = f"sliding_window_{band}/period_{period_number}/two_qpo"
+    if n_qpos == 0:
+        outdir = f"sliding_window_{band}/period_{period_number}/no_qpo"
+    elif n_qpos == 1:
+        outdir = f"sliding_window_{band}/period_{period_number}/one_qpo"
+    else:
+        outdir = f"sliding_window_{band}/period_{period_number}/two_qpo"
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -83,7 +113,7 @@ elif n_qpos == 1:
     priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
     priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
     priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(32), maximum=-np.log(16), name='terms[1]:log_P')
+    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(16), maximum=-np.log(5), name='terms[1]:log_P')
     # priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.15, maximum=-2.0, name='terms[1]:log_P')
 elif n_qpos == 2:
     priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='terms[0]:log_S0')
@@ -92,7 +122,7 @@ elif n_qpos == 2:
     priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
     priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
     priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(16), maximum=-np.log(2),
+    priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(16), maximum=-np.log(5),
                                                                name='terms[1]:log_P')
     priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
     priors['kernel:terms[2]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[2]:log_b')
@@ -101,7 +131,10 @@ elif n_qpos == 2:
                                                                name='terms[2]:log_P')
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
-label = f'{run_id}'
+if candidates:
+    label = f"{candidate_id}"
+else:
+    label = f'{run_id}'
 # label = f'testing_{freq}'
 
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,

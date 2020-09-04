@@ -16,6 +16,7 @@ def ranges(nums):
 
 candidates = []
 pulse_period = 7.56  # see papers
+offset = 10.0
 for i in range(n_periods):
     log_bfs = np.loadtxt(f'sliding_window_below_16Hz/log_bfs_period_one_qpo_{i}')
     candidate_indices = np.where(log_bfs > 1.0)[0]
@@ -24,8 +25,8 @@ for i in range(n_periods):
         if r[1] - r[0] >= 3:
             candidates.append(Candidate(
                 period_number=i, index_range=(r[0], r[1]),
-                start=r[0] * 0.27 + 10.0 + i * pulse_period,
-                stop=r[1] * 0.27 + 1.0 + 10.0 + i * pulse_period))
+                start=offset + i * pulse_period + r[0] * 0.135 + 0.2, # + 0.5,
+                stop=offset + i * pulse_period + r[1] * 0.135 + 1 - 0.2)) # ))
 
 
 starts = []
