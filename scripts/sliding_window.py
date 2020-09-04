@@ -140,7 +140,7 @@ else:
 # label = f'testing_{freq}'
 
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-                           label=label, sampler='dynesty', nlive=300, sample='rwalk',
+                           label=label, sampler='dynesty', nlive=1000, sample='rwalk',
                            resume=False, plot=False, clean=True)
 # result = bilby.result.read_in_result(outdir=outdir, label=label)
 # result.plot_corner()
