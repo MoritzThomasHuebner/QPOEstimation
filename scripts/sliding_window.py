@@ -139,10 +139,10 @@ else:
     label = f'{run_id}'
 # label = f'testing_{freq}'
 
-result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-                           label=label, sampler='dynesty', nlive=1000, sample='rwalk',
-                           resume=False, plot=False, clean=True)
-# result = bilby.result.read_in_result(outdir=outdir, label=label)
+# result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
+#                            label=label, sampler='dynesty', nlive=1000, sample='rwalk',
+#                            resume=False, plot=False, clean=True)
+result = bilby.result.read_in_result(outdir=outdir, label=label)
 # result.plot_corner()
 
 # for term in [1, 2]:
@@ -163,28 +163,28 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
 #     except Exception:
 #         continue
 #
-# max_like_params = result.posterior.iloc[-1]
-# for name, value in max_like_params.items():
-#     try:
-#         gp.set_parameter(name=name, value=value)
-#     except ValueError:
-#         continue
-#
-# x = np.linspace(t[0], t[-1], 5000)
-# pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
-# pred_std = np.sqrt(pred_var)
-# plt.legend()
-#
-# color = "#ff7f0e"
-# plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
-# plt.plot(x, pred_mean, color=color, label='Prediction')
-# plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
-#                  edgecolor="none")
-# plt.xlabel("time [s]")
-# plt.ylabel("variance stabilised data")
-# # plt.show()
-# plt.savefig(f"{outdir}/max_like_fit_{label}")
-# plt.clf()
+max_like_params = result.posterior.iloc[-1]
+for name, value in max_like_params.items():
+    try:
+        gp.set_parameter(name=name, value=value)
+    except ValueError:
+        continue
+
+x = np.linspace(t[0], t[-1], 5000)
+pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
+pred_std = np.sqrt(pred_var)
+plt.legend()
+
+color = "#ff7f0e"
+plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
+plt.plot(x, pred_mean, color=color, label='Prediction')
+plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
+                 edgecolor="none")
+plt.xlabel("time [s]")
+plt.ylabel("variance stabilised data")
+# plt.show()
+plt.savefig(f"{outdir}/max_like_fit_{label}")
+plt.clf()
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_corner.png',
