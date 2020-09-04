@@ -139,29 +139,29 @@ else:
     label = f'{run_id}'
 # label = f'testing_{freq}'
 
-# result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
-#                            label=label, sampler='dynesty', nlive=1000, sample='rwalk',
-#                            resume=False, plot=False, clean=True)
-result = bilby.result.read_in_result(outdir=outdir, label=label)
+result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
+                           label=label, sampler='dynesty', nlive=1000, sample='rwalk',
+                           resume=True, plot=False)
+# result = bilby.result.read_in_result(outdir=outdir, label=label)
 # result.plot_corner()
 
-# for term in [1, 2]:
-#     try:
-#         frequency_samples = []
-#         for i, sample in enumerate(result.posterior.iloc):
-#             frequency_samples.append(1 / np.exp(sample[f'kernel:terms[{term}]:log_P']))
-#
-#         plt.hist(frequency_samples, bins="fd", density=True)
-#         plt.xlabel('frequency [Hz]')
-#         plt.ylabel('normalised PDF')
-#         median = np.median(frequency_samples)
-#         percentiles = np.percentile(frequency_samples, [16, 84])
-#         plt.title(
-#             f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-#         plt.savefig(f"{outdir}/frequency_posterior_{label}_{term}")
-#         plt.clf()
-#     except Exception:
-#         continue
+for term in [1, 2]:
+    try:
+        frequency_samples = []
+        for i, sample in enumerate(result.posterior.iloc):
+            frequency_samples.append(1 / np.exp(sample[f'kernel:terms[{term}]:log_P']))
+
+        plt.hist(frequency_samples, bins="fd", density=True)
+        plt.xlabel('frequency [Hz]')
+        plt.ylabel('normalised PDF')
+        median = np.median(frequency_samples)
+        percentiles = np.percentile(frequency_samples, [16, 84])
+        plt.title(
+            f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+        plt.savefig(f"{outdir}/frequency_posterior_{label}_{term}")
+        plt.clf()
+    except Exception:
+        continue
 #
 max_like_params = result.posterior.iloc[-1]
 for name, value in max_like_params.items():
