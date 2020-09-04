@@ -31,9 +31,9 @@ data = np.loadtxt(f'data/sgr1806_64Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
 
-candidates = True
+candidates_run = True
 
-if candidates:
+if candidates_run:
     candidates = np.loadtxt('candidates_below_16Hz.txt')
     start = candidates[candidate_id][0]
     stop = candidates[candidate_id][1]
@@ -68,7 +68,7 @@ c = c.astype(int)
 
 band = '16_32Hz'
 
-if candidates:
+if candidates_run:
     if n_qpos == 0:
         outdir = f"sliding_window_{band}_candidates/no_qpo"
     elif n_qpos == 1:
@@ -133,7 +133,7 @@ elif n_qpos == 2:
                                                                name='terms[2]:log_P')
 
 likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
-if candidates:
+if candidates_run:
     label = f"{candidate_id}"
 else:
     label = f'{run_id}'
