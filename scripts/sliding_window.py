@@ -34,7 +34,7 @@ times = data[:, 0]
 counts = data[:, 1]
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
-likelihood_model = likelihood_models[0]
+likelihood_model = likelihood_models[model_id]
 candidates_run = True
 band = 'below_16Hz'
 
