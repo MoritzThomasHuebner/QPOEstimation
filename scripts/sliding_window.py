@@ -290,11 +290,13 @@ elif likelihood_model == likelihood_models[2]:
     for i in range(10):
         parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
         plt.plot(t, sine_func(t, **parameters) + background_estimate, color='r', alpha=0.2)
-    plt.savefig(f'{outdir}/fits/{label}_max_like_fit.png')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
     plt.legend()
-    plt.show()
+    plt.savefig(f'{outdir}/fits/{label}_max_like_fit.png')
+    plt.clf()
+
+
 
     plt.plot(t, c - sine_func(t, **max_like_params) - background_estimate, label='residual')
     plt.fill_between(t, np.sqrt(c), -np.sqrt(c), color='orange', alpha=0.3,
@@ -303,7 +305,7 @@ elif likelihood_model == likelihood_models[2]:
     plt.ylabel("residuals")
     plt.legend()
     plt.savefig(f'{outdir}/fits/{label}_max_like_fit_residuals.png')
-    plt.show()
+    plt.clf()
 
 
 
