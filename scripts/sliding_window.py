@@ -132,7 +132,7 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[1]:log_b')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=15, name='terms[1]:log_c')
+        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='terms[1]:log_c')
         priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[1]:log_P')
         # priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.15, maximum=-2.0, name='terms[1]:log_P')
     elif n_qpos == 2:
@@ -141,7 +141,7 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='terms[0]:log_omega0')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
+        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='terms[1]:log_c')
         priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum),
                                                                    name='terms[1]:log_P')
         priors['kernel:terms[2]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[2]:log_a')
