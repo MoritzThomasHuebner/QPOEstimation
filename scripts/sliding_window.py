@@ -17,19 +17,19 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 # period_number = int(sys.argv[2])
 # n_qpos = int(sys.argv[3])
 
-# run_id = 9
-# period_number = 2
+run_id = None
+period_number = None
 # n_qpos = 1
 
-candidate_id = int(sys.argv[1])
-n_qpos = int(sys.argv[2])
+# candidate_id = int(sys.argv[1])
+# n_qpos = int(sys.argv[2])
 
-# n_qpos = 1
-# candidate_id = 0
+n_qpos = 0
+candidate_id = 0
 model_id = 1
 
 # data = np.loadtxt(f'data/sgr1806_256Hz.dat')
-data = np.loadtxt(f'data/sgr1806_64Hz.dat')
+data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
 
@@ -73,18 +73,18 @@ c = c.astype(int)
 
 if candidates_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}_candidates/no_qpo"
+        outdir = f"sliding_window_{band}_candidates/no_qpo/results"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}_candidates/one_qpo"
+        outdir = f"sliding_window_{band}_candidates/one_qpo/results"
     else:
-        outdir = f"sliding_window_{band}_candidates/two_qpo"
+        outdir = f"sliding_window_{band}_candidates/two_qpo/results"
 else:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}/period_{period_number}/no_qpo"
+        outdir = f"sliding_window_{band}/period_{period_number}/no_qpo/results"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}/period_{period_number}/one_qpo"
+        outdir = f"sliding_window_{band}/period_{period_number}/one_qpo/results"
     else:
-        outdir = f"sliding_window_{band}/period_{period_number}/two_qpo"
+        outdir = f"sliding_window_{band}/period_{period_number}/two_qpo/results"
 
 stabilised_counts = bar_lev(c)
 stabilised_variance = np.ones(len(stabilised_counts))
@@ -153,6 +153,7 @@ elif likelihood_model == likelihood_models[1]:
     plt.clf()
     priors = QPOEstimation.prior.psd.get_full_prior(noise_model, frequencies=frequencies)
     priors['central_frequency'].maximum /= 2
+    priors['central_frequency'].minimum = 5
     if n_qpos == 0:
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
@@ -192,9 +193,9 @@ elif likelihood_model == likelihood_models[2]:
 # except Exception:
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=outdir,
                            label=label, sampler='dynesty', nlive=200, sample='rwalk',
-                           resume=True)
-# result.plot_corner()
-
+                           resume=False, clean=True)
+result.plot_corner(outdir=f"{outdir}/corner")
+print(result.log_evidence)
 if likelihood_model == likelihood_models[0]:
     for term in [1, 2]:
         try:
@@ -209,7 +210,7 @@ if likelihood_model == likelihood_models[0]:
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/frequency_posterior_{label}_{term}")
+            plt.savefig(f"{outdir}/fits/frequency_posterior_{label}_{term}")
             plt.clf()
         except Exception:
             continue
@@ -234,7 +235,7 @@ if likelihood_model == likelihood_models[0]:
     plt.xlabel("time [s]")
     plt.ylabel("variance stabilised data")
     # plt.show()
-    plt.savefig(f"{outdir}/max_like_fit_{label}")
+    plt.savefig(f"{outdir}/fits/max_like_fit_{label}")
     plt.clf()
 
     pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
@@ -242,19 +243,20 @@ if likelihood_model == likelihood_models[0]:
     plt.fill_between(t, 1, -1, color=color, alpha=0.3, edgecolor="none")
     plt.xlabel("time [s]")
     plt.ylabel("stabilised residuals")
-    plt.savefig(f"{outdir}/max_like_fit_residuals_{label}")
+    plt.savefig(f"{outdir}/fits/max_like_fit_residuals_{label}")
     plt.clf()
 elif likelihood_model == likelihood_models[1]:
-    frequency_samples = result.posterior['central_frequency']
-    plt.hist(frequency_samples, bins="fd", density=True)
-    plt.xlabel('frequency [Hz]')
-    plt.ylabel('normalised PDF')
-    median = np.median(frequency_samples)
-    percentiles = np.percentile(frequency_samples, [16, 84])
-    plt.title(
-        f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-    plt.savefig(f"{outdir}/frequency_posterior_whittle_{label}")
-    plt.clf()
+    if n_qpos > 0:
+        frequency_samples = result.posterior['central_frequency']
+        plt.hist(frequency_samples, bins="fd", density=True)
+        plt.xlabel('frequency [Hz]')
+        plt.ylabel('normalised PDF')
+        median = np.median(frequency_samples)
+        percentiles = np.percentile(frequency_samples, [16, 84])
+        plt.title(
+            f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+        plt.savefig(f"{outdir}/corner/frequency_posterior_whittle_{label}")
+        plt.clf()
 
     likelihood.parameters = result.posterior.iloc[-1]
     plt.loglog(frequencies[frequency_mask], powers[frequency_mask], label="Measured")
@@ -263,7 +265,7 @@ elif likelihood_model == likelihood_models[1]:
         likelihood.parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
         plt.loglog(likelihood.frequencies, likelihood.model + likelihood.psd, color='r', alpha=0.2)
     plt.legend()
-    plt.savefig(f'{outdir}/{label}_fitted_spectrum.png')
+    plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
     plt.show()
 elif likelihood_model == likelihood_models[2]:
     frequency_samples = result.posterior["f"]
@@ -274,7 +276,7 @@ elif likelihood_model == likelihood_models[2]:
     percentiles = np.percentile(frequency_samples, [16, 84])
     plt.title(
         f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-    plt.savefig(f"{outdir}/frequency_posterior_poisson_{label}")
+    plt.savefig(f"{outdir}/corner/frequency_posterior_poisson_{label}")
     plt.clf()
 
     plt.plot(t, c, label='measured')
@@ -283,7 +285,7 @@ elif likelihood_model == likelihood_models[2]:
     for i in range(10):
         parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
         plt.plot(t, sine_func(t, **parameters) + background_estimate, color='r', alpha=0.2)
-    plt.savefig(f'{outdir}/max_like_fit_poisson{label}.png')
+    plt.savefig(f'{outdir}/fits/max_like_fit_poisson{label}.png')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
     plt.legend()
@@ -295,18 +297,12 @@ elif likelihood_model == likelihood_models[2]:
     plt.xlabel("time [s]")
     plt.ylabel("residuals")
     plt.legend()
-    plt.savefig(f'{outdir}/max_like_fit_poisson_residuals{label}.png')
+    plt.savefig(f'{outdir}/fits/max_like_fit_poisson_residuals{label}.png')
     plt.show()
 
 
 
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_corner.png',
-                  '_dynesty.pickle', '_resume.pickle', '_samples.dat']:
-    try:
-        os.remove(f"{outdir}/{label}{extension}")
-    except Exception:
-        pass
 
 # max_like_params = dict(amplitude=0, frequency=29, phase=0, mu=241.05, sigma=0.1, elevation=1, c_0=1, c_1=-0, c_2=1, c_3=0, c_4=-0.0)
 

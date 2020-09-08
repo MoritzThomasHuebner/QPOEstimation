@@ -141,3 +141,36 @@ class PoissonLikelihoodWithBackground(bilby.core.likelihood.PoissonLikelihood):
 
     def _eval_log_likelihood(self, rate):
         return np.sum(-rate + self.y * np.log(rate) - gammaln(self.y + 1))
+
+
+class AssociationLikelihood(bilby.core.likelihood.Likelihood):
+
+    def __init__(self, posteriors):
+        super().__init__(parameters=dict(log_f_0=0))
+        self.posteriors = posteriors
+
+    def log_likelihood(self):
+        return np.sum(np.log(self.p_associated_any()))
+
+    def p_associated_any(self):
+        ps = []
+        for prob in self.posteriors:
+            ps.append(1 - self.p_unassociated(prob))
+        return ps
+
+    def p_unassociated(self, prob):
+        p = 1
+        ll = 2
+        frequency = 0
+        while frequency < prob.maximum:
+            frequency = self.frequency_at_mode(ll=ll)
+            if prob.minimum <= frequency:
+                p_associated = prob.prob(frequency) * 1/(ll+1)  # 1/l correction factor?
+                if ll == 1:
+                    p_associated = 0
+                p *= 1 - p_associated
+            ll += 1
+        return p
+
+    def frequency_at_mode(self, ll):
+        return np.exp(self.parameters['log_f_0']) * np.sqrt(ll*(ll+1))
