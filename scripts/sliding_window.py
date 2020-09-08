@@ -202,7 +202,7 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdi
                            resume=False, clean=True)
 result.plot_corner(outdir=f"{outdir}/corner")
 if likelihood_model == likelihood_models[0]:
-    for term in [1, 2]:
+    for term in range(1, n_qpos + 1):
         try:
             frequency_samples = []
             for i, sample in enumerate(result.posterior.iloc):
@@ -215,11 +215,12 @@ if likelihood_model == likelihood_models[0]:
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/fits/frequency_posterior_{label}_{term}")
+            print(f"{outdir}/corner/frequency_posterior_{label}")
+            plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
             plt.clf()
-        except Exception:
-            continue
-    #
+        except Exception as e:
+            bilby.core.utils.logger.info(e)
+
     max_like_params = result.posterior.iloc[-1]
     for name, value in max_like_params.items():
         try:
@@ -244,7 +245,7 @@ if likelihood_model == likelihood_models[0]:
     plt.clf()
 
     pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
-    plt.plot(t - pred_mean, stabilised_counts, label='residual')
+    plt.scatter(t, stabilised_counts - pred_mean, label='residual')
     plt.fill_between(t, 1, -1, color=color, alpha=0.3, edgecolor="none")
     plt.xlabel("time [s]")
     plt.ylabel("stabilised residuals")
@@ -260,7 +261,7 @@ elif likelihood_model == likelihood_models[1]:
         percentiles = np.percentile(frequency_samples, [16, 84])
         plt.title(
             f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-        plt.savefig(f"{outdir}/corner/frequency_posterior_whittle_{label}")
+        plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
         plt.clf()
 
     likelihood.parameters = result.posterior.iloc[-1]
@@ -281,7 +282,7 @@ elif likelihood_model == likelihood_models[2]:
     percentiles = np.percentile(frequency_samples, [16, 84])
     plt.title(
         f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-    plt.savefig(f"{outdir}/corner/frequency_posterior_poisson_{label}")
+    plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
     plt.clf()
 
     plt.plot(t, c, label='measured')
