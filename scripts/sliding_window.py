@@ -37,7 +37,7 @@ likelihood_model = likelihood_models[model_id]
 candidates_run = False
 
 # band = 'below_16Hz'
-band = 'below_16_32Hz'
+band = '16_32Hz'
 band_minimum = 16
 band_maximum = 32
 
