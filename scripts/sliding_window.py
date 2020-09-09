@@ -15,11 +15,11 @@ from QPOEstimation.stabilisation import anscombe, bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
-model_id = int(sys.argv[4])
-
+# run_id = int(sys.argv[1])
+# period_number = int(sys.argv[2])
+# n_qpos = int(sys.argv[3])
+# model_id = int(sys.argv[4])
+#
 # run_id = 27
 # period_number = 29
 # n_qpos = 1
@@ -34,12 +34,15 @@ model_id = int(sys.argv[4])
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = False
+candidates_run = True
 
+# band = 'test'
 # band = 'below_16Hz'
 band = '16_32Hz'
-band_minimum = 16
-band_maximum = 32
+band_minimum = 5
+band_maximum = 16
+# band_minimum = 16
+# band_maximum = 32
 
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{band_maximum*2}Hz.dat')
@@ -54,7 +57,6 @@ if candidates_run:
     start = candidates[candidate_id][0]
     stop = candidates[candidate_id][1]
     seglen = stop - start
-    print(seglen)
 
     if seglen < 1:
         extend = 1 - seglen
@@ -131,10 +133,10 @@ if likelihood_model == likelihood_models[0]:
         # priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.DeltaFunction(peak=-1, name='terms[0]:log_omega0')
         priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
-        priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[1]:log_b')
+        # priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[1]:log_b')
+        priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='terms[1]:log_c')
         priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[1]:log_P')
-        # priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-4.15, maximum=-2.0, name='terms[1]:log_P')
     elif n_qpos == 2:
         priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='terms[0]:log_S0')
         priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')

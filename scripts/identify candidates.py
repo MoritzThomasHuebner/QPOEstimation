@@ -4,7 +4,7 @@ from operator import itemgetter
 import numpy as np
 
 n_periods = 47
-
+band = '16_32Hz'
 
 Candidate = namedtuple('Candidate', ['period_number', 'index_range', 'start', 'stop'])
 
@@ -18,8 +18,8 @@ candidates = []
 pulse_period = 7.56  # see papers
 offset = 10.0
 for i in range(n_periods):
-    log_bfs = np.loadtxt(f'sliding_window_below_16Hz/log_bfs_period_one_qpo_{i}')
-    candidate_indices = np.where(log_bfs > 1.0)[0]
+    log_bfs = np.loadtxt(f'sliding_window_{band}/log_bfs_period_one_qpo_{i}')
+    candidate_indices = np.where(log_bfs > 2.0)[0]
     rs = ranges(candidate_indices)
     for r in rs:
         if r[1] - r[0] >= 3:
@@ -37,4 +37,4 @@ for c in candidates:
     starts.append(c.start)
     stops.append(c.stop)
 
-np.savetxt('candidates_below_16Hz.txt', np.array([starts, stops]).T)
+np.savetxt(f'candidates_{band}.txt', np.array([starts, stops]).T)
