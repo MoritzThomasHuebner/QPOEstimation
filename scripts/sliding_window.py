@@ -164,6 +164,8 @@ elif likelihood_model == likelihood_models[1]:
     plt.show()
     plt.clf()
     priors = QPOEstimation.prior.psd.get_full_prior(noise_model, frequencies=frequencies)
+    priors['width'].maximum = 10
+    priors['width'].minimum = frequencies[1] - frequencies[0]
     priors['central_frequency'].maximum = band_maximum
     priors['central_frequency'].minimum = band_minimum
     if n_qpos == 0:
