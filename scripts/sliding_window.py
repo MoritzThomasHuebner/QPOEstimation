@@ -24,11 +24,11 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 # period_number = 29
 # n_qpos = 1
 
-# candidate_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
+candidate_id = int(sys.argv[1])
+n_qpos = int(sys.argv[2])
+model_id = int(sys.argv[3])
 
-# n_qpos = 0
+# n_qpos = 1
 # candidate_id = 0
 # model_id = 0
 
@@ -39,10 +39,10 @@ candidates_run = True
 # band = 'test'
 # band = 'below_16Hz'
 band = '16_32Hz'
-band_minimum = 5
-band_maximum = 16
-# band_minimum = 16
-# band_maximum = 32
+# band_minimum = 5
+# band_maximum = 16
+band_minimum = 16
+band_maximum = 32
 
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{band_maximum*2}Hz.dat')
