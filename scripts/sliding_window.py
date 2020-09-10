@@ -208,14 +208,62 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdi
                            label=label, sampler='dynesty', nlive=200, sample='rwalk',
                            resume=False, clean=True)
 
-result.plot_corner(outdir=f"{outdir}/corner")
-if likelihood_model == likelihood_models[0]:
-    for term in range(1, n_qpos + 1):
-        try:
-            frequency_samples = []
-            for i, sample in enumerate(result.posterior.iloc):
-                frequency_samples.append(1 / np.exp(sample[f'kernel:terms[{term}]:log_P']))
+if candidates_run:
+    result.plot_corner(outdir=f"{outdir}/corner")
+    if likelihood_model == likelihood_models[0]:
+        for term in range(1, n_qpos + 1):
+            try:
+                frequency_samples = []
+                for i, sample in enumerate(result.posterior.iloc):
+                    frequency_samples.append(1 / np.exp(sample[f'kernel:terms[{term}]:log_P']))
 
+                plt.hist(frequency_samples, bins="fd", density=True)
+                plt.xlabel('frequency [Hz]')
+                plt.ylabel('normalised PDF')
+                median = np.median(frequency_samples)
+                percentiles = np.percentile(frequency_samples, [16, 84])
+                plt.title(
+                    f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+                print(f"{outdir}/corner/frequency_posterior_{label}")
+                plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
+                plt.clf()
+            except Exception as e:
+                bilby.core.utils.logger.info(e)
+
+        max_like_params = result.posterior.iloc[-1]
+        for name, value in max_like_params.items():
+            try:
+                gp.set_parameter(name=name, value=value)
+            except ValueError:
+                continue
+
+        x = np.linspace(t[0], t[-1], 5000)
+        pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
+        pred_std = np.sqrt(pred_var)
+        plt.legend()
+
+        color = "#ff7f0e"
+        plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
+        plt.plot(x, pred_mean, color=color, label='Prediction')
+        plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
+                         edgecolor="none")
+        plt.xlabel("time [s]")
+        plt.ylabel("variance stabilised data")
+        # plt.show()
+        Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
+        plt.clf()
+
+        pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
+        plt.scatter(t, stabilised_counts - pred_mean, label='residual')
+        plt.fill_between(t, 1, -1, color=color, alpha=0.3, edgecolor="none")
+        plt.xlabel("time [s]")
+        plt.ylabel("stabilised residuals")
+        plt.savefig(f"{outdir}/fits/{label}_max_like_fit_residuals")
+        plt.clf()
+    elif likelihood_model == likelihood_models[1]:
+        if n_qpos > 0:
+            frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')
             plt.ylabel('normalised PDF')
@@ -223,46 +271,21 @@ if likelihood_model == likelihood_models[0]:
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            print(f"{outdir}/corner/frequency_posterior_{label}")
             plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
             plt.clf()
-        except Exception as e:
-            bilby.core.utils.logger.info(e)
 
-    max_like_params = result.posterior.iloc[-1]
-    for name, value in max_like_params.items():
-        try:
-            gp.set_parameter(name=name, value=value)
-        except ValueError:
-            continue
-
-    x = np.linspace(t[0], t[-1], 5000)
-    pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
-    pred_std = np.sqrt(pred_var)
-    plt.legend()
-
-    color = "#ff7f0e"
-    plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
-    plt.plot(x, pred_mean, color=color, label='Prediction')
-    plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
-                     edgecolor="none")
-    plt.xlabel("time [s]")
-    plt.ylabel("variance stabilised data")
-    # plt.show()
-    Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
-    plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
-    plt.clf()
-
-    pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
-    plt.scatter(t, stabilised_counts - pred_mean, label='residual')
-    plt.fill_between(t, 1, -1, color=color, alpha=0.3, edgecolor="none")
-    plt.xlabel("time [s]")
-    plt.ylabel("stabilised residuals")
-    plt.savefig(f"{outdir}/fits/{label}_max_like_fit_residuals")
-    plt.clf()
-elif likelihood_model == likelihood_models[1]:
-    if n_qpos > 0:
-        frequency_samples = result.posterior['central_frequency']
+        likelihood.parameters = result.posterior.iloc[-1]
+        plt.loglog(frequencies[frequency_mask], powers[frequency_mask], label="Measured")
+        plt.loglog(likelihood.frequencies, likelihood.model + likelihood.psd, color='r', label='max_likelihood')
+        for i in range(10):
+            likelihood.parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
+            plt.loglog(likelihood.frequencies, likelihood.model + likelihood.psd, color='r', alpha=0.2)
+        plt.legend()
+        Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
+        plt.show()
+    elif likelihood_model == likelihood_models[2]:
+        frequency_samples = result.posterior["f"]
         plt.hist(frequency_samples, bins="fd", density=True)
         plt.xlabel('frequency [Hz]')
         plt.ylabel('normalised PDF')
@@ -273,49 +296,27 @@ elif likelihood_model == likelihood_models[1]:
         plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
         plt.clf()
 
-    likelihood.parameters = result.posterior.iloc[-1]
-    plt.loglog(frequencies[frequency_mask], powers[frequency_mask], label="Measured")
-    plt.loglog(likelihood.frequencies, likelihood.model + likelihood.psd, color='r', label='max_likelihood')
-    for i in range(10):
-        likelihood.parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
-        plt.loglog(likelihood.frequencies, likelihood.model + likelihood.psd, color='r', alpha=0.2)
-    plt.legend()
-    Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
-    plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
-    plt.show()
-elif likelihood_model == likelihood_models[2]:
-    frequency_samples = result.posterior["f"]
-    plt.hist(frequency_samples, bins="fd", density=True)
-    plt.xlabel('frequency [Hz]')
-    plt.ylabel('normalised PDF')
-    median = np.median(frequency_samples)
-    percentiles = np.percentile(frequency_samples, [16, 84])
-    plt.title(
-        f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-    plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
-    plt.clf()
+        plt.plot(t, c, label='measured')
+        max_like_params = result.posterior.iloc[-1]
+        plt.plot(t, sine_func(t, **max_like_params) + background_estimate, color='r', label='max_likelihood')
+        for i in range(10):
+            parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
+            plt.plot(t, sine_func(t, **parameters) + background_estimate, color='r', alpha=0.2)
+        plt.xlabel("time [s]")
+        plt.ylabel("counts")
+        plt.legend()
+        Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        plt.savefig(f'{outdir}/fits/{label}_max_like_fit.png')
+        plt.clf()
 
-    plt.plot(t, c, label='measured')
-    max_like_params = result.posterior.iloc[-1]
-    plt.plot(t, sine_func(t, **max_like_params) + background_estimate, color='r', label='max_likelihood')
-    for i in range(10):
-        parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
-        plt.plot(t, sine_func(t, **parameters) + background_estimate, color='r', alpha=0.2)
-    plt.xlabel("time [s]")
-    plt.ylabel("counts")
-    plt.legend()
-    Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
-    plt.savefig(f'{outdir}/fits/{label}_max_like_fit.png')
-    plt.clf()
-
-    plt.plot(t, c - sine_func(t, **max_like_params) - background_estimate, label='residual')
-    plt.fill_between(t, np.sqrt(c), -np.sqrt(c), color='orange', alpha=0.3,
-                     edgecolor="none", label='1 sigma uncertainty')
-    plt.xlabel("time [s]")
-    plt.ylabel("residuals")
-    plt.legend()
-    plt.savefig(f'{outdir}/fits/{label}_max_like_fit_residuals.png')
-    plt.clf()
+        plt.plot(t, c - sine_func(t, **max_like_params) - background_estimate, label='residual')
+        plt.fill_between(t, np.sqrt(c), -np.sqrt(c), color='orange', alpha=0.3,
+                         edgecolor="none", label='1 sigma uncertainty')
+        plt.xlabel("time [s]")
+        plt.ylabel("residuals")
+        plt.legend()
+        plt.savefig(f'{outdir}/fits/{label}_max_like_fit_residuals.png')
+        plt.clf()
 
 
 
