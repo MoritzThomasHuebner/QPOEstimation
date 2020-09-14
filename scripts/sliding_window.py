@@ -161,8 +161,10 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='terms[1]:log_c')
         priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[1]:log_P')
     elif n_qpos == 2:
-        priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
+        # priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
         # priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_S0')
+        priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
+        priors['log_opm'] = bilby.core.prior.Uniform(minimum=-40, maximum=40, name='log_opm')
         priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
         priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
                                                                         name='terms[0]:log_omega0')
