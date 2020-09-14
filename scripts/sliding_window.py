@@ -37,16 +37,16 @@ likelihood_model = likelihood_models[model_id]
 candidates_run = True
 
 # band = 'test'
-# band = 'below_16Hz'
-band = '16_32Hz'
+band = 'below_16Hz'
+# band = '16_32Hz'
 # band_minimum = 5
 # band_maximum = 16
 band_minimum = 5
-band_maximum = 64
+band_maximum = 32
 
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
-    # data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
-    data = np.loadtxt(f'data/sgr1806_256Hz.dat')
+    data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
+    # data = np.loadtxt(f'data/sgr1806_256Hz.dat')
 else:
     data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
 times = data[:, 0]
@@ -147,8 +147,10 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
         # slab = bilby.core.prior.Uniform(minimum=0, maximum=1e8, name='log_sho_amplitude')
-        priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
+        # priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
         priors['log_opm'] = bilby.core.prior.Uniform(minimum=-40, maximum=40, name='log_opm')
+        priors['log_sho_amplitude'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sho_amplitude')
+        priors['log_opm'] = bilby.core.prior.DeltaFunction(peak=0, name='log_opm')
         # priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_S0')
         # priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
         #                                                                 name='terms[0]:log_omega0')
@@ -234,7 +236,7 @@ elif likelihood_model == likelihood_models[2]:
 # except Exception:
 #     pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                           label=label, sampler='dynesty', nlive=200, sample='rwalk',
+                           label=label, sampler='dynesty', nlive=1000, sample='rwalk',
                            resume=False, clean=True)
 
 # if candidates_run:
