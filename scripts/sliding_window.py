@@ -34,7 +34,7 @@ model_id = int(sys.argv[3])
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = False
+candidates_run = True
 
 # band = 'test'
 band = 'below_16Hz'
