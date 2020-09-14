@@ -287,15 +287,13 @@ if True:
         psd_freqs = np.exp(np.linspace(np.log(5.0), np.log(128), 5000))
         psd = gp.kernel.get_psd(psd_freqs*2*np.pi)
 
-        plt.plot(psd_freqs, psd, label='complete GP')
+        plt.loglog(psd_freqs, psd, label='complete GP')
         for i, k in enumerate(gp.kernel.terms):
-            plt.plot(psd_freqs, k.get_psd(psd_freqs*2*np.pi), "--", label=f'term {i}')
+            plt.loglog(psd_freqs, k.get_psd(psd_freqs*2*np.pi), "--", label=f'term {i}')
 
-        plt.yscale("log")
-        plt.xscale("log")
         plt.xlim(psd_freqs[0], psd_freqs[-1])
-        plt.xlabel("$\omega$")
-        plt.ylabel("$S(\omega)$")
+        plt.xlabel("f[Hz]")
+        plt.ylabel("$S(f)$")
         plt.legend()
         plt.savefig(f"{outdir}/fits/psd_{label}")
         plt.clf()
