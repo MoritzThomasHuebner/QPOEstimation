@@ -90,15 +90,20 @@ class WhittleLikelihood(Likelihood):
 
 class CeleriteLikelihood(bilby.likelihood.Likelihood):
 
-    def __init__(self, gp, y):
+    def __init__(self, gp, y, conversion_func=None):
         parameters = gp.get_parameter_dict()
+        if conversion_func is None:
+            self.conversion_func = lambda x: x
+        else:
+            self.conversion_func = conversion_func
         self.gp = gp
         self.y = y
         super().__init__(parameters)
 
     def log_likelihood(self):
+        celerite_params = self.conversion_func(self.parameters)
         # self.gp.set_parameter_vector(vector=self.parameters)
-        for name, value in self.parameters.items():
+        for name, value in celerite_params.items():
             self.gp.set_parameter(name=name, value=value)
         try:
             return self.gp.log_likelihood(self.y)

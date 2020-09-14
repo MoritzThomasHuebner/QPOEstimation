@@ -11,7 +11,7 @@ from celerite import terms
 from scipy.signal import periodogram
 
 import QPOEstimation
-from QPOEstimation.stabilisation import anscombe, bar_lev
+from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground
 
@@ -19,9 +19,9 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 # period_number = int(sys.argv[2])
 # n_qpos = int(sys.argv[3])
 # model_id = int(sys.argv[4])
-#
-# run_id = 27
-# period_number = 29
+
+# run_id = 9
+# period_number = 2
 # n_qpos = 1
 
 candidate_id = int(sys.argv[1])
@@ -29,23 +29,24 @@ n_qpos = int(sys.argv[2])
 model_id = int(sys.argv[3])
 
 # n_qpos = 1
-# candidate_id = 0
+# candidate_id = 4
 # model_id = 0
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = True
+candidates_run = False
 
 # band = 'test'
-# band = 'below_16Hz'
-band = '16_32Hz'
+band = 'below_16Hz'
+# band = '16_32Hz'
 # band_minimum = 5
 # band_maximum = 16
-band_minimum = 16
+band_minimum = 5
 band_maximum = 32
 
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
-    data = np.loadtxt(f'data/sgr1806_{band_maximum*2}Hz.dat')
+    # data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
+    data = np.loadtxt(f'data/sgr1806_256Hz.dat')
 else:
     data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
 times = data[:, 0]
@@ -120,17 +121,37 @@ def sine_func(t, amplitude, f, phase, **kwargs):
     return amplitude * np.sin(2 * np.pi * f * t + phase)
 
 
+def log_sho_conversion_function(parameters):
+    converted_parameters = parameters.copy()
+    log_amplitude = converted_parameters['log_sho_amplitude']
+    log_opm = converted_parameters['log_opm']
+    if 'kernel:log_S0' in converted_parameters:
+        converted_parameters['kernel:log_omega0'] = -log_amplitude + log_opm
+        converted_parameters['kernel:log_S0'] = log_amplitude - converted_parameters['kernel:log_omega0']
+    else:
+        converted_parameters['kernel:terms[0]:log_omega0'] = -log_amplitude + log_opm
+        converted_parameters['kernel:terms[0]:log_S0'] = log_amplitude - converted_parameters['kernel:terms[0]:log_omega0']
+    del converted_parameters['log_sho_amplitude']
+    del converted_parameters['log_opm']
+    return converted_parameters
+
+
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == likelihood_models[0]:
     if n_qpos == 0:
-        priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_S0')
-        priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
-                                                               name='log_omega0')
+        priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
+        priors['log_opm'] = bilby.core.prior.Uniform(minimum=-40, maximum=40, name='log_opm')
+        # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_S0')
+        # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
+        #                                                        name='log_omega0')
         priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
-        priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_S0')
-        priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
-                                                                        name='terms[0]:log_omega0')
+        # slab = bilby.core.prior.Uniform(minimum=0, maximum=1e8, name='log_sho_amplitude')
+        priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
+        priors['log_opm'] = bilby.core.prior.Uniform(minimum=-40, maximum=40, name='log_opm')
+        # priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_S0')
+        # priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
+        #                                                                 name='terms[0]:log_omega0')
         # priors['kernel:terms[0]:log_S0'] = bilby.core.prior.DeltaFunction(peak=-15, name='terms[0]:log_S0')
         # priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.DeltaFunction(peak=-1, name='terms[0]:log_omega0')
         priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
@@ -140,7 +161,8 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='terms[1]:log_c')
         priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[1]:log_P')
     elif n_qpos == 2:
-        priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_S0')
+        priors['log_sho_amplitude'] = bilby.core.prior.Uniform(minimum=-5, maximum=30, name='log_sho_amplitude')
+        # priors['kernel:terms[0]:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_S0')
         priors['kernel:terms[0]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1 / np.sqrt(2)), name='terms[0]:log_Q')
         priors['kernel:terms[0]:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
                                                                         name='terms[0]:log_omega0')
@@ -155,7 +177,7 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:terms[2]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum),
                                                                    name='terms[2]:log_P')
 
-    likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
+    likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts, conversion_func=log_sho_conversion_function)
 elif likelihood_model == likelihood_models[1]:
     noise_model = 'red_noise'
 
@@ -213,7 +235,8 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdi
                            label=label, sampler='dynesty', nlive=200, sample='rwalk',
                            resume=False, clean=True)
 
-if candidates_run:
+# if candidates_run:
+if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         for term in range(1, n_qpos + 1):
@@ -236,6 +259,7 @@ if candidates_run:
                 bilby.core.utils.logger.info(e)
 
         max_like_params = result.posterior.iloc[-1]
+        max_like_params = log_sho_conversion_function(max_like_params)
         for name, value in max_like_params.items():
             try:
                 gp.set_parameter(name=name, value=value)
@@ -254,9 +278,24 @@ if candidates_run:
                          edgecolor="none")
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
-        # plt.show()
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
+        plt.clf()
+
+        omega = np.exp(np.linspace(np.log(5.0), np.log(128), 5000))
+        psd = gp.kernel.get_psd(omega)
+
+        plt.plot(omega, psd, label='complete GP')
+        for i, k in enumerate(gp.kernel.terms):
+            plt.plot(omega, k.get_psd(omega), "--", label=f'term {i}')
+
+        plt.yscale("log")
+        plt.xscale("log")
+        plt.xlim(omega[0], omega[-1])
+        plt.xlabel("$\omega$")
+        plt.ylabel("$S(\omega)$")
+        plt.legend()
+        plt.savefig(f"{outdir}/fits/psd_{label}")
         plt.clf()
 
         pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
