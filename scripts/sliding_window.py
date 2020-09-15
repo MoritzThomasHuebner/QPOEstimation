@@ -46,8 +46,8 @@ band_minimum = 5
 band_maximum = 32
 
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
-    data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
-    # data = np.loadtxt(f'data/sgr1806_256Hz.dat')
+    # data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
+    data = np.loadtxt(f'data/sgr1806_256Hz.dat')
 else:
     data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
 times = data[:, 0]
@@ -181,7 +181,6 @@ elif likelihood_model == likelihood_models[2]:
     priors['amplitude'] = bilby.core.prior.LogUniform(minimum=0.01, maximum=100, name='amplitude')
     priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='phase')
 
-# label = f'testing_{freq}'
 
 if likelihood_model == likelihood_models[0]:
     if candidates_run:
@@ -205,11 +204,11 @@ elif likelihood_model == likelihood_models[2]:
 # except Exception:
     # pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                           label=label, sampler='dynesty', nlive=200, sample='rwalk',
+                           label=label, sampler='dynesty', nlive=500, sample='rwalk',
                            resume=False, clean=True)
 
-# if candidates_run:
-if True:
+if candidates_run:
+# if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         if n_qpos == 1:
@@ -254,7 +253,7 @@ if True:
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
         plt.clf()
 
-        psd_freqs = np.exp(np.linspace(np.log(5.0), np.log(128), 5000))
+        psd_freqs = np.exp(np.linspace(np.log(1.0), np.log(128), 5000))
         psd = gp.kernel.get_psd(psd_freqs*2*np.pi)
 
         plt.loglog(psd_freqs, psd, label='complete GP')
