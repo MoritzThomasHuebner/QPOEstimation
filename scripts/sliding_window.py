@@ -20,29 +20,29 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 # n_qpos = int(sys.argv[3])
 # model_id = int(sys.argv[4])
 
-# run_id = 9
-# period_number = 2
-# n_qpos = 2
+run_id = 9
+period_number = 2
+n_qpos = 2
 
-candidate_id = int(sys.argv[1])
-n_qpos = int(sys.argv[2])
-model_id = int(sys.argv[3])
+# candidate_id = int(sys.argv[1])
+# n_qpos = int(sys.argv[2])
+# model_id = int(sys.argv[3])
 
 # n_qpos = 1
 # candidate_id = 9
-# model_id = 0
+model_id = 0
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = True
+candidates_run = False
 
 # band = 'test'
-band = 'below_16Hz'
+band = '5_16Hz'
 # band = '16_32Hz'
 # band_minimum = 5
 # band_maximum = 16
 band_minimum = 5
-band_maximum = 32
+band_maximum = 16
 
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
@@ -236,11 +236,11 @@ elif likelihood_model == likelihood_models[2]:
 # except Exception:
 #     pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                           label=label, sampler='dynesty', nlive=1000, sample='rwalk',
+                           label=label, sampler='dynesty', nlive=200, sample='rwalk',
                            resume=False, clean=True)
 
-# if candidates_run:
-if True:
+if candidates_run:
+# if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         for term in range(1, n_qpos + 1):
