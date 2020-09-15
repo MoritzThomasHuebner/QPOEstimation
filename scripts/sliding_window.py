@@ -43,7 +43,7 @@ band = '5_16Hz'
 # band_minimum = 5
 # band_maximum = 16
 band_minimum = 5
-band_maximum = 32
+band_maximum = 16
 
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     # data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
