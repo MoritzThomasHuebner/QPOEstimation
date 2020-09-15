@@ -44,10 +44,10 @@ band = '5_16Hz'
 # band_maximum = 16
 band_minimum = 5
 band_maximum = 16
-
+sampling_frequency = 4*band_maximum
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
-    # data = np.loadtxt(f'data/sgr1806_{band_maximum*4}Hz.dat')
-    data = np.loadtxt(f'data/sgr1806_256Hz.dat')
+    data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
+    # data = np.loadtxt(f'data/sgr1806_256Hz.dat')
 else:
     data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
 times = data[:, 0]
@@ -132,7 +132,7 @@ if likelihood_model == likelihood_models[0]:
         # priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
-        # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='log_c')
+        # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
         # priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
         priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_S0')
         priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
@@ -142,12 +142,12 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
         priors['kernel:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='log_P')
     elif n_qpos == 2:
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
-        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_maximum), name='terms[0]:log_c')
+        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='terms[0]:log_c')
         priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum),
                                                                    name='terms[0]:log_P')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
