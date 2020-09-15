@@ -20,17 +20,17 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 # n_qpos = int(sys.argv[3])
 # model_id = int(sys.argv[4])
 
-run_id = 9
-period_number = 2
-n_qpos = 2
+# run_id = 9
+# period_number = 2
+# n_qpos = 2
 
-# candidate_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
+candidate_id = int(sys.argv[1])
+n_qpos = int(sys.argv[2])
+model_id = int(sys.argv[3])
 
 # n_qpos = 1
 # candidate_id = 9
-model_id = 0
+# model_id = 0
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
