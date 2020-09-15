@@ -12,7 +12,9 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-outdir = 'sliding_window_16_32Hz'
+band = '5_16Hz'
+
+outdir = f'sliding_window_{band}'
 
 for period in range(n_periods):
     log_bfs_one_qpo = []
