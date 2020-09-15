@@ -3,7 +3,7 @@
 #SBATCH --job-name=test
 #
 #SBATCH --ntasks=1
-#SBATCH --time=15:00
+#SBATCH --time=25:00
 #SBATCH --mem-per-cpu=1G
 
 #srun python sliding_window.py ${1} ${2} 0
@@ -15,7 +15,7 @@
 # Candidate runs
 srun python sliding_window.py ${1} 0 0
 srun python sliding_window.py ${1} 1 0
-#srun python sliding_window.py ${1} 2 0
+srun python sliding_window.py ${1} 2 0
 #srun python sliding_window.py ${1} 0 1
 #srun python sliding_window.py ${1} 1 1
 #srun python sliding_window.py ${1} 1 2
