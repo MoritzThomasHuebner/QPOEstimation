@@ -15,18 +15,18 @@ from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground
 
-# run_id = int(sys.argv[1])
-# period_number = int(sys.argv[2])
-# n_qpos = int(sys.argv[3])
-# model_id = int(sys.argv[4])
+run_id = int(sys.argv[1])
+period_number = int(sys.argv[2])
+n_qpos = int(sys.argv[3])
+model_id = int(sys.argv[4])
 
 # run_id = 9
 # period_number = 2
 # n_qpos = 2
 
-candidate_id = int(sys.argv[1])
-n_qpos = int(sys.argv[2])
-model_id = int(sys.argv[3])
+# candidate_id = int(sys.argv[1])
+# n_qpos = int(sys.argv[2])
+# model_id = int(sys.argv[3])
 
 # n_qpos = 1
 # candidate_id = 9
