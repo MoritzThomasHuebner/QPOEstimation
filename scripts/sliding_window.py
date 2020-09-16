@@ -134,8 +134,8 @@ if likelihood_model == likelihood_models[0]:
         # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
         # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
         # priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
-        priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_S0')
-        priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-5, maximum=np.log(32*np.pi*np.sqrt(2)),
+        priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
+        priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(32*np.pi*np.sqrt(2)),
                                                                name='log_omega0')
         priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
@@ -210,7 +210,7 @@ elif likelihood_model == likelihood_models[2]:
 # except Exception:
     # pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                           label=label, sampler='dynesty', nlive=500, sample='rwalk',
+                           label=label, sampler='dynesty', nlive=1000, sample='rwalk',
                            resume=False, clean=True)
 
 if candidates_run:
