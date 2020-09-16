@@ -16,6 +16,9 @@ band = '5_16Hz'
 
 outdir = f'sliding_window_{band}'
 
+pulse_period = 7.56
+segment_step = 0.135
+
 for period in range(n_periods):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
@@ -49,21 +52,23 @@ for period in range(n_periods):
 
     fig, ax1 = plt.subplots()
 
+
+    start_times = 10.0 + period * pulse_period + segments * segment_step
     color = 'tab:red'
-    ax1.set_xlabel('segment number')
+    ax1.set_xlabel('segment start time [s]')
     ax1.set_ylabel('ln BF', color=color)
-    ax1.plot(segments, log_bfs_one_qpo, color=color, ls='solid', label='One QPO')
-    # ax1.plot(segments, log_bfs_two_qpo, color=color, ls='dotted', label='Two QPOs')
+    ax1.plot(start_times, log_bfs_one_qpo, color=color, ls='solid', label='One QPO')
+    # ax1.plot(start_times, log_bfs_two_qpo, color=color, ls='dotted', label='Two QPOs')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
     color = 'tab:blue'
     ax2.set_ylabel('frequency [Hz]', color=color)  # we already handled the x-label with ax1
-    ax2.plot(segments, mean_frequency, color=color)
+    ax2.plot(start_times, mean_frequency, color=color)
     mean_frequency = np.array(mean_frequency)
     std_frequency = np.array(std_frequency)
-    plt.fill_between(segments, mean_frequency + std_frequency, mean_frequency - std_frequency, color=color, alpha=0.3,
+    plt.fill_between(start_times, mean_frequency + std_frequency, mean_frequency - std_frequency, color=color, alpha=0.3,
                      edgecolor="none")
     ax2.tick_params(axis='y', labelcolor=color)
 
