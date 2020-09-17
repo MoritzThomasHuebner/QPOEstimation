@@ -19,7 +19,6 @@ class ParameterAccessor(object):
 
 
 class WhittleLikelihood(Likelihood):
-
     VALID_NOISE_MODELS = ['red_noise', 'broken_power_law']
     alpha = ParameterAccessor('alpha')
     alpha_1 = ParameterAccessor('alpha_1')
@@ -126,8 +125,23 @@ class QPOTerm(terms.Term):
         b = np.exp(log_b)
         return (
             np.exp(log_a) / (2.0 + b), 0.0,
-            np.exp(log_c), 2*np.pi*np.exp(-log_P),
+            np.exp(log_c), 2 * np.pi * np.exp(-log_P),
         )
+
+
+class ZeroedQPOTerm(terms.Term):
+    parameter_names = ("log_a", "log_c", "log_f")
+
+    def get_real_coefficients(self, params):
+        log_a, log_c, log_f = params
+        return 0, np.exp(log_c),
+
+    def get_complex_coefficients(self, params):
+        log_a, log_c, log_f = params
+        a = np.exp(log_a)
+        c = np.exp(log_c)
+        f = np.exp(log_f)
+        return a, 0.0, c, 2 * np.pi * f,
 
 
 class PoissonLikelihoodWithBackground(bilby.core.likelihood.PoissonLikelihood):
@@ -170,7 +184,7 @@ class AssociationLikelihood(bilby.core.likelihood.Likelihood):
         while frequency < prob.maximum:
             frequency = self.frequency_at_mode(ll=ll)
             if prob.minimum <= frequency:
-                p_associated = prob.prob(frequency) * 1/(ll+1)  # 1/l correction factor?
+                p_associated = prob.prob(frequency) * 1 / (ll + 1)  # 1/l correction factor?
                 if ll == 1:
                     p_associated = 0
                 p *= 1 - p_associated
@@ -178,4 +192,4 @@ class AssociationLikelihood(bilby.core.likelihood.Likelihood):
         return p
 
     def frequency_at_mode(self, ll):
-        return np.exp(self.parameters['log_f_0']) * np.sqrt(ll*(ll+1))
+        return np.exp(self.parameters['log_f_0']) * np.sqrt(ll * (ll + 1))
