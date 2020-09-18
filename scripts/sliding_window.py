@@ -15,19 +15,19 @@ from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
-model_id = int(sys.argv[4])
+# run_id = int(sys.argv[1])
+# period_number = int(sys.argv[2])
+# n_qpos = int(sys.argv[3])
+# model_id = int(sys.argv[4])
 
 # run_id = 19
 # period_number = 2
 # n_qpos = 1
 # model_id = 0
 
-# candidate_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
+candidate_id = int(sys.argv[1])
+n_qpos = int(sys.argv[2])
+model_id = int(sys.argv[3])
 
 # n_qpos = 1
 # candidate_id = 0
@@ -35,15 +35,16 @@ model_id = int(sys.argv[4])
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = False
+candidates_run = True
 
 # band = 'test'
 # band = '5_16Hz'
-band = '64_128Hz'
+# band = '64_128Hz'
 # band_minimum = 5
 # band_maximum = 16
-band_minimum = 64
-band_maximum = 128
+band_minimum = 16
+band_maximum = 32
+band = f'{band_minimum}_{band_maximum}Hz'
 sampling_frequency = 4*band_maximum
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
