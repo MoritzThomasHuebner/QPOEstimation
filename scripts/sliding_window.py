@@ -39,11 +39,11 @@ candidates_run = False
 
 # band = 'test'
 # band = '5_16Hz'
-band = '32_64Hz'
+band = '64_128Hz'
 # band_minimum = 5
 # band_maximum = 16
-band_minimum = 32
-band_maximum = 64
+band_minimum = 64
+band_maximum = 128
 sampling_frequency = 4*band_maximum
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
