@@ -12,7 +12,7 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-band = '5_16Hz'
+band = '16_32Hz'
 
 outdir = f'sliding_window_{band}'
 
@@ -38,7 +38,8 @@ for period in range(n_periods):
             frequency_samples = 1 / np.exp(log_P_samples)
             mean_frequency.append(np.mean(frequency_samples))
             std_frequency.append(np.std(frequency_samples))
-        except Exception:
+        except Exception as e:
+            print(e)
             log_bf_one_qpo = np.nan
             # log_bf_two_qpo = np.nan
             mean_frequency.append(np.nan)
