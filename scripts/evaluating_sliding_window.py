@@ -34,7 +34,7 @@ for period in range(n_periods):
             # log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
             # max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
             # mean_frequency.append(1 / np.exp(max_likelihood_sample_one_qpo[f'kernel:terms[1]:log_P']))
-            log_P_samples = np.array(res_one_qpo.posterior['kernel:terms[1]:log_P'])
+            log_P_samples = np.array(res_one_qpo.posterior['kernel:log_P'])
             frequency_samples = 1 / np.exp(log_P_samples)
             mean_frequency.append(np.mean(frequency_samples))
             std_frequency.append(np.std(frequency_samples))
