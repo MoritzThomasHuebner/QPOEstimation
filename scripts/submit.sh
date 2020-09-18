@@ -9,13 +9,13 @@
 #srun python sliding_window.py ${1} ${2} 0
 #srun python sliding_window.py ${1} ${2} 1
 
-srun python sliding_window.py ${1} ${2} 0 0
-srun python sliding_window.py ${1} ${2} 1 0
+#srun python sliding_window.py ${1} ${2} 0 0
+#srun python sliding_window.py ${1} ${2} 1 0
 
 # Candidate runs
-#srun python sliding_window.py ${1} 0 0
-#srun python sliding_window.py ${1} 1 0
+srun python sliding_window.py ${1} 0 0
+srun python sliding_window.py ${1} 1 0
 #srun python sliding_window.py ${1} 2 0
-#srun python sliding_window.py ${1} 0 1
-#srun python sliding_window.py ${1} 1 1
+srun python sliding_window.py ${1} 0 1
+srun python sliding_window.py ${1} 1 1
 #srun python sliding_window.py ${1} 1 2
