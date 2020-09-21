@@ -42,9 +42,9 @@ candidates_run = True
 # band = '64_128Hz'
 # band_minimum = 5
 # band_maximum = 16
-band_minimum = 64
-band_maximum = 128
-band = f'{band_minimum}_{band_maximum}Hz'
+band_minimum = 8
+band_maximum = 64
+band = f'16_32Hz'
 sampling_frequency = 4*band_maximum
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
@@ -53,6 +53,7 @@ else:
     data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
+# times[0] = 2004 December 27 at 21:30:51.378 UTC
 
 
 if candidates_run:
