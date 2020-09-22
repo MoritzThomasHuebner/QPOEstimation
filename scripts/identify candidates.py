@@ -5,7 +5,8 @@ import numpy as np
 
 n_periods = 47
 # band = '16_32Hz
-band = '5_16Hz'
+# band = '5_16Hz'
+band = '64_128Hz'
 # band = 'below_16Hz'
 
 Candidate = namedtuple('Candidate', ['period_number', 'index_range', 'start', 'stop'])
