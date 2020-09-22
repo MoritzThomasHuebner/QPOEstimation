@@ -42,9 +42,39 @@ candidates_run = True
 # band = '64_128Hz'
 # band_minimum = 5
 # band_maximum = 16
-band_minimum = 50
-band_maximum = 180
-band = f'64_128Hz'
+band = 'miller'
+miller_band_bounds = [(16, 64),
+                      (60, 128),
+                      (60, 128),
+                      (16, 64),
+                      (60, 128),
+                      (60, 128),
+                      (16, 64),
+                      (16, 64),
+                      (60, 128),
+                      (10, 32),
+                      (128, 256),
+                      (16, 64),
+                      (16, 64),
+                      (16, 64),
+                      (128, 256),
+                      (16, 64),
+                      (16, 64),
+                      (60, 128),
+                      (60, 128),
+                      (60, 128),
+                      (60, 128),
+                      (16, 64),
+                      (32, 64),
+                      ]
+
+if band == 'miller':
+    band_minimum = miller_band_bounds[candidate_id][0]
+    band_maximum = miller_band_bounds[candidate_id][1]
+else:
+    band_minimum = 10
+    band_maximum = 32
+# band = f'64_128Hz'
 sampling_frequency = 4*band_maximum
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
@@ -60,6 +90,9 @@ if candidates_run:
     candidates = np.loadtxt(f'candidates_{band}.txt')
     start = candidates[candidate_id][0]
     stop = candidates[candidate_id][1]
+    if band == 'miller':  # Miller et al. time segments are shifted by 16 s
+        start += 20
+        stop += 20
     seglen = stop - start
 
     if seglen < 1:
