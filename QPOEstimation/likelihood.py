@@ -2,7 +2,8 @@ import bilby
 import numpy as np
 from bilby.core.likelihood import Likelihood
 from celerite import terms
-from scipy.special import gammaln
+from scipy.special import gammaln, gamma
+
 
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 
@@ -85,6 +86,50 @@ class WhittleLikelihood(Likelihood):
             return broken_power_law_noise(frequencies=self.frequencies, alpha_1=self.alpha_1,
                                           alpha_2=self.alpha_2, beta=self.beta, delta=self.delta, rho=self.rho) \
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
+
+
+class GrothLikelihood(WhittleLikelihood):
+
+    def __init__(self, frequencies, periodogram, noise_model='red_noise'):
+        super(GrothLikelihood, self).__init__(frequencies=frequencies, periodogram=periodogram,
+                                              frequency_mask=[True]*len(frequencies), noise_model=noise_model)
+
+    # def log_likelihood(self):
+    #     log_l = -np.sum(self.psd + self.model)
+    #     groth_term_prev = 0
+    #     sum_diff = 1e-20
+    #     m = 0
+    #     groth_sum = 0.
+    #     while(True):
+    #         groth_sum_factor = self.psd**m * self.model**m
+    #         groth_term = groth_sum_factor/(gamma(m + 1))**2
+    #         if np.abs(np.sum(groth_term - groth_term_prev)) < sum_diff:
+    #             break
+    #         groth_term_prev = groth_term
+    #         groth_sum += groth_term
+    #         m += 1
+    #     log_l += np.sum(np.log(groth_sum))
+    #     return log_l
+
+    @property
+    def psd(self):
+        if self.noise_model == 'red_noise':
+            return red_noise(frequencies=self.frequencies, alpha=self.alpha, beta=self.beta)
+        elif self.noise_model == 'broken_power_law':
+            return broken_power_law_noise(frequencies=self.frequencies, alpha_1=self.alpha_1,
+                                          alpha_2=self.alpha_2, beta=self.beta, delta=self.delta, rho=self.rho)
+
+    def log_likelihood(self):
+        log_l = -np.sum(self.psd + self.model)
+
+        groth_sum = 0.
+        for m in range(20):
+            groth_sum_factor = self.psd**m * self.model**m
+            groth_term = groth_sum_factor/(gamma(m + 1))**2
+            groth_sum += groth_term
+            # print(log_l)
+        log_l += np.sum(np.log(groth_sum))
+        return log_l
 
 
 class CeleriteLikelihood(bilby.likelihood.Likelihood):

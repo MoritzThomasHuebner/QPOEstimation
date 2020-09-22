@@ -83,7 +83,7 @@ else:
     data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
-# times[0] = 2004 December 27 at 21:30:51.378 UTC
+# times[0] = 2004 December 27 at 21:30:31.375 UTC
 
 
 if candidates_run:
@@ -91,8 +91,8 @@ if candidates_run:
     start = candidates[candidate_id][0]
     stop = candidates[candidate_id][1]
     if band == 'miller':  # Miller et al. time segments are shifted by 16 s
-        start += 20
-        stop += 20
+        start += 20.003
+        stop += 20.003
     seglen = stop - start
 
     if seglen < 1:
@@ -177,8 +177,8 @@ if likelihood_model == likelihood_models[0]:
         # priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
-        # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
-        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
+        priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
+        # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
         priors['kernel:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='log_P')
     elif n_qpos == 2:
@@ -195,8 +195,13 @@ if likelihood_model == likelihood_models[0]:
 
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 elif likelihood_model == likelihood_models[1]:
-    noise_model = 'red_noise'
 
+    # import stingray
+    # lc = stingray.Lightcurve(time=t, counts=c)
+    # ps = stingray.Powerspectrum(lc=lc, norm='leahy')
+    # frequencies = ps.freq
+    # powers = ps.power / 2  # Groth norm
+    noise_model = 'red_noise'
     fs = 1/(t[1] - t[0])
     frequencies, powers = periodogram(c, fs)
     frequency_mask = [True] * len(frequencies)
@@ -205,6 +210,9 @@ elif likelihood_model == likelihood_models[1]:
     plt.show()
     plt.clf()
     priors = QPOEstimation.prior.psd.get_full_prior(noise_model, frequencies=frequencies)
+    priors['alpha'] = bilby.core.prior.DeltaFunction(peak=2)
+    priors['beta'].maximum = 50
+    priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
     priors['width'].maximum = 10
     priors['width'].minimum = frequencies[1] - frequencies[0]
     priors['central_frequency'].maximum = band_maximum
@@ -213,8 +221,8 @@ elif likelihood_model == likelihood_models[1]:
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
         priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
-    likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model,
-                                   frequency_mask=frequency_mask)
+    # likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model)
+    likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model, frequency_mask=[True]*len(frequencies))
 elif likelihood_model == likelihood_models[2]:
     priors = bilby.core.prior.PriorDict()
     background_estimate = QPOEstimation.smoothing.two_sided_exponential_smoothing(counts, alpha=0.06)
@@ -248,7 +256,7 @@ elif likelihood_model == likelihood_models[2]:
     # pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                            label=label, sampler='dynesty', nlive=400, sample='rwalk',
-                           resume=True, clean=True)
+                           resume=False, clean=True)
 
 if candidates_run:
 # if True:
