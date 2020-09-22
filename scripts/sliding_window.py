@@ -42,9 +42,9 @@ candidates_run = True
 # band = '64_128Hz'
 # band_minimum = 5
 # band_maximum = 16
-band_minimum = 16
-band_maximum = 128
-band = f'32_64Hz'
+band_minimum = 5
+band_maximum = 32
+band = f'5_16Hz'
 sampling_frequency = 4*band_maximum
 if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
     data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
@@ -186,8 +186,7 @@ elif likelihood_model == likelihood_models[1]:
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
         priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
-    likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers,
-                                   frequency_mask=frequency_mask, noise_model=noise_model)
+    likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model)
 elif likelihood_model == likelihood_models[2]:
     priors = bilby.core.prior.PriorDict()
     background_estimate = QPOEstimation.smoothing.two_sided_exponential_smoothing(counts, alpha=0.06)
