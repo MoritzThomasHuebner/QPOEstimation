@@ -145,7 +145,7 @@ S0 = np.var(stabilised_counts) / (w0 * Q)
 
 if n_qpos == 0:
     # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-    kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+    kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 else:
     # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
     # kernel *= terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
