@@ -173,62 +173,18 @@ def sine_model(times, amplitude, frequency, phase, **kwargs):
 
 
 def sine_gaussian(t, mu, sigma, amplitude, frequency, phase, **kwargs):
-    return sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) \
+    return sine_model(times=t, amplitude=amplitude, frequency=frequency, phase=phase) \
            * norm_gaussian(x=t, mu=mu, sigma=sigma)
 
 
-def elevated_sine_gaussian(t, mu, sigma, amplitude, frequency, phase, elevation, **kwargs):
-    return elevated_sine(t=t, amplitude=amplitude, frequency=frequency, phase=phase, elevation=elevation) \
-           * norm_gaussian(x=t, mu=mu, sigma=sigma)
+def exponential_background(times, tau, offset, **kwargs):
+    return np.exp(times/tau) + offset
 
 
-def elevated_sine(t, amplitude, frequency, phase, elevation, **kwargs):
-    return sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation
+def sine_gaussian_with_background(times, tau, offset, amplitude, mu, sigma, frequency, phase, **kwargs):
+    return exponential_background(times=times, tau=tau, offset=amplitude+offset) + \
+           sine_gaussian(t=times, amplitude=amplitude, mu=mu, sigma=sigma, frequency=frequency, phase=phase) * np.sqrt(2 * np.pi * sigma ** 2)
 
-
-def elevated_squared_sine(t, amplitude, frequency, phase, elevation, **kwargs):
-    return sine_model(t=t, amplitude=amplitude, frequency=frequency/2, phase=phase)**2 + elevation
-
-
-def squared_sine(t, amplitude, frequency, phase, **kwargs):
-    return sine_model(t=t, amplitude=amplitude, frequency=frequency/2, phase=phase)**2
-
-
-def elevated_double_sine_gaussian(t, mu_1, mu_2, sigma_1, sigma_2, amplitude, frequency, phase, elevation, balance, **kwargs):
-    return (sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation)\
-           * (norm_gaussian(x=t, mu=mu_1, sigma=sigma_1) + balance*norm_gaussian(x=t, mu=mu_2, sigma=sigma_2))
-
-
-def transient_elevated_sine(t, amplitude, frequency, phase, t_start, t_stop, elevation, alpha, **kwargs):
-    res = np.zeros(len(t))
-    indices = np.where(np.logical_and(t_start < t, t < t_stop))
-    window = tukey(len(indices[0]), alpha)
-    res[indices] += window
-    res *= sine_model(t=t, amplitude=amplitude, frequency=frequency, phase=phase) + elevation
-    return res
-
-
-def hermite_sine_gaussian(time_array, mu, sigma, amplitude, frequency, phase, c_0=0, c_1=0, c_2=0, c_3=0, c_4=0, c_5=0, c_6=0, c_7=0, c_8=0, **kwargs):
-    t = deepcopy(time_array)
-    hermite = hermite_model(t, mu, sigma, c_0, c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8, **kwargs)
-    signal = sine_gaussian(t, mu, sigma, amplitude, frequency, phase) * hermite
-    signal[np.where(signal < 0)] = 0
-    return signal
-
-
-def hermite_elevated_sine_gaussian(time_array, mu, sigma, amplitude, frequency, phase, elevation, c_0, c_1, c_2, c_3,
-                                   c_4, c_5, c_6, c_7, c_8, **kwargs):
-    t = deepcopy(time_array)
-    hermite = hermite_model(time_array=t, mu=mu, sigma=sigma, c_0=c_0, c_1=c_1, c_2=c_2, c_3=c_3, c_4=c_4,
-                            c_5=c_5, c_6=c_6, c_7=c_7, c_8=c_8,  **kwargs)
-    signal = elevated_sine_gaussian(t=t, mu=mu, sigma=sigma, amplitude=amplitude,
-                                    frequency=frequency, phase=phase, elevation=elevation) * hermite
-    return signal
-
-
-def hermite_model(time_array, mu, sigma, c_0=0, c_1=0, c_2=0, c_3=0, c_4=0, c_5=0, c_6=0, c_7=0, c_8=0, **kwargs):
-    poly = np.polynomial.hermite.Hermite([c_0, c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8])
-    return poly((time_array - mu)/sigma/np.sqrt(2))
 
 
 def two_frequency_model(time_array, mu_1, mu_2, sigma_1, sigma_2, amplitude_1, amplitude_2, frequency_1, frequency_2, phase_1, phase_2, **kwargs):
