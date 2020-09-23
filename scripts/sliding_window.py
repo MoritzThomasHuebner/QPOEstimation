@@ -219,6 +219,7 @@ elif likelihood_model == likelihood_models[1]:
     priors['width'].minimum = frequencies[1] - frequencies[0]
     priors['central_frequency'].maximum = band_maximum
     priors['central_frequency'].minimum = band_minimum
+    priors['amplitude'].maximum = 10000
     if n_qpos == 0:
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
