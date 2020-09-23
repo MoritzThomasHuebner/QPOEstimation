@@ -214,7 +214,7 @@ elif likelihood_model == likelihood_models[1]:
     priors = QPOEstimation.prior.psd.get_full_prior(noise_model, frequencies=frequencies)
     priors['alpha'] = bilby.core.prior.DeltaFunction(peak=2)
     priors['beta'].maximum = 100000
-    # priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
+    priors['sigma'].maximum = 10
     priors['width'].maximum = 10
     priors['width'].minimum = frequencies[1] - frequencies[0]
     priors['central_frequency'].maximum = band_maximum
