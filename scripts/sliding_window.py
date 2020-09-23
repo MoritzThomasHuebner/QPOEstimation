@@ -34,13 +34,13 @@ import matplotlib
 # candidate_id = 3
 # model_id = 1
 
-# injection_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
+injection_id = int(sys.argv[1])
+n_qpos = int(sys.argv[2])
+model_id = int(sys.argv[3])
 
-n_qpos = 1
-injection_id = 0
-model_id = 2
+# n_qpos = 1
+# injection_id = 0
+# model_id = 2
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
