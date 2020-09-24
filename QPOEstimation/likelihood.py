@@ -175,18 +175,18 @@ class QPOTerm(terms.Term):
 
 
 class ZeroedQPOTerm(terms.Term):
-    parameter_names = ("log_a", "log_c", "log_f")
+    parameter_names = ("log_a", "log_c", "log_P")
 
     def get_real_coefficients(self, params):
-        log_a, log_c, log_f = params
+        log_a, log_c, log_P = params
         return 0, np.exp(log_c),
 
     def get_complex_coefficients(self, params):
-        log_a, log_c, log_f = params
+        log_a, log_c, log_P = params
         a = np.exp(log_a)
         c = np.exp(log_c)
-        f = np.exp(log_f)
-        return a, 0.0, c, 2 * np.pi * f,
+        P = np.exp(log_P)
+        return a, 0.0, c, 2 * np.pi / P,
 
 
 class PoissonLikelihoodWithBackground(bilby.core.likelihood.PoissonLikelihood):

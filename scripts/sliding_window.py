@@ -13,7 +13,7 @@ from scipy.signal import periodogram
 import QPOEstimation
 from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.model.series import *
-from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground, GrothLikelihood
+from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground, GrothLikelihood
 import matplotlib
 
 # run_id = int(sys.argv[1])
@@ -38,9 +38,9 @@ injection_id = int(sys.argv[1])
 n_qpos = int(sys.argv[2])
 model_id = int(sys.argv[3])
 
-# n_qpos = 1
+# n_qpos = 0
 # injection_id = 0
-# model_id = 2
+# model_id = 0
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
@@ -52,31 +52,9 @@ band = '5_64Hz'
 # band_minimum = 5
 # band_maximum = 16
 # band = 'miller'
-miller_band_bounds = [(16, 64),
-                      (60, 128),
-                      (60, 128),
-                      (16, 64),
-                      (60, 128),
-                      (60, 128),
-                      (16, 64),
-                      (16, 64),
-                      (60, 128),
-                      (10, 32),
-                      (128, 256),
-                      (16, 64),
-                      (16, 64),
-                      (16, 64),
-                      (128, 256),
-                      (16, 64),
-                      (16, 64),
-                      (60, 128),
-                      (60, 128),
-                      (60, 128),
-                      (60, 128),
-                      (16, 64),
-                      (32, 64),
-                      ]
-
+miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
+                      (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
+                      (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
 
 if band == 'miller':
     band_minimum = miller_band_bounds[candidate_id][0]
@@ -159,52 +137,69 @@ else:
     else:
         outdir = f"sliding_window_{band}/period_{period_number}/two_qpo"
 
-stabilised_counts = bar_lev(c)
-stabilised_variance = np.ones(len(stabilised_counts))
-
-# A non-periodic component
-Q = 1.0 / np.sqrt(2.0)
-w0 = 3.0
-S0 = np.var(stabilised_counts) / (w0 * Q)
-
-if n_qpos == 0:
-    # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-    kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-else:
-    # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
-    # kernel *= terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
-    kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-    # for i in range(1, n_qpos):
-    #     kernel += QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-
-params_dict = kernel.get_parameter_dict()
-print(params_dict)
-gp = celerite.GP(kernel, mean=np.mean(stabilised_counts))
-gp.compute(t, stabilised_variance)  # You always need to call compute once.
-
-
-def sine_func(t, amplitude, f, phase, **kwargs):
-    return amplitude * np.sin(2 * np.pi * f * t + phase)
 
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == likelihood_models[0]:
+
+    stabilised_counts = bar_lev(c)
+    stabilised_variance = np.ones(len(stabilised_counts))
+
+    # A non-periodic component
+    Q = 1.0 / np.sqrt(2.0)
+    w0 = 3.0
+    S0 = np.var(stabilised_counts) / (w0 * Q)
+
     if n_qpos == 0:
-        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
-        priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
-        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
-        priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
-        # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
-        # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)),
-        #                                                        name='log_omega0')
-        # priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
+        kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+        # kernel += terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+        # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+        # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+    else:
+        # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+        # kernel *= terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        # kernel += QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        # kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_P=-3)
+        # for i in range(1, n_qpos):
+        #     kernel += QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+
+    params_dict = kernel.get_parameter_dict()
+    print(params_dict)
+    gp = celerite.GP(kernel, mean=np.mean(stabilised_counts))
+    gp.compute(t, stabilised_variance)  # You always need to call compute once.
+
+    if n_qpos == 0:
+        # priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
+        # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
+        # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
+        # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
+        # priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
+        priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
+        priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='log_omega0')
+        priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
+        # priors['kernel:terms[1]:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='terms[1]:log_S0')
+        # priors['kernel:terms[1]:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='terms[1]:log_omega0')
+        # priors['kernel:terms[1]:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='terms[1]:log_Q')
     elif n_qpos == 1:
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
-        priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
-        # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
+        # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
+        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
         priors['kernel:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='log_P')
+        # priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
+        # priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
+        # priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
+        # priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
+        # priors['kernel:terms[1]:log_P'] = bilby.core.prior.DeltaFunction(peak=3, name='log_P')
+        # priors['kernel:k1:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='k1:log_S0')
+        # priors['kernel:k1:log_S0'] = bilby.core.prior.DeltaFunction(peak=0, name='k1:log_S0')
+        # priors['kernel:k1:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='k1:log_omega0')
+        # priors['kernel:k1:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='k1:log_Q')
+        # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='k2:log_S0')
+        # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=np.log(2*np.pi*band_minimum), maximum=np.log(2*np.pi*band_maximum), name='k2:log_omega0')
+        # priors['kernel:log_Q'] = bilby.core.prior.Uniform(minimum=np.log(1/np.sqrt(2)), maximum=10, name='k2:log_Q')
     elif n_qpos == 2:
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
@@ -272,6 +267,9 @@ elif likelihood_model == likelihood_models[2]:
             x=t, y=c, func=QPOEstimation.model.series.sine_gaussian_with_background)
 
     else:
+        def sine_func(t, amplitude, f, phase, **kwargs):
+            return amplitude * np.sin(2 * np.pi * f * t + phase)
+
         background_estimate = QPOEstimation.smoothing.two_sided_exponential_smoothing(counts, alpha=0.06)
         background_estimate = background_estimate[indices]
         likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=sine_func, background=background_estimate)
@@ -304,12 +302,12 @@ elif likelihood_model == likelihood_models[2]:
 
 
 # try:
-#     result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
+# result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
 # except Exception:
     # pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                            label=label, sampler='dynesty', nlive=400, sample='rwalk',
-                           resume=False, clean=True)
+                           resume=True, clean=True)
 
 if candidates_run or injection_run:
 # if True:
@@ -318,6 +316,8 @@ if candidates_run or injection_run:
         if n_qpos == 1:
             try:
                 frequency_samples = []
+                # for i, sample in enumerate(result.posterior.iloc):
+                #     frequency_samples.append(np.exp(sample['kernel:log_omega0'])/2/np.pi)
                 for i, sample in enumerate(result.posterior.iloc):
                     frequency_samples.append(1 / np.exp(sample[f'kernel:log_P']))
 
@@ -341,6 +341,14 @@ if candidates_run or injection_run:
             except ValueError:
                 continue
 
+        Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        taus = np.linspace(-0.5, 0.5, 1000)
+        plt.plot(taus, gp.kernel.get_value(taus))
+        plt.xlabel('tau [s]')
+        plt.ylabel('kernel')
+        plt.savefig(f"{outdir}/fits/{label}_max_like_kernel")
+        plt.clf()
+
         x = np.linspace(t[0], t[-1], 5000)
         pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
         pred_std = np.sqrt(pred_var)
@@ -353,7 +361,6 @@ if candidates_run or injection_run:
                          edgecolor="none")
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
-        Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
         plt.clf()
 
