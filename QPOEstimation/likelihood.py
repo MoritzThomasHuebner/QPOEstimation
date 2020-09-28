@@ -104,7 +104,7 @@ class GrothLikelihood(WhittleLikelihood):
                 groth_sum += groth_term
                 if groth_term < 1e-20:
                     break
-            log_l += groth_sum
+            log_l += np.log(groth_sum)
         return log_l
 
     @property
