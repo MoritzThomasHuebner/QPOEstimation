@@ -7,17 +7,21 @@ class MinimumPrior(ConditionalBeta):
     Adopted from kookaburra. Needs to be imported at some stage
     """
     def __init__(self, order, minimum=0, maximum=1, name=None,
-                 minimum_spacing=0, latex_label=None, unit=None, boundary=None):
+                 minimum_spacing=0, latex_label=None, unit=None, boundary=None,
+                 reference_name=None):
         super().__init__(
             alpha=1, beta=order, minimum=minimum, maximum=maximum,
             name=name, latex_label=latex_label, unit=unit,
             boundary=boundary, condition_func=self.minimum_condition
         )
         self.order = order
-        self.reference_name = self.name[:-1] + str(int(self.name[-1]) - 1)
+        if reference_name is None:
+            self.reference_name = self.name[:-1] + str(int(self.name[-1]) - 1)
+        else:
+            self.reference_name = reference_name
         self._required_variables = [self.reference_name]
         self.minimum_spacing = minimum_spacing
-        self.__class__.__name__ == "MinimumPrior"
+        # self.__class__.__name__ == "MinimumPrior"
 
     def minimum_condition(self, reference_params, **kwargs):
         return dict(minimum=kwargs[self.reference_name] + self.minimum_spacing)

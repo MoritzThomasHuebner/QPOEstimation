@@ -11,28 +11,32 @@ from celerite import terms
 from scipy.signal import periodogram
 
 import QPOEstimation
+from QPOEstimation.prior.minimum import MinimumPrior
 from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground, GrothLikelihood
 import matplotlib
 
-# run_id = int(sys.argv[1])
-# period_number = int(sys.argv[2])
-# n_qpos = int(sys.argv[3])
-# model_id = int(sys.argv[4])
+run_id = int(sys.argv[1])
+period_number = int(sys.argv[2])
+n_qpos = int(sys.argv[3])
+model_id = int(sys.argv[4])
 
 # run_id = 19
 # period_number = 2
 # n_qpos = 1
 # model_id = 0
 
-candidate_id = int(sys.argv[1])
-n_qpos = int(sys.argv[2])
-model_id = int(sys.argv[3])
+# candidate_id = int(sys.argv[1])
+# seg_id = int(sys.argv[2])
+# n_qpos = int(sys.argv[3])
+# model_id = int(sys.argv[4])
 
-# n_qpos = 1
-# candidate_id = 3
-# model_id = 1
+# n_qpos = 0
+# candidate_id = 13
+# model_id = 0
+# seg_id = 'test'
+
 
 # injection_id = int(sys.argv[1])
 # n_qpos = int(sys.argv[2])
@@ -44,14 +48,13 @@ model_id = int(sys.argv[3])
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = True
+candidates_run = False
 injection_run = False
 # band = 'test'
 # band = '5_64Hz'
 # band = '64_128Hz'
-# band_minimum = 5
-# band_maximum = 16
-band = 'miller'
+band = '16_32Hz'
+# band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
                       (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
                       (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
@@ -60,8 +63,8 @@ if band == 'miller':
     band_minimum = miller_band_bounds[candidate_id][0]
     band_maximum = miller_band_bounds[candidate_id][1]
 else:
-    band_minimum = 5
-    band_maximum = 64
+    band_minimum = 16
+    band_maximum = 32
 # band = f'64_128Hz'
 sampling_frequency = 4*band_maximum
 
@@ -100,12 +103,13 @@ else:
     pulse_period = 7.56  # see papers
     interpulse_periods = []
     for i in range(47):
-        interpulse_periods.append((10.0 + i * pulse_period, 10.0 + (i + 1) * pulse_period))
+        interpulse_periods.append((20.0 + i * pulse_period, 20.0 + (i + 1) * pulse_period))
 
     start = interpulse_periods[period_number][0]
 
     segment_length = 1.0
-    segment_step = 0.135  # Requires 56 steps
+    # segment_step = 0.135  # Requires 56 steps
+    segment_step = 0.27  # Requires 28 steps
 
     start = start + run_id * segment_step
     stop = start + segment_length
@@ -117,11 +121,11 @@ c = c.astype(int)
 
 if candidates_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}_candidates/no_qpo"
+        outdir = f"sliding_window_{band}_candidates/no_qpo_{seg_id}"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}_candidates/one_qpo"
+        outdir = f"sliding_window_{band}_candidates/one_qpo_{seg_id}"
     else:
-        outdir = f"sliding_window_{band}_candidates/two_qpo"
+        outdir = f"sliding_window_{band}_candidates/two_qpo_{seg_id}"
 elif injection_run:
     if n_qpos == 0:
         outdir = f"sliding_window_{band}_injections/no_qpo"
@@ -153,10 +157,10 @@ if likelihood_model == likelihood_models[0]:
     if n_qpos == 0:
         # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
         # kernel += terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
-        kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+        # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
+        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
         # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-        # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-    else:
+    elif n_qpos == 1:
         # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
         # kernel *= terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
@@ -164,6 +168,9 @@ if likelihood_model == likelihood_models[0]:
         # kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_P=-3)
         # for i in range(1, n_qpos):
         #     kernel += QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+    elif n_qpos == 2:
+        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3) \
+                 + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
 
     params_dict = kernel.get_parameter_dict()
     print(params_dict)
@@ -171,14 +178,14 @@ if likelihood_model == likelihood_models[0]:
     gp.compute(t, stabilised_variance)  # You always need to call compute once.
 
     if n_qpos == 0:
-        # priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
+        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
-        # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
-        # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
-        # priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
-        priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
-        priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='log_omega0')
-        priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
+        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
+        priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
+        # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
+        # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='log_omega0')
+        # priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
@@ -198,20 +205,19 @@ if likelihood_model == likelihood_models[0]:
         # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=np.log(2*np.pi*band_minimum), maximum=np.log(2*np.pi*band_maximum), name='k2:log_omega0')
         # priors['kernel:log_Q'] = bilby.core.prior.Uniform(minimum=np.log(1/np.sqrt(2)), maximum=10, name='k2:log_Q')
     elif n_qpos == 2:
+        priors = bilby.core.prior.ConditionalPriorDict()
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
         priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum),
-                                                                   name='terms[0]:log_P')
+        priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[0]:log_P')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[1]:log_b')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-        priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum),
-                                                                   name='terms[1]:log_P')
+        priors['kernel:terms[1]:log_P'] = MinimumPrior(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[1]:log_P', reference_name='kernel:terms[0]:log_P', order=1)
+        priors['kernel:terms[1]:log_P']._required_variables = ['kernel:terms[0]:log_P']
 
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 elif likelihood_model == likelihood_models[1]:
-
     import stingray
     lc = stingray.Lightcurve(time=t, counts=c)
     ps = stingray.Powerspectrum(lc=lc, norm='leahy')
@@ -325,8 +331,7 @@ if candidates_run or injection_run:
                 percentiles = np.percentile(frequency_samples, [16, 84])
                 plt.title(
                     f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-                print(f"{outdir}/corner/frequency_posterior_{label}")
-                plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
+                plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
                 plt.clf()
             except Exception as e:
                 bilby.core.utils.logger.info(e)
@@ -372,7 +377,7 @@ if candidates_run or injection_run:
         plt.xlabel("f[Hz]")
         plt.ylabel("$S(f)$")
         plt.legend()
-        plt.savefig(f"{outdir}/fits/psd_{label}")
+        plt.savefig(f"{outdir}/fits/{label}_psd")
         plt.clf()
 
         pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
@@ -392,7 +397,7 @@ if candidates_run or injection_run:
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
+            plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
             plt.clf()
 
         likelihood.parameters = result.posterior.iloc[-1]
@@ -415,7 +420,7 @@ if candidates_run or injection_run:
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
+            plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
             plt.clf()
 
             plt.plot(t, c, label='measured')
@@ -450,7 +455,7 @@ if candidates_run or injection_run:
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/corner/frequency_posterior_{label}")
+            plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
             plt.clf()
 
             plt.plot(t, c, label='measured')
