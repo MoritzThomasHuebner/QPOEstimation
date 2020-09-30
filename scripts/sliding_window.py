@@ -9,6 +9,7 @@ import bilby
 import celerite
 from celerite import terms
 from scipy.signal import periodogram
+import stingray
 
 import QPOEstimation
 from QPOEstimation.prior.minimum import MinimumPrior
@@ -17,24 +18,24 @@ from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground, GrothLikelihood
 import matplotlib
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
-model_id = int(sys.argv[4])
-
-# run_id = 19
-# period_number = 2
-# n_qpos = 1
-# model_id = 0
-
-# candidate_id = int(sys.argv[1])
-# seg_id = int(sys.argv[2])
+# run_id = int(sys.argv[1])
+# period_number = int(sys.argv[2])
 # n_qpos = int(sys.argv[3])
 # model_id = int(sys.argv[4])
 
-# n_qpos = 0
-# candidate_id = 13
+# run_id = 12
+# period_number = 7
+# n_qpos = 1
 # model_id = 0
+
+candidate_id = int(sys.argv[1])
+# seg_id = int(sys.argv[2])
+n_qpos = int(sys.argv[2])
+model_id = int(sys.argv[3])
+#
+# n_qpos = 1
+# candidate_id = 0
+# model_id = 1
 # seg_id = 'test'
 
 
@@ -48,13 +49,13 @@ model_id = int(sys.argv[4])
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = False
+candidates_run = True
 injection_run = False
 # band = 'test'
 # band = '5_64Hz'
 # band = '64_128Hz'
-band = '16_32Hz'
-# band = 'miller'
+# band = '16_32Hz'
+band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
                       (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
                       (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
@@ -121,11 +122,11 @@ c = c.astype(int)
 
 if candidates_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}_candidates/no_qpo_{seg_id}"
+        outdir = f"sliding_window_{band}_candidates/no_qpo"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}_candidates/one_qpo_{seg_id}"
+        outdir = f"sliding_window_{band}_candidates/one_qpo"
     else:
-        outdir = f"sliding_window_{band}_candidates/two_qpo_{seg_id}"
+        outdir = f"sliding_window_{band}_candidates/two_qpo"
 elif injection_run:
     if n_qpos == 0:
         outdir = f"sliding_window_{band}_injections/no_qpo"
@@ -140,7 +141,6 @@ else:
         outdir = f"sliding_window_{band}/period_{period_number}/one_qpo"
     else:
         outdir = f"sliding_window_{band}/period_{period_number}/two_qpo"
-
 
 
 priors = bilby.core.prior.PriorDict()
@@ -218,12 +218,11 @@ if likelihood_model == likelihood_models[0]:
 
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 elif likelihood_model == likelihood_models[1]:
-    import stingray
     lc = stingray.Lightcurve(time=t, counts=c)
     ps = stingray.Powerspectrum(lc=lc, norm='leahy')
     frequencies = ps.freq
     powers = ps.power
-    # powers = ps.power / 2  # Groth norm
+    powers = ps.power / 2  # Groth norm
     noise_model = 'red_noise'
     # fs = 1/(t[1] - t[0])
     # frequencies, powers = periodogram(c, fs)
@@ -233,21 +232,24 @@ elif likelihood_model == likelihood_models[1]:
     plt.show()
     plt.clf()
     priors = QPOEstimation.prior.psd.get_full_prior(noise_model, frequencies=frequencies)
-    priors['alpha'] = bilby.core.prior.DeltaFunction(peak=2)
-    priors['beta'].maximum = 100000
-    priors['sigma'].maximum = 10
+    priors['alpha'] = bilby.core.prior.DeltaFunction(peak=2, name='alpha')
+    priors['beta'] = bilby.core.prior.Uniform(minimum=1, maximum=10000, name='beta')
+    # priors['beta'].maximum = 100000
+    # priors['sigma'].maximum = 10
+    priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
     priors['width'].maximum = 10
     priors['width'].minimum = frequencies[1] - frequencies[0]
     priors['central_frequency'].maximum = band_maximum
     priors['central_frequency'].minimum = band_minimum
-    priors['amplitude'].maximum = 10000
+    priors['amplitude'] = bilby.core.prior.Uniform(minimum=1, maximum=10000)
+    # priors['amplitude'].maximum = 10000
     if n_qpos == 0:
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
         priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
-    # likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model)
-    likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model,
-                                   frequency_mask=[True]*len(frequencies))
+    likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model)
+    # likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model,
+    #                                frequency_mask=[True]*len(frequencies))
 elif likelihood_model == likelihood_models[2]:
     if injection_run:
         if n_qpos == 0:
@@ -312,8 +314,8 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdi
                            label=label, sampler='dynesty', nlive=400, sample='rwalk',
                            resume=True, clean=True)
 
-if candidates_run or injection_run:
-# if True:
+# if candidates_run or injection_run:
+if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         if n_qpos == 1:
