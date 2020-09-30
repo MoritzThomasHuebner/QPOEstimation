@@ -296,7 +296,7 @@ elif likelihood_model == likelihood_models[1]:
     elif injection_run:
         label = f"{str(injection_id).zfill(2)}_groth"
     else:
-        label = f'{run_id}_whittle'
+        label = f'{run_id}_groth'
 elif likelihood_model == likelihood_models[2]:
     if candidates_run:
         label = f"{candidate_id}_poisson"
