@@ -292,9 +292,9 @@ if likelihood_model == likelihood_models[0]:
         label = f'{run_id}'
 elif likelihood_model == likelihood_models[1]:
     if candidates_run:
-        label = f"{candidate_id}_whittle"
+        label = f"{candidate_id}_groth"
     elif injection_run:
-        label = f"{str(injection_id).zfill(2)}_whittle"
+        label = f"{str(injection_id).zfill(2)}_groth"
     else:
         label = f'{run_id}_whittle'
 elif likelihood_model == likelihood_models[2]:
