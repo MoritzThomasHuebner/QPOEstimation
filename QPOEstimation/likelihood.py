@@ -130,7 +130,6 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
 
     def log_likelihood(self):
         celerite_params = self.conversion_func(self.parameters)
-        # self.gp.set_parameter_vector(vector=self.parameters)
         for name, value in celerite_params.items():
             self.gp.set_parameter(name=name, value=value)
         try:

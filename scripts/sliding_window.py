@@ -23,19 +23,19 @@ import matplotlib
 # n_qpos = int(sys.argv[3])
 # model_id = int(sys.argv[4])
 
-# run_id = 12
-# period_number = 7
-# n_qpos = 1
+# run_id = 1
+# period_number = 5
+# n_qpos = 0
 # model_id = 0
 
-candidate_id = int(sys.argv[1])
+# candidate_id = int(sys.argv[1])
 # seg_id = int(sys.argv[2])
-n_qpos = int(sys.argv[2])
-model_id = int(sys.argv[3])
+# n_qpos = int(sys.argv[2])
+# model_id = int(sys.argv[3])
 #
-# n_qpos = 1
-# candidate_id = 0
-# model_id = 1
+n_qpos = 1
+candidate_id = 10
+model_id = 0
 # seg_id = 'test'
 
 
