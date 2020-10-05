@@ -34,9 +34,9 @@ model_id = int(sys.argv[4])
 # n_qpos = int(sys.argv[2])
 # model_id = int(sys.argv[3])
 
-n_qpos = 1
-candidate_id = 3
-model_id = 0
+# n_qpos = 1
+# candidate_id = 3
+# model_id = 0
 # seg_id = 'test'
 
 
