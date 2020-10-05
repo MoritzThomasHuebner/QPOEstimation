@@ -18,24 +18,25 @@ from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground, GrothLikelihood
 import matplotlib
 # matplotlib.use('Qt5Agg')
-# run_id = int(sys.argv[1])
-# period_number = int(sys.argv[2])
-# n_qpos = int(sys.argv[3])
-# model_id = int(sys.argv[4])
+
+run_id = int(sys.argv[1])
+period_number = int(sys.argv[2])
+n_qpos = int(sys.argv[3])
+model_id = int(sys.argv[4])
 
 # run_id = 0
 # period_number = 0
 # n_qpos = 2
 # model_id = 0
 
-candidate_id = int(sys.argv[1])
+# candidate_id = int(sys.argv[1])
 # seg_id = int(sys.argv[2])
-n_qpos = int(sys.argv[2])
-model_id = int(sys.argv[3])
-#
-# n_qpos = 1
-# candidate_id = 3
-# model_id = 0
+# n_qpos = int(sys.argv[2])
+# model_id = int(sys.argv[3])
+
+n_qpos = 1
+candidate_id = 3
+model_id = 0
 # seg_id = 'test'
 
 
@@ -49,7 +50,7 @@ model_id = int(sys.argv[3])
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = True
+candidates_run = False
 injection_run = False
 # band = 'test'
 # band = '5_64Hz'
@@ -67,8 +68,8 @@ else:
     band_minimum = 16
     band_maximum = 32
 # band = f'64_128Hz'
-# band_minimum = 10
-# band_maximum = 64
+band_minimum = 5
+band_maximum = 16
 # sampling_frequency = 4*band_maximum
 sampling_frequency = 4 * band_maximum
 
@@ -93,6 +94,8 @@ if candidates_run:
     if band == 'miller':  # Miller et al. time segments are shifted by 16 s
         start += 20.0
         stop += 20.0
+        # start += 20.0
+        # stop += 20.0
     seglen = stop - start
 
     segment_length = stop - start
@@ -147,6 +150,7 @@ if likelihood_model == likelihood_models[0]:
 
     # stabilised_counts = bar_lev(c)
     stabilised_counts = c
+    # print(np.std(stabilised_counts))
     stabilised_variance = np.ones(len(stabilised_counts))
 
     plt.plot(t, stabilised_counts)
@@ -177,24 +181,38 @@ if likelihood_model == likelihood_models[0]:
 
     params_dict = kernel.get_parameter_dict()
     print(params_dict)
-    gp = celerite.GP(kernel)  # , mean=np.mean(stabilised_counts))
-    gp.compute(t, stabilised_variance)  # You always need to call compute once.
+    # mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0)#, a4=0, a5=0, a6=0, a7=0, a8=0, a9=0)
+    gp = celerite.GP(kernel=kernel, mean=np.mean(stabilised_counts))#, fit_mean=True)  # , mean=np.mean(stabilised_counts))
+    gp.compute(t, np.ones(len(t)))  # You always need to call compute once.
+
+
+    print(gp.get_parameter_vector())
 
     if n_qpos == 0:
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_minimum), name='log_c')
         priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
         # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
         # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='log_omega0')
         # priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
+        # priors['mean:a0'] = bilby.core.prior.Uniform(minimum=0, maximum=50, name='mean:a0')
+        # priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-5, maximum=5, name='mean:a1')
+        # priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-2, maximum=2, name='mean:a2')
+        # priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-1, maximum=1, name='mean:a3')
+        # priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a4')
+        # priors['mean:a5'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a5')
+        # priors['mean:a6'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a6')
+        # priors['mean:a7'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a7')
+        # priors['mean:a8'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a8')
+        # priors['mean:a9'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a9')
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=0, name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_minimum), name='log_c')
         priors['kernel:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='log_P')
         # priors['kernel:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56/2), maximum=np.log(7.56*8), name='log_P')
         # priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
@@ -214,23 +232,27 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[0]:log_b')
         priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='terms[0]:log_c')
-        # priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[0]:log_P')
-        priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56*0.75), maximum=np.log(7.56*8), name='terms[0]:log_P')
+        priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(16), maximum=-np.log(10), name='terms[0]:log_P')
+        # priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56*0.75), maximum=np.log(7.56*8), name='terms[0]:log_P')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[1]:log_b')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-        priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56*0.25), maximum=np.log(7.56*0.75), name='terms[1]:log_P')
+        priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(64), maximum=-np.log(16), name='terms[1]:log_P')
+        # priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56*0.25), maximum=np.log(7.56*0.75), name='terms[1]:log_P')
         # priors['kernel:terms[1]:log_P'] = MinimumPrior(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[1]:log_P', reference_name='kernel:terms[0]:log_P', order=1)
         # priors['kernel:terms[1]:log_P']._required_variables = ['kernel:terms[0]:log_P']
 
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
+    noise_term = celerite.terms.JitterTerm(log_sigma=0)
+    noise_gp = celerite.GP(noise_term)
+    noise_gp.compute(t=t, yerr=np.ones(len(t)))
 
 elif likelihood_model == likelihood_models[1]:
     lc = stingray.Lightcurve(time=t, counts=c)
     ps = stingray.Powerspectrum(lc=lc, norm='leahy')
     frequencies = ps.freq
     powers = ps.power
-    powers /=  2  # Groth norm
+    powers /= 2  # Groth norm
     noise_model = 'red_noise'
     # fs = 1/(t[1] - t[0])
     # frequencies, powers = periodogram(c, fs)
