@@ -17,7 +17,7 @@ from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.model.series import *
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground, GrothLikelihood
 import matplotlib
-matplotlib.use('Qt5Agg')
+# matplotlib.use('Qt5Agg')
 # run_id = int(sys.argv[1])
 # period_number = int(sys.argv[2])
 # n_qpos = int(sys.argv[3])
