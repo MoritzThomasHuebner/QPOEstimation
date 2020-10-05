@@ -71,7 +71,7 @@ else:
 band_minimum = 5
 band_maximum = 16
 # sampling_frequency = 4*band_maximum
-sampling_frequency = 4 * band_maximum
+sampling_frequency = 8 * band_maximum
 
 if injection_run:
     data = np.loadtxt(f'injection_files/{str(injection_id).zfill(2)}_data.txt')
