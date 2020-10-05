@@ -1,6 +1,7 @@
 import bilby
 import numpy as np
 from bilby.core.likelihood import Likelihood
+import celerite
 from celerite import terms
 from scipy.special import gammaln, gamma
 
@@ -126,6 +127,10 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
             self.conversion_func = conversion_func
         self.gp = gp
         self.y = y
+        noise_kernel = celerite.terms.JitterTerm(log_sigma=0)
+        noise_gp = celerite.GP(noise_kernel)
+        self.noise_likelihood = CeleriteLikelihood(gp=noise_gp, y=y)
+
         super().__init__(parameters)
 
     def log_likelihood(self):
@@ -136,6 +141,9 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
             return self.gp.log_likelihood(self.y)
         except Exception:
             return -np.inf
+
+    def noise_log_likelihood(self):
+        return self.noise_likelihood.log_likelihood()
 
 
 class QPOTerm(terms.Term):
