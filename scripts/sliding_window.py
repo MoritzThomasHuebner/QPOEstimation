@@ -53,7 +53,7 @@ likelihood_model = likelihood_models[model_id]
 candidates_run = False
 injection_run = False
 # band = 'test'
-band = '5_16Hz'
+band = '16_40Hz'
 # band = '64_128Hz'
 # band = '16_32Hz'
 # band = 'miller'
@@ -69,9 +69,9 @@ else:
     band_maximum = 32
 # band = f'64_128Hz'
 band_minimum = 5
-band_maximum = 16
+band_maximum = 40
 # sampling_frequency = 4*band_maximum
-sampling_frequency = 8 * band_maximum
+sampling_frequency = 256
 
 if injection_run:
     data = np.loadtxt(f'injection_files/{str(injection_id).zfill(2)}_data.txt')
