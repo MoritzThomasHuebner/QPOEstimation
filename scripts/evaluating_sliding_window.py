@@ -12,7 +12,7 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-band = '16_40Hz'
+band = '5_16Hz'
 
 outdir = f'sliding_window_{band}'
 
