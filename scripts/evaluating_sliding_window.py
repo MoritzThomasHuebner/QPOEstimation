@@ -30,13 +30,14 @@ for period in range(n_periods):
     std_frequency_whittle = []
     for run_id in range(len(segments)):
         try:
-            res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
+            # res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
             res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_result.json")
             # res_no_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_whittle_result.json")
             # res_one_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_whittle_result.json")
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_result.json")
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_two_qpo_result.json")
-            log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+            # log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+            log_bf_one_qpo = res_one_qpo.log_bayes_factor
             # log_bf_one_qpo_whittle = res_one_qpo_whittle.log_evidence - res_no_qpo_whittle.log_evidence
             # log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
             # max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
