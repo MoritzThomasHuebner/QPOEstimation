@@ -8,17 +8,16 @@ n_candidates = 26
 candidates = np.arange(0, n_candidates)
 # band = '16_32Hz'
 # band = 'below_16Hz'
-band = '16_40Hz'
+band = '32_16Hz'
 
 for candidate in range(len(candidates)):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
     try:
-        # res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_candidates/no_qpo/results/{candidate}_result.json")
+        res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_candidates/no_qpo/results/{candidate}_result.json")
         res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_candidates/one_qpo/results/{candidate}_result.json")
         # res_two_qpo = bilby.result.read_in_result(f"sliding_window_{band}_candidates/two_qpo/results/{candidate}_result.json")
-        # log_bfs_one_qpo.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
-        log_bfs_one_qpo.append(res_one_qpo.log_bayes_factor)
+        log_bfs_one_qpo.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
         # log_bfs_two_qpo.append(res_two_qpo.log_evidence - res_no_qpo.log_evidence)
         log_P_samples = np.array(res_one_qpo.posterior['kernel:terms[1]:log_P'])
         frequency_samples = 1 / np.exp(log_P_samples)
