@@ -8,7 +8,7 @@ n_candidates = 26
 candidates = np.arange(0, n_candidates)
 # band = '16_32Hz'
 # band = 'below_16Hz'
-band = '32_16Hz'
+band = '16_40Hz'
 
 for candidate in range(len(candidates)):
     log_bfs_one_qpo = []
