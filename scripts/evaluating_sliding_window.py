@@ -12,7 +12,7 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-band = '5_16Hz'
+band = '16_40Hz'
 
 outdir = f'sliding_window_{band}'
 
@@ -62,7 +62,7 @@ for period in range(n_periods):
         print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
         # print(f"{period} {run_id} two qpo: {log_bf_two_qpo}")
     np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
-    np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}_whittle', np.array(log_bfs_one_qpo_whittle))
+    # np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}_whittle', np.array(log_bfs_one_qpo_whittle))
     # np.savetxt(f'log_bfs_period_two_qpo_{period}', np.array(log_bfs_two_qpo))
 
     start_times = period * pulse_period + segments * segment_step
