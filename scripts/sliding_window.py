@@ -110,7 +110,7 @@ else:
 
     start = interpulse_periods[period_number][0]
 
-    segment_length = 1.0
+    segment_length = 0.27
     # segment_step = 0.135  # Requires 56 steps
     segment_step = 0.27  # Requires 28 steps
 
