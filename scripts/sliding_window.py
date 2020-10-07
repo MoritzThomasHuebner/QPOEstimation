@@ -19,15 +19,15 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm,
 import matplotlib
 # matplotlib.use('Qt5Agg')
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
-model_id = int(sys.argv[4])
+# run_id = int(sys.argv[1])
+# period_number = int(sys.argv[2])
+# n_qpos = int(sys.argv[3])
+# model_id = int(sys.argv[4])
 
-# run_id = 14
-# period_number = 13
-# n_qpos = 1
-# model_id = 0
+run_id = 0
+period_number = 0
+n_qpos = 1
+model_id = 0
 
 # candidate_id = int(sys.argv[1])
 # seg_id = int(sys.argv[2])
@@ -346,15 +346,15 @@ elif likelihood_model == likelihood_models[2]:
 
 
 # try:
-# result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
+result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
 # except Exception:
     # pass
-result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                           label=label, sampler='dynesty', nlive=200, sample='rwalk',
-                           resume=True, clean=True)
+# result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
+#                            label=label, sampler='dynesty', nlive=200, sample='rwalk',
+#                            resume=True, clean=True)
 
-if candidates_run or injection_run:
-# if True:
+# if candidates_run or injection_run:
+if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         if n_qpos == 1:
