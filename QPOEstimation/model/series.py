@@ -3,6 +3,7 @@ from copy import deepcopy
 import numpy as np
 from celerite.modeling import Model
 from scipy.signal.windows import tukey
+from ..stabilisation import bar_lev
 import stingray
 
 
@@ -213,3 +214,17 @@ class PolynomialMeanModel(Model):
     #     dell = self.alpha * dalpha * (t-self.ell) * np.exp(-self.log_sigma2)
     #     dlog_s2 = self.alpha * dalpha * e
     #     return np.array([dalpha, dell, dlog_s2])
+
+
+class ExponentialMeanModel(Model):
+    parameter_names = ("tau", "offset")
+
+    def get_value(self, t):
+        return exponential_background(times=t, tau=self.tau, offset=self.offset)
+
+
+class ExponentialStabilisedMeanModel(Model):
+    parameter_names = ("tau", "offset")
+
+    def get_value(self, t):
+        return bar_lev(exponential_background(times=t, tau=self.tau, offset=self.offset))

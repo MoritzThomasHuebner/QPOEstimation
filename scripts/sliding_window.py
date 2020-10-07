@@ -19,14 +19,14 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm,
 import matplotlib
 # matplotlib.use('Qt5Agg')
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
-model_id = int(sys.argv[4])
+# run_id = int(sys.argv[1])
+# period_number = int(sys.argv[2])
+# n_qpos = int(sys.argv[3])
+# model_id = int(sys.argv[4])
 
-# run_id = 0
-# period_number = 0
-# n_qpos = 2
+# run_id = 14
+# period_number = 13
+# n_qpos = 1
 # model_id = 0
 
 # candidate_id = int(sys.argv[1])
@@ -40,9 +40,12 @@ model_id = int(sys.argv[4])
 # seg_id = 'test'
 
 
-# injection_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
+injection_id = int(sys.argv[1])
+n_qpos = int(sys.argv[2])
+model_id = int(sys.argv[3])
+# injection_id = 1
+# n_qpos = 0
+# model_id = 0
 
 # n_qpos = 0
 # injection_id = 0
@@ -51,9 +54,9 @@ model_id = int(sys.argv[4])
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
 candidates_run = False
-injection_run = False
+injection_run = True
 # band = 'test'
-band = '16_40Hz'
+band = '10_64Hz'
 # band = '64_128Hz'
 # band = '16_32Hz'
 # band = 'miller'
@@ -68,8 +71,8 @@ else:
     band_minimum = 16
     band_maximum = 32
 # band = f'64_128Hz'
-band_minimum = 5
-band_maximum = 40
+band_minimum = 10
+band_maximum = 64
 # sampling_frequency = 4*band_maximum
 sampling_frequency = 256
 
@@ -148,8 +151,8 @@ else:
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == likelihood_models[0]:
 
-    # stabilised_counts = bar_lev(c)
-    stabilised_counts = c
+    stabilised_counts = bar_lev(c)
+    # stabilised_counts = c
     # print(np.std(stabilised_counts))
     stabilised_variance = np.ones(len(stabilised_counts))
 
@@ -182,13 +185,16 @@ if likelihood_model == likelihood_models[0]:
     params_dict = kernel.get_parameter_dict()
     print(params_dict)
     # mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0)#, a4=0, a5=0, a6=0, a7=0, a8=0, a9=0)
-    gp = celerite.GP(kernel=kernel, mean=np.mean(stabilised_counts))#, fit_mean=True)  # , mean=np.mean(stabilised_counts))
+    mean_model = ExponentialStabilisedMeanModel(tau=0, offset=0)#, a4=0, a5=0, a6=0, a7=0, a8=0, a9=0)
+    gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=True)  # , mean=np.mean(stabilised_counts))
     gp.compute(t, np.ones(len(t)))  # You always need to call compute once.
 
 
     print(gp.get_parameter_vector())
 
     if n_qpos == 0:
+        priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
+        priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
@@ -198,6 +204,8 @@ if likelihood_model == likelihood_models[0]:
         # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='log_omega0')
         # priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
+        priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
+        priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
         # priors['mean:a0'] = bilby.core.prior.Uniform(minimum=0, maximum=50, name='mean:a0')
         # priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-5, maximum=5, name='mean:a1')
         # priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-2, maximum=2, name='mean:a2')
@@ -341,7 +349,7 @@ elif likelihood_model == likelihood_models[2]:
 # except Exception:
     # pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                           label=label, sampler='dynesty', nlive=400, sample='rwalk',
+                           label=label, sampler='dynesty', nlive=200, sample='rwalk',
                            resume=True, clean=True)
 
 if candidates_run or injection_run:
