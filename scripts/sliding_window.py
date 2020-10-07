@@ -51,10 +51,10 @@ likelihood_model = likelihood_models[model_id]
 candidates_run = False
 injection_run = False
 # band = 'test'
-# band = '10_64Hz'
+band = '10_40Hz'
 # band = '64_128Hz'
 # band = '16_32Hz'
-band = 'miller'
+# band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
                       (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
                       (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
