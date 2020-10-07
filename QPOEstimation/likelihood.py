@@ -127,11 +127,8 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
             self.conversion_func = conversion_func
         self.gp = gp
         self.y = y
-        # noise_kernel = celerite.terms.JitterTerm(log_sigma=np.log(np.std(self.y)))
-        # self.noise_gp = celerite.GP(noise_kernel)
-        # self.noise_gp.compute(np.linspace(0, 1, len(y)), yerr=np.ones(len(y)))
-        self.noise_likelihood = bilby.core.likelihood.GaussianLikelihood(
-            x=np.linspace(0, 1, len(y)), y=self.y, sigma=1, func=lambda x: np.mean(self.y)).log_likelihood()
+        # self.noise_likelihood = bilby.core.likelihood.GaussianLikelihood(
+        #     x=np.linspace(0, 1, len(y)), y=self.y, sigma=1, func=lambda x: np.mean(self.y)).log_likelihood()
         super().__init__(parameters)
 
     def log_likelihood(self):
@@ -143,8 +140,8 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         except Exception:
             return -np.inf
 
-    def noise_log_likelihood(self):
-        return self.noise_likelihood
+    # def noise_log_likelihood(self):
+    #     return self.noise_likelihood
 
 
 class QPOTerm(terms.Term):

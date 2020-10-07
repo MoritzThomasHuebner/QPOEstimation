@@ -19,10 +19,10 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm,
 import matplotlib
 # matplotlib.use('Qt5Agg')
 
-# run_id = int(sys.argv[1])
-# period_number = int(sys.argv[2])
-# n_qpos = int(sys.argv[3])
-# model_id = int(sys.argv[4])
+run_id = int(sys.argv[1])
+period_number = int(sys.argv[2])
+n_qpos = int(sys.argv[3])
+model_id = int(sys.argv[4])
 
 # run_id = 14
 # period_number = 13
@@ -35,31 +35,26 @@ import matplotlib
 # model_id = int(sys.argv[3])
 
 # n_qpos = 1
-# candidate_id = 3
+# candidate_id = 0
 # model_id = 0
-# seg_id = 'test'
 
 
-injection_id = int(sys.argv[1])
-n_qpos = int(sys.argv[2])
-model_id = int(sys.argv[3])
+# injection_id = int(sys.argv[1])
+# n_qpos = int(sys.argv[2])
+# model_id = int(sys.argv[3])
 # injection_id = 1
 # n_qpos = 0
-# model_id = 0
-
-# n_qpos = 0
-# injection_id = 0
 # model_id = 0
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
 candidates_run = False
-injection_run = True
+injection_run = False
 # band = 'test'
-band = '10_64Hz'
+# band = '10_64Hz'
 # band = '64_128Hz'
 # band = '16_32Hz'
-# band = 'miller'
+band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
                       (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
                       (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
@@ -72,7 +67,7 @@ else:
     band_maximum = 32
 # band = f'64_128Hz'
 band_minimum = 10
-band_maximum = 64
+band_maximum = 40
 # sampling_frequency = 4*band_maximum
 sampling_frequency = 256
 
@@ -80,8 +75,8 @@ if injection_run:
     data = np.loadtxt(f'injection_files/{str(injection_id).zfill(2)}_data.txt')
 else:
     if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
-        # data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
-        data = np.loadtxt(f'data/detrend_counts_{sampling_frequency}Hz.dat')
+        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
+        # data = np.loadtxt(f'data/detrend_counts_{sampling_frequency}Hz.dat')
         # data = np.loadtxt(f'data/sgr1806_256Hz.dat')
     else:
         data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
@@ -113,7 +108,7 @@ else:
 
     start = interpulse_periods[period_number][0]
 
-    segment_length = 0.27
+    segment_length = 1.0
     # segment_step = 0.135  # Requires 56 steps
     segment_step = 0.27  # Requires 28 steps
 
@@ -168,7 +163,8 @@ if likelihood_model == likelihood_models[0]:
         # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
         # kernel += terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
         # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
-        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        kernel = celerite.terms.JitterTerm(log_sigma=-20)
         # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
     elif n_qpos == 1:
         # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
@@ -184,33 +180,38 @@ if likelihood_model == likelihood_models[0]:
 
     params_dict = kernel.get_parameter_dict()
     print(params_dict)
-    # mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0)#, a4=0, a5=0, a6=0, a7=0, a8=0, a9=0)
-    mean_model = ExponentialStabilisedMeanModel(tau=0, offset=0)#, a4=0, a5=0, a6=0, a7=0, a8=0, a9=0)
+    mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)#, a5=0, a6=0, a7=0, a8=0, a9=0)
+    # mean_model = ExponentialStabilisedMeanModel(tau=0, offset=0)#, a4=0, a5=0, a6=0, a7=0, a8=0, a9=0)
     gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=True)  # , mean=np.mean(stabilised_counts))
     gp.compute(t, np.ones(len(t)))  # You always need to call compute once.
-
 
     print(gp.get_parameter_vector())
 
     if n_qpos == 0:
-        priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
-        priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
-        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
+        priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a0')
+        priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a1')
+        priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a2')
+        priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a3')
+        priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a4')
+        priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
+        # priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
+        # priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
+        # priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
-        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_minimum), name='log_c')
-        priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
+        # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
+        # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_minimum), name='log_c')
+        # priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
         # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
         # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='log_omega0')
         # priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
     elif n_qpos == 1:
-        priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
-        priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
-        # priors['mean:a0'] = bilby.core.prior.Uniform(minimum=0, maximum=50, name='mean:a0')
-        # priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-5, maximum=5, name='mean:a1')
-        # priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-2, maximum=2, name='mean:a2')
-        # priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-1, maximum=1, name='mean:a3')
-        # priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a4')
+        # priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
+        # priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
+        priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a0')
+        priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a1')
+        priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a2')
+        priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a3')
+        priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a4')
         # priors['mean:a5'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a5')
         # priors['mean:a6'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a6')
         # priors['mean:a7'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a7')
@@ -260,7 +261,7 @@ elif likelihood_model == likelihood_models[1]:
     ps = stingray.Powerspectrum(lc=lc, norm='leahy')
     frequencies = ps.freq
     powers = ps.power
-    powers /= 2  # Groth norm
+    # powers /= 2  # Groth norm
     noise_model = 'red_noise'
     # fs = 1/(t[1] - t[0])
     # frequencies, powers = periodogram(c, fs)
@@ -426,7 +427,7 @@ if candidates_run or injection_run:
         # plt.show()
         plt.clf()
 
-        psd_freqs = np.exp(np.linspace(np.log(1.0), np.log(128), 5000))
+        psd_freqs = np.exp(np.linspace(np.log(1.0), np.log(band_maximum), 5000))
         psd = gp.kernel.get_psd(psd_freqs*2*np.pi)
 
         plt.loglog(psd_freqs, psd, label='complete GP')
@@ -440,13 +441,13 @@ if candidates_run or injection_run:
         plt.savefig(f"{outdir}/fits/{label}_psd")
         plt.clf()
 
-        # pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
-        # plt.scatter(t, stabilised_counts - pred_mean, label='residual')
-        # plt.fill_between(t, 1, -1, color=color, alpha=0.3, edgecolor="none")
-        # plt.xlabel("time [s]")
-        # plt.ylabel("stabilised residuals")
-        # plt.savefig(f"{outdir}/fits/{label}_max_like_fit_residuals")
-        # plt.clf()
+        pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
+        plt.scatter(t, stabilised_counts - pred_mean, label='residual')
+        plt.fill_between(t, 1, -1, color=color, alpha=0.3, edgecolor="none")
+        plt.xlabel("time [s]")
+        plt.ylabel("stabilised residuals")
+        plt.savefig(f"{outdir}/fits/{label}_max_like_fit_residuals")
+        plt.clf()
     elif likelihood_model == likelihood_models[1]:
         if n_qpos > 0:
             frequency_samples = result.posterior['central_frequency']

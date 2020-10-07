@@ -199,11 +199,13 @@ def two_frequency_model(time_array, mu_1, mu_2, sigma_1, sigma_2, amplitude_1, a
 
 
 class PolynomialMeanModel(Model):
-    parameter_names = ("a0", "a1", "a2", "a3")#, "a4", "a5", "a6", "a7", "a8", "a9")
+    parameter_names = ("a0", "a1", "a2", "a3", "a4")#, "a5", "a6", "a7", "a8", "a9")
 
     def get_value(self, t):
         t -= t[0] - 0.5
-        return self.a0 + self.a1 * t + self.a2 * t**2 + self.a3 * t**3# + self.a4 * t**4 + self.a5 * t**5 + \
+        res = self.a0 + self.a1 * t + self.a2 * t**2 + self.a3 * t**3 + self.a4 * t**4
+        # res[np.where(res < 0)[0]] = 0
+        return res# + self.a4 * t**4 + self.a5 * t**5 + \
                # self.a6 * t**6 + self.a7 * t**7 + self.a8 * t**8 + self.a9 * t**9
 
     # This method is optional but it can be used to compute the gradient of the
