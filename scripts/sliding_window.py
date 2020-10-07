@@ -285,9 +285,9 @@ elif likelihood_model == likelihood_models[1]:
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
         priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
-    likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model)
-    # likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model,
-    #                                frequency_mask=[True]*len(frequencies))
+    # likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model)
+    likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model,
+                                   frequency_mask=[True]*len(frequencies))
 elif likelihood_model == likelihood_models[2]:
     if injection_run:
         if n_qpos == 0:
