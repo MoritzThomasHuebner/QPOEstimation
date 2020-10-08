@@ -345,15 +345,15 @@ elif likelihood_model == likelihood_models[2]:
 
 
 # try:
-result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
+# result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
 # except Exception:
     # pass
-# result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-#                            label=label, sampler='dynesty', nlive=200, sample='rwalk',
-#                            resume=True, clean=True)
-
-# if candidates_run or injection_run:
-if True:
+result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
+                           label=label, sampler='dynesty', nlive=200, sample='rwalk',
+                           resume=True, clean=True)
+#
+if candidates_run or injection_run:
+# if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         if n_qpos == 1:
