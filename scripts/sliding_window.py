@@ -50,7 +50,7 @@ likelihood_model = likelihood_models[model_id]
 candidates_run = False
 injection_run = False
 
-band = '5_16Hz'
+band = '40_80Hz'
 # band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
                       (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
@@ -60,10 +60,18 @@ if band == 'miller':
     band_minimum = miller_band_bounds[candidate_id][0]
     band_maximum = miller_band_bounds[candidate_id][1]
 else:
-    band_minimum = 5
-    band_maximum = 16
+    band_minimum = 40
+    band_maximum = 80
 
+
+if band_maximum < 64:
+    sampling_frequency = 256
+elif band_maximum < 128:
+    sampling_frequency = 512
+else:
+    sampling_frequency = 1024
 # sampling_frequency = 4*band_maximum
+
 sampling_frequency = 256
 
 if injection_run:
