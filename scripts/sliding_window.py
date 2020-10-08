@@ -70,9 +70,7 @@ elif band_maximum < 128:
     sampling_frequency = 512
 else:
     sampling_frequency = 1024
-# sampling_frequency = 4*band_maximum
 
-sampling_frequency = 256
 
 if injection_run:
     data = np.loadtxt(f'injection_files/{str(injection_id).zfill(2)}_data.txt')
