@@ -19,19 +19,19 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm,
 import matplotlib
 # matplotlib.use('Qt5Agg')
 
-# run_id = int(sys.argv[1])
-# period_number = int(sys.argv[2])
-# n_qpos = int(sys.argv[3])
-# model_id = int(sys.argv[4])
+run_id = int(sys.argv[1])
+period_number = int(sys.argv[2])
+n_qpos = int(sys.argv[3])
+model_id = int(sys.argv[4])
 
 # run_id = 0
 # period_number = 0
 # n_qpos = 1
 # model_id = 0
-
-candidate_id = int(sys.argv[1])
-n_qpos = int(sys.argv[2])
-model_id = int(sys.argv[3])
+#
+# candidate_id = int(sys.argv[1])
+# n_qpos = int(sys.argv[2])
+# model_id = int(sys.argv[3])
 
 # n_qpos = 1
 # candidate_id = 0
@@ -47,13 +47,14 @@ model_id = int(sys.argv[3])
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = True
+candidates_run = False
 injection_run = False
 # band = 'test'
 # band = '10_40Hz'
 # band = '64_128Hz'
 # band = '16_32Hz'
-band = 'miller'
+band = '5_16Hz'
+# band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
                       (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
                       (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
@@ -62,13 +63,13 @@ if band == 'miller':
     band_minimum = miller_band_bounds[candidate_id][0]
     band_maximum = miller_band_bounds[candidate_id][1]
 else:
-    band_minimum = 16
-    band_maximum = 32
+    band_minimum = 5
+    band_maximum = 16
 # band = f'64_128Hz'
 # band_minimum = 10
 # band_maximum = 40
-sampling_frequency = 4*band_maximum
-# sampling_frequency = 256
+# sampling_frequency = 4*band_maximum
+sampling_frequency = 256
 
 if injection_run:
     data = np.loadtxt(f'injection_files/{str(injection_id).zfill(2)}_data.txt')
@@ -259,7 +260,7 @@ elif likelihood_model == likelihood_models[1]:
     lc = stingray.Lightcurve(time=t, counts=c)
     ps = stingray.Powerspectrum(lc=lc, norm='leahy')
     frequencies = ps.freq
-    powers = ps.power
+    powers = ps.power  # Leahy norm
     # powers /= 2  # Groth norm
     noise_model = 'red_noise'
     # fs = 1/(t[1] - t[0])
@@ -330,11 +331,11 @@ if likelihood_model == likelihood_models[0]:
         label = f'{run_id}'
 elif likelihood_model == likelihood_models[1]:
     if candidates_run:
-        label = f"{candidate_id}_groth"
+        label = f"{candidate_id}_whittle"
     elif injection_run:
         label = f"{str(injection_id).zfill(2)}_whittle"
     else:
-        label = f'{run_id}_groth'
+        label = f'{run_id}_whittle'
 elif likelihood_model == likelihood_models[2]:
     if candidates_run:
         label = f"{candidate_id}_poisson"
@@ -348,8 +349,8 @@ elif likelihood_model == likelihood_models[2]:
 #     result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
 # except Exception:
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                       label=label, sampler='dynesty', nlive=300, sample='rwalk',
-                       resume=True, clean=True)
+                           label=label, sampler='dynesty', nlive=300, sample='rwalk',
+                           resume=True, clean=True)
 
 if candidates_run or injection_run:
 # if True:
