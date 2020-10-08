@@ -150,8 +150,8 @@ if likelihood_model == likelihood_models[0]:
     # print(np.std(stabilised_counts))
     stabilised_variance = np.ones(len(stabilised_counts))
 
-    plt.plot(t, stabilised_counts)
-    plt.show()
+    # plt.plot(t, stabilised_counts)
+    # plt.show()
 
     # A non-periodic component
     Q = 1.0 / np.sqrt(2.0)
@@ -274,7 +274,7 @@ elif likelihood_model == likelihood_models[1]:
     priors['beta'] = bilby.core.prior.Uniform(minimum=1, maximum=10000, name='beta')
     # priors['beta'].maximum = 100000
     # priors['sigma'].maximum = 10
-    priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
+    # priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
     priors['width'].maximum = 10
     priors['width'].minimum = frequencies[1] - frequencies[0]
     priors['central_frequency'].maximum = band_maximum
@@ -332,7 +332,7 @@ elif likelihood_model == likelihood_models[1]:
     if candidates_run:
         label = f"{candidate_id}_groth"
     elif injection_run:
-        label = f"{str(injection_id).zfill(2)}_groth"
+        label = f"{str(injection_id).zfill(2)}_whittle"
     else:
         label = f'{run_id}_groth'
 elif likelihood_model == likelihood_models[2]:
