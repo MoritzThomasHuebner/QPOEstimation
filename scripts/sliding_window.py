@@ -349,7 +349,7 @@ elif likelihood_model == likelihood_models[2]:
 # except Exception:
     # pass
 result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                           label=label, sampler='dynesty', nlive=200, sample='rwalk',
+                           label=label, sampler='dynesty', nlive=500, sample='rwalk',
                            resume=True, clean=True)
 #
 if candidates_run or injection_run:
