@@ -344,14 +344,13 @@ elif likelihood_model == likelihood_models[2]:
         label = f'{run_id}_poisson'
 
 
-# try:
-# result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
-# except Exception:
-    # pass
-result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
+try:
+    result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
+except Exception:
+    result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                            label=label, sampler='dynesty', nlive=500, sample='rwalk',
                            resume=True, clean=True)
-#
+
 if candidates_run or injection_run:
 # if True:
     result.plot_corner(outdir=f"{outdir}/corner")
