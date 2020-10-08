@@ -24,15 +24,14 @@ import matplotlib
 # n_qpos = int(sys.argv[3])
 # model_id = int(sys.argv[4])
 
-run_id = 0
-period_number = 0
-n_qpos = 1
-model_id = 0
+# run_id = 0
+# period_number = 0
+# n_qpos = 1
+# model_id = 0
 
-# candidate_id = int(sys.argv[1])
-# seg_id = int(sys.argv[2])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
+candidate_id = int(sys.argv[1])
+n_qpos = int(sys.argv[2])
+model_id = int(sys.argv[3])
 
 # n_qpos = 1
 # candidate_id = 0
@@ -48,13 +47,13 @@ model_id = 0
 
 likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
-candidates_run = False
+candidates_run = True
 injection_run = False
 # band = 'test'
-band = '10_40Hz'
+# band = '10_40Hz'
 # band = '64_128Hz'
 # band = '16_32Hz'
-# band = 'miller'
+band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
                       (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
                       (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
@@ -66,10 +65,10 @@ else:
     band_minimum = 16
     band_maximum = 32
 # band = f'64_128Hz'
-band_minimum = 10
-band_maximum = 40
-# sampling_frequency = 4*band_maximum
-sampling_frequency = 256
+# band_minimum = 10
+# band_maximum = 40
+sampling_frequency = 4*band_maximum
+# sampling_frequency = 256
 
 if injection_run:
     data = np.loadtxt(f'injection_files/{str(injection_id).zfill(2)}_data.txt')
