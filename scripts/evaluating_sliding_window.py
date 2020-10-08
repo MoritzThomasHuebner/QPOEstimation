@@ -32,13 +32,13 @@ for period in range(n_periods):
         try:
             res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
             res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_result.json")
-            res_no_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_whittle_result.json")
-            res_one_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_whittle_result.json")
+            # res_no_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_whittle_result.json")
+            # res_one_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_whittle_result.json")
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_result.json")
             # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_two_qpo_result.json")
             # log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
             log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
-            log_bf_one_qpo_whittle = res_one_qpo_whittle.log_evidence - res_no_qpo_whittle.log_evidence
+            # log_bf_one_qpo_whittle = res_one_qpo_whittle.log_evidence - res_no_qpo_whittle.log_evidence
             # log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
             # max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
             # mean_frequency.append(1 / np.exp(max_likelihood_sample_one_qpo[f'kernel:terms[1]:log_P']))
@@ -46,9 +46,9 @@ for period in range(n_periods):
             frequency_samples = 1 / np.exp(log_P_samples)
             mean_frequency.append(np.mean(frequency_samples))
             std_frequency.append(np.std(frequency_samples))
-            frequency_samples_whittle = np.array(res_one_qpo_whittle.posterior['central_frequency'])
-            mean_frequency_whittle.append(np.mean(frequency_samples_whittle))
-            std_frequency_whittle.append(np.std(frequency_samples_whittle))
+            # frequency_samples_whittle = np.array(res_one_qpo_whittle.posterior['central_frequency'])
+            # mean_frequency_whittle.append(np.mean(frequency_samples_whittle))
+            # std_frequency_whittle.append(np.std(frequency_samples_whittle))
         except Exception as e:
             print(e)
             log_bf_one_qpo = np.nan
