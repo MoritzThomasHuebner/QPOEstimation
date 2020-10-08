@@ -49,10 +49,7 @@ likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
 likelihood_model = likelihood_models[model_id]
 candidates_run = False
 injection_run = False
-# band = 'test'
-# band = '10_40Hz'
-# band = '64_128Hz'
-# band = '16_32Hz'
+
 band = '5_16Hz'
 # band = 'miller'
 miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
@@ -65,9 +62,7 @@ if band == 'miller':
 else:
     band_minimum = 5
     band_maximum = 16
-# band = f'64_128Hz'
-# band_minimum = 10
-# band_maximum = 40
+
 # sampling_frequency = 4*band_maximum
 sampling_frequency = 256
 
@@ -77,10 +72,9 @@ else:
     if likelihood_model in [likelihood_models[0], likelihood_models[2]]:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
         # data = np.loadtxt(f'data/detrend_counts_{sampling_frequency}Hz.dat')
-        # data = np.loadtxt(f'data/sgr1806_256Hz.dat')
     else:
         data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
-    # times[0] = 2004 December 27 at 21:30:31.375 UTC
+        # times[0] = 2004 December 27 at 21:30:31.375 UTC
 times = data[:, 0]
 counts = data[:, 1]
 
@@ -92,8 +86,6 @@ if candidates_run:
     if band == 'miller':  # Miller et al. time segments are shifted by 16 s
         start += 20.0
         stop += 20.0
-        # start += 20.0
-        # stop += 20.0
     seglen = stop - start
 
     segment_length = stop - start
@@ -147,33 +139,13 @@ priors = bilby.core.prior.PriorDict()
 if likelihood_model == likelihood_models[0]:
 
     stabilised_counts = bar_lev(c)
-    # stabilised_counts = c
-    # print(np.std(stabilised_counts))
     stabilised_variance = np.ones(len(stabilised_counts))
 
-    # plt.plot(t, stabilised_counts)
-    # plt.show()
-
-    # A non-periodic component
-    Q = 1.0 / np.sqrt(2.0)
-    w0 = 3.0
-    S0 = np.var(stabilised_counts) / (w0 * Q)
-
     if n_qpos == 0:
-        # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
-        # kernel += terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
-        # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
         # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
     elif n_qpos == 1:
-        # kernel = terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
-        # kernel *= terms.SHOTerm(log_S0=np.log(S0), log_Q=np.log(Q), log_omega0=np.log(w0))
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-        # kernel += QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
-        # kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_P=-3)
-        # for i in range(1, n_qpos):
-        #     kernel += QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
     elif n_qpos == 2:
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3) \
                  + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
