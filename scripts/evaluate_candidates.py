@@ -9,15 +9,13 @@ matplotlib.use('Qt5Agg')
 
 log_bfs_whittle = []
 log_bfs_gpr = []
-log_bfs_gpr_sho = []
 log_bfs_gpr_two_qpo = []
 log_bfs_poisson = []
 
 # band = '5_64Hz'
 band = 'miller'
 
-bfs_miller = np.array([1.8e7, 2.47e6, 9.77e5, 5.09e5, 2.3e5, 2.09e5, 1.97e5, 1.68e5, 1.6e5, 6.28e4, 2.21e4, 1.1e4, 9.76e3,
-                       5.63e3, 4.57e4, 4.3e3, 3.09e3, 2.49e3, 1.83e3, 1.48e3, 1.36e3, 1.32e3, 1.02e3])
+bfs_miller = np.loadtxt('candidates/miller_bayes_factors.dat')
 
 for i in range(23):
     # res_no_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_candidates_ref/no_qpo_exponential/results/{i}_whittle_result.json')
