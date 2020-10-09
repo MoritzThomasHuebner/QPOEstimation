@@ -1,54 +1,49 @@
-import matplotlib.pyplot as plt
 import os
 import sys
 from pathlib import Path
+import argparse
 
-
-from astropy.io import fits
 import bilby
 import celerite
-from celerite import terms
-from scipy.signal import periodogram
-import stingray
+import matplotlib
+import matplotlib.pyplot as plt
 
 import QPOEstimation
-from QPOEstimation.prior.minimum import MinimumPrior
-from QPOEstimation.stabilisation import bar_lev
+from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground
 from QPOEstimation.model.series import *
-from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, ZeroedQPOTerm, WhittleLikelihood, PoissonLikelihoodWithBackground, GrothLikelihood
-import matplotlib
-# matplotlib.use('Qt5Agg')
 
-run_id = int(sys.argv[1])
-period_number = int(sys.argv[2])
-n_qpos = int(sys.argv[3])
-model_id = int(sys.argv[4])
+likelihood_models = ["gaussian_process", "periodogram", "poisson"]
 
-# period_number = 14
-# run_id = 12
-# n_qpos = 1
-# model_id = 0
+if len(sys.argv) > 1:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--candidates_run", default=False, type=bool)
+    parser.add_argument("--injection_run", default=False, type=bool)
+    parser.add_argument("--run_id", default=0, type=int)
+    parser.add_argument("--period_number", default=0, type=int)
+    parser.add_argument("--n_qpos", default=0, type=int)
+    parser.add_argument("--candidate_id", default=0, type=int)
+    parser.add_argument("--injection_id", default=0, type=int)
+    parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
+    args = parser.parse_args()
+    candidates_run = args.candidates_run
+    injection_run = args.injection_run
+    run_id = args.run_id
+    period_number = args.period_number
+    n_qpos = args.n_qpos
+    candidate_id = args.candidate_id
+    injection_id = args.injection_id
+    likelihood_model = args.model
 
-# candidate_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
-
-# n_qpos = 1
-# candidate_id = 0
-# model_id = 0
-
-
-# injection_id = int(sys.argv[1])
-# n_qpos = int(sys.argv[2])
-# model_id = int(sys.argv[3])
-# injection_id = 1
-# n_qpos = 0
-# model_id = 0
-
-likelihood_models = ['gaussian_process', 'periodogram', 'poisson']
-likelihood_model = likelihood_models[model_id]
-candidates_run = False
-injection_run = False
+else:
+    matplotlib.use('Qt5Agg')
+    candidates_run = False
+    injection_run = False
+    period_number = 14
+    run_id = 12
+    n_qpos = 1
+    candidate_id = None
+    injection_id = None
+    likelihood_model = 'gaussian_process'
 
 # band = 'miller'
 band = '40_128Hz'
@@ -144,7 +139,7 @@ else:
 
 
 priors = bilby.core.prior.PriorDict()
-if likelihood_model == likelihood_models[0]:
+if likelihood_model == "gaussian_process":
 
     stabilised_counts = bar_lev(c)
     stabilised_variance = np.ones(len(stabilised_counts))
@@ -211,7 +206,7 @@ if likelihood_model == likelihood_models[0]:
 
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 
-elif likelihood_model == likelihood_models[1]:
+elif likelihood_model == "periodogram":
     lc = stingray.Lightcurve(time=t, counts=c)
     ps = stingray.Powerspectrum(lc=lc, norm='leahy')
     frequencies = ps.freq
@@ -240,7 +235,7 @@ elif likelihood_model == likelihood_models[1]:
     # likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model)
     likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=noise_model,
                                    frequency_mask=[True]*len(frequencies))
-elif likelihood_model == likelihood_models[2]:
+elif likelihood_model == "poisson":
     if injection_run:
         if n_qpos == 0:
             priors['tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
@@ -273,21 +268,21 @@ elif likelihood_model == likelihood_models[2]:
         priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='phase')
 
 
-if likelihood_model == likelihood_models[0]:
+if likelihood_model == "gaussian_process":
     if candidates_run:
         label = f"{candidate_id}"
     elif injection_run:
         label = f"{str(injection_id).zfill(2)}"
     else:
         label = f'{run_id}'
-elif likelihood_model == likelihood_models[1]:
+elif likelihood_model == "periodogram":
     if candidates_run:
         label = f"{candidate_id}_whittle"
     elif injection_run:
         label = f"{str(injection_id).zfill(2)}_whittle"
     else:
         label = f'{run_id}_whittle'
-elif likelihood_model == likelihood_models[2]:
+elif likelihood_model == "poisson":
     if candidates_run:
         label = f"{candidate_id}_poisson"
     elif injection_run:
@@ -303,10 +298,9 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdi
                            label=label, sampler='dynesty', nlive=150, sample='rwalk',
                            resume=True, clean=True)
 
-if candidates_run or injection_run:
-# if True:
+if len(sys.argv) > 1:
     result.plot_corner(outdir=f"{outdir}/corner")
-    if likelihood_model == likelihood_models[0]:
+    if likelihood_model == "gaussian_process":
         if n_qpos == 1:
             try:
                 frequency_samples = []
@@ -396,7 +390,7 @@ if candidates_run or injection_run:
         plt.ylabel("stabilised residuals")
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit_residuals")
         plt.clf()
-    elif likelihood_model == likelihood_models[1]:
+    elif likelihood_model == "periodogram":
         if n_qpos > 0:
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
@@ -419,7 +413,7 @@ if candidates_run or injection_run:
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
         plt.show()
-    elif likelihood_model == likelihood_models[2]:
+    elif likelihood_model == "poisson":
         if injection_run:
             frequency_samples = result.posterior["frequency"]
             plt.hist(frequency_samples, bins="fd", density=True)
@@ -488,7 +482,6 @@ if candidates_run or injection_run:
             plt.legend()
             plt.savefig(f'{outdir}/fits/{label}_max_like_fit_residuals.png')
             plt.clf()
-
 
 
 # clean up
