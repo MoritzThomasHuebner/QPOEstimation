@@ -2,6 +2,7 @@ import bilby
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from QPOEstimation.stabilisation import bar_lev
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
 segments = np.arange(0, 28)
@@ -16,10 +17,39 @@ band = '20_128Hz'
 
 outdir = f'sliding_window_{band}'
 
+sampling_frequency = 32
+
+data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
+times = data[:, 0]
+counts = data[:, 1]
+
 pulse_period = 7.56
 segment_step = 0.27
 
 for period in range(n_periods):
+
+    pulse_period = 7.56  # see papers
+    interpulse_periods = []
+    for i in range(47):
+        interpulse_periods.append((20.0 + i * pulse_period, 20.0 + (i + 1) * pulse_period))
+
+    start = interpulse_periods[period][0]
+
+    segment_length = 7.56
+    start = start
+    stop = start + segment_length
+
+    indices = np.where(np.logical_and(times > start, times < stop))
+    t = times[indices]
+    c = counts[indices]
+    # c = c.astype(int)
+    stabilised_counts = bar_lev(c)
+    stabilised_variance = np.ones(len(stabilised_counts))
+    plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
+    plt.savefig(f'{outdir}/data_{period}.png')
+    plt.clf()
+    continue
+
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
     mean_frequency = []
