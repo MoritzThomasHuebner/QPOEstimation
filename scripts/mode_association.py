@@ -25,8 +25,12 @@ for candidate_id in candidate_ids:
         frequency_samples = np.loadtxt(f'sliding_window_{band}_candidates/one_qpo/results/{candidate_id}_frequency_samples.txt')
     except Exception:
         frequency_samples = []
-        for i, sample in enumerate(res.posterior.iloc):
-            frequency_samples.append(1 / np.exp(sample[f'kernel:log_P']))
+        try:
+            log_P_samples = np.array(res.posterior['kernel:log_P'])
+            frequency_samples = 1 / np.exp(log_P_samples)
+        except Exception:
+            log_f_samples = np.array(res.posterior['kernel:log_f'])
+            frequency_samples = np.exp(log_f_samples)
 
         np.savetxt(f'sliding_window_{band}_candidates/one_qpo/results/{candidate_id}_frequency_samples.txt', frequency_samples)
     # if np.mean(frequency_samples) > 16:

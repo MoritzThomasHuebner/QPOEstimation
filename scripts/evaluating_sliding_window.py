@@ -41,9 +41,13 @@ for period in range(n_periods):
             # log_bf_one_qpo_whittle = res_one_qpo_whittle.log_evidence - res_no_qpo_whittle.log_evidence
             # log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
             # max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
-            # mean_frequency.append(1 / np.exp(max_likelihood_sample_one_qpo[f'kernel:terms[1]:log_P']))
-            log_P_samples = np.array(res_one_qpo.posterior['kernel:log_P'])
-            frequency_samples = 1 / np.exp(log_P_samples)
+            try:
+                log_P_samples = np.array(res_one_qpo.posterior['kernel:log_P'])
+                frequency_samples = 1 / np.exp(log_P_samples)
+            except Exception:
+                log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
+                frequency_samples = np.exp(log_f_samples)
+
             mean_frequency.append(np.mean(frequency_samples))
             std_frequency.append(np.std(frequency_samples))
             # frequency_samples_whittle = np.array(res_one_qpo_whittle.posterior['central_frequency'])

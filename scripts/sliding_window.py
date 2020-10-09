@@ -148,15 +148,18 @@ if likelihood_model == likelihood_models[0]:
 
     stabilised_counts = bar_lev(c)
     stabilised_variance = np.ones(len(stabilised_counts))
+    plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
+    plt.show()
+    plt.clf()
 
     if n_qpos == 0:
-        # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        # kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
     elif n_qpos == 1:
-        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
     elif n_qpos == 2:
-        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3) \
-                 + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_P=-3)
+        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3) \
+                 + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
 
     params_dict = kernel.get_parameter_dict()
     print(params_dict)
@@ -174,16 +177,11 @@ if likelihood_model == likelihood_models[0]:
         priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a3')
         priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a4')
         priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-        # priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
-        # priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
         # priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
         # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_minimum), name='log_c')
-        # priors['kernel:log_P'] = bilby.core.prior.DeltaFunction(peak=-2, name='log_P')
-        # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='log_S0')
-        # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='log_omega0')
-        # priors['kernel:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='log_Q')
+        # priors['kernel:log_f'] = bilby.core.prior.DeltaFunction(peak=2, name='log_f')
     elif n_qpos == 1:
         # priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
         # priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
@@ -192,32 +190,11 @@ if likelihood_model == likelihood_models[0]:
         priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a2')
         priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a3')
         priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a4')
-        # priors['mean:a5'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a5')
-        # priors['mean:a6'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a6')
-        # priors['mean:a7'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a7')
-        # priors['mean:a8'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a8')
-        # priors['mean:a9'] = bilby.core.prior.Uniform(minimum=-50, maximum=50, name='mean:a9')
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
-        # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-        # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_minimum), name='log_c')
-        priors['kernel:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='log_P')
-        # priors['kernel:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56/2), maximum=np.log(7.56*8), name='log_P')
-        # priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
-        # priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
-        # priors['kernel:terms[1]:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
-        # priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
-        # priors['kernel:terms[1]:log_P'] = bilby.core.prior.DeltaFunction(peak=3, name='log_P')
-        # priors['kernel:k1:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='k1:log_S0')
-        # priors['kernel:k1:log_S0'] = bilby.core.prior.DeltaFunction(peak=0, name='k1:log_S0')
-        # priors['kernel:k1:log_omega0'] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(band_maximum*np.pi*np.sqrt(2)), name='k1:log_omega0')
-        # priors['kernel:k1:log_Q'] = bilby.core.prior.DeltaFunction(peak=np.log(1/np.sqrt(2)), name='k1:log_Q')
-        # priors['kernel:log_S0'] = bilby.core.prior.Uniform(minimum=-10, maximum=15, name='k2:log_S0')
-        # priors['kernel:log_omega0'] = bilby.core.prior.Uniform(minimum=np.log(2*np.pi*band_minimum), maximum=np.log(2*np.pi*band_maximum), name='k2:log_omega0')
-        # priors['kernel:log_Q'] = bilby.core.prior.Uniform(minimum=np.log(1/np.sqrt(2)), maximum=10, name='k2:log_Q')
+        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
     elif n_qpos == 2:
-        # priors = bilby.core.prior.ConditionalPriorDict()
         priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a0')
         priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a1')
         priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-200, maximum=200, name='mean:a2')
@@ -226,15 +203,11 @@ if likelihood_model == likelihood_models[0]:
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[0]:log_b')
         priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(40), maximum=-np.log(20), name='terms[0]:log_P')
-        # priors['kernel:terms[0]:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56*0.75), maximum=np.log(7.56*8), name='terms[0]:log_P')
+        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(20), maximum=np.log(40), name='terms[0]:log_f')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[1]:log_b')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-        priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=-np.log(80), maximum=-np.log(40), name='terms[1]:log_P')
-        # priors['kernel:terms[1]:log_P'] = bilby.core.prior.Uniform(minimum=np.log(7.56*0.25), maximum=np.log(7.56*0.75), name='terms[1]:log_P')
-        # priors['kernel:terms[1]:log_P'] = MinimumPrior(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='terms[1]:log_P', reference_name='kernel:terms[0]:log_P', order=1)
-        # priors['kernel:terms[1]:log_P']._required_variables = ['kernel:terms[0]:log_P']
+        priors['kernel:terms[1]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(40), maximum=np.log(80), name='terms[1]:log_f')
 
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 
@@ -245,10 +218,7 @@ elif likelihood_model == likelihood_models[1]:
     powers = ps.power  # Leahy norm
     # powers /= 2  # Groth norm
     noise_model = 'red_noise'
-    # fs = 1/(t[1] - t[0])
-    # frequencies, powers = periodogram(c, fs)
     frequency_mask = [True] * len(frequencies)
-    # frequency_mask[0] = False
     plt.loglog(frequencies[frequency_mask], powers[frequency_mask])
     plt.show()
     plt.clf()
@@ -262,8 +232,7 @@ elif likelihood_model == likelihood_models[1]:
     priors['width'].minimum = frequencies[1] - frequencies[0]
     priors['central_frequency'].maximum = band_maximum
     priors['central_frequency'].minimum = band_minimum
-    priors['amplitude'] = bilby.core.prior.Uniform(minimum=1, maximum=10000)
-    # priors['amplitude'].maximum = 10000
+    priors['amplitude'] = bilby.core.prior.LogUniform(minimum=1, maximum=10000)
     if n_qpos == 0:
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
@@ -334,8 +303,8 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdi
                            label=label, sampler='dynesty', nlive=150, sample='rwalk',
                            resume=True, clean=True)
 
-if candidates_run or injection_run:
-# if True:
+# if candidates_run or injection_run:
+if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         if n_qpos == 1:
@@ -344,7 +313,7 @@ if candidates_run or injection_run:
                 # for i, sample in enumerate(result.posterior.iloc):
                 #     frequency_samples.append(np.exp(sample['kernel:log_omega0'])/2/np.pi)
                 for i, sample in enumerate(result.posterior.iloc):
-                    frequency_samples.append(1 / np.exp(sample[f'kernel:log_P']))
+                    frequency_samples.append(np.exp(sample[f'kernel:log_f']))
 
                 plt.hist(frequency_samples, bins="fd", density=True)
                 plt.xlabel('frequency [Hz]')
@@ -359,8 +328,8 @@ if candidates_run or injection_run:
                 bilby.core.utils.logger.info(e)
         elif n_qpos == 2:
             try:
-                frequency_samples_0 = np.array(1 / np.exp(result.posterior.iloc[f'kernel:terms[0]:log_P']))
-                frequency_samples_1 = np.array(1 / np.exp(result.posterior.iloc[f'kernel:terms[1]:log_P']))
+                frequency_samples_0 = np.array(np.exp(result.posterior.iloc[f'kernel:terms[0]:log_f']))
+                frequency_samples_1 = np.array(np.exp(result.posterior.iloc[f'kernel:terms[1]:log_f']))
                 for samples, mode in zip([frequency_samples_0, frequency_samples_1], [0, 1]):
                     plt.hist(samples, bins="fd", density=True)
                     plt.xlabel('frequency [Hz]')

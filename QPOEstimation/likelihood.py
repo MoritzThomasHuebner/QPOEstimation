@@ -127,8 +127,6 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
             self.conversion_func = conversion_func
         self.gp = gp
         self.y = y
-        # self.noise_likelihood = bilby.core.likelihood.GaussianLikelihood(
-        #     x=np.linspace(0, 1, len(y)), y=self.y, sigma=1, func=lambda x: np.mean(self.y)).log_likelihood()
         super().__init__(parameters)
 
     def log_likelihood(self):
@@ -140,42 +138,39 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         except Exception:
             return -np.inf
 
-    # def noise_log_likelihood(self):
-    #     return self.noise_likelihood
-
 
 class QPOTerm(terms.Term):
-    parameter_names = ("log_a", "log_b", "log_c", "log_P")
+    parameter_names = ("log_a", "log_b", "log_c", "log_f")
 
     def get_real_coefficients(self, params):
-        log_a, log_b, log_c, log_P = params
+        log_a, log_b, log_c, log_f = params
         b = np.exp(log_b)
         return (
             np.exp(log_a) * (1.0 + b) / (2.0 + b), np.exp(log_c),
         )
 
     def get_complex_coefficients(self, params):
-        log_a, log_b, log_c, log_P = params
+        log_a, log_b, log_c, log_f = params
         b = np.exp(log_b)
         return (
             np.exp(log_a) / (2.0 + b), 0.0,
-            np.exp(log_c), 2 * np.pi * np.exp(-log_P),
+            np.exp(log_c), 2 * np.pi * np.exp(log_f),
         )
 
 
 class ZeroedQPOTerm(terms.Term):
-    parameter_names = ("log_a", "log_c", "log_P")
+    parameter_names = ("log_a", "log_c", "log_f")
 
     def get_real_coefficients(self, params):
-        log_a, log_c, log_P = params
+        log_a, log_c, log_f = params
         return 0, np.exp(log_c),
 
     def get_complex_coefficients(self, params):
-        log_a, log_c, log_P = params
+        log_a, log_c, log_f = params
         a = np.exp(log_a)
         c = np.exp(log_c)
-        P = np.exp(log_P)
-        return a, 0.0, c, 2 * np.pi / P,
+        f = np.exp(log_f)
+        return a, 0.0, c, 2 * np.pi * f,
 
 
 class PoissonLikelihoodWithBackground(bilby.core.likelihood.PoissonLikelihood):

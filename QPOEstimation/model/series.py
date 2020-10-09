@@ -2,7 +2,6 @@ from copy import deepcopy
 
 import numpy as np
 from celerite.modeling import Model
-from scipy.signal.windows import tukey
 from ..stabilisation import bar_lev
 import stingray
 
@@ -188,7 +187,6 @@ def sine_gaussian_with_background(times, tau, offset, amplitude, mu, sigma, freq
            sine_gaussian(t=times, amplitude=amplitude, mu=mu, sigma=sigma, frequency=frequency, phase=phase) * np.sqrt(2 * np.pi * sigma ** 2)
 
 
-
 def two_frequency_model(time_array, mu_1, mu_2, sigma_1, sigma_2, amplitude_1, amplitude_2, frequency_1, frequency_2, phase_1, phase_2, **kwargs):
     t = deepcopy(time_array)
     signal_1 = sine_gaussian(t, mu_1, sigma_1, amplitude_1, frequency_1, phase_1)
@@ -199,23 +197,15 @@ def two_frequency_model(time_array, mu_1, mu_2, sigma_1, sigma_2, amplitude_1, a
 
 
 class PolynomialMeanModel(Model):
-    parameter_names = ("a0", "a1", "a2", "a3", "a4")#, "a5", "a6", "a7", "a8", "a9")
+
+    parameter_names = ("a0", "a1", "a2", "a3", "a4")
 
     def get_value(self, t):
         t -= t[0] - 0.5
-        res = self.a0 + self.a1 * t + self.a2 * t**2 + self.a3 * t**3 + self.a4 * t**4
-        # res[np.where(res < 0)[0]] = 0
-        return res# + self.a4 * t**4 + self.a5 * t**5 + \
-               # self.a6 * t**6 + self.a7 * t**7 + self.a8 * t**8 + self.a9 * t**9
+        return self.a0 + self.a1 * t + self.a2 * t**2 + self.a3 * t**3 + self.a4 * t**4
 
-    # This method is optional but it can be used to compute the gradient of the
-    # cost function below.
-    # def compute_gradient(self, t):
-    #     e = 0.5*(t-self.ell)**2 * np.exp(-self.log_sigma2)
-    #     dalpha = np.exp(-e)
-    #     dell = self.alpha * dalpha * (t-self.ell) * np.exp(-self.log_sigma2)
-    #     dlog_s2 = self.alpha * dalpha * e
-    #     return np.array([dalpha, dell, dlog_s2])
+    def compute_gradient(self, *args, **kwargs):
+        pass
 
 
 class ExponentialMeanModel(Model):
@@ -224,9 +214,15 @@ class ExponentialMeanModel(Model):
     def get_value(self, t):
         return exponential_background(times=t, tau=self.tau, offset=self.offset)
 
+    def compute_gradient(self, *args, **kwargs):
+        pass
+
 
 class ExponentialStabilisedMeanModel(Model):
     parameter_names = ("tau", "offset")
 
     def get_value(self, t):
         return bar_lev(exponential_background(times=t, tau=self.tau, offset=self.offset))
+
+    def compute_gradient(self, *args, **kwargs):
+        pass

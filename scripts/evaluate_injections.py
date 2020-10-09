@@ -44,8 +44,14 @@ for injection in range(n_injections):
             injection_params = json.load(f)
             true_frequency = injection_params['frequency']
 
-        log_P_samples = np.array(res_one_qpo.posterior['kernel:log_P'])
-        frequency_samples_gpr = 1 / np.exp(log_P_samples)
+        try:
+            log_P_samples = np.array(res_one_qpo.posterior['kernel:log_P'])
+            frequency_samples_gpr = 1 / np.exp(log_P_samples)
+        except Exception:
+            log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
+            frequency_samples_gpr = np.exp(log_f_samples)
+
+
         frequency_samples_whittle = np.array(res_one_qpo_whittle.posterior['central_frequency'])
         # frequency_samples_poisson = np.array(res_one_qpo_poisson.posterior['frequency'])
 
