@@ -303,8 +303,8 @@ result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdi
                            label=label, sampler='dynesty', nlive=150, sample='rwalk',
                            resume=True, clean=True)
 
-# if candidates_run or injection_run:
-if True:
+if candidates_run or injection_run:
+# if True:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == likelihood_models[0]:
         if n_qpos == 1:
