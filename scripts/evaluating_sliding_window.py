@@ -13,11 +13,11 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-band = '20_128Hz'
+band = '40_128Hz'
 
 outdir = f'sliding_window_{band}'
 
-sampling_frequency = 32
+sampling_frequency = 512
 
 data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
 times = data[:, 0]
@@ -48,7 +48,6 @@ for period in range(n_periods):
     plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
     plt.savefig(f'{outdir}/data_{period}.png')
     plt.clf()
-    continue
 
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
@@ -97,6 +96,8 @@ for period in range(n_periods):
         print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
         # print(f"{period} {run_id} two qpo: {log_bf_two_qpo}")
     np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
+    np.savetxt(f'{outdir}/mean_frequencies_{period}', np.array(mean_frequency))
+    np.savetxt(f'{outdir}/std_frequencies_{period}', np.array(std_frequency))
     # np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}_whittle', np.array(log_bfs_one_qpo_whittle))
     # np.savetxt(f'log_bfs_period_two_qpo_{period}', np.array(log_bfs_two_qpo))
 
