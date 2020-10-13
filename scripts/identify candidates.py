@@ -6,7 +6,7 @@ import numpy as np
 n_periods = 47
 # band = '10_40Hz
 # band = '5_16Hz'
-band = '10_40Hz'
+band = '40_128Hz'
 # band = 'below_16Hz'
 
 Candidate = namedtuple('Candidate', ['period_number', 'index_range', 'start', 'stop', 'mean', 'std'])
@@ -37,8 +37,8 @@ for i in range(n_periods):
             # middle = np.int((r[1] + r[0])/2)
             candidates.append(Candidate(
                 period_number=i, index_range=(r[0], r[1]),
-                start=time_offset + i * pulse_period + preferred_index * 0.135,
-                stop=time_offset + i * pulse_period + preferred_index * 0.135 + 1,
+                start=time_offset + i * pulse_period + preferred_index * 0.27,
+                stop=time_offset + i * pulse_period + preferred_index * 0.27 + 1,
                 mean=mean_freqs[preferred_index], std=std_freqs[preferred_index]))
 
 

@@ -12,19 +12,19 @@ log_bfs_gpr = []
 log_bfs_gpr_two_qpo = []
 log_bfs_poisson = []
 
-# band = '5_64Hz'
-band = 'miller'
+band = '40_128Hz'
+# band = 'miller'
 
 bfs_miller = np.loadtxt('candidates/miller_bayes_factors.dat')
 
-for i in range(23):
+for i in range(9):
     # res_no_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_candidates_ref/no_qpo_exponential/results/{i}_whittle_result.json')
     # res_no_qpo_poisson = bilby.result.read_in_result(f'sliding_window_{band}_candidates_ref/no_qpo_exponential/results/{i}_poisson_result.json')
     res_one_qpo_gpr = bilby.result.read_in_result(f'sliding_window_{band}_candidates/one_qpo/results/{i}_result.json')
-    res_one_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_candidates_ref/one_qpo/results/{i}_whittle_result.json')
+    res_one_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_candidates/one_qpo/results/{i}_whittle_result.json')
     # res_one_qpo_poisson = bilby.result.read_in_result(f'sliding_window_{band}_candidates_ref/one_qpo/results/{i}_poisson_result.json')
     res_no_qpo_gpr = bilby.result.read_in_result(f'sliding_window_{band}_candidates/no_qpo/results/{i}_result.json')
-    res_no_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_candidates_ref/no_qpo/results/{i}_whittle_result.json')
+    res_no_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_candidates/no_qpo/results/{i}_whittle_result.json')
     # res_no_qpo_poisson = bilby.result.read_in_result(f'sliding_window_{band}_candidates_ref/no_qpo/results/{i}_poisson_result.json')
     # res_no_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_injections_fixed_log_b/no_qpo/results/{str(i).zfill(2)}_whittle_result.json')
     # res_one_qpo_whittle = bilby.result.read_in_result(f'sliding_window_{band}_injections_fixed_log_b/one_qpo/results/{str(i).zfill(2)}_whittle_result.json')
@@ -61,9 +61,12 @@ for i in range(23):
 
 # print(log_bfs_gpr)
 
-print(f"ID:\tln BF GPR\tln BF Whittle\tln BF Miller")
-for i, log_bf_gpr, log_bf_whittle, log_bf_miller in zip(np.arange(0, len(log_bfs_gpr)), log_bfs_gpr, log_bfs_whittle, np.log(bfs_miller)):
-    print(f"{i}:\t{log_bf_gpr:.2f}\t{log_bf_whittle:.2f}\t{log_bf_miller:.2f}")
+print(f"ID:\tln BF GPR\tln BF Whittle")
+for i, log_bf_gpr, log_bf_whittle in zip(np.arange(0, len(log_bfs_gpr)), log_bfs_gpr, log_bfs_whittle):
+    print(f"{i}:\t{log_bf_gpr:.2f}\t{log_bf_whittle:.2f}")
+# print(f"ID:\tln BF GPR\tln BF Whittle\tln BF Miller")
+# for i, log_bf_gpr, log_bf_whittle, log_bf_miller in zip(np.arange(0, len(log_bfs_gpr)), log_bfs_gpr, log_bfs_whittle, np.log(bfs_miller)):
+#     print(f"{i}:\t{log_bf_gpr:.2f}\t{log_bf_whittle:.2f}\t{log_bf_miller:.2f}")
 
 print(f"Total GP: {np.sum(np.nan_to_num(log_bfs_gpr))}")
 print(f"Total Whittle: {np.sum(np.nan_to_num(log_bfs_whittle))}")

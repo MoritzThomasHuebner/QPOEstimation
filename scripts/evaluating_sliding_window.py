@@ -101,7 +101,7 @@ for period in range(n_periods):
     # np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}_whittle', np.array(log_bfs_one_qpo_whittle))
     # np.savetxt(f'log_bfs_period_two_qpo_{period}', np.array(log_bfs_two_qpo))
 
-    start_times = period * pulse_period + segments * segment_step
+    start_times = period * pulse_period + segments * segment_step + 20
     fig, ax1 = plt.subplots()
     color = 'tab:red'
     ax1.set_xlabel('segment start time [s]')

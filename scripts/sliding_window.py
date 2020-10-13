@@ -75,7 +75,7 @@ else:
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
     nlive = 150
-    try_load = False
+    try_load = True
     plot = True
 
 pulse_period = 7.56  # see papers
@@ -115,7 +115,7 @@ if candidates_run:
     candidates = np.loadtxt(f'candidates/candidates_{band}.txt')
     start = candidates[candidate_id][0]
     stop = candidates[candidate_id][1]
-    if band == 'miller':  # Miller et al. time segments are shifted by 16 s
+    if band == 'miller':  # Miller et al. time segments are shifted by 20 s
         start += time_offset
         stop += time_offset
     segment_length = stop - start

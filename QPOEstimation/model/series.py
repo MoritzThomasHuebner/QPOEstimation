@@ -201,8 +201,8 @@ class PolynomialMeanModel(Model):
     parameter_names = ("a0", "a1", "a2", "a3", "a4")
 
     def get_value(self, t):
-        t -= t[0] - 0.5
-        return self.a0 + self.a1 * t + self.a2 * t**2 + self.a3 * t**3 + self.a4 * t**4
+        times = t - t[0] - 0.5
+        return self.a0 + self.a1 * times + self.a2 * times**2 + self.a3 * times**3 + self.a4 * times**4
 
     def compute_gradient(self, *args, **kwargs):
         pass
