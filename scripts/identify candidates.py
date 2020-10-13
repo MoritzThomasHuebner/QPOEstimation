@@ -4,12 +4,12 @@ from operator import itemgetter
 import numpy as np
 
 n_periods = 47
-# band = '16_32Hz
+# band = '10_40Hz
 # band = '5_16Hz'
-band = '64_128Hz'
+band = '10_40Hz'
 # band = 'below_16Hz'
 
-Candidate = namedtuple('Candidate', ['period_number', 'index_range', 'start', 'stop'])
+Candidate = namedtuple('Candidate', ['period_number', 'index_range', 'start', 'stop', 'mean', 'std'])
 
 def ranges(nums):
     nums = sorted(set(nums))
@@ -19,20 +19,14 @@ def ranges(nums):
 
 candidates = []
 pulse_period = 7.56  # see papers
-offset = 10.0
-# for i in range(n_periods):
-#     log_bfs = np.loadtxt(f'sliding_window_{band}/log_bfs_period_one_qpo_{i}')
-#     candidate_indices = np.where(log_bfs > 2.0)[0]
-#     rs = ranges(candidate_indices)
-#     for r in rs:
-#         if r[1] - r[0] >= 3:
-#             candidates.append(Candidate(
-#                 period_number=i, index_range=(r[0], r[1]),
-#                 start=offset + i * pulse_period + r[0] * 0.135 + 0.2, # + 0.5,
-#                 stop=offset + i * pulse_period + r[1] * 0.135 + 1 - 0.2)) # ))
+time_offset = 20.0
+
 for i in range(n_periods):
     log_bfs = np.loadtxt(f'sliding_window_{band}/log_bfs_period_one_qpo_{i}')
-    candidate_indices = np.where(log_bfs > 2.0)[0]
+    mean_freqs = np.loadtxt(f'sliding_window_{band}/mean_frequencies_{i}')
+    std_freqs = np.loadtxt(f'sliding_window_{band}/std_frequencies_{i}')
+    candidate_indices = np.where(np.logical_and(log_bfs > 8, std_freqs/mean_freqs < 1/4))[0]
+    # candidate_indices = np.where(log_bfs > 4)[0]
     rs = ranges(candidate_indices)
 
     for r in rs:
@@ -43,8 +37,9 @@ for i in range(n_periods):
             # middle = np.int((r[1] + r[0])/2)
             candidates.append(Candidate(
                 period_number=i, index_range=(r[0], r[1]),
-                start=offset + i * pulse_period + preferred_index * 0.135,
-                stop=offset + i * pulse_period + preferred_index * 0.135 + 1))
+                start=time_offset + i * pulse_period + preferred_index * 0.135,
+                stop=time_offset + i * pulse_period + preferred_index * 0.135 + 1,
+                mean=mean_freqs[preferred_index], std=std_freqs[preferred_index]))
 
 
 starts = []
@@ -55,4 +50,4 @@ for c in candidates:
     starts.append(c.start)
     stops.append(c.stop)
 
-np.savetxt(f'candidates_{band}.txt', np.array([starts, stops]).T)
+np.savetxt(f'candidates/candidates_{band}.txt', np.array([starts, stops]).T)
