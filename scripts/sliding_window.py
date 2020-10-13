@@ -58,16 +58,16 @@ if len(sys.argv) > 1:
     plot = args.plot
 else:
     matplotlib.use('Qt5Agg')
-    candidates_run = False
+    candidates_run = True
     miller_candidates = False
     injection_run = False
     period_number = 14
     run_id = 12
     n_qpos = 1
-    candidate_id = None
+    candidate_id = 5
     injection_id = None
-    band_minimum = 40
-    band_maximum = 128
+    band_minimum = 10
+    band_maximum = 40
     likelihood_model = 'gaussian_process'
     segment_length = 1.0
     segment_step = 0.27   # Requires 28 steps
@@ -75,7 +75,7 @@ else:
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
     nlive = 150
-    try_load = True
+    try_load = False
     plot = True
 
 pulse_period = 7.56  # see papers
@@ -227,10 +227,16 @@ if likelihood_model == "gaussian_process":
         # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(band_minimum), name='log_c')
         # priors['kernel:log_f'] = bilby.core.prior.DeltaFunction(peak=2, name='log_f')
     elif n_qpos == 1:
+        def conversion_function(sample):
+            out_sample = deepcopy(sample)
+            out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
+            return out_sample
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=2*np.log(band_minimum), name='log_c')
         priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
+        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
+        priors.conversion_function = conversion_function
     elif n_qpos == 2:
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[0]:log_b')
