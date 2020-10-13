@@ -17,7 +17,7 @@ band = '40_128Hz'
 
 outdir = f'sliding_window_{band}'
 
-sampling_frequency = 512
+sampling_frequency = 128  # Not used for calculations, 128 more handy for visualisation
 
 data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
 times = data[:, 0]
