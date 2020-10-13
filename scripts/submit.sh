@@ -15,15 +15,15 @@
 # Candidate runs
 srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model gaussian_process --band_minimum 5 --band_maximum 16
 srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model gaussian_process --band_minimum 5 --band_maximum 16
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model periodogram --band_minimum 5 --band_maximum 16
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model periodogram --band_minimum 5 --band_maximum 16
-
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model gaussian_process --band_minimum 10 --band_maximum 40
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model gaussian_process --band_minimum 10 --band_maximum 40
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model periodogram --band_minimum 10 --band_maximum 40
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model periodogram --band_minimum 10 --band_maximum 40
-
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model gaussian_process --band_minimum 40 --band_maximum 128
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model gaussian_process --band_minimum 40 --band_maximum 128
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model periodogram --band_minimum 40 --band_maximum 128
-srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model periodogram --band_minimum 40 --band_maximum 128
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model periodogram --band_minimum 5 --band_maximum 16
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model periodogram --band_minimum 5 --band_maximum 16
+#
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model gaussian_process --band_minimum 10 --band_maximum 40
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model gaussian_process --band_minimum 10 --band_maximum 40
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model periodogram --band_minimum 10 --band_maximum 40
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model periodogram --band_minimum 10 --band_maximum 40
+#
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model gaussian_process --band_minimum 40 --band_maximum 128
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model gaussian_process --band_minimum 40 --band_maximum 128
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 0 --model periodogram --band_minimum 40 --band_maximum 128
+#srun python sliding_window.py --candidate_run True --candidate_id ${1} --n_qpos 1 --model periodogram --band_minimum 40 --band_maximum 128
