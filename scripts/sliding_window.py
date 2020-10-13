@@ -36,6 +36,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--nlive", default=150, type=int)
     parser.add_argument("--try_load", default=False, type=bool)
     parser.add_argument("--plot", default=False, type=bool)
+    parser.add_argument("--suffix", default="", type=str)
     args = parser.parse_args()
     candidates_run = args.candidates_run
     miller_candidates = args.miller_candidates
@@ -56,6 +57,7 @@ if len(sys.argv) > 1:
     nlive = args.nlive
     try_load = args.try_load
     plot = args.plot
+    suffix = args.suffix
 else:
     matplotlib.use('Qt5Agg')
     candidates_run = True
@@ -77,6 +79,7 @@ else:
     nlive = 150
     try_load = False
     plot = True
+    suffix = ""
 
 pulse_period = 7.56  # see papers
 n_pulse_periods = 47
@@ -135,11 +138,11 @@ c = counts[indices]
 
 if candidates_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}_candidates/no_qpo"
+        outdir = f"sliding_window_{band}_candidates{suffix}/no_qpo"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}_candidates/one_qpo"
+        outdir = f"sliding_window_{band}_candidates{suffix}/one_qpo"
     else:
-        outdir = f"sliding_window_{band}_candidates/two_qpo"
+        outdir = f"sliding_window_{band}_candidates{suffix}/two_qpo"
 
     if likelihood_model == "gaussian_process":
         label = f"{candidate_id}"
@@ -150,11 +153,11 @@ if candidates_run:
 
 elif injection_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}_injections/no_qpo"
+        outdir = f"sliding_window_{band}_injections{suffix}/no_qpo"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}_injections/one_qpo"
+        outdir = f"sliding_window_{band}_injections{suffix}/one_qpo"
     else:
-        outdir = f"sliding_window_{band}_injections/two_qpo"
+        outdir = f"sliding_window_{band}_injections{suffix}/two_qpo"
 
     if likelihood_model == "gaussian_process":
         label = f"{str(injection_id).zfill(2)}"
@@ -165,11 +168,11 @@ elif injection_run:
 
 else:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}/period_{period_number}/no_qpo"
+        outdir = f"sliding_window_{band}{suffix}/period_{period_number}/no_qpo"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}/period_{period_number}/one_qpo"
+        outdir = f"sliding_window_{band}{suffix}/period_{period_number}/one_qpo"
     else:
-        outdir = f"sliding_window_{band}/period_{period_number}/two_qpo"
+        outdir = f"sliding_window_{band}{suffix}/period_{period_number}/two_qpo"
 
     if likelihood_model == "gaussian_process":
         label = f'{run_id}'
