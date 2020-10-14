@@ -15,8 +15,9 @@ period_two_log_bf_data = []
 
 # band = '40_128Hz'
 band = '10_40Hz'
+suffix = '_0.5s'
 
-outdir = f'sliding_window_{band}'
+outdir = f'sliding_window_{band}{suffix}'
 
 sampling_frequency = 128  # Not used for calculations, 128 more handy for visualisation
 
