@@ -14,7 +14,7 @@
 #  sbatch submit.sh ${i} periodogram 5 16
 #done
 #
-for i in {0..23}
+for i in {0..22}
 do
   sbatch submit.sh ${i} gaussian_process 40 128
   sbatch submit.sh ${i} periodogram 40 128
