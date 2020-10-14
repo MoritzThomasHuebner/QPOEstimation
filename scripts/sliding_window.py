@@ -117,7 +117,7 @@ counts = data[:, 1]
 if candidates_run:
     candidates = np.loadtxt(f'candidates/candidates_{band}{suffix}.txt')
     start = candidates[candidate_id][0]
-    stop = candidates[candidate_id][1]
+    stop = start + segment_length
     if band == 'miller':  # Miller et al. time segments are shifted by 20 s
         start += time_offset
         stop += time_offset
