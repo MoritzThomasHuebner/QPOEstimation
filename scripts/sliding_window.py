@@ -115,7 +115,7 @@ times = data[:, 0]
 counts = data[:, 1]
 
 if candidates_run:
-    candidates = np.loadtxt(f'candidates/candidates_{band}.txt')
+    candidates = np.loadtxt(f'candidates/candidates_{band}{suffix}.txt')
     start = candidates[candidate_id][0]
     stop = candidates[candidate_id][1]
     if band == 'miller':  # Miller et al. time segments are shifted by 20 s
@@ -138,11 +138,11 @@ c = counts[indices]
 
 if candidates_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}_candidates{suffix}/no_qpo"
+        outdir = f"sliding_window_{band}{suffix}_candidates/no_qpo"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}_candidates{suffix}/one_qpo"
+        outdir = f"sliding_window_{band}{suffix}_candidates/one_qpo"
     else:
-        outdir = f"sliding_window_{band}_candidates{suffix}/two_qpo"
+        outdir = f"sliding_window_{band}{suffix}_candidates/two_qpo"
 
     if likelihood_model == "gaussian_process":
         label = f"{candidate_id}"
@@ -153,11 +153,11 @@ if candidates_run:
 
 elif injection_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}_injections{suffix}/no_qpo"
+        outdir = f"sliding_window_{band}{suffix}_injections/no_qpo"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}_injections{suffix}/one_qpo"
+        outdir = f"sliding_window_{band}{suffix}_injections/one_qpo"
     else:
-        outdir = f"sliding_window_{band}_injections{suffix}/two_qpo"
+        outdir = f"sliding_window_{band}{suffix}_injections/two_qpo"
 
     if likelihood_model == "gaussian_process":
         label = f"{str(injection_id).zfill(2)}"
