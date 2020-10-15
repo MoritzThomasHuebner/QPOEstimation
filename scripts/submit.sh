@@ -14,7 +14,7 @@
 #
 # Candidate runs
 srun python sliding_window.py --candidates_run True --candidate_id ${1} --n_qpos 0 --model ${2} --plot True --band_minimum ${3} --band_maximum ${4} --suffix _0.5s --segment_length 0.5
-srun python sliding_window.py --candidates_run True --candidate_id ${1} --n_qpos 1 --model ${2} --plot True --band_minimum ${3} --band_maximum ${4} --suffix _0.5s --segment_length 0.5
+#srun python sliding_window.py --candidates_run True --candidate_id ${1} --n_qpos 1 --model ${2} --plot True --band_minimum ${3} --band_maximum ${4} --suffix _0.5s --segment_length 0.5
 #srun python sliding_window.py --candidates_run True --candidate_id ${1} --n_qpos 0 --model periodogram --plot True --band_minimum 5 --band_maximum 16
 #srun python sliding_window.py --candidates_run True --candidate_id ${1} --n_qpos 1 --model periodogram --plot True --band_minimum 5 --band_maximum 16
 #

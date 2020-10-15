@@ -63,15 +63,15 @@ else:
     candidates_run = True
     miller_candidates = False
     injection_run = False
-    period_number = 14
-    run_id = 12
-    n_qpos = 1
-    candidate_id = 5
+    period_number = 0
+    run_id = 5
+    n_qpos = 0
+    candidate_id = 10
     injection_id = None
     band_minimum = 10
     band_maximum = 40
     likelihood_model = 'gaussian_process'
-    segment_length = 1.0
+    segment_length = 0.5
     segment_step = 0.27   # Requires 28 steps
     background_model = 'polynomial'
     periodogram_likelihood = "whittle"
@@ -79,7 +79,7 @@ else:
     nlive = 150
     try_load = False
     plot = True
-    suffix = ""
+    suffix = "_0.5s"
 
 pulse_period = 7.56  # see papers
 n_pulse_periods = 47
@@ -223,7 +223,8 @@ if likelihood_model == "gaussian_process":
     gp.compute(t, np.ones(len(t)))  # You always need to call compute once.
 
     if n_qpos == 0:
-        priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
+        # priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
+        priors['kernel:log_sigma'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_sigma')
         # priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         # priors['kernel:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_b')
         # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
