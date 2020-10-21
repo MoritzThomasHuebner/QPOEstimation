@@ -192,8 +192,9 @@ def conversion_function(sample):
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == "gaussian_process":
     # stabilised_counts = bar_lev(c)
-    stabilised_counts = c
-    stabilised_variance = c
+    from copy import deepcopy
+    stabilised_counts = deepcopy(c)
+    stabilised_variance = deepcopy(c)
     stabilised_variance[np.where(stabilised_variance == 0)] = 1
     plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
     plt.show()
