@@ -191,9 +191,11 @@ def conversion_function(sample):
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == "gaussian_process":
-    stabilised_counts = bar_lev(c)
-    stabilised_variance = np.ones(len(stabilised_counts))
-    plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
+    # stabilised_counts = bar_lev(c)
+    stabilised_counts = c
+    stabilised_variance = c
+    stabilised_variance[np.where(stabilised_variance == 0)] = 1
+    plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
     plt.show()
     plt.clf()
 
@@ -222,7 +224,7 @@ if likelihood_model == "gaussian_process":
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-        priors['kernel:log_c'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
         priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
         priors.conversion_function = conversion_function
@@ -241,7 +243,7 @@ if likelihood_model == "gaussian_process":
         raise ValueError
 
     gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
-    gp.compute(t, np.ones(len(t)))  # You always need to call compute once.
+    gp.compute(t, np.sqrt(stabilised_variance))  # You always need to call compute once.
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 
 elif likelihood_model == "periodogram":
@@ -254,7 +256,7 @@ elif likelihood_model == "periodogram":
 
     frequency_mask = [True] * len(frequencies)
     plt.loglog(frequencies[frequency_mask], powers[frequency_mask])
-    plt.show()
+    # plt.show()
     plt.clf()
     priors = QPOEstimation.prior.psd.get_full_prior(periodogram_noise_model, frequencies=frequencies)
     priors['beta'] = bilby.core.prior.Uniform(minimum=1, maximum=100000, name='beta')
@@ -371,7 +373,7 @@ if plot:
         plt.legend()
 
         color = "#ff7f0e"
-        plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
+        plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
@@ -423,7 +425,7 @@ if plot:
         plt.legend()
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
-        plt.show()
+        # plt.show()
     elif likelihood_model == "poisson":
         if injection_run:
             frequency_samples = result.posterior["frequency"]
