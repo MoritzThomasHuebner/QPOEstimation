@@ -65,8 +65,8 @@ else:
     injection_run = False
     period_number = 0
     run_id = 5
-    n_qpos = 1
-    candidate_id = 1
+    n_qpos = 0
+    candidate_id = 0
     injection_id = None
     band_minimum = 10
     band_maximum = 40
@@ -216,8 +216,8 @@ if likelihood_model == "gaussian_process":
 
     if n_qpos == 0:
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        # priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-        priors['kernel:log_sigma'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_sigma')
+        priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
+        # priors['kernel:log_sigma'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_sigma')
     elif n_qpos == 1:
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
@@ -368,15 +368,25 @@ if plot:
         x = np.linspace(t[0], t[-1], 5000)
         pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
         pred_std = np.sqrt(pred_var)
-        plt.legend()
 
         color = "#ff7f0e"
         plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
+        # for i in range(15):
+        #     params = result.posterior.iloc[np.random.randint(len(result.posterior))]
+        #     for name, value in params.items():
+        #         try:
+        #             gp.set_parameter(name=name, value=value)
+        #         except ValueError:
+        #             continue
+        #     pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
+        #     plt.plot(x, pred_mean, color=color, alpha=0.2)
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
+        plt.legend()
+        plt.show()
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
         plt.clf()
 
