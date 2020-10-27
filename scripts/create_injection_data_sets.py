@@ -38,7 +38,7 @@ priors.conversion_function = conversion_function
 
 sampling_frequency = 256
 
-for injection_id in range(100):
+for injection_id in range(1000):
     res_id = np.random.randint(0, 18, 1)[0]
     res = bilby.result.read_in_result(f'sliding_window_10_40Hz_candidates/one_qpo/results/{res_id}_result.json')
     params = res.posterior.iloc[np.random.randint(len(res.posterior))]
@@ -58,7 +58,7 @@ for injection_id in range(100):
     y = np.random.multivariate_normal(mean_model.get_value(t), K)
     np.savetxt(f'injection_files/no_qpo/{str(injection_id).zfill(2)}_data.txt', np.array([t, y]).T)
     with open(f'injection_files/no_qpo/{str(injection_id).zfill(2)}_params.json', 'w') as f:
-        json.dump(params, f)
+        json.dump(params_mean, f)
 
     for i in range(len(t)):
         for j in range(len(t)):
