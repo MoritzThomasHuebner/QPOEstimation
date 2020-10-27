@@ -25,6 +25,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--n_qpos", default=0, type=int)
     parser.add_argument("--candidate_id", default=0, type=int)
     parser.add_argument("--injection_id", default=0, type=int)
+    parser.add_argument("--injection_mode", default="one_qpo", choices=["one_qpo", "no_qpo"], type=str)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
     parser.add_argument("--band_minimum", default=10, type=int)
     parser.add_argument("--band_maximum", default=32, type=int)
@@ -46,6 +47,7 @@ if len(sys.argv) > 1:
     n_qpos = args.n_qpos
     candidate_id = args.candidate_id
     injection_id = args.injection_id
+    injection_mode = args.injection_mode
     likelihood_model = args.model
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
@@ -68,6 +70,7 @@ else:
     n_qpos = 0
     candidate_id = 0
     injection_id = None
+    injection_mode = "one_qpo"
     band_minimum = 10
     band_maximum = 40
     likelihood_model = 'gaussian_process'
@@ -106,7 +109,7 @@ else:
     sampling_frequency = 1024
 
 if injection_run:
-    data = np.loadtxt(f'injection_files/{str(injection_id).zfill(2)}_data.txt')
+    data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
 else:
     if likelihood_model in ['gaussian_process', 'poisson']:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
@@ -155,11 +158,11 @@ if candidates_run:
         label = f"{candidate_id}_poisson"
 elif injection_run:
     if n_qpos == 0:
-        outdir = f"sliding_window_{band}{suffix}_injections/no_qpo"
+        outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/no_qpo"
     elif n_qpos == 1:
-        outdir = f"sliding_window_{band}{suffix}_injections/one_qpo"
+        outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/one_qpo"
     else:
-        outdir = f"sliding_window_{band}{suffix}_injections/two_qpo"
+        outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/two_qpo"
 
     if likelihood_model == "gaussian_process":
         label = f"{str(injection_id).zfill(2)}"
@@ -275,34 +278,7 @@ elif likelihood_model == "periodogram":
         priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
         likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=periodogram_noise_model)
 else:
-    if injection_run:
-        if n_qpos == 0:
-            priors['tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
-            priors['offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
-            priors['amplitude'] = bilby.core.prior.DeltaFunction(peak=0, name='amplitude')
-            priors['mu'] = bilby.core.prior.DeltaFunction(peak=0.5, name='mu')
-            priors['sigma'] = bilby.core.prior.DeltaFunction(peak=1, name='sigma')
-            priors['frequency'] = bilby.core.prior.DeltaFunction(peak=1, name='frequency')
-            priors['phase'] = bilby.core.prior.DeltaFunction(peak=0, name='phase')
-        elif n_qpos == 1:
-            priors['tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
-            priors['offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
-            priors['amplitude'] = bilby.core.prior.LogUniform(minimum=2, maximum=20, name='amplitude')
-            priors['mu'] = bilby.core.prior.Uniform(minimum=0.3, maximum=0.7, name='mu')
-            priors['sigma'] = bilby.core.prior.LogUniform(minimum=0.05, maximum=0.15, name='sigma')
-            priors['frequency'] = bilby.core.prior.LogUniform(minimum=10, maximum=64, name='frequency')
-            priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2 * np.pi, name='phase')
-        likelihood = bilby.core.likelihood.PoissonLikelihood(
-            x=t, y=c, func=QPOEstimation.model.series.sine_gaussian_with_background)
-    else:
-        def sine_func(t, amplitude, f, phase, **kwargs):
-            return amplitude * np.sin(2 * np.pi * f * t + phase)
-        background_estimate = QPOEstimation.smoothing.two_sided_exponential_smoothing(counts, alpha=0.06)
-        background_estimate = background_estimate[indices]
-        priors['f'] = bilby.core.prior.LogUniform(minimum=band_minimum, maximum=band_maximum, name='f')
-        priors['amplitude'] = bilby.core.prior.LogUniform(minimum=0.01, maximum=100, name='amplitude')
-        priors['phase'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name='phase')
-        likelihood = PoissonLikelihoodWithBackground(x=t, y=c, func=sine_func, background=background_estimate)
+    raise ValueError
 
 result = None
 if try_load:
@@ -314,7 +290,7 @@ if try_load:
 if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample='rwalk',
-                               resume=True, clean=True)
+                               resume=True)
 
 
 if plot:
@@ -374,15 +350,7 @@ if plot:
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
-        # for i in range(15):
-        #     params = result.posterior.iloc[np.random.randint(len(result.posterior))]
-        #     for name, value in params.items():
-        #         try:
-        #             gp.set_parameter(name=name, value=value)
-        #         except ValueError:
-        #             continue
-        #     pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
-        #     plt.plot(x, pred_mean, color=color, alpha=0.2)
+
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
         plt.legend()
@@ -436,7 +404,7 @@ if plot:
         # plt.show()
     elif likelihood_model == "poisson":
         if injection_run:
-            frequency_samples = result.posterior["frequency"]
+            frequency_samples = np.exp(np.array(result.posterior["kernel:log_f"]))
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')
             plt.ylabel('normalised PDF')
@@ -463,39 +431,6 @@ if plot:
             plt.clf()
 
             plt.plot(t, c - QPOEstimation.model.series.sine_gaussian_with_background(t, **max_like_params), label='residual')
-            plt.fill_between(t, np.sqrt(c), -np.sqrt(c), color='orange', alpha=0.3,
-                             edgecolor="none", label='1 sigma uncertainty')
-            plt.xlabel("time [s]")
-            plt.ylabel("residuals")
-            plt.legend()
-            plt.savefig(f'{outdir}/fits/{label}_max_like_fit_residuals.png')
-            plt.clf()
-        else:
-            frequency_samples = result.posterior["f"]
-            plt.hist(frequency_samples, bins="fd", density=True)
-            plt.xlabel('frequency [Hz]')
-            plt.ylabel('normalised PDF')
-            median = np.median(frequency_samples)
-            percentiles = np.percentile(frequency_samples, [16, 84])
-            plt.title(
-                f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
-            plt.clf()
-
-            plt.plot(t, c, label='measured')
-            max_like_params = result.posterior.iloc[-1]
-            plt.plot(t, sine_func(t, **max_like_params) + background_estimate, color='r', label='max_likelihood')
-            for i in range(10):
-                parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
-                plt.plot(t, sine_func(t, **parameters) + background_estimate, color='r', alpha=0.2)
-            plt.xlabel("time [s]")
-            plt.ylabel("counts")
-            plt.legend()
-            Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
-            plt.savefig(f'{outdir}/fits/{label}_max_like_fit.png')
-            plt.clf()
-
-            plt.plot(t, c - sine_func(t, **max_like_params) - background_estimate, label='residual')
             plt.fill_between(t, np.sqrt(c), -np.sqrt(c), color='orange', alpha=0.3,
                              edgecolor="none", label='1 sigma uncertainty')
             plt.xlabel("time [s]")
