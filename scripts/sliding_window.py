@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 import argparse
+import json
 
 import bilby
 import celerite
@@ -17,13 +18,13 @@ likelihood_models = ["gaussian_process", "periodogram", "poisson"]
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--candidates_run", default=False, type=bool)
-    parser.add_argument("--miller_candidates", default=False, type=bool)
-    parser.add_argument("--injection_run", default=False, type=bool)
-    parser.add_argument("--run_id", default=0, type=int)
     parser.add_argument("--period_number", default=0, type=int)
     parser.add_argument("--n_qpos", default=0, type=int)
+    parser.add_argument("--run_id", default=0, type=int)
+    parser.add_argument("--candidates_run", default=False, type=bool)
     parser.add_argument("--candidate_id", default=0, type=int)
+    parser.add_argument("--miller_candidates", default=False, type=bool)
+    parser.add_argument("--injection_run", default=False, type=bool)
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_mode", default="one_qpo", choices=["one_qpo", "no_qpo"], type=str)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
@@ -62,14 +63,14 @@ if len(sys.argv) > 1:
     suffix = args.suffix
 else:
     matplotlib.use('Qt5Agg')
-    candidates_run = True
+    candidates_run = False
     miller_candidates = False
-    injection_run = False
+    injection_run = True
     period_number = 0
     run_id = 5
-    n_qpos = 0
+    n_qpos = 1
     candidate_id = 0
-    injection_id = None
+    injection_id = 1
     injection_mode = "one_qpo"
     band_minimum = 10
     band_maximum = 40
@@ -80,7 +81,7 @@ else:
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
     nlive = 150
-    try_load = False
+    try_load = True
     plot = True
     suffix = ""
 
@@ -110,6 +111,8 @@ else:
 
 if injection_run:
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
+    with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
+        truths = json.load(f)
 else:
     if likelihood_model in ['gaussian_process', 'poisson']:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
@@ -194,7 +197,10 @@ def conversion_function(sample):
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == "gaussian_process":
-    stabilised_counts = bar_lev(c)
+    if injection_run:
+        stabilised_counts = c
+    else:
+        stabilised_counts = bar_lev(c)
     stabilised_variance = np.ones(len(c))
     plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
     plt.show()
@@ -296,6 +302,11 @@ if result is None:
 if plot:
     result.plot_corner(outdir=f"{outdir}/corner")
     if likelihood_model == "gaussian_process":
+        if injection_run:
+            try:
+                result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
+            except Exception:
+                pass
         if n_qpos == 1:
             try:
                 frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
@@ -354,7 +365,7 @@ if plot:
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
         plt.legend()
-        plt.show()
+        # plt.show()
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
         plt.clf()
 
@@ -380,6 +391,7 @@ if plot:
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit_residuals")
         plt.clf()
     elif likelihood_model == "periodogram":
+        result.plot_corner(outdir=f"{outdir}/corner")
         if n_qpos > 0:
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
@@ -402,42 +414,6 @@ if plot:
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
         # plt.show()
-    elif likelihood_model == "poisson":
-        if injection_run:
-            frequency_samples = np.exp(np.array(result.posterior["kernel:log_f"]))
-            plt.hist(frequency_samples, bins="fd", density=True)
-            plt.xlabel('frequency [Hz]')
-            plt.ylabel('normalised PDF')
-            median = np.median(frequency_samples)
-            percentiles = np.percentile(frequency_samples, [16, 84])
-            plt.title(
-                f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
-            plt.clf()
-
-            plt.plot(t, c, label='measured')
-            max_like_params = result.posterior.iloc[-1]
-            plt.plot(t, QPOEstimation.model.series.sine_gaussian_with_background(t, **max_like_params),
-                     color='r', label='max_likelihood')
-            for i in range(10):
-                parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
-                plt.plot(t, QPOEstimation.model.series.sine_gaussian_with_background(t, **parameters),
-                         color='r', alpha=0.2)
-            plt.xlabel("time [s]")
-            plt.ylabel("counts")
-            plt.legend()
-            Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
-            plt.savefig(f'{outdir}/fits/{label}_max_like_fit.png')
-            plt.clf()
-
-            plt.plot(t, c - QPOEstimation.model.series.sine_gaussian_with_background(t, **max_like_params), label='residual')
-            plt.fill_between(t, np.sqrt(c), -np.sqrt(c), color='orange', alpha=0.3,
-                             edgecolor="none", label='1 sigma uncertainty')
-            plt.xlabel("time [s]")
-            plt.ylabel("residuals")
-            plt.legend()
-            plt.savefig(f'{outdir}/fits/{label}_max_like_fit_residuals.png')
-            plt.clf()
 
 
 # clean up

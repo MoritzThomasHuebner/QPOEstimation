@@ -38,7 +38,7 @@ priors.conversion_function = conversion_function
 
 sampling_frequency = 256
 
-for i in range(100):
+for injection_id in range(100):
     res_id = np.random.randint(0, 18, 1)[0]
     res = bilby.result.read_in_result(f'sliding_window_10_40Hz_candidates/one_qpo/results/{res_id}_result.json')
     params = res.posterior.iloc[np.random.randint(len(res.posterior))]
@@ -46,7 +46,9 @@ for i in range(100):
                        a3=params['mean:a3'], a4=params['mean:a4'])
     params_kernel = dict(log_a=params['kernel:log_a'], log_b=-10,
                          log_c=params['kernel:log_c'], log_f=params['kernel:log_f'])
-    params = dict(**params_mean, **params_kernel)
+    params = dict(**params)
+    del params['log_likelihood']
+    del params['log_prior']
     mean_model = PolynomialMeanModel(**params_mean)
     kernel = QPOTerm(**params_kernel)
 
@@ -54,8 +56,8 @@ for i in range(100):
     yerr = np.ones(len(t))
     K = np.diag(np.ones(len(t)))
     y = np.random.multivariate_normal(mean_model.get_value(t), K)
-    np.savetxt(f'injection_files/no_qpo/{str(i).zfill(2)}_data.txt', np.array([t, y]).T)
-    with open(f'injection_files/no_qpo/{str(i).zfill(2)}_params.json', 'w') as f:
+    np.savetxt(f'injection_files/no_qpo/{str(injection_id).zfill(2)}_data.txt', np.array([t, y]).T)
+    with open(f'injection_files/no_qpo/{str(injection_id).zfill(2)}_params.json', 'w') as f:
         json.dump(params, f)
 
     for i in range(len(t)):
@@ -64,6 +66,6 @@ for i in range(100):
             tau = np.abs(i - j) * dt
             K[i][j] += kernel.get_value(tau=tau)
     y = np.random.multivariate_normal(mean_model.get_value(t), K)
-    np.savetxt(f'injection_files/one_qpo/{str(i).zfill(2)}_data.txt', np.array([t, y]).T)
-    with open(f'injection_files/one_qpo/{str(i).zfill(2)}_params.json', 'w') as f:
+    np.savetxt(f'injection_files/one_qpo/{str(injection_id).zfill(2)}_data.txt', np.array([t, y]).T)
+    with open(f'injection_files/one_qpo/{str(injection_id).zfill(2)}_params.json', 'w') as f:
         json.dump(params, f)
