@@ -9,15 +9,21 @@ n_injections = 100
 injections = np.arange(0, n_injections)
 # band = '16_32Hz'
 # band = 'below_16Hz'
-band = '10_64Hz'
-
+band = '10_40Hz'
+injection_mode = "one_qpo"
 log_bfs_one_qpo_gpr = []
 log_bfs_one_qpo_whittle = []
-log_bfs_one_qpo_poisson = []
 
 perc_unc_gpr = []
 perc_unc_whittle = []
-perc_unc_poisson = []
+
+for injection in range(n_injections):
+    res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
+    res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
+    log_bf = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+    print(log_bf)
+
+assert False
 
 for injection in range(n_injections):
     try:
