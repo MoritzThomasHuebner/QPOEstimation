@@ -5,6 +5,7 @@ import numpy as np
 from QPOEstimation.stabilisation import bar_lev
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
+
 segments = np.arange(0, 28)
 mean_log_bfs = []
 
@@ -13,13 +14,22 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-band = '40_128Hz'
-# band = '10_40Hz'
-suffix = '_0.5s'
+band_minimum = 5
+band_maximum = 64
+
+
+if band_maximum <= 64:
+    sampling_frequency = 256
+elif band_maximum <= 128:
+    sampling_frequency = 512
+else:
+    sampling_frequency = 1024
+
+band = f'{band_maximum}_128Hz'
+suffix = ''
 
 outdir = f'sliding_window_{band}{suffix}'
 
-sampling_frequency = 128  # Not used for calculations, 128 more handy for visualisation
 
 data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
 times = data[:, 0]
@@ -29,27 +39,6 @@ pulse_period = 7.56
 segment_step = 0.27
 
 for period in range(n_periods):
-
-    # pulse_period = 7.56  # see papers
-    # interpulse_periods = []
-    # for i in range(47):
-    #     interpulse_periods.append((20.0 + i * pulse_period, 20.0 + (i + 1) * pulse_period))
-    #
-    # start = interpulse_periods[period][0]
-    #
-    # segment_length = 7.56
-    # start = start
-    # stop = start + segment_length
-    #
-    # indices = np.where(np.logical_and(times > start, times < stop))
-    # t = times[indices]
-    # c = counts[indices]
-    # stabilised_counts = bar_lev(c)
-    # stabilised_variance = np.ones(len(stabilised_counts))
-    # plt.errorbar(t, stabilised_counts, yerr=stabilised_variance, fmt=".k", capsize=0, label='data')
-    # plt.savefig(f'{outdir}/data_{period}.png')
-    # plt.clf()
-
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
     mean_frequency = []
@@ -62,35 +51,26 @@ for period in range(n_periods):
         try:
             res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
             res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_result.json")
-            # res_no_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_whittle_result.json")
-            # res_one_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_whittle_result.json")
-            # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_result.json")
-            # res_two_qpo = bilby.result.read_in_result(f"sliding_window/period_{period}/two_qpo/{run_id}_two_qpo_result.json")
-            # log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
             log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
-            # log_bf_one_qpo_whittle = res_one_qpo_whittle.log_evidence - res_no_qpo_whittle.log_evidence
-            # log_bf_two_qpo = res_two_qpo.log_evidence - res_no_qpo.log_evidence
-            # max_likelihood_sample_one_qpo = res_one_qpo.posterior.iloc[-1]
-            try:
-                log_P_samples = np.array(res_one_qpo.posterior['kernel:log_P'])
-                frequency_samples = 1 / np.exp(log_P_samples)
-            except Exception:
-                log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
-                frequency_samples = np.exp(log_f_samples)
-
+            log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
+            frequency_samples = np.exp(log_f_samples)
             mean_frequency.append(np.mean(frequency_samples))
             std_frequency.append(np.std(frequency_samples))
+
+            # res_no_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_whittle_result.json")
+            # res_one_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_whittle_result.json")
+            # log_bf_one_qpo_whittle = res_one_qpo_whittle.log_evidence - res_no_qpo_whittle.log_evidence
             # frequency_samples_whittle = np.array(res_one_qpo_whittle.posterior['central_frequency'])
             # mean_frequency_whittle.append(np.mean(frequency_samples_whittle))
             # std_frequency_whittle.append(np.std(frequency_samples_whittle))
         except Exception as e:
             print(e)
             log_bf_one_qpo = np.nan
-            # log_bf_two_qpo = np.nan
             mean_frequency.append(np.nan)
             std_frequency.append(np.nan)
             mean_frequency_whittle.append(np.nan)
             std_frequency_whittle.append(np.nan)
+            # log_bf_two_qpo = np.nan
         log_bfs_one_qpo.append(log_bf_one_qpo)
         # log_bfs_one_qpo_whittle.append(log_bf_one_qpo_whittle)
         # log_bfs_two_qpo.append(log_bf_two_qpo)
@@ -108,7 +88,6 @@ for period in range(n_periods):
     ax1.set_xlabel('segment start time [s]')
     ax1.set_ylabel('ln BF', color=color)
     ax1.plot(start_times, log_bfs_one_qpo, color=color, ls='solid', label='One QPO')
-    # ax1.plot(start_times, log_bfs_two_qpo, color=color, ls='dotted', label='Two QPOs')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
@@ -156,26 +135,3 @@ for period in range(n_periods):
     # period_two_log_bf_data.append(deepcopy(log_bfs_two_qpo))
 
 
-# for period in range(9):
-#     plt.plot(segments, period_one_log_bf_data[period], label=f'period_{period}')
-#     plt.legend()
-#     plt.xlabel("Data segment")
-#     plt.ylabel("ln BF")
-# plt.savefig("one_qpo_log_bfs")
-# plt.clf()
-
-# for period in range(9):
-#     plt.plot(segments, period_two_log_bf_data[period], label=f'period_{period}')
-#     plt.legend()
-#     plt.xlabel("Data segment")
-#     plt.ylabel("ln BF")
-# plt.savefig("two_qpo_log_bfs")
-# plt.clf()
-#
-# for period in range(9):
-#     plt.plot(segments, np.array(period_two_log_bf_data[period]) - np.array(period_one_log_bf_data[period]), label=f'period_{period}')
-#     plt.legend()
-#     plt.xlabel("Data segment")
-#     plt.ylabel("ln BF")
-# plt.savefig("two_v_one_qpo_log_bfs")
-# plt.clf()

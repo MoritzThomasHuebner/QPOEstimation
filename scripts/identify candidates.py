@@ -6,7 +6,7 @@ import numpy as np
 n_periods = 47
 # band = '10_40Hz
 # band = '5_16Hz'
-band = '5_16Hz'
+band = '5_64Hz'
 # band = 'below_16Hz'
 
 Candidate = namedtuple('Candidate', ['period_number', 'index_range', 'start', 'stop', 'mean', 'std'])
@@ -26,16 +26,14 @@ for i in range(n_periods):
     log_bfs = np.loadtxt(f'sliding_window_{band}/log_bfs_period_one_qpo_{i}')
     mean_freqs = np.loadtxt(f'sliding_window_{band}/mean_frequencies_{i}')
     std_freqs = np.loadtxt(f'sliding_window_{band}/std_frequencies_{i}')
-    candidate_indices = np.where(np.logical_and(log_bfs > 6, std_freqs/mean_freqs < 1/4))[0]
+    candidate_indices = np.where(np.logical_and(log_bfs > 4, std_freqs/mean_freqs < 1/4))[0]
     # candidate_indices = np.where(log_bfs > 4)[0]
     rs = ranges(candidate_indices)
 
     for r in rs:
-        if r[1] - r[0] >= 2:
+        if r[1] - r[0] > 1:
             indexes = np.arange(r[0], r[1])
             preferred_index = np.where(log_bfs[indexes] == np.max(log_bfs[indexes]))[0][0] + indexes[0]
-            print(log_bfs[preferred_index])
-            # middle = np.int((r[1] + r[0])/2)
             candidates.append(Candidate(
                 period_number=i, index_range=(r[0], r[1]),
                 start=time_offset + i * pulse_period + preferred_index * segment_step,

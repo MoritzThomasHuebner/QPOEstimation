@@ -4,7 +4,7 @@ for segment in {0..27}
 do
   for period in {0..46}
   do
-    sbatch submit.sh $segment $period gaussian_process 5 64
+    sbatch submit.sh $segment $period gaussian_process 64 128
   done
 done
 
