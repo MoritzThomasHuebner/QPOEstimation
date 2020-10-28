@@ -5,7 +5,7 @@ import numpy as np
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
 import json
-n_injections = 100
+n_injections = 1000
 injections = np.arange(0, n_injections)
 # band = '16_32Hz'
 # band = 'below_16Hz'
@@ -20,9 +20,13 @@ perc_unc_whittle = []
 log_bfs = []
 
 for injection in range(n_injections):
-    res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
-    res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-    log_bfs.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
+    print(injection)
+    try:
+        res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
+        res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
+        log_bfs.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
+    except Exception as e:
+        print(e)
 
 plt.hist(log_bfs, bins='fd')
 plt.xlabel("ln BF")
