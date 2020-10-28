@@ -4,6 +4,7 @@ from QPOEstimation.poisson import poisson_process
 from QPOEstimation.model.series import sine_gaussian_with_background
 from QPOEstimation.likelihood import CeleriteLikelihood
 import matplotlib.pyplot as plt
+from pathlib import Path
 import matplotlib
 import bilby
 import stingray
@@ -37,6 +38,9 @@ priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=
 priors.conversion_function = conversion_function
 
 sampling_frequency = 256
+
+Path('injection_files/no_qpo').mkdir(exist_ok=True, parents=True)
+Path('injection_files/one_qpo').mkdir(exist_ok=True, parents=True)
 
 for injection_id in range(1000):
     res_id = np.random.randint(0, 18, 1)[0]

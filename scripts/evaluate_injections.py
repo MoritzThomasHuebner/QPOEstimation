@@ -17,11 +17,18 @@ log_bfs_one_qpo_whittle = []
 perc_unc_gpr = []
 perc_unc_whittle = []
 
+log_bfs = []
+
 for injection in range(n_injections):
     res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
     res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-    log_bf = res_one_qpo.log_evidence - res_no_qpo.log_evidence
-    print(log_bf)
+    log_bfs.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
+
+plt.hist(log_bfs, bins='fd')
+plt.xlabel("ln BF")
+plt.ylabel("counts")
+plt.savefig(f"injections_{injection_mode}_log_bfs")
+plt.show()
 
 assert False
 
