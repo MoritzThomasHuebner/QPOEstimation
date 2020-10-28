@@ -25,7 +25,7 @@ elif band_maximum <= 128:
 else:
     sampling_frequency = 1024
 
-band = f'{band_maximum}_{band_maximum}Hz'
+band = f'{band_minimum}_{band_maximum}Hz'
 suffix = ''
 
 outdir = f'sliding_window_{band}{suffix}'
