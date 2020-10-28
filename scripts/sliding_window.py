@@ -1,8 +1,8 @@
+import argparse
+import json
 import os
 import sys
 from pathlib import Path
-import argparse
-import json
 
 import bilby
 import celerite
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
-    PoissonLikelihoodWithBackground, GrothLikelihood
+    GrothLikelihood
 from QPOEstimation.model.series import *
 
 likelihood_models = ["gaussian_process", "periodogram", "poisson"]
@@ -99,9 +99,7 @@ if miller_candidates:
 else:
     band = f'{band_minimum}_{band_maximum}Hz'
 
-# if band_maximum <= 16:
-#     sampling_frequency = 128
-# el
+
 if band_maximum <= 64:
     sampling_frequency = 256
 elif band_maximum <= 128:
