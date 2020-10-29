@@ -63,17 +63,17 @@ if len(sys.argv) > 1:
     suffix = args.suffix
 else:
     matplotlib.use('Qt5Agg')
-    candidates_run = False
+    candidates_run = True
     miller_candidates = False
-    injection_run = True
+    injection_run = False
     period_number = 0
     run_id = 5
     n_qpos = 1
-    candidate_id = 0
+    candidate_id = 12
     injection_id = 1
     injection_mode = "one_qpo"
-    band_minimum = 10
-    band_maximum = 40
+    band_minimum = 5
+    band_maximum = 16
     likelihood_model = 'gaussian_process'
     segment_length = 1.0
     segment_step = 0.27   # Requires 28 steps
