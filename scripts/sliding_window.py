@@ -70,7 +70,7 @@ else:
     run_id = 5
     n_qpos = 1
     candidate_id = 12
-    injection_id = 1
+    injection_id = 0
     injection_mode = "one_qpo"
     band_minimum = 5
     band_maximum = 64
@@ -343,6 +343,13 @@ if plot:
             except ValueError:
                 continue
 
+        for name, value in max_like_params.items():
+            try:
+                mean_model.set_parameter(name=name, value=value)
+            except ValueError:
+                continue
+
+
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         taus = np.linspace(-0.5, 0.5, 1000)
         plt.plot(taus, gp.kernel.get_value(taus))
@@ -354,12 +361,14 @@ if plot:
         x = np.linspace(t[0], t[-1], 5000)
         pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
         pred_std = np.sqrt(pred_var)
+        trend = mean_model.get_value(x)
 
         color = "#ff7f0e"
         plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
+        plt.plot(x, trend, color='green', label='Trend')
 
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
