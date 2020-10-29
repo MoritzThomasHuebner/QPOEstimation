@@ -63,9 +63,9 @@ if len(sys.argv) > 1:
     suffix = args.suffix
 else:
     matplotlib.use('Qt5Agg')
-    candidates_run = True
+    candidates_run = False
     miller_candidates = False
-    injection_run = False
+    injection_run = True
     period_number = 0
     run_id = 5
     n_qpos = 1
@@ -73,7 +73,7 @@ else:
     injection_id = 1
     injection_mode = "one_qpo"
     band_minimum = 5
-    band_maximum = 16
+    band_maximum = 64
     likelihood_model = 'gaussian_process'
     segment_length = 1.0
     segment_step = 0.27   # Requires 28 steps
@@ -226,7 +226,6 @@ if likelihood_model == "gaussian_process":
     if n_qpos == 0:
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
         priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-        # priors['kernel:log_sigma'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_sigma')
     elif n_qpos == 1:
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
@@ -263,7 +262,7 @@ elif likelihood_model == "periodogram":
 
     frequency_mask = [True] * len(frequencies)
     plt.loglog(frequencies[frequency_mask], powers[frequency_mask])
-    # plt.show()
+    plt.show()
     plt.clf()
     priors = QPOEstimation.prior.psd.get_full_prior(periodogram_noise_model, frequencies=frequencies)
     priors['beta'] = bilby.core.prior.Uniform(minimum=1, maximum=100000, name='beta')
@@ -365,8 +364,8 @@ if plot:
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
         plt.legend()
-        # plt.show()
         plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
+        plt.show()
         plt.clf()
 
         psd_freqs = np.exp(np.linspace(np.log(1.0), np.log(band_maximum), 5000))
@@ -383,13 +382,6 @@ if plot:
         plt.savefig(f"{outdir}/fits/{label}_psd")
         plt.clf()
 
-        pred_mean, pred_var = gp.predict(stabilised_counts, t, return_var=True)
-        plt.scatter(t, stabilised_counts - pred_mean, label='residual')
-        plt.fill_between(t, 1, -1, color=color, alpha=0.3, edgecolor="none")
-        plt.xlabel("time [s]")
-        plt.ylabel("stabilised residuals")
-        plt.savefig(f"{outdir}/fits/{label}_max_like_fit_residuals")
-        plt.clf()
     elif likelihood_model == "periodogram":
         result.plot_corner(outdir=f"{outdir}/corner")
         if n_qpos > 0:
