@@ -108,10 +108,12 @@ else:
     sampling_frequency = 1024
 
 if injection_run:
+    polynomial_max = 10
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
     with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
         truths = json.load(f)
 else:
+    polynomial_max = 1000
     if likelihood_model in ['gaussian_process', 'poisson']:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
     else:
@@ -205,11 +207,11 @@ if likelihood_model == "gaussian_process":
     plt.clf()
 
     if background_model == 'polynomial':
-        priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-1000, maximum=1000, name='mean:a0')
-        priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-1000, maximum=1000, name='mean:a1')
-        priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-1000, maximum=1000, name='mean:a2')
-        priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-1000, maximum=1000, name='mean:a3')
-        priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-1000, maximum=1000, name='mean:a4')
+        priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
+        priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
+        priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
+        priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a3')
+        priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a4')
         mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)
         fit_mean = True
     elif background_model == 'exponential':
