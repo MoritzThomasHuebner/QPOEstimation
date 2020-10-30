@@ -9,4 +9,4 @@ for injection_id in range(100):
     res.injection_parameters = injection_params
     res_list.append(res)
 
-bilby.result.make_pp_plot(results=res_list, outdir='.')
+bilby.result.make_pp_plot(results=res_list, filename='pp_test_one_qpo.png')
