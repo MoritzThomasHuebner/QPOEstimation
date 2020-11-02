@@ -10,7 +10,7 @@ injections = np.arange(0, n_injections)
 # band = '16_32Hz'
 # band = 'below_16Hz'
 band = '5_64Hz'
-injection_mode = "one_qpo"
+injection_mode = "no_qpo"
 log_bfs_one_qpo_gpr = []
 log_bfs_one_qpo_whittle = []
 
