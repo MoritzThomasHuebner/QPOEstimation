@@ -158,6 +158,25 @@ class QPOTerm(terms.Term):
         )
 
 
+class ExponentialTerm(terms.Term):
+    parameter_names = ("log_a", "log_c")
+
+    def get_real_coefficients(self, params):
+        log_a, log_c = params
+        b = np.exp(10)
+        return (
+            np.exp(log_a) * (1.0 + b) / (2.0 + b), np.exp(log_c),
+        )
+
+    def get_complex_coefficients(self, params):
+        log_a, log_c = params
+        b = np.exp(10)
+        return (
+            np.exp(log_a) / (2.0 + b), 0.0,
+            np.exp(log_c), 50,
+        )
+
+
 class ZeroedQPOTerm(terms.Term):
     parameter_names = ("log_a", "log_c", "log_f")
 
