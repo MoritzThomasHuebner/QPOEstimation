@@ -40,13 +40,13 @@ plt.hist(log_bfs_one_qpo_vs_exp, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
 plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_vs_exp_kernel")
-plt.show()
+plt.clf()
 
 plt.hist(log_bfs_one_qpo_vs_no_qpo, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
 plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_vs_no_qpo_kernel")
-plt.show()
+plt.clf()
 
 assert False
 
