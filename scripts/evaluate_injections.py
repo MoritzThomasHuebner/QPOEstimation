@@ -38,6 +38,7 @@ perc_unc_whittle = []
 
 log_bfs_one_qpo = []
 log_bfs_red_noise = []
+log_bfs_one_qpo_red_noise = []
 for injection in range(n_injections):
     print(injection)
     try:
@@ -46,6 +47,7 @@ for injection in range(n_injections):
         res_red_noise = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/red_noise/results/{str(injection).zfill(2)}_result.json")
         log_bfs_one_qpo.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
         log_bfs_red_noise.append(res_red_noise.log_evidence - res_no_qpo.log_evidence)
+        log_bfs_one_qpo_red_noise.append(res_one_qpo.log_evidence - res_red_noise.log_evidence)
         print(log_bfs_one_qpo[-1])
         print(log_bfs_red_noise[-1])
         print()
@@ -63,6 +65,12 @@ plt.hist(log_bfs_red_noise, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
 plt.savefig(f"injections_{injection_mode}_log_bfs_red_noise")
+plt.clf()
+
+plt.hist(log_bfs_red_noise, bins='fd')
+plt.xlabel("ln BF")
+plt.ylabel("counts")
+plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_red_noise")
 plt.clf()
 
 assert False

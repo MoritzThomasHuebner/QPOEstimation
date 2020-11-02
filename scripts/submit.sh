@@ -30,9 +30,9 @@
 #srun python sliding_window.py --candidates_run True --miller_candidates True --candidate_id ${1} --recovery_mode no_qpo --model periodogram --plot True
 #srun python sliding_window.py --candidates_run True --miller_candidates True --candidate_id ${1} --recovery_mode one_qpo --model periodogram --plot True
 #
-srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode ${2} --recovery_mode no_qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
-srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode ${2} --recovery_mode one_qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
-srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode ${2} --recovery_mode red_noise --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
+srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode ${2} --recovery_mode no_qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64
+srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode ${2} --recovery_mode one_qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64
+srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode ${2} --recovery_mode red_noise --model gaussian_process --plot True --band_minimum 5 --band_maximum 64
 #srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode red_noise --recovery_mode no_qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
 #srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode red_noise --recovery_mode one_qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
 #srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode red_noise --recovery_mode red_noise --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
