@@ -25,7 +25,7 @@ for injection in range(n_injections):
         # res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
         # res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
         res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-        res_exp = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_exp_kernel_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
+        res_exp = bilby.result.read_in_result(f"sliding_window_{band}_exp_kernel_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
         # log_bf = res_one_qpo.log_evidence - res_no_qpo.log_evidence
         log_bf = res_one_qpo.log_evidence - res_exp.log_evidence
         log_bfs.append(log_bf)
