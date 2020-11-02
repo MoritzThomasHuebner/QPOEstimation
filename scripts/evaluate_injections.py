@@ -2,50 +2,67 @@ import bilby
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-# matplotlib.use("Qt5Agg")
 from copy import deepcopy
+import argparse
+import sys
 import json
-n_injections = 100
+
+if len(sys.argv) > 1:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--injection_mode", default="one_qpo", choices=["one_qpo", "no_qpo", "red_noise"], type=str)
+    parser.add_argument("--n_injections", default=100, type=int)
+    parser.add_argument("--band_minimum", default=5, type=int)
+    parser.add_argument("--band_maximum", default=64, type=int)
+    args = parser.parse_args()
+
+    injection_mode = args.injection_mode
+    n_injections = args.n_injections
+    band_minimum = args.band_minimum
+    band_maximum = args.band_maximum
+else:
+    matplotlib.use('Qt5Agg')
+    injection_mode = "red_noise"
+    n_injections = 100
+    band_minimum = 5
+    band_maximum = 64
+
 injections = np.arange(0, n_injections)
-# band = '16_32Hz'
-# band = 'below_16Hz'
-band = '5_64Hz'
-injection_mode = "no_qpo"
+
+band = f'{band_minimum}_{band_maximum}Hz'
+
 log_bfs_one_qpo_gpr = []
 log_bfs_one_qpo_whittle = []
 
 perc_unc_gpr = []
 perc_unc_whittle = []
 
-log_bfs_one_qpo_vs_exp = []
-log_bfs_one_qpo_vs_no_qpo = []
+log_bfs_one_qpo = []
+log_bfs_red_noise = []
 for injection in range(n_injections):
     print(injection)
     try:
         res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
-        # res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
         res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-        res_exp = bilby.result.read_in_result(f"sliding_window_{band}_exp_kernel_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-        # log_bf = res_one_qpo.log_evidence - res_no_qpo.log_evidence
-        log_bfs_one_qpo_vs_exp.append(res_one_qpo.log_evidence - res_exp.log_evidence)
-        log_bfs_one_qpo_vs_no_qpo.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
-        print(log_bfs_one_qpo_vs_exp[-1])
-        print(log_bfs_one_qpo_vs_no_qpo[-1])
+        res_red_noise = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/red_noise/results/{str(injection).zfill(2)}_result.json")
+        log_bfs_one_qpo.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
+        log_bfs_red_noise.append(res_red_noise.log_evidence - res_no_qpo.log_evidence)
+        print(log_bfs_one_qpo[-1])
+        print(log_bfs_red_noise[-1])
         print()
 
     except Exception as e:
         print(e)
 
-plt.hist(log_bfs_one_qpo_vs_exp, bins='fd')
+plt.hist(log_bfs_one_qpo, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
-plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_vs_exp_kernel")
+plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo")
 plt.clf()
 
-plt.hist(log_bfs_one_qpo_vs_no_qpo, bins='fd')
+plt.hist(log_bfs_red_noise, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
-plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_vs_no_qpo_kernel")
+plt.savefig(f"injections_{injection_mode}_log_bfs_red_noise")
 plt.clf()
 
 assert False
