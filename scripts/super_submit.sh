@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#for segment in {0..27}
-#do
-#  for period in {0..46}
-#  do
-#    sbatch submit.sh $segment $period gaussian_process 64 128
-#  done
-#done
+for segment in {0..27}
+do
+  for period in {0..46}
+  do
+    sbatch submit.sh $segment $period gaussian_process 5 64
+  done
+done
 
 #for i in {0..51}
 #do
@@ -33,9 +33,9 @@
 #  sbatch submit.sh ${i} gaussian_process 40 128
 #  sbatch submit.sh ${i} periodogram 40 128
 #done
-for i in {0..99}
-do
-  sbatch submit.sh ${i} no_qpo
-  sbatch submit.sh ${i} one_qpo
-  sbatch submit.sh ${i} red_noise
-done
+#for i in {0..99}
+#do
+#  sbatch submit.sh ${i} no_qpo
+#  sbatch submit.sh ${i} one_qpo
+#  sbatch submit.sh ${i} red_noise
+#done
