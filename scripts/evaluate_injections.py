@@ -67,7 +67,7 @@ plt.ylabel("counts")
 plt.savefig(f"injections_{injection_mode}_log_bfs_red_noise")
 plt.clf()
 
-plt.hist(log_bfs_red_noise, bins='fd')
+plt.hist(log_bfs_one_qpo_red_noise, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
 plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_red_noise")
