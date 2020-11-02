@@ -5,7 +5,7 @@ import numpy as np
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
 import json
-n_injections = 1000
+n_injections = 100
 injections = np.arange(0, n_injections)
 # band = '16_32Hz'
 # band = 'below_16Hz'
