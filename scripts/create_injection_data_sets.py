@@ -48,7 +48,7 @@ priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-1, maximum=1, name='l
 # priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
 priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=1, maximum=np.log(sampling_frequency), name='log_c')
 # priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(5), maximum=np.log(64), name='log_f')
-priors['kernel:log_f'] = np.log(10)
+# priors['kernel:log_f'] = np.log(10)
 # priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
 # priors.conversion_function = conversion_function
 
