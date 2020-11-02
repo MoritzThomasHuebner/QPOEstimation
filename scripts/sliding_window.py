@@ -11,22 +11,23 @@ import matplotlib.pyplot as plt
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
-    GrothLikelihood
+    GrothLikelihood, ExponentialTerm
 from QPOEstimation.model.series import *
 
 likelihood_models = ["gaussian_process", "periodogram", "poisson"]
+modes = ["one_qpo", "no_qpo", "red_noise"]
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument("--period_number", default=0, type=int)
-    parser.add_argument("--n_qpos", default=0, type=int)
+    parser.add_argument("--recovery_mode", default="one_qpo", choices=modes)
     parser.add_argument("--run_id", default=0, type=int)
     parser.add_argument("--candidates_run", default=False, type=bool)
     parser.add_argument("--candidate_id", default=0, type=int)
     parser.add_argument("--miller_candidates", default=False, type=bool)
     parser.add_argument("--injection_run", default=False, type=bool)
     parser.add_argument("--injection_id", default=0, type=int)
-    parser.add_argument("--injection_mode", default="one_qpo", choices=["one_qpo", "no_qpo"], type=str)
+    parser.add_argument("--injection_mode", default="one_qpo", choices=modes, type=str)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
     parser.add_argument("--band_minimum", default=10, type=int)
     parser.add_argument("--band_maximum", default=32, type=int)
@@ -45,7 +46,7 @@ if len(sys.argv) > 1:
     injection_run = args.injection_run
     run_id = args.run_id
     period_number = args.period_number
-    n_qpos = args.n_qpos
+    recovery_mode = args.recovery_mode
     candidate_id = args.candidate_id
     injection_id = args.injection_id
     injection_mode = args.injection_mode
@@ -68,10 +69,10 @@ else:
     injection_run = True
     period_number = 0
     run_id = 5
-    n_qpos = 1
+    recovery_mode = "one_qpo"
     candidate_id = 12
-    injection_id = 0
-    injection_mode = "one_qpo"
+    injection_id = 4
+    injection_mode = "red_noise"
     band_minimum = 5
     band_maximum = 64
     likelihood_model = 'gaussian_process'
@@ -108,12 +109,13 @@ else:
     sampling_frequency = 1024
 
 if injection_run:
-    polynomial_max = 10
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
-    with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
-        truths = json.load(f)
+    if injection_mode == recovery_mode:
+        with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
+            truths = json.load(f)
+    else:
+        truths = {}
 else:
-    polynomial_max = 1000
     if likelihood_model in ['gaussian_process', 'poisson']:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
     else:
@@ -146,47 +148,23 @@ t = times[indices]
 c = counts[indices]
 
 if candidates_run:
-    if n_qpos == 0:
-        outdir = f"sliding_window_{band}{suffix}_candidates/no_qpo"
-    elif n_qpos == 1:
-        outdir = f"sliding_window_{band}{suffix}_candidates/one_qpo"
-    else:
-        outdir = f"sliding_window_{band}{suffix}_candidates/two_qpo"
-
+    outdir = f"sliding_window_{band}{suffix}_candidates/{recovery_mode}"
     if likelihood_model == "gaussian_process":
         label = f"{candidate_id}"
     elif likelihood_model == "periodogram":
         label = f"{candidate_id}_{periodogram_likelihood}"
-    else:
-        label = f"{candidate_id}_poisson"
 elif injection_run:
-    if n_qpos == 0:
-        outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/no_qpo"
-    elif n_qpos == 1:
-        outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/one_qpo"
-    else:
-        outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/two_qpo"
-
+    outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/{recovery_mode}"
     if likelihood_model == "gaussian_process":
         label = f"{str(injection_id).zfill(2)}"
     elif likelihood_model == "periodogram":
         label = f"{str(injection_id).zfill(2)}_{periodogram_likelihood}"
-    else:
-        label = f"{str(injection_id).zfill(2)}_poisson"
 else:
-    if n_qpos == 0:
-        outdir = f"sliding_window_{band}{suffix}/period_{period_number}/no_qpo"
-    elif n_qpos == 1:
-        outdir = f"sliding_window_{band}{suffix}/period_{period_number}/one_qpo"
-    else:
-        outdir = f"sliding_window_{band}{suffix}/period_{period_number}/two_qpo"
-
+    outdir = f"sliding_window_{band}{suffix}/period_{period_number}/{recovery_mode}"
     if likelihood_model == "gaussian_process":
         label = f'{run_id}'
     elif likelihood_model == "periodogram":
         label = f'{run_id}_{periodogram_likelihood}'
-    else:
-        label = f'{run_id}_poisson'
 
 
 def conversion_function(sample):
@@ -198,8 +176,17 @@ def conversion_function(sample):
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == "gaussian_process":
     if injection_run:
+        polynomial_max = 10
+        min_log_a = -1
+        max_log_a = 1
+        min_log_c = 1
         stabilised_counts = c
     else:
+        polynomial_max = 1000
+        min_log_a = -5
+        max_log_a = 15
+        min_log_c = -6
+
         stabilised_counts = bar_lev(c)
     stabilised_variance = np.ones(len(c))
     plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
@@ -223,39 +210,21 @@ if likelihood_model == "gaussian_process":
         mean_model = np.mean(stabilised_counts)
         fit_mean = False
 
-    if n_qpos == 0:
+    if recovery_mode == "no_qpo":
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
         priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-    elif n_qpos == 1:
-        if injection_run:
-            kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
-            priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-1, maximum=1, name='log_a')
-            priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
-            priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=1, maximum=np.log(sampling_frequency), name='log_c')
-            priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
-            priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
-            priors.conversion_function = conversion_function
-        else:
-            kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
-            priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='log_a')
-            priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-            priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='log_c')
-            priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
-            priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
-            priors.conversion_function = conversion_function
-    elif n_qpos == 2:
-        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3) \
-                 + QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
-        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[0]:log_a')
-        priors['kernel:terms[0]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[0]:log_b')
-        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=np.log(sampling_frequency), name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(20), maximum=np.log(40), name='terms[0]:log_f')
-        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=-5, maximum=15, name='terms[1]:log_a')
-        priors['kernel:terms[1]:log_b'] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='terms[1]:log_b')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=-6, maximum=3.5, name='terms[1]:log_c')
-        priors['kernel:terms[1]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(40), maximum=np.log(80), name='terms[1]:log_f')
-    else:
-        raise ValueError
+    elif recovery_mode == "one_qpo":
+        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
+        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
+        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency), name='log_c')
+        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
+        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
+        priors.conversion_function = conversion_function
+    elif recovery_mode == 'red_noise':
+        kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
+        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency), name='log_c')
 
     gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
     gp.compute(t, np.sqrt(stabilised_variance))  # You always need to call compute once.
@@ -281,7 +250,7 @@ elif likelihood_model == "periodogram":
     priors['central_frequency'].maximum = band_maximum
     priors['central_frequency'].minimum = band_minimum
     priors['amplitude'] = bilby.core.prior.LogUniform(minimum=1, maximum=10000)
-    if n_qpos == 0:
+    if recovery_mode == "no_qpo":
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
         priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
@@ -315,7 +284,7 @@ if plot:
                 result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
             except Exception:
                 pass
-        if n_qpos == 1:
+        if recovery_mode == "one_qpo":
             try:
                 frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
                 plt.hist(frequency_samples, bins="fd", density=True)
@@ -326,22 +295,6 @@ if plot:
                 plt.title(f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
                 plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
                 plt.clf()
-            except Exception as e:
-                bilby.core.utils.logger.info(e)
-        elif n_qpos == 2:
-            try:
-                frequency_samples_0 = np.array(np.exp(result.posterior.iloc[f'kernel:terms[0]:log_f']))
-                frequency_samples_1 = np.array(np.exp(result.posterior.iloc[f'kernel:terms[1]:log_f']))
-                for samples, mode in zip([frequency_samples_0, frequency_samples_1], [0, 1]):
-                    plt.hist(samples, bins="fd", density=True)
-                    plt.xlabel('frequency [Hz]')
-                    plt.ylabel('normalised PDF')
-                    median = np.median(samples)
-                    percentiles = np.percentile(samples, [16, 84])
-                    plt.title(
-                        f"{np.mean(samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-                    plt.savefig(f"{outdir}/corner/{label}_frequency_posterior_{mode}")
-                    plt.clf()
             except Exception as e:
                 bilby.core.utils.logger.info(e)
 
@@ -402,7 +355,7 @@ if plot:
 
     elif likelihood_model == "periodogram":
         result.plot_corner(outdir=f"{outdir}/corner")
-        if n_qpos > 0:
+        if recovery_mode == "one_qpo":
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')

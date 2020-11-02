@@ -35,5 +35,7 @@
 #done
 for i in {0..99}
 do
-  sbatch submit.sh ${i}
+  sbatch submit.sh ${i} no_qpo
+  sbatch submit.sh ${i} one_qpo
+  sbatch submit.sh ${i} red_noise
 done
