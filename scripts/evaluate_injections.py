@@ -9,8 +9,8 @@ n_injections = 1000
 injections = np.arange(0, n_injections)
 # band = '16_32Hz'
 # band = 'below_16Hz'
-band = '10_40Hz'
-injection_mode = "no_qpo"
+band = '5_64Hz'
+injection_mode = "one_qpo"
 log_bfs_one_qpo_gpr = []
 log_bfs_one_qpo_whittle = []
 
@@ -22,16 +22,21 @@ log_bfs = []
 for injection in range(n_injections):
     print(injection)
     try:
-        res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
+        # res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
+        # res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
         res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-        log_bfs.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
+        res_exp = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_exp_kernel_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
+        # log_bf = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+        log_bf = res_one_qpo.log_evidence - res_exp.log_evidence
+        log_bfs.append(log_bf)
+
     except Exception as e:
         print(e)
 
 plt.hist(log_bfs, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
-plt.savefig(f"injections_{injection_mode}_log_bfs")
+plt.savefig(f"injections_{injection_mode}_log_bfs_exp_kernel")
 plt.show()
 
 assert False
