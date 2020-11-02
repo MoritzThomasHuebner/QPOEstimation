@@ -17,26 +17,35 @@ log_bfs_one_qpo_whittle = []
 perc_unc_gpr = []
 perc_unc_whittle = []
 
-log_bfs = []
-
+log_bfs_one_qpo_vs_exp = []
+log_bfs_one_qpo_vs_no_qpo = []
 for injection in range(n_injections):
     print(injection)
     try:
-        # res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
+        res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
         # res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
         res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
         res_exp = bilby.result.read_in_result(f"sliding_window_{band}_exp_kernel_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
         # log_bf = res_one_qpo.log_evidence - res_no_qpo.log_evidence
-        log_bf = res_one_qpo.log_evidence - res_exp.log_evidence
-        log_bfs.append(log_bf)
+        log_bfs_one_qpo_vs_exp.append(res_one_qpo.log_evidence - res_exp.log_evidence)
+        log_bfs_one_qpo_vs_no_qpo.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
+        print(log_bfs_one_qpo_vs_exp[-1])
+        print(log_bfs_one_qpo_vs_no_qpo[-1])
+        print()
 
     except Exception as e:
         print(e)
 
-plt.hist(log_bfs, bins='fd')
+plt.hist(log_bfs_one_qpo_vs_exp, bins='fd')
 plt.xlabel("ln BF")
 plt.ylabel("counts")
-plt.savefig(f"injections_{injection_mode}_log_bfs_exp_kernel")
+plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_vs_exp_kernel")
+plt.show()
+
+plt.hist(log_bfs_one_qpo_vs_no_qpo, bins='fd')
+plt.xlabel("ln BF")
+plt.ylabel("counts")
+plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_vs_no_qpo_kernel")
 plt.show()
 
 assert False
