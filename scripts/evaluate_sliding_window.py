@@ -41,6 +41,7 @@ segment_step = 0.27
 for period in range(n_periods):
     log_bfs_one_qpo = []
     log_bfs_two_qpo = []
+    log_bfs_red_noise = []
     mean_frequency = []
     std_frequency = []
     log_bfs_one_qpo_whittle = []
@@ -51,7 +52,10 @@ for period in range(n_periods):
         try:
             res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
             res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_result.json")
+            res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_result.json")
             log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+            log_bf_red_noise = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+
             log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
             frequency_samples = np.exp(log_f_samples)
             mean_frequency.append(np.mean(frequency_samples))
@@ -66,17 +70,21 @@ for period in range(n_periods):
         except Exception as e:
             print(e)
             log_bf_one_qpo = np.nan
+            log_bf_red_noise = np.nan
             mean_frequency.append(np.nan)
             std_frequency.append(np.nan)
             mean_frequency_whittle.append(np.nan)
             std_frequency_whittle.append(np.nan)
             # log_bf_two_qpo = np.nan
         log_bfs_one_qpo.append(log_bf_one_qpo)
+        log_bfs_one_qpo.append(log_bf_one_qpo)
         # log_bfs_one_qpo_whittle.append(log_bf_one_qpo_whittle)
         # log_bfs_two_qpo.append(log_bf_two_qpo)
         print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
+        print(f"{period} {run_id} red noise: {log_bfs_red_noise}")
         # print(f"{period} {run_id} two qpo: {log_bf_two_qpo}")
     np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
+    np.savetxt(f'{outdir}/log_bfs_period_red_noise_{period}', np.array(log_bfs_red_noise))
     np.savetxt(f'{outdir}/mean_frequencies_{period}', np.array(mean_frequency))
     np.savetxt(f'{outdir}/std_frequencies_{period}', np.array(std_frequency))
     # np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}_whittle', np.array(log_bfs_one_qpo_whittle))
@@ -104,6 +112,31 @@ for period in range(n_periods):
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     ax1.legend()
     plt.savefig(f'{outdir}/log_bfs_period_{period}')
+    plt.clf()
+
+
+    start_times = period * pulse_period + segments * segment_step + 20
+    fig, ax1 = plt.subplots()
+    color = 'tab:red'
+    ax1.set_xlabel('segment start time [s]')
+    ax1.set_ylabel('ln BF', color=color)
+    ax1.plot(start_times, np.array(log_bfs_one_qpo) - np.array(log_bfs_red_noise), color=color, ls='solid', label='One QPO')
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    color = 'tab:blue'
+    ax2.set_ylabel('frequency [Hz]', color=color)  # we already handled the x-label with ax1
+    ax2.plot(start_times, mean_frequency, color=color)
+    mean_frequency = np.array(mean_frequency)
+    std_frequency = np.array(std_frequency)
+    plt.fill_between(start_times, mean_frequency + std_frequency, mean_frequency - std_frequency, color=color, alpha=0.3,
+                     edgecolor="none")
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    ax1.legend()
+    plt.savefig(f'{outdir}/log_bfs_period_{period}_vs_red_noise')
     plt.clf()
 
 
