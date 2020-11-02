@@ -30,7 +30,7 @@
 #srun python sliding_window.py --candidates_run True --miller_candidates True --candidate_id ${1} --n_qpos 0 --model periodogram --plot True
 #srun python sliding_window.py --candidates_run True --miller_candidates True --candidate_id ${1} --n_qpos 1 --model periodogram --plot True
 #
-#srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode no_qpo --n_qpos 0 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
-#srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode no_qpo --n_qpos 1 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
-#srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode one_qpo --n_qpos 0 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
-srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode one_qpo --n_qpos 1 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64
+srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode no_qpo --n_qpos 0 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
+srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode no_qpo --n_qpos 1 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
+srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode one_qpo --n_qpos 0 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel
+srun python sliding_window.py --injection_run True --injection_id ${1} --injection_mode one_qpo --n_qpos 1 --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --suffix _exp_kernel

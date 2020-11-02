@@ -230,7 +230,7 @@ if likelihood_model == "gaussian_process":
         if injection_run:
             kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
             priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=-1, maximum=1, name='log_a')
-            priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
+            priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=10, name='log_b')
             priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=1, maximum=np.log(sampling_frequency), name='log_c')
             priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
             priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
