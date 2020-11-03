@@ -54,7 +54,7 @@ for period in range(n_periods):
             res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_result.json")
             res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_result.json")
             log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
-            log_bf_red_noise = res_one_qpo.log_evidence - res_no_qpo.log_evidence
+            log_bf_red_noise = res_red_noise.log_evidence - res_no_qpo.log_evidence
 
             log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
             frequency_samples = np.exp(log_f_samples)
