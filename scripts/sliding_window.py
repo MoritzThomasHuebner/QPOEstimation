@@ -66,15 +66,15 @@ else:
     matplotlib.use('Qt5Agg')
     candidates_run = False
     miller_candidates = False
-    injection_run = True
-    period_number = 0
-    run_id = 5
+    injection_run = False
+    period_number = 5
+    run_id = 24
     recovery_mode = "one_qpo"
     candidate_id = 12
     injection_id = 4
     injection_mode = "red_noise"
-    band_minimum = 5
-    band_maximum = 64
+    band_minimum = 64
+    band_maximum = 128
     likelihood_model = 'gaussian_process'
     segment_length = 1.0
     segment_step = 0.27   # Requires 28 steps
@@ -82,7 +82,7 @@ else:
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
     nlive = 150
-    try_load = True
+    try_load = False
     plot = True
     suffix = ""
 
@@ -224,7 +224,7 @@ if likelihood_model == "gaussian_process":
     elif recovery_mode == 'red_noise':
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency), name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(np.sqrt(2*np.pi)), name='log_c')
 
     gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
     gp.compute(t, np.sqrt(stabilised_variance))  # You always need to call compute once.
