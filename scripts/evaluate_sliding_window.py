@@ -77,11 +77,11 @@ for period in range(n_periods):
             std_frequency_whittle.append(np.nan)
             # log_bf_two_qpo = np.nan
         log_bfs_one_qpo.append(log_bf_one_qpo)
-        log_bfs_one_qpo.append(log_bf_one_qpo)
+        log_bfs_red_noise.append(log_bf_red_noise)
         # log_bfs_one_qpo_whittle.append(log_bf_one_qpo_whittle)
         # log_bfs_two_qpo.append(log_bf_two_qpo)
         print(f"{period} {run_id} one qpo: {log_bf_one_qpo}")
-        print(f"{period} {run_id} red noise: {log_bfs_red_noise}")
+        print(f"{period} {run_id} red noise: {log_bf_red_noise}")
         # print(f"{period} {run_id} two qpo: {log_bf_two_qpo}")
     np.savetxt(f'{outdir}/log_bfs_period_one_qpo_{period}', np.array(log_bfs_one_qpo))
     np.savetxt(f'{outdir}/log_bfs_period_red_noise_{period}', np.array(log_bfs_red_noise))
