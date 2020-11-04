@@ -156,6 +156,11 @@ else:
 
 times = data[:, 0]
 counts = data[:, 1]
+outdir = 'outdir'
+label = 'run'
+start = times[0] - 0.1
+stop = times[-1] + 0.1
+
 
 if run_mode == 'candidates':
     candidates = np.loadtxt(f'candidates/candidates_{band}{suffix}.txt')
@@ -167,21 +172,10 @@ if run_mode == 'candidates':
     segment_length = stop - start
 
     outdir = f"{run_mode}_{band}{suffix}/{recovery_mode}"
-    if likelihood_model == "gaussian_process":
-        label = f"{candidate_id}"
-    elif likelihood_model == "periodogram":
-        label = f"{candidate_id}_{periodogram_likelihood}"
-    else:
-        raise ValueError("Likelihood model not defined")
-
+    label = f"{candidate_id}_{likelihood_model}"
 elif run_mode == 'injection':
-    start = times[0] - 0.1
-    stop = times[-1] + 0.1
     outdir = f"{run_mode}_{band}{suffix}_{injection_mode}/{recovery_mode}"
-    if likelihood_model == "gaussian_process":
-        label = f"{str(injection_id).zfill(2)}"
-    elif likelihood_model == "periodogram":
-        label = f"{str(injection_id).zfill(2)}_{periodogram_likelihood}"
+    label = f"{str(injection_id).zfill(2)}_{likelihood_model}"
 elif run_mode == 'sliding_window':
     interpulse_periods = []
     for i in range(n_pulse_periods):
@@ -190,13 +184,7 @@ elif run_mode == 'sliding_window':
     stop = start + segment_length
 
     outdir = f"{run_mode}_{band}{suffix}/period_{period_number}/{recovery_mode}"
-    if likelihood_model == "gaussian_process":
-        label = f'{run_id}'
-    elif likelihood_model == "periodogram":
-        label = f'{run_id}_{periodogram_likelihood}'
-
-else:
-    raise ValueError("No run mode specified")
+    label = f'{run_id}_{likelihood_model}'
 
 
 indices = np.where(np.logical_and(times > start, times < stop))
