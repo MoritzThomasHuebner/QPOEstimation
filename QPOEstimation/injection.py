@@ -22,13 +22,13 @@ class InjectionCreator(object):
         self.injection_id = str(injection_id).zfill(2)
         self.create_outdir()
 
-        self.kernel = self.get_kernel()
         self.mean_model = PolynomialMeanModel(**self.params_mean)
 
         self.times = np.linspace(0, self.segment_length, self.sampling_frequency * self.segment_length)
         self.n = len(self.times)
         self.dt = self.times[1] - self.times[0]
 
+        self.kernel = self.get_kernel()
         self.yerr = np.ones(self.n)
         self.cov = self.get_cov()
         self.y = self.get_y()
@@ -75,14 +75,16 @@ class InjectionCreator(object):
 
     def get_cov(self):
         cov = np.diag(np.ones(self.n))
+        taus = np.zeros(shape=(self.n, self.n))
         for i in range(self.n):
             for j in range(self.n):
-                tau = np.abs(i - j) * self.dt
-                cov[i][j] += self.kernel.get_value(tau=tau)
+                taus[i][j] = np.abs(i - j) * self.dt
+        cov += self.kernel.get_value(tau=taus)
         return cov
 
     def get_y(self):
-        return np.random.multivariate_normal(self.mean_model.get_value(self.times), self.cov)
+        self.y = np.random.multivariate_normal(self.mean_model.get_value(self.times), self.cov)
+        return self.y
 
     def save(self):
         np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.txt',
