@@ -6,4 +6,4 @@
 #SBATCH --time=1:00:00
 #SBATCH --mem-per-cpu=1G
 
-srun python create_injection_data_sets.py --minimum_id ${1} --maximum_id  ${2} --injection_mode ${3}
+srun python inject.py --minimum_id ${1} --maximum_id  ${2} --injection_mode ${3}
