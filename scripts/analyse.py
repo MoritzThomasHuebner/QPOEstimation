@@ -243,14 +243,14 @@ if likelihood_model == "gaussian_process":
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency)/2, name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency/2), name='log_c')
         priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
         priors.conversion_function = conversion_function
     elif recovery_mode == 'red_noise':
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency)/2, name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency/2), name='log_c')
         # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-2, maximum=np.log(np.sqrt(2*np.pi)), name='log_c')
     else:
         raise ValueError('Recovery mode not defined')
