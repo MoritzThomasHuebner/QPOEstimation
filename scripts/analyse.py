@@ -55,6 +55,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--suffix", default="", type=str)
 
     parser.add_argument("--try_load", default=True, type=bool)
+    parser.add_argument("--resume", default=False, type=bool)
     parser.add_argument("--plot", default=True, type=bool)
     args = parser.parse_args()
 
@@ -90,6 +91,7 @@ if len(sys.argv) > 1:
     suffix = args.suffix
 
     try_load = args.try_load
+    resume = args.resume
     plot = args.plot
 else:
     matplotlib.use('Qt5Agg')
@@ -124,6 +126,7 @@ else:
     nlive = 150
 
     try_load = False
+    resume = False
     plot = True
 
     suffix = ""
@@ -302,7 +305,7 @@ if try_load:
 if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample='rwalk',
-                               resume=True)
+                               resume=resume)
 
 
 if plot:
