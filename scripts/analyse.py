@@ -30,11 +30,15 @@ if len(sys.argv) > 1:
 
 
     parser.add_argument("--candidate_id", default=0, type=int)
+    parser.add_argument("--miller_candidates", default=False, type=bool)
 
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
 
-    parser.add_argument("--miller_candidates", default=False, type=bool)
+    parser.add_argument("--polynomial_max", default=1000, type=float)
+    parser.add_argument("--min_log_a", default=-5, type=float)
+    parser.add_argument("--max_log_a", default=15, type=float)
+    parser.add_argument("--min_log_c", default=-6, type=float)
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
@@ -56,18 +60,20 @@ if len(sys.argv) > 1:
 
     run_mode = args.run_mode
 
-    # sliding_window_run = args.sliding_window_run
     period_number = args.period_number
     run_id = args.run_id
 
-    # candidates_run = args.candidates_run
     candidate_id = args.candidate_id
+    miller_candidates = args.miller_candidates
 
-    # injection_run = args.injection_run
+    polynomial_max = args.polynomial_max
+    min_log_a = args.min_log_a
+    max_log_a = args.max_log_a
+    min_log_c = args.min_log_c
+
     injection_id = args.injection_id
     injection_mode = args.injection_mode
 
-    miller_candidates = args.miller_candidates
 
     recovery_mode = args.recovery_mode
     likelihood_model = args.model
@@ -88,30 +94,30 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    run_mode = 'sliding_window'
-
-    # sliding_window_run = True
-    # candidates_run = False
-    # injection_run = False
+    run_mode = 'injection'
 
     period_number = 14
     run_id = 13
 
     candidate_id = 12
-
-    injection_id = 4
-    injection_mode = "red_noise"
-
     miller_candidates = False
 
-    recovery_mode = "qpo"
+    injection_id = 0
+    injection_mode = "qpo"
+
+    polynomial_max = 10
+    min_log_a = -1
+    max_log_a = 1
+    min_log_c = 1
+
+    recovery_mode = "red_noise"
     likelihood_model = 'gaussian_process'
     background_model = 'polynomial'
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
-    band_minimum = 64
-    band_maximum = 128
+    band_minimum = 5
+    band_maximum = 64
     segment_length = 1.0
     segment_step = 0.27   # Requires 28 steps
 
@@ -201,16 +207,8 @@ def conversion_function(sample):
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == "gaussian_process":
     if run_mode == 'injection':
-        polynomial_max = 10
-        min_log_a = -1
-        max_log_a = 1
-        min_log_c = 1
         stabilised_counts = c
     else:
-        polynomial_max = 1000
-        min_log_a = -5
-        max_log_a = 15
-        min_log_c = -6
         stabilised_counts = bar_lev(c)
 
     stabilised_variance = np.ones(len(c))
@@ -219,18 +217,21 @@ if likelihood_model == "gaussian_process":
     plt.clf()
 
     if background_model == 'polynomial':
-        priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
-        priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
-        priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
-        priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a3')
-        priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a4')
+        if polynomial_max == 0:
+            priors['mean:a0'] = 0
+            priors['mean:a1'] = 0
+            priors['mean:a2'] = 0
+            priors['mean:a3'] = 0
+            priors['mean:a4'] = 0
+            fit_mean = False
+        else:
+            priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
+            priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
+            priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
+            priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a3')
+            priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a4')
+            fit_mean = True
         mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)
-        fit_mean = True
-    elif background_model == 'exponential':
-        priors['mean:tau'] = bilby.core.prior.LogUniform(minimum=0.3, maximum=1.0, name='tau')
-        priors['mean:offset'] = bilby.core.prior.LogUniform(minimum=1, maximum=50, name='offset')
-        mean_model = ExponentialStabilisedMeanModel(tau=0, offset=0)
-        fit_mean = True
     else:
         mean_model = np.mean(stabilised_counts)
         fit_mean = False
@@ -249,7 +250,8 @@ if likelihood_model == "gaussian_process":
     elif recovery_mode == 'red_noise':
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(np.sqrt(2*np.pi)), name='log_c')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency), name='log_c')
+        # priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=-2, maximum=np.log(np.sqrt(2*np.pi)), name='log_c')
     else:
         raise ValueError('Recovery mode not defined')
 

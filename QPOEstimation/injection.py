@@ -61,7 +61,8 @@ class InjectionCreator(object):
         for param, value in self.params.items():
             if param.startswith('kernel:'):
                 params_kernel[param.replace('kernel:', '')] = value
-        params_kernel['log_b'] = -10
+        if self.injection_mode == 'qpo':
+            params_kernel['log_b'] = -10
         return params_kernel
 
     def get_kernel(self):
