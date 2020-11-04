@@ -8,6 +8,7 @@ import bilby
 import celerite
 import matplotlib
 import matplotlib.pyplot as plt
+from scipy.signal import periodogram
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
@@ -15,75 +16,110 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 from QPOEstimation.model.series import *
 
 likelihood_models = ["gaussian_process", "periodogram", "poisson"]
-modes = ["one_qpo", "no_qpo", "red_noise"]
+modes = ["qpo", "white_noise", "red_noise"]
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--period_number", default=0, type=int)
-    parser.add_argument("--recovery_mode", default="one_qpo", choices=modes)
-    parser.add_argument("--run_id", default=0, type=int)
+    parser.add_argument("--run_mode", default='sliding_window', choices=['sliding_window', 'candidates', 'injection'])
+    parser.add_argument("--sliding_window_run", default=True, type=bool)
     parser.add_argument("--candidates_run", default=False, type=bool)
-    parser.add_argument("--candidate_id", default=0, type=int)
-    parser.add_argument("--miller_candidates", default=False, type=bool)
     parser.add_argument("--injection_run", default=False, type=bool)
+
+    parser.add_argument("--period_number", default=0, type=int)
+    parser.add_argument("--run_id", default=0, type=int)
+
+
+    parser.add_argument("--candidate_id", default=0, type=int)
+
     parser.add_argument("--injection_id", default=0, type=int)
-    parser.add_argument("--injection_mode", default="one_qpo", choices=modes, type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
+
+    parser.add_argument("--miller_candidates", default=False, type=bool)
+
+    parser.add_argument("--recovery_mode", default="qpo", choices=modes)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
+    parser.add_argument("--background_model", default="polynomial", choices=["polynomial", "exponential", None])
+    parser.add_argument("--periodogram_likelihood", default="whittle", choices=["whittle", "groth"])
+    parser.add_argument("--periodogram_noise_model", default="red_noise", choices=["red_noise", "broken_power_law"])
+
     parser.add_argument("--band_minimum", default=10, type=int)
     parser.add_argument("--band_maximum", default=32, type=int)
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--segment_step", default=0.27, type=float)
-    parser.add_argument("--background_model", default="polynomial", choices=["polynomial", "exponential", None])
-    parser.add_argument("--periodogram_likelihood", default="whittle", choices=["whittle", "groth"])
-    parser.add_argument("--periodogram_noise_model", default="red_noise", choices=["red_noise", "broken_power_law"])
     parser.add_argument("--nlive", default=150, type=int)
+
+    parser.add_argument("--suffix", default="", type=str)
+
     parser.add_argument("--try_load", default=False, type=bool)
     parser.add_argument("--plot", default=False, type=bool)
-    parser.add_argument("--suffix", default="", type=str)
     args = parser.parse_args()
-    candidates_run = args.candidates_run
-    miller_candidates = args.miller_candidates
-    injection_run = args.injection_run
-    run_id = args.run_id
+
+    run_mode = args.run_mode
+
+    # sliding_window_run = args.sliding_window_run
     period_number = args.period_number
-    recovery_mode = args.recovery_mode
+    run_id = args.run_id
+
+    # candidates_run = args.candidates_run
     candidate_id = args.candidate_id
+
+    # injection_run = args.injection_run
     injection_id = args.injection_id
     injection_mode = args.injection_mode
+
+    miller_candidates = args.miller_candidates
+
+    recovery_mode = args.recovery_mode
     likelihood_model = args.model
+    background_model = args.background_model
+    periodogram_likelihood = args.periodogram_likelihood
+    periodogram_noise_model = args.periodogram_noise_model
+
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
     segment_length = args.segment_length
     segment_step = args.segment_step
-    background_model = args.background_model
-    periodogram_likelihood = args.periodogram_likelihood
-    periodogram_noise_model = args.periodogram_noise_model
     nlive = args.nlive
+
+    suffix = args.suffix
+
     try_load = args.try_load
     plot = args.plot
-    suffix = args.suffix
 else:
     matplotlib.use('Qt5Agg')
-    candidates_run = False
-    miller_candidates = False
-    injection_run = False
-    period_number = 5
-    run_id = 24
-    recovery_mode = "one_qpo"
+
+    run_mode = 'sliding_window'
+
+    # sliding_window_run = True
+    # candidates_run = False
+    # injection_run = False
+
+    period_number = 14
+    run_id = 13
+
     candidate_id = 12
+
     injection_id = 4
     injection_mode = "red_noise"
-    band_minimum = 64
-    band_maximum = 128
+
+    miller_candidates = False
+
+    recovery_mode = "qpo"
     likelihood_model = 'gaussian_process'
-    segment_length = 1.0
-    segment_step = 0.27   # Requires 28 steps
     background_model = 'polynomial'
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
+
+    band_minimum = 64
+    band_maximum = 128
+    segment_length = 1.0
+    segment_step = 0.27   # Requires 28 steps
+
     nlive = 150
+
     try_load = False
     plot = True
+
     suffix = ""
 
 pulse_period = 7.56  # see papers
@@ -108,7 +144,7 @@ elif band_maximum <= 128:
 else:
     sampling_frequency = 1024
 
-if injection_run:
+if run_mode == 'injection':
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
     if injection_mode == recovery_mode:
         with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
@@ -116,55 +152,56 @@ if injection_run:
     else:
         truths = {}
 else:
-    if likelihood_model in ['gaussian_process', 'poisson']:
-        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
-    else:
-        data = np.loadtxt(f'data/sgr1806_1024Hz.dat')
-        # times[0] = 2004 December 27 at 21:30:31.375 UTC
+    data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
 
 times = data[:, 0]
 counts = data[:, 1]
 
-if candidates_run:
+if run_mode == 'candidates':
     candidates = np.loadtxt(f'candidates/candidates_{band}{suffix}.txt')
     start = candidates[candidate_id][0]
     stop = start + segment_length
-    if band == 'miller':  # Miller et al. time segments are shifted by 20 s
+    if miller_candidates:  # Miller et al. time segments are shifted by 20 s
         start += time_offset
         stop += time_offset
     segment_length = stop - start
-elif injection_run:
-    start = -0.1
-    stop = 1.1
-else:
+
+    outdir = f"{run_mode}_{band}{suffix}/{recovery_mode}"
+    if likelihood_model == "gaussian_process":
+        label = f"{candidate_id}"
+    elif likelihood_model == "periodogram":
+        label = f"{candidate_id}_{periodogram_likelihood}"
+    else:
+        raise ValueError("Likelihood model not defined")
+
+elif run_mode == 'injection':
+    start = times[0] - 0.1
+    stop = times[-1] + 0.1
+    outdir = f"{run_mode}_{band}{suffix}_{injection_mode}/{recovery_mode}"
+    if likelihood_model == "gaussian_process":
+        label = f"{str(injection_id).zfill(2)}"
+    elif likelihood_model == "periodogram":
+        label = f"{str(injection_id).zfill(2)}_{periodogram_likelihood}"
+elif run_mode == 'sliding_window':
     interpulse_periods = []
     for i in range(n_pulse_periods):
         interpulse_periods.append((time_offset + i * pulse_period, time_offset + (i + 1) * pulse_period))
     start = interpulse_periods[period_number][0] + run_id * segment_step
     stop = start + segment_length
 
-indices = np.where(np.logical_and(times > start, times < stop))
-t = times[indices]
-c = counts[indices]
-
-if candidates_run:
-    outdir = f"sliding_window_{band}{suffix}_candidates/{recovery_mode}"
-    if likelihood_model == "gaussian_process":
-        label = f"{candidate_id}"
-    elif likelihood_model == "periodogram":
-        label = f"{candidate_id}_{periodogram_likelihood}"
-elif injection_run:
-    outdir = f"sliding_window_{band}{suffix}_{injection_mode}_injections/{recovery_mode}"
-    if likelihood_model == "gaussian_process":
-        label = f"{str(injection_id).zfill(2)}"
-    elif likelihood_model == "periodogram":
-        label = f"{str(injection_id).zfill(2)}_{periodogram_likelihood}"
-else:
-    outdir = f"sliding_window_{band}{suffix}/period_{period_number}/{recovery_mode}"
+    outdir = f"{run_mode}_{band}{suffix}/period_{period_number}/{recovery_mode}"
     if likelihood_model == "gaussian_process":
         label = f'{run_id}'
     elif likelihood_model == "periodogram":
         label = f'{run_id}_{periodogram_likelihood}'
+
+else:
+    raise ValueError("No run mode specified")
+
+
+indices = np.where(np.logical_and(times > start, times < stop))
+t = times[indices]
+c = counts[indices]
 
 
 def conversion_function(sample):
@@ -175,7 +212,7 @@ def conversion_function(sample):
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == "gaussian_process":
-    if injection_run:
+    if run_mode == 'injection':
         polynomial_max = 10
         min_log_a = -1
         max_log_a = 1
@@ -186,8 +223,8 @@ if likelihood_model == "gaussian_process":
         min_log_a = -5
         max_log_a = 15
         min_log_c = -6
-
         stabilised_counts = bar_lev(c)
+
     stabilised_variance = np.ones(len(c))
     plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
     plt.show()
@@ -210,10 +247,10 @@ if likelihood_model == "gaussian_process":
         mean_model = np.mean(stabilised_counts)
         fit_mean = False
 
-    if recovery_mode == "no_qpo":
+    if recovery_mode == "white_noise":
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
         priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-    elif recovery_mode == "one_qpo":
+    elif recovery_mode == "qpo":
         kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
@@ -225,9 +262,11 @@ if likelihood_model == "gaussian_process":
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(np.sqrt(2*np.pi)), name='log_c')
+    else:
+        raise ValueError('Recovery mode not defined')
 
     gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
-    gp.compute(t, np.sqrt(stabilised_variance))  # You always need to call compute once.
+    gp.compute(t, np.sqrt(stabilised_variance))
     likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 
 elif likelihood_model == "periodogram":
@@ -250,7 +289,7 @@ elif likelihood_model == "periodogram":
     priors['central_frequency'].maximum = band_maximum
     priors['central_frequency'].minimum = band_minimum
     priors['amplitude'] = bilby.core.prior.LogUniform(minimum=1, maximum=10000)
-    if recovery_mode == "no_qpo":
+    if recovery_mode == "white_noise":
         priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
         priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
         priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
@@ -261,7 +300,7 @@ elif likelihood_model == "periodogram":
         priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
         likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=periodogram_noise_model)
 else:
-    raise ValueError
+    raise ValueError("Likelihood model not defined")
 
 result = None
 if try_load:
@@ -277,14 +316,14 @@ if result is None:
 
 
 if plot:
-    result.plot_corner(outdir=f"{outdir}/corner")
+    if run_mode == 'injection':
+        try:
+            result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
+        except Exception:
+            result.plot_corner(outdir=f"{outdir}/corner")
+
     if likelihood_model == "gaussian_process":
-        if injection_run:
-            try:
-                result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
-            except Exception:
-                pass
-        if recovery_mode == "one_qpo":
+        if recovery_mode == "qpo":
             try:
                 frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
                 plt.hist(frequency_samples, bins="fd", density=True)
@@ -304,13 +343,10 @@ if plot:
                 gp.set_parameter(name=name, value=value)
             except ValueError:
                 continue
-
-        for name, value in max_like_params.items():
             try:
                 mean_model.set_parameter(name=name, value=value)
             except ValueError:
                 continue
-
 
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         taus = np.linspace(-0.5, 0.5, 1000)
@@ -355,7 +391,7 @@ if plot:
 
     elif likelihood_model == "periodogram":
         result.plot_corner(outdir=f"{outdir}/corner")
-        if recovery_mode == "one_qpo":
+        if recovery_mode == "qpo":
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')
