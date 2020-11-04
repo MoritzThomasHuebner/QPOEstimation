@@ -12,13 +12,9 @@
 for i in {0..99}
 do
   sbatch analyse_submit.sh ${i} red_noise
-  sbatch analyse_submit.sh ${i} red_noise
-  sbatch analyse_submit.sh ${i} red_noise
 done
 
 for i in {0..999}
 do
-  sbatch analyse_submit.sh ${i} qpo
-  sbatch analyse_submit.sh ${i} qpo
   sbatch analyse_submit.sh ${i} qpo
 done
