@@ -312,7 +312,7 @@ if plot:
         except Exception:
             result.plot_corner(outdir=f"{outdir}/corner")
     else:
-        result.plot_corner()
+        result.plot_corner(outdir=f"{outdir}/corner")
 
     if likelihood_model == "gaussian_process":
         if recovery_mode == "qpo":
