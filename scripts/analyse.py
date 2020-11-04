@@ -306,11 +306,13 @@ if result is None:
 
 
 if plot:
-    if run_mode == 'injection':
+    if run_mode == 'injection' and injection_mode == recovery_mode:
         try:
             result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
         except Exception:
             result.plot_corner(outdir=f"{outdir}/corner")
+    else:
+        result.plot_corner()
 
     if likelihood_model == "gaussian_process":
         if recovery_mode == "qpo":
