@@ -12,6 +12,7 @@ import numpy as np
 
 from QPOEstimation.likelihood import QPOTerm, ExponentialTerm
 from QPOEstimation.model.series import PolynomialMeanModel
+from QPOEstimation.injection import create_injection
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -20,12 +21,18 @@ if len(sys.argv) > 1:
     parser.add_argument("--injection_mode", default="one_qpo", choices=["one_qpo", "no_qpo", "red_noise"], type=str)
     parser.add_argument("--sampling_frequency", default=256, type=int)
     parser.add_argument("--polynomial_max", default=10, type=int)
+    parser.add_argument("--plot", default=False, type=bool)
+    parser.add_argument("--segment_length", default=1.0, type=float)
+    parser.add_argument("--outdir", default='injection_files', type=str)
     args = parser.parse_args()
     minimum_id = args.minimum_id
     maximum_id = args.maximum_id
     injection_mode = args.injection_mode
     sampling_frequency = args.sampling_frequency
     polynomial_max = args.polynomial_max
+    plot = args.plot
+    segment_length = args.segment_length
+    outdir = args.outdir
 else:
     matplotlib.use('Qt5Agg')
     minimum_id = 0
@@ -34,6 +41,9 @@ else:
     sampling_frequency = 256
     polynomial_max = 10
     injection_mode = "red_noise"
+    plot = True
+    segment_length = 1
+    outdir = 'injection_files'
 
 
 def conversion_function(sample):
@@ -69,65 +79,5 @@ elif injection_mode == "no_qpo":
 Path(f'injection_files/{injection_mode}').mkdir(exist_ok=True, parents=True)
 
 for injection_id in range(minimum_id, maximum_id):
-    params = priors.sample()
-    params_mean = dict(a0=params['mean:a0'], a1=params['mean:a1'], a2=params['mean:a2'],
-                       a3=params['mean:a3'], a4=params['mean:a4'])
-    if injection_mode == "red_noise":
-        params_kernel = dict(log_a=params['kernel:log_a'],
-                             log_c=params['kernel:log_c'])
-        kernel = ExponentialTerm(**params_kernel)
-    else:
-        params_kernel = dict(log_a=params['kernel:log_a'], log_b=-10,
-                             log_c=params['kernel:log_c'], log_f=params['kernel:log_f'])
-        kernel = QPOTerm(**params_kernel)
-
-    mean_model = PolynomialMeanModel(**params_mean)
-    t = np.linspace(0, 1, sampling_frequency)
-    yerr = np.ones(len(t))
-
-    if injection_mode == "no_qpo":
-        K = np.diag(np.ones(len(t)))
-        y = np.random.multivariate_normal(mean_model.get_value(t), K)
-        np.savetxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt', np.array([t, y]).T)
-        with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'w') as f:
-            json.dump(params_mean, f)
-
-        jitter_kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        gp = celerite.GP(kernel=jitter_kernel, mean=mean_model)
-        gp.compute(t, yerr)
-
-        x = np.linspace(t[0], t[-1], 5000)
-        # pred_mean_poly, pred_var = gp.predict(y, x, return_var=True)
-        # pred_std = np.sqrt(pred_var)
-    elif injection_mode in ["one_qpo", "red_noise"]:
-        K = np.diag(np.ones(len(t)))
-        for i in range(len(t)):
-            for j in range(len(t)):
-                dt = t[1] - t[0]
-                tau = np.abs(i - j) * dt
-                K[i][j] += kernel.get_value(tau=tau)
-        y = np.random.multivariate_normal(mean_model.get_value(t), K)
-        np.savetxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt', np.array([t, y]).T)
-        with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'w') as f:
-            json.dump(params, f)
-
-
-    # gp = celerite.GP(kernel=kernel, mean=mean_model)
-    # gp.compute(t, yerr)
-    # for param, value in params.items():
-    #     gp.set_parameter(param, value)
-    # x = np.linspace(t[0], t[-1], 5000)
-    # pred_mean, pred_var = gp.predict(y, x, return_var=True)
-    # pred_std = np.sqrt(pred_var)
-    #
-    # color = "#ff7f0e"
-    # plt.errorbar(t, y, yerr=np.ones(len(t)), fmt=".k", capsize=0, label='data')
-    # plt.plot(x, pred_mean, color=color, label='Prediction')
-    # plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
-    #                  edgecolor="none")
-    #
-    # plt.plot(x, pred_mean_poly, color='green', label='Polynomial')
-    # plt.legend()
-    # plt.savefig(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.pdf')
-    # plt.show()
-    # plt.clf()
+    create_injection(params=priors.sample(), injection_mode=injection_mode, sampling_frequency=sampling_frequency,
+                     segment_length=segment_length, outdir=outdir, injection_id=injection_id, plot=plot)

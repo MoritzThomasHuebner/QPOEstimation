@@ -1,13 +1,9 @@
-import argparse
 import json
-import sys
-from copy import deepcopy
 from pathlib import Path
-import matplotlib.pyplot as plt
 
 import bilby
 import celerite
-import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 
 from QPOEstimation.likelihood import QPOTerm, ExponentialTerm
