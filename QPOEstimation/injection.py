@@ -24,7 +24,7 @@ class InjectionCreator(object):
 
         self.mean_model = PolynomialMeanModel(**self.params_mean)
 
-        self.times = np.linspace(0, self.segment_length, self.sampling_frequency * self.segment_length)
+        self.times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
         self.n = len(self.times)
         self.dt = self.times[1] - self.times[0]
 
