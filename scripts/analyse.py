@@ -54,7 +54,7 @@ if len(sys.argv) > 1:
 
     parser.add_argument("--suffix", default="", type=str)
 
-    parser.add_argument("--try_load", default=False, type=bool)
+    parser.add_argument("--try_load", default=True, type=bool)
     parser.add_argument("--plot", default=True, type=bool)
     args = parser.parse_args()
 
