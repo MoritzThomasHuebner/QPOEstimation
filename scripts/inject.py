@@ -101,9 +101,7 @@ log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
 log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
 
 for injection_id in range(minimum_id, maximum_id):
-    print(f"{str(injection_id).zfill(3)[0]}")
-    print(f"{str(injection_id).zfill(3)[1]}")
-    print(f"{str(injection_id).zfill(3)[2]}")
+    bilby.core.utils.logger.info(f"ID: {injection_id}")
     log_f = log_as[int(str(injection_id).zfill(3)[0])]
     log_a = log_as[int(str(injection_id).zfill(3)[1])]
     log_c = log_cs[int(str(injection_id).zfill(3)[2])]
