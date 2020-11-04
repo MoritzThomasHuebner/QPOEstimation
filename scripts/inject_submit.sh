@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=test
+#SBATCH --job-name=inject
 #
 #SBATCH --ntasks=1
 #SBATCH --time=1:00:00
