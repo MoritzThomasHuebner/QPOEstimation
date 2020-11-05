@@ -9,7 +9,7 @@ import json
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--injection_mode", default="one_qpo", choices=["one_qpo", "no_qpo", "red_noise"], type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise"], type=str)
     parser.add_argument("--n_injections", default=100, type=int)
     parser.add_argument("--band_minimum", default=5, type=int)
     parser.add_argument("--band_maximum", default=64, type=int)
