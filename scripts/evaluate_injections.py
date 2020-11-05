@@ -37,9 +37,7 @@ log_bfs_one_qpo_whittle = []
 # perc_unc_gpr = []
 # perc_unc_whittle = []
 
-log_evidences_qpo = []
-log_evidences_red_noise = []
-log_bfs_one_qpo_red_noise = []
+
 # log_as = []
 # log_cs = []
 # log_fs = []
@@ -58,6 +56,9 @@ if injection_mode == 'qpo':
 else:
     log_fs = [0]
 for j, log_f in enumerate(log_fs):
+    log_evidences_qpo = []
+    log_evidences_red_noise = []
+    log_bfs_one_qpo_red_noise = []
     for injection_id in range(j*100, j*100+n_injections):
         print(injection_id)
 
