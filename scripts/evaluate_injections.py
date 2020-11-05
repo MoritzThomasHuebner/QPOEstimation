@@ -23,9 +23,10 @@ else:
     matplotlib.use('Qt5Agg')
     injection_mode = "red_noise"
     n_injections = 100
-    band_minimum = 5
+    band_minimum = 10
     band_maximum = 64
 
+likelihood_model = 'gaussian_process'
 injections = np.arange(0, n_injections)
 
 band = f'{band_minimum}_{band_maximum}Hz'
@@ -33,58 +34,103 @@ band = f'{band_minimum}_{band_maximum}Hz'
 log_bfs_one_qpo_gpr = []
 log_bfs_one_qpo_whittle = []
 
-perc_unc_gpr = []
-perc_unc_whittle = []
+# perc_unc_gpr = []
+# perc_unc_whittle = []
 
-log_bfs_one_qpo = []
-log_bfs_red_noise = []
+log_evidences_qpo = []
+log_evidences_red_noise = []
 log_bfs_one_qpo_red_noise = []
-for injection in range(n_injections):
-    print(injection)
+# log_as = []
+# log_cs = []
+# log_fs = []
+
+minimum_log_a = -2
+maximum_log_a = 1
+minimum_log_c = 1
+maximum_log_c = 4.8
+minimum_log_f = np.log(10)
+maximum_log_f = np.log(64)
+
+log_as = np.linspace(minimum_log_a, maximum_log_a, 10)
+log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
+log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
+
+for injection_id in range(n_injections):
+    print(injection_id)
+
+    bilby.core.utils.logger.info(f"ID: {injection_id}")
+    log_f = log_as[int(str(injection_id).zfill(3)[0])]
+    log_a = log_as[int(str(injection_id).zfill(3)[1])]
+    log_c = log_cs[int(str(injection_id).zfill(3)[2])]
+
     try:
-        res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
-        res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-        res_red_noise = bilby.result.read_in_result(f"sliding_window_{band}_{injection_mode}_injections/red_noise/results/{str(injection).zfill(2)}_result.json")
-        log_bfs_one_qpo.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
-        log_bfs_red_noise.append(res_red_noise.log_evidence - res_no_qpo.log_evidence)
-        log_bfs_one_qpo_red_noise.append(res_one_qpo.log_evidence - res_red_noise.log_evidence)
-        print(log_bfs_one_qpo[-1])
-        print(log_bfs_red_noise[-1])
-        print()
+        res_qpo = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/qpo/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+        res_red_noise = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/red_noise/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+        log_evidences_qpo.append(res_qpo.log_evidence)
+        log_evidences_red_noise.append(res_red_noise.log_evidence)
+        log_bfs_one_qpo_red_noise.append(res_qpo.log_evidence - res_red_noise.log_evidence)
+        print(log_bfs_one_qpo_red_noise[-1])
 
     except Exception as e:
         print(e)
 
-plt.hist(log_bfs_one_qpo, bins='fd')
-plt.xlabel("ln BF")
-plt.ylabel("counts")
-plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo")
-plt.clf()
+for i in range(10):
+    plt.plot(log_as, log_bfs_one_qpo_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
+    plt.xlabel('ln a')
+    plt.ylabel('ln BF')
+plt.legend()
+plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
+plt.show()
 
-plt.hist(log_bfs_red_noise, bins='fd')
-plt.xlabel("ln BF")
-plt.ylabel("counts")
-plt.savefig(f"injections_{injection_mode}_log_bfs_red_noise")
-plt.clf()
+for i in range(10):
+    plt.plot(log_cs, log_bfs_one_qpo_red_noise[10*i: 10*i+10], label=f'ln a = {log_as[i]:.2f}')
+    plt.xlabel('ln c')
+    plt.ylabel('ln BF')
+plt.legend()
+plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
+plt.show()
 
-plt.hist(log_bfs_one_qpo_red_noise, bins='fd')
-plt.xlabel("ln BF")
-plt.ylabel("counts")
-plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_red_noise")
-plt.clf()
+log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
+log_as_unique = np.unique(log_as)
+log_cs_unique = np.unique(log_cs)
+plt.contourf(log_as_unique, log_cs_unique, log_bfs_one_qpo_red_noise_reshaped)
+plt.colorbar()
+plt.xlabel('ln a')
+plt.ylabel('ln c')
+plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
+plt.show()
+# plt.plot(log_fs, log_bfs_one_qpo_red_noise)
+
+# plt.hist(log_evidences_qpo, bins='fd')
+# plt.xlabel("ln BF")
+# plt.ylabel("counts")
+# plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo")
+# plt.clf()
+#
+# plt.hist(log_evidences_red_noise, bins='fd')
+# plt.xlabel("ln BF")
+# plt.ylabel("counts")
+# plt.savefig(f"injections_{injection_mode}_log_bfs_red_noise")
+# plt.clf()
+
+# plt.hist(log_bfs_one_qpo_red_noise, bins='fd')
+# plt.xlabel("ln BF")
+# plt.ylabel("counts")
+# plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_red_noise")
+# plt.clf()
 
 assert False
 
-for injection in range(n_injections):
+for injection_id in range(n_injections):
     try:
-        res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_injections/no_qpo/results/{str(injection).zfill(2)}_result.json")
-        res_one_qpo = bilby.result.read_in_result(f"sliding_window_{band}_injections/one_qpo/results/{str(injection).zfill(2)}_result.json")
-        res_no_qpo_whittle = bilby.result.read_in_result(f"sliding_window_{band}_injections/no_qpo/results/{str(injection).zfill(2)}_groth_result.json")
-        res_one_qpo_whittle = bilby.result.read_in_result(f"sliding_window_{band}_injections/one_qpo/results/{str(injection).zfill(2)}_groth_result.json")
+        res_no_qpo = bilby.result.read_in_result(f"sliding_window_{band}_injections/no_qpo/results/{str(injection_id).zfill(2)}_result.json")
+        res_qpo = bilby.result.read_in_result(f"sliding_window_{band}_injections/one_qpo/results/{str(injection_id).zfill(2)}_result.json")
+        res_no_qpo_whittle = bilby.result.read_in_result(f"sliding_window_{band}_injections/no_qpo/results/{str(injection_id).zfill(2)}_groth_result.json")
+        res_one_qpo_whittle = bilby.result.read_in_result(f"sliding_window_{band}_injections/one_qpo/results/{str(injection_id).zfill(2)}_groth_result.json")
         # res_no_qpo_poisson = bilby.result.read_in_result(f"sliding_window_{band}_injections_fixed_log_b/no_qpo/results/{str(injection).zfill(2)}_poisson_result.json")
         # res_one_qpo_poisson = bilby.result.read_in_result(f"sliding_window_{band}_injections_fixed_log_b/one_qpo/results/{str(injection).zfill(2)}_poisson_result.json")
         # res_two_qpo = bilby.result.read_in_result(f"sliding_window_{band}_candidates/two_qpo/results/{candidate}_result.json")
-        log_bfs_one_qpo_gpr.append(res_one_qpo.log_evidence - res_no_qpo.log_evidence)
+        log_bfs_one_qpo_gpr.append(res_qpo.log_evidence - res_no_qpo.log_evidence)
         log_bfs_one_qpo_whittle.append(res_one_qpo_whittle.log_evidence - res_no_qpo_whittle.log_evidence)
         log_bfs_one_qpo_poisson.append(np.nan)
         # log_bfs_one_qpo_poisson.append(res_one_qpo_poisson.log_evidence - res_no_qpo_poisson.log_evidence)
@@ -96,15 +142,15 @@ for injection in range(n_injections):
         # plt.savefig(f'injection_files/{str(injection).zfill(2)}_plot')
         # plt.clf()
 
-        with open(f'injection_files/{str(injection).zfill(2)}_params.json', 'r') as f:
+        with open(f'injection_files/{str(injection_id).zfill(2)}_params.json', 'r') as f:
             injection_params = json.load(f)
             true_frequency = injection_params['frequency']
 
         try:
-            log_P_samples = np.array(res_one_qpo.posterior['kernel:log_P'])
+            log_P_samples = np.array(res_qpo.posterior['kernel:log_P'])
             frequency_samples_gpr = 1 / np.exp(log_P_samples)
         except Exception:
-            log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
+            log_f_samples = np.array(res_qpo.posterior['kernel:log_f'])
             frequency_samples_gpr = np.exp(log_f_samples)
 
 
@@ -123,7 +169,7 @@ for injection in range(n_injections):
         plt.legend()
         plt.xlabel('frequency [Hz]')
         plt.ylabel('probability')
-        plt.savefig(f"sliding_window_{band}_injections/frequency_posterior_{str(injection).zfill(2)}")
+        plt.savefig(f"sliding_window_{band}_injections/frequency_posterior_{str(injection_id).zfill(2)}")
         plt.clf()
 
     except Exception as e:
