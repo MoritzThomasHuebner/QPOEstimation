@@ -81,6 +81,7 @@ for i in range(10):
 plt.legend()
 plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
 plt.show()
+plt.clf()
 
 for i in range(10):
     plt.plot(log_cs, log_bfs_one_qpo_red_noise[10*i: 10*i+10], label=f'ln a = {log_as[i]:.2f}')
@@ -89,6 +90,7 @@ for i in range(10):
 plt.legend()
 plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
 plt.show()
+plt.clf()
 
 log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
 log_as_unique = np.unique(log_as)
@@ -99,6 +101,8 @@ plt.xlabel('ln a')
 plt.ylabel('ln c')
 plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
 plt.show()
+plt.clf()
+
 # plt.plot(log_fs, log_bfs_one_qpo_red_noise)
 
 # plt.hist(log_evidences_qpo, bins='fd')
