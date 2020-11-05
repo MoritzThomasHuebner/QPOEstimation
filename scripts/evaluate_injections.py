@@ -104,9 +104,7 @@ for j, log_f in enumerate(log_fs):
     plt.clf()
 
     log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
-    log_as_unique = np.unique(log_as)
-    log_cs_unique = np.unique(log_cs)
-    plt.contourf(log_as_unique, log_cs_unique, log_bfs_one_qpo_red_noise_reshaped)
+    plt.contourf(log_as, log_cs, log_bfs_one_qpo_red_noise_reshaped)
     plt.colorbar()
     plt.xlabel('ln a')
     plt.ylabel('ln c')
