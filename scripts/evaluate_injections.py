@@ -53,55 +53,68 @@ maximum_log_f = np.log(64)
 
 log_as = np.linspace(minimum_log_a, maximum_log_a, 10)
 log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
-log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
+if injection_mode == 'qpo':
+    log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
+else:
+    log_fs = [0]
+for j, log_f in enumerate(log_fs):
+    for injection_id in range(n_injections):
+        print(injection_id)
 
-for injection_id in range(n_injections):
-    print(injection_id)
+        bilby.core.utils.logger.info(f"ID: {injection_id}")
+        # log_f = log_as[int(str(injection_id).zfill(3)[0])]
+        log_a = log_as[int(str(injection_id).zfill(3)[1])]
+        log_c = log_cs[int(str(injection_id).zfill(3)[2])]
 
-    bilby.core.utils.logger.info(f"ID: {injection_id}")
-    log_f = log_as[int(str(injection_id).zfill(3)[0])]
-    log_a = log_as[int(str(injection_id).zfill(3)[1])]
-    log_c = log_cs[int(str(injection_id).zfill(3)[2])]
+        try:
+            res_qpo = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/qpo/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+            res_red_noise = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/red_noise/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+            log_evidences_qpo.append(res_qpo.log_evidence)
+            log_evidences_red_noise.append(res_red_noise.log_evidence)
+            log_bfs_one_qpo_red_noise.append(res_qpo.log_evidence - res_red_noise.log_evidence)
+            print(log_bfs_one_qpo_red_noise[-1])
 
-    try:
-        res_qpo = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/qpo/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
-        res_red_noise = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/red_noise/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
-        log_evidences_qpo.append(res_qpo.log_evidence)
-        log_evidences_red_noise.append(res_red_noise.log_evidence)
-        log_bfs_one_qpo_red_noise.append(res_qpo.log_evidence - res_red_noise.log_evidence)
-        print(log_bfs_one_qpo_red_noise[-1])
+        except Exception as e:
+            print(e)
 
-    except Exception as e:
-        print(e)
+    for i in range(10):
+        plt.plot(log_as, log_bfs_one_qpo_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
+        plt.xlabel('ln a')
+        plt.ylabel('ln BF')
+    plt.legend()
+    if injection_mode == 'qpo':
+        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_ln_f_{log_f:.2f}')
+    else:
+        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
+    plt.show()
+    plt.clf()
 
-for i in range(10):
-    plt.plot(log_as, log_bfs_one_qpo_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
+    for i in range(10):
+        plt.plot(log_cs, log_bfs_one_qpo_red_noise[10*i: 10*i+10], label=f'ln a = {log_as[i]:.2f}')
+        plt.xlabel('ln c')
+        plt.ylabel('ln BF')
+    plt.legend()
+    if injection_mode == 'qpo':
+        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_ln_f_{log_f:.2f}')
+    else:
+        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}')
+
+    plt.show()
+    plt.clf()
+
+    log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
+    log_as_unique = np.unique(log_as)
+    log_cs_unique = np.unique(log_cs)
+    plt.contourf(log_as_unique, log_cs_unique, log_bfs_one_qpo_red_noise_reshaped)
+    plt.colorbar()
     plt.xlabel('ln a')
-    plt.ylabel('ln BF')
-plt.legend()
-plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
-plt.show()
-plt.clf()
-
-for i in range(10):
-    plt.plot(log_cs, log_bfs_one_qpo_red_noise[10*i: 10*i+10], label=f'ln a = {log_as[i]:.2f}')
-    plt.xlabel('ln c')
-    plt.ylabel('ln BF')
-plt.legend()
-plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
-plt.show()
-plt.clf()
-
-log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
-log_as_unique = np.unique(log_as)
-log_cs_unique = np.unique(log_cs)
-plt.contourf(log_as_unique, log_cs_unique, log_bfs_one_qpo_red_noise_reshaped)
-plt.colorbar()
-plt.xlabel('ln a')
-plt.ylabel('ln c')
-plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
-plt.show()
-plt.clf()
+    plt.ylabel('ln c')
+    if injection_mode == 'qpo':
+        plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_ln_f_{log_f:.2f}')
+    else:
+        plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
+    plt.show()
+    plt.clf()
 
 # plt.plot(log_fs, log_bfs_one_qpo_red_noise)
 
