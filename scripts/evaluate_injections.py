@@ -83,7 +83,7 @@ for j, log_f in enumerate(log_fs):
         plt.ylabel('ln BF')
     plt.legend()
     if injection_mode == 'qpo':
-        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_ln_f_{log_f:.2f}')
+        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_ln_f_{log_f}')
     else:
         plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
     plt.show()
@@ -95,7 +95,7 @@ for j, log_f in enumerate(log_fs):
         plt.ylabel('ln BF')
     plt.legend()
     if injection_mode == 'qpo':
-        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_ln_f_{log_f:.2f}')
+        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_ln_f_{log_f}')
     else:
         plt.savefig(f'ln_c_v_ln_BF_{injection_mode}')
 
@@ -110,7 +110,7 @@ for j, log_f in enumerate(log_fs):
     plt.xlabel('ln a')
     plt.ylabel('ln c')
     if injection_mode == 'qpo':
-        plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_ln_f_{log_f:.2f}')
+        plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_ln_f_{log_f}')
     else:
         plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
     plt.show()
