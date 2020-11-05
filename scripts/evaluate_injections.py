@@ -58,7 +58,7 @@ if injection_mode == 'qpo':
 else:
     log_fs = [0]
 for j, log_f in enumerate(log_fs):
-    for injection_id in range(n_injections):
+    for injection_id in range(j*100, j*100+n_injections):
         print(injection_id)
 
         bilby.core.utils.logger.info(f"ID: {injection_id}")
