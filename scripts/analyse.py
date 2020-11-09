@@ -41,7 +41,7 @@ if len(sys.argv) > 1:
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
-    parser.add_argument("--background_model", default="polynomial", choices=["polynomial", "exponential", None])
+    parser.add_argument("--background_model", default="polynomial", choices=["polynomial", "exponential", "mean"])
     parser.add_argument("--periodogram_likelihood", default="whittle", choices=["whittle", "groth"])
     parser.add_argument("--periodogram_noise_model", default="red_noise", choices=["red_noise", "broken_power_law"])
 
@@ -115,9 +115,9 @@ else:
     max_log_a = 5
     min_log_c = -5
 
-    recovery_mode = "qpo"
+    recovery_mode = "red_noise"
     likelihood_model = 'gaussian_process'
-    background_model = None
+    background_model = "mean"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -156,7 +156,7 @@ if sampling_frequency is not None:
     else:
         sampling_frequency = 1024
 
-if background_model is None:
+if background_model is "mean":
     use_ratio = True
 else:
     use_ratio = False
