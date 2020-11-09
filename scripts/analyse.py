@@ -371,7 +371,7 @@ if plot:
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
-        if background_model is not None:
+        if background_model != "mean":
             trend = mean_model.get_value(x)
             plt.plot(x, trend, color='green', label='Trend')
 

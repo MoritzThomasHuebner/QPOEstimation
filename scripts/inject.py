@@ -40,10 +40,10 @@ else:
 
     sampling_frequency = 256
     polynomial_max = 10
-    injection_mode = "qpo"
+    injection_mode = "red_noise"
     plot = True
     segment_length = 1
-    outdir = 'injection_files'
+    outdir = 'testing'
 
 
 # def conversion_function(sample):
@@ -83,16 +83,27 @@ else:
 params = dict()
 
 
-params['mean:a0'] = 0
-params['mean:a1'] = 0
-params['mean:a2'] = 0
-params['mean:a3'] = 0
-params['mean:a4'] = 0
+# params['mean:a0'] = 0
+# params['mean:a1'] = 0
+# params['mean:a2'] = 0
+# params['mean:a3'] = 0
+# params['mean:a4'] = 0
 
-minimum_log_a = -2
-maximum_log_a = 1
-minimum_log_c = 1
-maximum_log_c = 4.8
+# minimum_log_a = -2
+# maximum_log_a = 1
+# minimum_log_c = 1
+# maximum_log_c = 4.8
+# minimum_log_f = np.log(10)
+# maximum_log_f = np.log(64)
+params['mean:a0'] = 1
+params['mean:a1'] = 2
+params['mean:a2'] = 3
+params['mean:a3'] = 4
+params['mean:a4'] = 5
+minimum_log_a = 0.2
+maximum_log_a = 0.21
+minimum_log_c = 3.6
+maximum_log_c = 3.8
 minimum_log_f = np.log(10)
 maximum_log_f = np.log(64)
 
