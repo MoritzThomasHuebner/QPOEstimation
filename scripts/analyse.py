@@ -21,13 +21,12 @@ modes = ["qpo", "white_noise", "red_noise"]
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run_mode", default='sliding_window', choices=['sliding_window', 'candidates', 'injection'])
-    parser.add_argument("--sliding_window_run", default=True, type=bool)
-    parser.add_argument("--candidates_run", default=False, type=bool)
-    parser.add_argument("--injection_run", default=False, type=bool)
+    parser.add_argument("--sampling_frequency", default=None, type=int)
+    parser.add_argument("--data_mode", choices=['normal', 'smoothed', 'smoothed_residual'], default='normal', type=str)
+    parser.add_argument("--alpha", default=0.02, type=float)
 
     parser.add_argument("--period_number", default=0, type=int)
     parser.add_argument("--run_id", default=0, type=int)
-
 
     parser.add_argument("--candidate_id", default=0, type=int)
     parser.add_argument("--miller_candidates", default=False, type=bool)
@@ -48,11 +47,10 @@ if len(sys.argv) > 1:
 
     parser.add_argument("--band_minimum", default=10, type=int)
     parser.add_argument("--band_maximum", default=32, type=int)
+
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--segment_step", default=0.27, type=float)
     parser.add_argument("--nlive", default=150, type=int)
-
-    parser.add_argument("--suffix", default="", type=str)
 
     parser.add_argument("--try_load", default=True, type=bool)
     parser.add_argument("--resume", default=False, type=bool)
@@ -60,6 +58,9 @@ if len(sys.argv) > 1:
     args = parser.parse_args()
 
     run_mode = args.run_mode
+    sampling_frequency = args.sampling_frequency
+    data_mode = args.data_mode
+    alpha = args.alpha
 
     period_number = args.period_number
     run_id = args.run_id
@@ -84,11 +85,10 @@ if len(sys.argv) > 1:
 
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
+
     segment_length = args.segment_length
     segment_step = args.segment_step
     nlive = args.nlive
-
-    suffix = args.suffix
 
     try_load = args.try_load
     resume = args.resume
@@ -96,25 +96,28 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    run_mode = 'injection'
+    run_mode = 'sliding_window'
+    sampling_frequency = 256
+    data_mode = 'smoothed_residual'
+    alpha = 0.02
 
-    period_number = 14
-    run_id = 13
+    period_number = 5
+    run_id = 10
 
-    candidate_id = 12
+    candidate_id = 0
     miller_candidates = False
 
     injection_id = 0
     injection_mode = "qpo"
 
     polynomial_max = 10
-    min_log_a = -1
-    max_log_a = 1
-    min_log_c = 1
+    min_log_a = -5
+    max_log_a = 5
+    min_log_c = -5
 
-    recovery_mode = "red_noise"
+    recovery_mode = "qpo"
     likelihood_model = 'gaussian_process'
-    background_model = 'polynomial'
+    background_model = None
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -145,13 +148,18 @@ if miller_candidates:
 else:
     band = f'{band_minimum}_{band_maximum}Hz'
 
+if sampling_frequency is not None:
+    if band_maximum <= 64:
+        sampling_frequency = 256
+    elif band_maximum <= 128:
+        sampling_frequency = 512
+    else:
+        sampling_frequency = 1024
 
-if band_maximum <= 64:
-    sampling_frequency = 256
-elif band_maximum <= 128:
-    sampling_frequency = 512
+if background_model is None:
+    use_ratio = True
 else:
-    sampling_frequency = 1024
+    use_ratio = False
 
 if run_mode == 'injection':
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
@@ -161,7 +169,13 @@ if run_mode == 'injection':
     else:
         truths = {}
 else:
-    data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
+    if data_mode == 'smoothed':
+        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat')
+    elif data_mode == 'smoothed_residual':
+        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_residual_alpha_{alpha}.dat')
+    else:
+        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
+
 
 times = data[:, 0]
 counts = data[:, 1]
@@ -172,7 +186,7 @@ stop = times[-1] + 0.1
 
 
 if run_mode == 'candidates':
-    candidates = np.loadtxt(f'candidates/candidates_{band}{suffix}.txt')
+    candidates = np.loadtxt(f'candidates/candidates_{band}_{data_mode}.txt')
     start = candidates[candidate_id][0]
     stop = start + segment_length
     if miller_candidates:  # Miller et al. time segments are shifted by 20 s
@@ -180,10 +194,10 @@ if run_mode == 'candidates':
         stop += time_offset
     segment_length = stop - start
 
-    outdir = f"{run_mode}_{band}{suffix}/{recovery_mode}"
+    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}"
     label = f"{candidate_id}_{likelihood_model}"
 elif run_mode == 'injection':
-    outdir = f"{run_mode}_{band}{suffix}_{injection_mode}/{recovery_mode}"
+    outdir = f"{run_mode}_{band}_{data_mode}_{injection_mode}/{recovery_mode}"
     label = f"{str(injection_id).zfill(2)}_{likelihood_model}"
 elif run_mode == 'sliding_window':
     interpulse_periods = []
@@ -192,7 +206,7 @@ elif run_mode == 'sliding_window':
     start = interpulse_periods[period_number][0] + run_id * segment_step
     stop = start + segment_length
 
-    outdir = f"{run_mode}_{band}{suffix}/period_{period_number}/{recovery_mode}"
+    outdir = f"{run_mode}_{band}_{data_mode}/period_{period_number}/{recovery_mode}"
     label = f'{run_id}_{likelihood_model}'
 
 
@@ -209,7 +223,7 @@ def conversion_function(sample):
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model == "gaussian_process":
-    if run_mode == 'injection':
+    if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual']:
         stabilised_counts = c
     else:
         stabilised_counts = bar_lev(c)
@@ -305,7 +319,7 @@ if try_load:
 if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample='rwalk',
-                               resume=resume)
+                               resume=resume, use_ratio=use_ratio)
 
 
 if plot:
@@ -340,7 +354,7 @@ if plot:
                 continue
             try:
                 mean_model.set_parameter(name=name, value=value)
-            except ValueError:
+            except (ValueError, AttributeError):
                 continue
 
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
@@ -354,14 +368,15 @@ if plot:
         x = np.linspace(t[0], t[-1], 5000)
         pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
         pred_std = np.sqrt(pred_var)
-        trend = mean_model.get_value(x)
 
         color = "#ff7f0e"
         plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
-        plt.plot(x, trend, color='green', label='Trend')
+        if background_model is not None:
+            trend = mean_model.get_value(x)
+            plt.plot(x, trend, color='green', label='Trend')
 
         plt.xlabel("time [s]")
         plt.ylabel("variance stabilised data")
