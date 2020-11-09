@@ -157,7 +157,7 @@ if sampling_frequency is None:
         sampling_frequency = 1024
 
 print(background_model)
-if background_model is "mean":
+if background_model == "mean":
     use_ratio = True
 else:
     use_ratio = False
