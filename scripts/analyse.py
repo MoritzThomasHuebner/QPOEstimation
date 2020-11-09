@@ -160,7 +160,7 @@ if background_model is "mean":
     use_ratio = True
 else:
     use_ratio = False
-
+print(use_ratio)
 if run_mode == 'injection':
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
     if injection_mode == recovery_mode:
