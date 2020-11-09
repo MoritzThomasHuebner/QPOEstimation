@@ -148,7 +148,7 @@ if miller_candidates:
 else:
     band = f'{band_minimum}_{band_maximum}Hz'
 
-if sampling_frequency is not None:
+if sampling_frequency is None:
     if band_maximum <= 64:
         sampling_frequency = 256
     elif band_maximum <= 128:
