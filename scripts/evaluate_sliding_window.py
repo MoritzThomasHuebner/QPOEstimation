@@ -6,7 +6,8 @@ from QPOEstimation.stabilisation import bar_lev
 # matplotlib.use("Qt5Agg")
 from copy import deepcopy
 
-segments = np.arange(0, 28)
+# segments = np.arange(0, 28)
+segments = np.arange(0, 8)
 mean_log_bfs = []
 
 import numpy as np
