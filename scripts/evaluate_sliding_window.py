@@ -21,6 +21,7 @@ pulse_period = 7.56
 segment_step = 0.27
 segment_length = 3
 data_mode = "smoothed_residual"
+likelihood_model = "gaussian_process"
 alpha = 0.02
 
 if band_maximum <= 64:
@@ -60,8 +61,8 @@ for period in range(n_periods):
     for run_id in range(len(segments)):
         try:
             # res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
-            res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/qpo/results/{run_id}_result.json")
-            res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_result.json")
+            res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/qpo/results/{run_id}_{likelihood_model}_result.json")
+            res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_{likelihood_model}_result.json")
             log_bf_one_qpo = res_one_qpo.log_bayes_factor
             log_bf_red_noise = res_red_noise.log_bayes_factor
 
