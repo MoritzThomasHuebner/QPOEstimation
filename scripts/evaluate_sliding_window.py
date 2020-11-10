@@ -106,7 +106,7 @@ for period in range(n_periods):
     color = 'tab:red'
     ax1.set_xlabel('segment start time [s]')
     ax1.set_ylabel('ln BF', color=color)
-    ax1.plot(start_times, log_bfs_one_qpo, color=color, ls='solid', label='One QPO')
+    ax1.plot(start_times, log_bfs_one_qpo, color=color, ls='solid', label='One QPO vs white noise')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
@@ -131,7 +131,7 @@ for period in range(n_periods):
     color = 'tab:red'
     ax1.set_xlabel('segment start time [s]')
     ax1.set_ylabel('ln BF', color=color)
-    ax1.plot(start_times, np.array(log_bfs_one_qpo) - np.array(log_bfs_red_noise), color=color, ls='solid', label='One QPO')
+    ax1.plot(start_times, np.array(log_bfs_one_qpo) - np.array(log_bfs_red_noise), color=color, ls='solid', label='One QPO vs Red noise')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
