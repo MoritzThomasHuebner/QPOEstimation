@@ -14,9 +14,14 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-band_minimum = 5
+band_minimum = 10
 band_maximum = 64
 
+pulse_period = 7.56
+segment_step = 0.27
+segment_length = 3
+data_mode = "smoothed_residual"
+alpha = 0.02
 
 if band_maximum <= 64:
     sampling_frequency = 256
@@ -28,15 +33,19 @@ else:
 band = f'{band_minimum}_{band_maximum}Hz'
 suffix = ''
 
-outdir = f'sliding_window_{band}{suffix}'
+outdir = f'sliding_window_{band}_{data_mode}'
 
+if data_mode == 'smoothed':
+    data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat')
+elif data_mode == 'smoothed_residual':
+    data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_residual_alpha_{alpha}.dat')
+else:
+    data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
 
-data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
 times = data[:, 0]
 counts = data[:, 1]
 
-pulse_period = 7.56
-segment_step = 0.27
+
 
 for period in range(n_periods):
     log_bfs_one_qpo = []
@@ -50,11 +59,11 @@ for period in range(n_periods):
     std_frequency_whittle = []
     for run_id in range(len(segments)):
         try:
-            res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
-            res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_result.json")
+            # res_no_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_result.json")
+            res_one_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/qpo/results/{run_id}_result.json")
             res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_result.json")
-            log_bf_one_qpo = res_one_qpo.log_evidence - res_no_qpo.log_evidence
-            log_bf_red_noise = res_red_noise.log_evidence - res_no_qpo.log_evidence
+            log_bf_one_qpo = res_one_qpo.log_bayes_factor
+            log_bf_red_noise = res_red_noise.log_bayes_factor
 
             log_f_samples = np.array(res_one_qpo.posterior['kernel:log_f'])
             frequency_samples = np.exp(log_f_samples)
