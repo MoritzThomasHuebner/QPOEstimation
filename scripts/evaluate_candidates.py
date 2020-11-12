@@ -18,9 +18,12 @@ likelihood_model = 'gaussian_process'
 
 
 for i in range(45):
-    res_qpo_gpr = bilby.result.read_in_result(f'candidates_{band}_{data_mode}/qpo/results/{i}_{likelihood_model}_result.json')
-    res_red_noise_gpr = bilby.result.read_in_result(f'candidates_{band}_{data_mode}/red_noise/results/{i}_{likelihood_model}_result.json')
-    log_bfs.append(res_qpo_gpr.log_evidence - res_red_noise_gpr.log_evidence)
+    try:
+        res_qpo_gpr = bilby.result.read_in_result(f'candidates_{band}_{data_mode}/qpo/results/{i}_{likelihood_model}_result.json')
+        res_red_noise_gpr = bilby.result.read_in_result(f'candidates_{band}_{data_mode}/red_noise/results/{i}_{likelihood_model}_result.json')
+        log_bfs.append(res_qpo_gpr.log_evidence - res_red_noise_gpr.log_evidence)
+    except OSError:
+        continue
 
 # print(log_bfs_gpr)
 

@@ -68,8 +68,8 @@ for injection_id in range(100):
     log_bfs_qpo_v_red_noise.append(0)
     for j in range(10):
         try:
-            res_qpo = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/qpo/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
-            res_red_noise = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/red_noise/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+            res_qpo = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/qpo/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+            res_red_noise = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/red_noise/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
             log_evidences_qpo[-1] += res_qpo.log_evidence / 10
             log_evidences_red_noise[-1] += res_red_noise.log_evidence / 10
             log_bfs_qpo_v_red_noise[-1] += (res_qpo.log_evidence - res_red_noise.log_evidence) / 10
