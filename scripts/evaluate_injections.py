@@ -78,8 +78,7 @@ for injection_id in range(100):
     print(averaged_log_bfs_qpo_v_red_noise[-1])
 
 for i in range(10):
-    plt.errorbar(log_as, averaged_log_bfs_qpo_v_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}',
-                 yerr=averaged_log_bfs_qpo_v_red_noise_err[i::10], capsize=0)
+    plt.errorbar(log_as, averaged_log_bfs_qpo_v_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
     plt.xlabel('ln a')
     plt.ylabel('ln BF')
 plt.legend()
@@ -92,8 +91,7 @@ plt.show()
 plt.clf()
 
 for i in range(10):
-    plt.errorbar(log_cs, averaged_log_bfs_qpo_v_red_noise[10 * i: 10 * i + 10],
-                 yerr=averaged_log_bfs_qpo_v_red_noise_err[10 * i: 10 * i + 10], capsize=0, label=f'ln a = {log_as[i]:.2f}')
+    plt.plot(log_cs, averaged_log_bfs_qpo_v_red_noise[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')
     plt.xlabel('ln c')
     plt.ylabel('ln BF')
 plt.legend()
