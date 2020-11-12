@@ -10,12 +10,12 @@
 #done
 
 
-for i in {0..44}
-do
-  sbatch analyse_submit.sh ${i}
-done
-
-#for i in {0..999}
+#for i in {0..44}
 #do
-#  sbatch analyse_submit.sh ${i} qpo
+#  sbatch analyse_submit.sh ${i}
 #done
+
+for i in {0..999}
+do
+  sbatch analyse_submit.sh ${i} qpo
+done
