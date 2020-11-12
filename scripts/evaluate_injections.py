@@ -69,7 +69,7 @@ for injection_id in range(100):
         try:
             res_qpo = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/qpo/results/{str(j*100+injection_id).zfill(2)}_{likelihood_model}_result.json")
             res_red_noise = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/red_noise/results/{str(j*100+injection_id).zfill(2)}_{likelihood_model}_result.json")
-            individual_log_bfs_qpo_v_red_noise.append((res_qpo.log_evidence - res_red_noise.log_evidence) / 10)
+            individual_log_bfs_qpo_v_red_noise.append((res_qpo.log_evidence - res_red_noise.log_evidence))
         except Exception as e:
             print(e)
     averaged_log_bfs_qpo_v_red_noise.append(np.mean(individual_log_bfs_qpo_v_red_noise))
