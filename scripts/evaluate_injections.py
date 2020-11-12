@@ -112,8 +112,8 @@ cmap = matplotlib.cm.jet
 ax = plt.contourf(log_as, log_cs, log_bfs_qpo_red_noise_reshaped,
                   cmap=cmap, levels=np.linspace(np.amin(log_bfs_qpo_red_noise_reshaped), np.amax(log_bfs_qpo_red_noise_reshaped), 1000))
 plt.colorbar(ax)
-plt.xlabel('ln a')
-plt.ylabel('ln c')
+plt.xlabel('ln c')
+plt.ylabel('ln a')
 plt.title("10 runs averaged")
 if injection_mode == 'qpo':
     plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
@@ -174,8 +174,8 @@ plt.clf()
 #     log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
 #     plt.contourf(log_as, log_cs, log_bfs_one_qpo_red_noise_reshaped)
 #     plt.colorbar()
-#     plt.xlabel('ln a')
-#     plt.ylabel('ln c')
+#     plt.xlabel('ln c')
+#     plt.ylabel('ln a')
 #     if injection_mode == 'qpo':
 #         plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_ln_f_{suffix}.png')
 #     else:
