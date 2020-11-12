@@ -118,9 +118,20 @@ log_bfs_one_qpo_whittle = []
 # plt.clf()
 
 # varied log f runs
-log_as = []
-log_cs = []
-log_fs = []
+minimum_log_a = -2
+maximum_log_a = 1
+minimum_log_c = 1
+maximum_log_c = 4.8
+minimum_log_f = np.log(10)
+maximum_log_f = np.log(64)
+
+log_as = np.linspace(minimum_log_a, maximum_log_a, 10)
+log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
+if injection_mode == 'qpo':
+    log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
+else:
+    log_fs = [0]
+
 for j, log_f in enumerate(log_fs):
     log_evidences_qpo = []
     log_evidences_red_noise = []
