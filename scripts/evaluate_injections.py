@@ -106,6 +106,20 @@ plt.show()
 plt.clf()
 
 
+log_bfs_qpo_red_noise_reshaped = np.reshape(averaged_log_bfs_qpo_v_red_noise, (10, 10))
+
+cmap = matplotlib.cm.jet
+ax = plt.contourf(log_as, log_cs, log_bfs_qpo_red_noise_reshaped)
+plt.colorbar(ax)
+plt.xlabel('ln a')
+plt.ylabel('ln c')
+if injection_mode == 'qpo':
+    plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
+else:
+    plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
+plt.show()
+plt.clf()
+
 # for j, log_f in enumerate(log_fs):
 #     log_evidences_qpo = []
 #     log_evidences_red_noise = []
