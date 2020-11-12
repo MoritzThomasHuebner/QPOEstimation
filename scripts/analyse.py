@@ -12,11 +12,11 @@ from scipy.signal import periodogram
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
-    GrothLikelihood, ExponentialTerm
+    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm
 from QPOEstimation.model.series import *
 
 likelihood_models = ["gaussian_process", "periodogram", "poisson"]
-modes = ["qpo", "white_noise", "red_noise"]
+modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo"]
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -96,7 +96,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    run_mode = 'sliding_window'
+    run_mode = 'candidates'
     sampling_frequency = 256
     data_mode = 'smoothed_residual'
     alpha = 0.02
@@ -104,20 +104,20 @@ else:
     period_number = 5
     run_id = 10
 
-    candidate_id = 0
+    candidate_id = 1
     miller_candidates = False
 
     injection_id = 0
     injection_mode = "qpo"
 
-    polynomial_max = 10
+    polynomial_max = 1000
     min_log_a = -5
     max_log_a = 5
     min_log_c = -5
 
-    recovery_mode = "red_noise"
-    likelihood_model = 'gaussian_process'
-    background_model = "mean"
+    recovery_mode = "zeroed_qpo"
+    likelihood_model = "gaussian_process"
+    background_model = "polynomial"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -156,7 +156,8 @@ if sampling_frequency is None:
     else:
         sampling_frequency = 1024
 
-use_ratio = background_model == "mean"
+# use_ratio = background_model == "mean"
+use_ratio = False
 
 if run_mode == 'injection':
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
@@ -261,7 +262,14 @@ if likelihood_model == "gaussian_process":
         priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
         priors.conversion_function = conversion_function
-    elif recovery_mode == 'red_noise':
+    elif recovery_mode == "zeroed_qpo":
+        kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
+        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
+        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency/2), name='log_c')
+        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
+        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=-0.5, name='decay_constraint')
+        priors.conversion_function = conversion_function
+    elif recovery_mode == "red_noise":
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency/2), name='log_c')
@@ -329,7 +337,7 @@ if plot:
         result.plot_corner(outdir=f"{outdir}/corner")
 
     if likelihood_model == "gaussian_process":
-        if recovery_mode == "qpo":
+        if recovery_mode in ["qpo", "zeroed_qpo"] :
             try:
                 frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
                 plt.hist(frequency_samples, bins="fd", density=True)
@@ -398,7 +406,7 @@ if plot:
 
     elif likelihood_model == "periodogram":
         result.plot_corner(outdir=f"{outdir}/corner")
-        if recovery_mode == "qpo":
+        if recovery_mode in ["qpo", "zeroed_qpo"]:
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')

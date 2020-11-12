@@ -199,6 +199,63 @@ class ZeroedQPOTerm(terms.Term):
         return a, 0.0, c, 2 * np.pi * f,
 
 
+class RedNoiseKernel(object):
+
+    def __init__(self, log_tau=0):
+        self.tau = np.exp(log_tau)
+
+    def get_value(self, t_0, t_1):
+        return np.minimum(t_0, t_1) / self.tau
+
+
+class GaussianProcessLikelihood(bilby.core.likelihood.Likelihood):
+
+    def __init__(self, t, y, mean, cov, parameters=None):
+        self.cov = cov
+        self.mean = mean
+        self.y = y
+        self.t = t
+        self.dt = self.t[1] - self.t[0]
+        self.n = len(y)
+        super().__init__(parameters=parameters)
+
+    @property
+    def residual(self):
+        return self.y - self.mean
+
+    @property
+    def inverse_cov(self):
+        return np.linalg.inv(self.cov)
+
+    @property
+    def cov_det(self):
+        return np.linalg.det(self.cov)
+
+    def log_likelihood(self):
+        return -0.5 * (self.residual.T @ self.inverse_cov @ self.residual) - 0.5 * np.log(self.cov_det) - self.n/2 * np.log(2*np.pi)
+
+
+class RedNoiseGaussianProcessLikelihood(GaussianProcessLikelihood):
+
+    def __init__(self, t, y, mean, log_tau=0):
+        cov = np.diag(np.ones(len(t)))
+        super().__init__(t=t, y=y, mean=mean, cov=cov, parameters=dict(log_tau=log_tau))
+        self.t_0 = np.zeros(shape=(self.n, self.n))
+        self.t_1 = np.zeros(shape=(self.n, self.n))
+        for i in range(self.n):
+            for j in range(self.n):
+                self.t_0[i][j] = i * self.dt
+                self.t_1[i][j] = j * self.dt
+
+    @property
+    def kernel(self):
+        return RedNoiseKernel(log_tau=self.parameters['log_tau'])
+
+    def log_likelihood(self):
+        self.cov = np.diag(np.ones(self.n)) + self.kernel.get_value(t_0=self.t_0, t_1=self.t_1)
+        return super(RedNoiseGaussianProcessLikelihood, self).log_likelihood()
+
+
 class PoissonLikelihoodWithBackground(bilby.core.likelihood.PoissonLikelihood):
 
     def __init__(self, x, y, func, background):

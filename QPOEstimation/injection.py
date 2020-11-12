@@ -6,7 +6,7 @@ import celerite
 import matplotlib.pyplot as plt
 import numpy as np
 
-from QPOEstimation.likelihood import QPOTerm, ExponentialTerm
+from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, RedNoiseKernel, ZeroedQPOTerm
 from QPOEstimation.model.series import PolynomialMeanModel
 
 
@@ -27,8 +27,8 @@ class InjectionCreator(object):
         self.times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
         self.n = len(self.times)
         self.dt = self.times[1] - self.times[0]
-
         self.kernel = self.get_kernel()
+
         self.yerr = np.ones(self.n)
         self.cov = self.get_cov()
         self.y = self.get_y()
@@ -70,6 +70,10 @@ class InjectionCreator(object):
             kernel = ExponentialTerm(**self.params_kernel)
         elif self.injection_mode == "qpo":
             kernel = QPOTerm(**self.params_kernel)
+        elif self.injection_mode == "zeroed_qpo":
+            kernel = ZeroedQPOTerm(**self.params_kernel)
+        elif self.injection_mode == "red_noise_proper":
+            kernel = RedNoiseKernel(**self.params_kernel)
         else:
             kernel = None
         return kernel
@@ -81,6 +85,17 @@ class InjectionCreator(object):
             for j in range(self.n):
                 taus[i][j] = np.abs(i - j) * self.dt
         cov += self.kernel.get_value(tau=taus)
+        return cov
+
+    def get_cov_non_stationary(self):
+        cov = np.diag(np.ones(self.n))
+        t_0 = np.zeros(shape=(self.n, self.n))
+        t_1 = np.zeros(shape=(self.n, self.n))
+        for i in range(self.n):
+            for j in range(self.n):
+                t_0[i][j] = i * self.dt
+                t_1[i][j] = j * self.dt
+        cov += self.kernel.get_value(t_0=t_0, t_1=t_1)
         return cov
 
     def get_y(self):
