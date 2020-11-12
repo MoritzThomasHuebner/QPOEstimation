@@ -109,7 +109,8 @@ plt.clf()
 log_bfs_qpo_red_noise_reshaped = np.reshape(averaged_log_bfs_qpo_v_red_noise, (10, 10))
 
 cmap = matplotlib.cm.jet
-ax = plt.contourf(log_as, log_cs, log_bfs_qpo_red_noise_reshaped)
+ax = plt.contourf(log_as, log_cs, log_bfs_qpo_red_noise_reshaped,
+                  cmap=cmap, levels=np.linspace(0, np.amax(log_bfs_qpo_red_noise_reshaped), 1000))
 plt.colorbar(ax)
 plt.xlabel('ln a')
 plt.ylabel('ln c')
