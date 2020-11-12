@@ -40,7 +40,7 @@ else:
 
     sampling_frequency = 256
     polynomial_max = 10
-    injection_mode = "red_noise"
+    injection_mode = "qpo"
     plot = True
     segment_length = 1
     outdir = 'testing'
@@ -83,39 +83,35 @@ else:
 params = dict()
 
 
-# params['mean:a0'] = 0
-# params['mean:a1'] = 0
-# params['mean:a2'] = 0
-# params['mean:a3'] = 0
-# params['mean:a4'] = 0
+params['mean:a0'] = 0
+params['mean:a1'] = 0
+params['mean:a2'] = 0
+params['mean:a3'] = 0
+params['mean:a4'] = 0
 
-# minimum_log_a = -2
-# maximum_log_a = 1
 # minimum_log_c = 1
 # maximum_log_c = 4.8
 # minimum_log_f = np.log(10)
 # maximum_log_f = np.log(64)
-params['mean:a0'] = 1
-params['mean:a1'] = 2
-params['mean:a2'] = 3
-params['mean:a3'] = 4
-params['mean:a4'] = 5
-minimum_log_a = 0.2
-maximum_log_a = 0.21
-minimum_log_c = 3.6
-maximum_log_c = 3.8
-minimum_log_f = np.log(10)
-maximum_log_f = np.log(64)
+
+minimum_log_a = -2
+maximum_log_a = 1
+minimum_log_c = -1
+maximum_log_c = 5
+# minimum_log_f = np.log(10)
+# maximum_log_f = np.log(64)
 
 log_as = np.linspace(minimum_log_a, maximum_log_a, 10)
 log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
-log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
+log_fs = [np.log(20)] * 10
+# log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
 
 for injection_id in range(minimum_id, maximum_id):
     bilby.core.utils.logger.info(f"ID: {injection_id}")
     log_a = log_as[int(str(injection_id).zfill(3)[1])]
     log_c = log_cs[int(str(injection_id).zfill(3)[2])]
-    log_f = log_fs[int(str(injection_id).zfill(3)[0])]
+    # log_f = log_fs[int(str(injection_id).zfill(3)[0])]
+    log_f = np.log(20)
 
     params['kernel:log_a'] = log_a
     params['kernel:log_c'] = log_c
