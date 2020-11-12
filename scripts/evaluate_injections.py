@@ -55,86 +55,115 @@ if injection_mode == 'qpo':
     log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
 else:
     log_fs = [0]
-for j, log_f in enumerate(log_fs):
-    log_evidences_qpo = []
-    log_evidences_red_noise = []
-    log_bfs_one_qpo_red_noise = []
-    for injection_id in range(j*100, j*100+n_injections):
-        print(injection_id)
 
-        bilby.core.utils.logger.info(f"ID: {injection_id}")
-        # log_f = log_as[int(str(injection_id).zfill(3)[0])]
-        log_a = log_as[int(str(injection_id).zfill(3)[1])]
-        log_c = log_cs[int(str(injection_id).zfill(3)[2])]
-
+log_evidences_qpo = []
+log_evidences_red_noise = []
+log_bfs_qpo_v_red_noise = []
+for injection_id in range(100):
+    log_a = log_as[int(str(injection_id).zfill(3)[1])]
+    log_c = log_cs[int(str(injection_id).zfill(3)[2])]
+    log_f = np.log(20)
+    log_evidences_qpo.append(0)
+    log_evidences_red_noise.append(0)
+    log_bfs_qpo_v_red_noise.append(0)
+    for j in range(10):
         try:
             res_qpo = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/qpo/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
             res_red_noise = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/red_noise/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
-            log_evidences_qpo.append(res_qpo.log_evidence)
-            log_evidences_red_noise.append(res_red_noise.log_evidence)
-            log_bfs_one_qpo_red_noise.append(res_qpo.log_evidence - res_red_noise.log_evidence)
-            print(log_bfs_one_qpo_red_noise[-1])
-
+            log_evidences_qpo[-1] += res_qpo.log_evidence / 10
+            log_evidences_red_noise[-1] += res_red_noise.log_evidence / 10
+            log_bfs_qpo_v_red_noise[-1] += (res_qpo.log_evidence - res_red_noise.log_evidence) / 10
         except Exception as e:
             print(e)
+    print(log_bfs_qpo_v_red_noise[-1])
 
-    for i in range(10):
-        plt.plot(log_as, log_bfs_one_qpo_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
-        plt.xlabel('ln a')
-        plt.ylabel('ln BF')
-    plt.legend()
-    suffix = f'{log_f:.2f}'
-    if injection_mode == 'qpo':
-        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_ln_f_{suffix}.png')
-    else:
-        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
-    plt.show()
-    plt.clf()
-
-    for i in range(10):
-        plt.plot(log_cs, log_bfs_one_qpo_red_noise[10*i: 10*i+10], label=f'ln a = {log_as[i]:.2f}')
-        plt.xlabel('ln c')
-        plt.ylabel('ln BF')
-    plt.legend()
-    if injection_mode == 'qpo':
-        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_ln_f_{suffix}.png')
-    else:
-        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}')
-
-    plt.show()
-    plt.clf()
-
-    log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
-    plt.contourf(log_as, log_cs, log_bfs_one_qpo_red_noise_reshaped)
-    plt.colorbar()
+for i in range(10):
+    plt.plot(log_as, log_bfs_qpo_v_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
     plt.xlabel('ln a')
-    plt.ylabel('ln c')
-    if injection_mode == 'qpo':
-        plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_ln_f_{suffix}.png')
-    else:
-        plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
-    plt.show()
-    plt.clf()
+    plt.ylabel('ln BF')
+plt.legend()
+suffix = '20Hz'
+if injection_mode == 'qpo':
+    plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_{suffix}.png')
+else:
+    plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
+plt.show()
+plt.clf()
 
-# plt.plot(log_fs, log_bfs_one_qpo_red_noise)
+for i in range(10):
+    plt.plot(log_cs, log_bfs_qpo_v_red_noise[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')
+    plt.xlabel('ln c')
+    plt.ylabel('ln BF')
+plt.legend()
+if injection_mode == 'qpo':
+    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
+else:
+    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}')
 
-# plt.hist(log_evidences_qpo, bins='fd')
-# plt.xlabel("ln BF")
-# plt.ylabel("counts")
-# plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo")
-# plt.clf()
+plt.show()
+plt.clf()
+
+
+# for j, log_f in enumerate(log_fs):
+#     log_evidences_qpo = []
+#     log_evidences_red_noise = []
+#     log_bfs_one_qpo_red_noise = []
+#     for injection_id in range(j*100, j*100+n_injections):
+#         print(injection_id)
 #
-# plt.hist(log_evidences_red_noise, bins='fd')
-# plt.xlabel("ln BF")
-# plt.ylabel("counts")
-# plt.savefig(f"injections_{injection_mode}_log_bfs_red_noise")
-# plt.clf()
-
-# plt.hist(log_bfs_one_qpo_red_noise, bins='fd')
-# plt.xlabel("ln BF")
-# plt.ylabel("counts")
-# plt.savefig(f"injections_{injection_mode}_log_bfs_one_qpo_red_noise")
-# plt.clf()
+#         bilby.core.utils.logger.info(f"ID: {injection_id}")
+#         # log_f = log_as[int(str(injection_id).zfill(3)[0])]
+#         log_a = log_as[int(str(injection_id).zfill(3)[1])]
+#         log_c = log_cs[int(str(injection_id).zfill(3)[2])]
+#
+#         try:
+#             res_qpo = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/qpo/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+#             res_red_noise = bilby.result.read_in_result(f"injection_{band}_{injection_mode}/red_noise/results/{str(injection_id).zfill(2)}_{likelihood_model}_result.json")
+#             log_evidences_qpo.append(res_qpo.log_evidence)
+#             log_evidences_red_noise.append(res_red_noise.log_evidence)
+#             log_bfs_one_qpo_red_noise.append(res_qpo.log_evidence - res_red_noise.log_evidence)
+#             print(log_bfs_one_qpo_red_noise[-1])
+#
+#         except Exception as e:
+#             print(e)
+#
+#     for i in range(10):
+#         plt.plot(log_as, log_bfs_one_qpo_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
+#         plt.xlabel('ln a')
+#         plt.ylabel('ln BF')
+#     plt.legend()
+#     suffix = f'{log_f:.2f}'
+#     if injection_mode == 'qpo':
+#         plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_ln_f_{suffix}.png')
+#     else:
+#         plt.savefig(f'ln_a_v_ln_BF_{injection_mode}')
+#     plt.show()
+#     plt.clf()
+#
+#     for i in range(10):
+#         plt.plot(log_cs, log_bfs_one_qpo_red_noise[10*i: 10*i+10], label=f'ln a = {log_as[i]:.2f}')
+#         plt.xlabel('ln c')
+#         plt.ylabel('ln BF')
+#     plt.legend()
+#     if injection_mode == 'qpo':
+#         plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_ln_f_{suffix}.png')
+#     else:
+#         plt.savefig(f'ln_c_v_ln_BF_{injection_mode}')
+#
+#     plt.show()
+#     plt.clf()
+#
+#     log_bfs_one_qpo_red_noise_reshaped = np.reshape(log_bfs_one_qpo_red_noise, (10, 10))
+#     plt.contourf(log_as, log_cs, log_bfs_one_qpo_red_noise_reshaped)
+#     plt.colorbar()
+#     plt.xlabel('ln a')
+#     plt.ylabel('ln c')
+#     if injection_mode == 'qpo':
+#         plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_ln_f_{suffix}.png')
+#     else:
+#         plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
+#     plt.show()
+#     plt.clf()
 
 assert False
 
