@@ -94,7 +94,7 @@ for i in range(10):
     plt.ylabel('ln BF')
 plt.legend()
 suffix = '20Hz'
-plt.title("10 runs averaged")
+plt.title("Standard deviation based on 10 injections")
 if injection_mode == 'qpo':
     plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_{suffix}_errs.png')
 else:
@@ -120,7 +120,7 @@ for i in range(10):
     plt.xlabel('ln c')
     plt.ylabel('ln BF')
 plt.legend()
-plt.title("10 runs averaged")
+plt.title("Standard deviation based on 10 injections")
 if injection_mode == 'qpo':
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}_errs.png')
 else:
