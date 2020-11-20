@@ -112,6 +112,8 @@ if injection_mode == 'qpo':
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
 else:
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}')
+plt.show()
+plt.clf()
 
 for i in range(10):
     plt.plot(log_cs, averaged_log_bfs_qpo_v_red_noise_err[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')
