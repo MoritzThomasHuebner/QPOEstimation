@@ -71,6 +71,7 @@ for injection_id in range(100):
     averaged_log_bfs_qpo_v_red_noise_err.append(np.std(individual_log_bfs_qpo_v_red_noise))
 
     print(averaged_log_bfs_qpo_v_red_noise[-1])
+    print(injection_id)
 
 for i in range(10):
     plt.errorbar(log_as, averaged_log_bfs_qpo_v_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
