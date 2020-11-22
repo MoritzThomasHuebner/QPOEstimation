@@ -107,7 +107,7 @@ for i in range(10):
     plt.xlabel('ln c')
     plt.ylabel('ln BF')
 plt.legend()
-plt.title("10 runs averaged")
+plt.title("10 injections averaged")
 if injection_mode == 'qpo':
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
 else:
@@ -138,7 +138,7 @@ ax = plt.contourf(log_as, log_cs, log_bfs_qpo_red_noise_reshaped,
 plt.colorbar(ax)
 plt.xlabel('ln c')
 plt.ylabel('ln a')
-plt.title("10 runs averaged")
+plt.title("10 injections averaged")
 if injection_mode == 'qpo':
     plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
 else:
