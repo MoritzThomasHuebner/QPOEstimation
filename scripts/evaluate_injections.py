@@ -1,11 +1,10 @@
+import argparse
+import sys
+
 import bilby
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from copy import deepcopy
-import argparse
-import sys
-import json
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
