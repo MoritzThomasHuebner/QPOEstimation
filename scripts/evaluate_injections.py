@@ -91,7 +91,7 @@ plt.clf()
 for i in range(10):
     plt.semilogy(log_as, averaged_log_bfs_qpo_v_red_noise_err[i::10], label=f'ln c = {log_cs[i]:.2f}')
     plt.xlabel('ln a')
-    plt.ylabel('ln BF')
+    plt.ylabel('$\Delta \ln \mathrm{BF}$')
 plt.legend()
 suffix = '20Hz'
 plt.title("Standard deviation based on 10 injections")
@@ -107,7 +107,7 @@ for i in range(10):
     plt.xlabel('ln c')
     plt.ylabel('ln BF')
 plt.legend()
-plt.title("10 injections averaged")
+plt.title("10 runs averaged")
 if injection_mode == 'qpo':
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
 else:
@@ -118,7 +118,7 @@ plt.clf()
 for i in range(10):
     plt.semilogy(log_cs, averaged_log_bfs_qpo_v_red_noise_err[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')
     plt.xlabel('ln c')
-    plt.ylabel('ln BF')
+    plt.ylabel('$\Delta \ln \mathrm{BF}$')
 plt.legend()
 plt.title("Standard deviation based on 10 injections")
 if injection_mode == 'qpo':
@@ -138,7 +138,7 @@ ax = plt.contourf(log_as, log_cs, log_bfs_qpo_red_noise_reshaped,
 plt.colorbar(ax)
 plt.xlabel('ln c')
 plt.ylabel('ln a')
-plt.title("10 injections averaged")
+plt.title("10 runs averaged")
 if injection_mode == 'qpo':
     plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
 else:
