@@ -20,7 +20,7 @@ modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo"]
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run_mode", default='sliding_window', choices=['sliding_window', 'candidates', 'injection'])
+    parser.add_argument("--run_mode", default='sliding_window', choices=['sliding_window', 'multiple_windows', 'candidates', 'injection'])
     parser.add_argument("--sampling_frequency", default=None, type=int)
     parser.add_argument("--data_mode", choices=['normal', 'smoothed', 'smoothed_residual'], default='normal', type=str)
     parser.add_argument("--alpha", default=0.02, type=float)
@@ -96,13 +96,14 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    run_mode = 'candidates'
+    # run_mode = 'sliding_window'
+    run_mode = 'multiple_windows'
     sampling_frequency = 256
     data_mode = 'smoothed_residual'
     alpha = 0.02
 
     period_number = 5
-    run_id = 10
+    run_id = 20
 
     candidate_id = 3
     miller_candidates = False
@@ -123,8 +124,11 @@ else:
 
     band_minimum = 5
     band_maximum = 64
-    segment_length = 1.0
+    # segment_length = 7.56
+    # segment_length = 2.268
+    segment_length = 2.268
     segment_step = 0.27   # Requires 28 steps
+    # segment_step = 0.54   # Requires 14 steps
 
     nlive = 150
 
@@ -182,35 +186,53 @@ label = 'run'
 start = times[0] - 0.1
 stop = times[-1] + 0.1
 
+starts = []
+stops = []
 
-if run_mode == 'candidates':
-    candidates = np.loadtxt(f'candidates/candidates_{band}_{data_mode}.txt')
-    start = candidates[candidate_id][0]
-    stop = start + segment_length
-    if miller_candidates:  # Miller et al. time segments are shifted by 20 s
-        start += time_offset
-        stop += time_offset
-    segment_length = stop - start
-
-    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}"
-    label = f"{candidate_id}_{likelihood_model}"
-elif run_mode == 'injection':
-    outdir = f"{run_mode}_{band}_{data_mode}_{injection_mode}/{recovery_mode}"
-    label = f"{str(injection_id).zfill(2)}_{likelihood_model}"
-elif run_mode == 'sliding_window':
+if run_mode == 'multiple_windows':
     interpulse_periods = []
     for i in range(n_pulse_periods):
         interpulse_periods.append((time_offset + i * pulse_period, time_offset + (i + 1) * pulse_period))
-    start = interpulse_periods[period_number][0] + run_id * segment_step
-    stop = start + segment_length
 
+    for i in range(20):
+        starts.append(interpulse_periods[period_number + i][0] + run_id * segment_step)
+        stops.append(starts[-1] + segment_length)
     outdir = f"{run_mode}_{band}_{data_mode}/period_{period_number}/{recovery_mode}"
     label = f'{run_id}_{likelihood_model}'
 
+    indices = np.array([], dtype=int)
+    for start, stop in zip(starts, stops):
+        indices = np.append(indices, np.where(np.logical_and(times > start, times < stop))[0])
 
-indices = np.where(np.logical_and(times > start, times < stop))
-t = times[indices]
-c = counts[indices]
+    t = times[indices]
+    c = counts[indices]
+else:
+    if run_mode == 'candidates':
+        candidates = np.loadtxt(f'candidates/candidates_{band}_{data_mode}.txt')
+        start = candidates[candidate_id][0]
+        stop = start + segment_length
+        if miller_candidates:  # Miller et al. time segments are shifted by 20 s
+            start += time_offset
+            stop += time_offset
+        segment_length = stop - start
+
+        outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}"
+        label = f"{candidate_id}_{likelihood_model}"
+    elif run_mode == 'injection':
+        outdir = f"{run_mode}_{band}_{data_mode}_{injection_mode}/{recovery_mode}"
+        label = f"{str(injection_id).zfill(2)}_{likelihood_model}"
+    elif run_mode == 'sliding_window':
+        interpulse_periods = []
+        for i in range(n_pulse_periods):
+            interpulse_periods.append((time_offset + i * pulse_period, time_offset + (i + 1) * pulse_period))
+        start = interpulse_periods[period_number][0] + run_id * segment_step
+        stop = start + segment_length
+
+        outdir = f"{run_mode}_{band}_{data_mode}/period_{period_number}/{recovery_mode}"
+        label = f'{run_id}_{likelihood_model}'
+    indices = np.where(np.logical_and(times > start, times < stop))[0]
+    t = times[indices]
+    c = counts[indices]
 
 
 priors = bilby.core.prior.PriorDict()
