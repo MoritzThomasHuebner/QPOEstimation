@@ -71,6 +71,7 @@ for injection_id in range(100):
     averaged_log_bfs_qpo_v_red_noise_err.append(np.std(individual_log_bfs_qpo_v_red_noise))
 
     print(averaged_log_bfs_qpo_v_red_noise[-1])
+    print(injection_id)
 
 for i in range(10):
     plt.errorbar(log_as, averaged_log_bfs_qpo_v_red_noise[i::10], label=f'ln c = {log_cs[i]:.2f}')
@@ -86,6 +87,21 @@ else:
 plt.show()
 plt.clf()
 
+
+for i in range(10):
+    plt.semilogy(log_as, averaged_log_bfs_qpo_v_red_noise_err[i::10], label=f'ln c = {log_cs[i]:.2f}')
+    plt.xlabel('ln a')
+    plt.ylabel('ln BF')
+plt.legend()
+suffix = '20Hz'
+plt.title("Standard deviation based on 10 injections")
+if injection_mode == 'qpo':
+    plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_{suffix}_errs.png')
+else:
+    plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_errs.png')
+plt.show()
+plt.clf()
+
 for i in range(10):
     plt.plot(log_cs, averaged_log_bfs_qpo_v_red_noise[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')
     plt.xlabel('ln c')
@@ -96,6 +112,19 @@ if injection_mode == 'qpo':
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
 else:
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}')
+plt.show()
+plt.clf()
+
+for i in range(10):
+    plt.semilogy(log_cs, averaged_log_bfs_qpo_v_red_noise_err[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')
+    plt.xlabel('ln c')
+    plt.ylabel('ln BF')
+plt.legend()
+plt.title("Standard deviation based on 10 injections")
+if injection_mode == 'qpo':
+    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}_errs.png')
+else:
+    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_errs.png')
 
 for i in range(10):
     plt.plot(log_cs, averaged_log_bfs_qpo_v_red_noise_err[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')

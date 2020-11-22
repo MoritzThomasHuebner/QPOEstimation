@@ -31,4 +31,4 @@ print(f"ID:\tln BF GPR")
 for i, log_bf_gpr in zip(np.arange(0, len(log_bfs)), log_bfs):
     print(f"{i}:\t{log_bf_gpr:.2f}")
 
-print(f"Total GP: {np.sum(np.nan_to_num(log_bfs))}")
+print(f"Total QPO: {np.sum(np.nan_to_num(log_bfs))}")
