@@ -126,17 +126,6 @@ if injection_mode == 'qpo':
 else:
     plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_errs.png')
 
-for i in range(10):
-    plt.plot(log_cs, averaged_log_bfs_qpo_v_red_noise_err[10 * i: 10 * i + 10], label=f'ln a = {log_as[i]:.2f}')
-    plt.xlabel('ln c')
-    plt.ylabel('ln BF')
-plt.legend()
-plt.title("10 runs averaged")
-if injection_mode == 'qpo':
-    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}_errs.png')
-else:
-    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_errs.png')
-
 plt.show()
 plt.clf()
 
