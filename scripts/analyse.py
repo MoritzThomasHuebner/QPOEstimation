@@ -16,7 +16,7 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 from QPOEstimation.model.series import *
 
 likelihood_models = ["gaussian_process", "periodogram", "poisson"]
-modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo"]
+modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed"]
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -51,6 +51,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--segment_step", default=0.27, type=float)
     parser.add_argument("--nlive", default=150, type=int)
+    parser.add_argument("--use_ratio", default=False, type=bool)
 
     parser.add_argument("--try_load", default=True, type=bool)
     parser.add_argument("--resume", default=False, type=bool)
@@ -88,7 +89,9 @@ if len(sys.argv) > 1:
 
     segment_length = args.segment_length
     segment_step = args.segment_step
+
     nlive = args.nlive
+    use_ratio = args.use_ratio
 
     try_load = args.try_load
     resume = args.resume
@@ -116,7 +119,7 @@ else:
     max_log_a = 5
     min_log_c = -5
 
-    recovery_mode = "red_noise"
+    recovery_mode = "mixed"
     likelihood_model = "gaussian_process"
     background_model = "mean"
     periodogram_likelihood = "whittle"
@@ -131,6 +134,7 @@ else:
     # segment_step = 0.54   # Requires 14 steps
 
     nlive = 150
+    use_ratio = False
 
     try_load = False
     resume = False
@@ -159,9 +163,6 @@ if sampling_frequency is None:
         sampling_frequency = 512
     else:
         sampling_frequency = 1024
-
-# use_ratio = background_model == "mean"
-use_ratio = False
 
 if run_mode == 'injection':
     data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
@@ -285,6 +286,14 @@ if likelihood_model == "gaussian_process":
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='log_c')
+    elif recovery_mode == "mixed":
+        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
+        priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
+        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[0]:log_c')
+        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
+        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
+        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[1]:log_c')
     else:
         raise ValueError('Recovery mode not defined')
 
@@ -350,7 +359,10 @@ if plot:
     if likelihood_model == "gaussian_process":
         if recovery_mode in ["qpo", "zeroed_qpo"]:
             try:
-                frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
+                try:
+                    frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
+                except Exception as e:
+                    frequency_samples = np.exp(np.array(result.posterior['kernel:terms[0]:log_f']))
                 plt.hist(frequency_samples, bins="fd", density=True)
                 plt.xlabel('frequency [Hz]')
                 plt.ylabel('normalised PDF')
