@@ -357,7 +357,7 @@ if plot:
         result.plot_corner(outdir=f"{outdir}/corner")
 
     if likelihood_model == "gaussian_process":
-        if recovery_mode in ["qpo", "zeroed_qpo"]:
+        if recovery_mode in ["qpo", "zeroed_qpo", "mixed"]:
             try:
                 try:
                     frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
@@ -429,7 +429,7 @@ if plot:
 
     elif likelihood_model == "periodogram":
         result.plot_corner(outdir=f"{outdir}/corner")
-        if recovery_mode in ["qpo", "zeroed_qpo"]:
+        if recovery_mode in ["qpo", "zeroed_qpo", "mixed"]:
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')
