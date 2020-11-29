@@ -26,8 +26,10 @@ white_noise_results = bilby.result.ResultList([bilby.result.read_in_result(f'sli
 #     return bilby.prior.Gaussian(mu=mu_ln_f, sigma=sigma_ln_f).prob(val=dataset['kernel:terms[0]:log_f'])
 
 
-def hyper_prior_log_f(dataset, min_ln_f, delta_ln_f):
-    return bilby.prior.Uniform(minimum=min_ln_f, maximum=min_ln_f+delta_ln_f).prob(dataset['kernel:terms[0]:log_f'])
+def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
+    if max_ln_f < min_ln_f:
+        return 0
+    return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset['kernel:terms[0]:log_f'])
 #
 #
 # def hyper_prior_log_c(dataset, mu_ln_c, sigma_ln_c):
@@ -51,22 +53,30 @@ def hyper_prior_log_f(dataset, min_ln_f, delta_ln_f):
 #     return bilby.prior.Gaussian(mu=mu_ln_c_qpo, sigma=sigma_ln_c_qpo).prob(val=dataset['kernel:terms[0]:log_c'])
 
 
-def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, delta_ln_c_qpo):
-    return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=min_ln_c_qpo+delta_ln_c_qpo).prob(dataset['kernel:terms[0]:log_c'])
+def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo):
+    if min_ln_c_qpo < max_ln_c_qpo:
+        return 0
+    return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset['kernel:terms[0]:log_c'])
 
 
-def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, delta_ln_a_qpo):
-    return bilby.prior.Uniform(minimum=min_ln_a_qpo, maximum=min_ln_a_qpo+delta_ln_a_qpo).prob(val=dataset['kernel:terms[0]:log_a'])
+def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, max_ln_a_qpo):
+    if min_ln_a_qpo < max_ln_a_qpo:
+        return 0
+    return bilby.prior.Uniform(minimum=min_ln_a_qpo, maximum=max_ln_a_qpo).prob(val=dataset['kernel:terms[0]:log_a'])
 
 # def hyper_prior_log_a_qpo(dataset, mu_ln_a_qpo, sigma_ln_a_qpo):
 #     return bilby.prior.Gaussian(mu=mu_ln_a_qpo, sigma=sigma_ln_a_qpo).prob(val=dataset['kernel:terms[0]:log_a'])
 
-def hyper_prior_log_c_red_noise(dataset, min_ln_c_red_noise, delta_ln_c_red_noise):
-    return bilby.prior.Uniform(minimum=min_ln_c_red_noise, maximum=min_ln_c_red_noise+delta_ln_c_red_noise).prob(val=dataset['kernel:terms[1]:log_c'])
+def hyper_prior_log_c_red_noise(dataset, min_ln_c_red_noise, max_ln_c_red_noise):
+    if min_ln_c_red_noise < max_ln_c_red_noise:
+        return 0
+    return bilby.prior.Uniform(minimum=min_ln_c_red_noise, maximum=max_ln_c_red_noise).prob(val=dataset['kernel:terms[1]:log_c'])
 
 
-def hyper_prior_log_a_red_noise(dataset, min_ln_a_red_noise, delta_ln_a_red_noise):
-    return bilby.prior.Uniform(minimum=min_ln_a_red_noise, maximum=min_ln_a_red_noise+delta_ln_a_red_noise).prob(val=dataset['kernel:terms[1]:log_a'])
+def hyper_prior_log_a_red_noise(dataset, min_ln_a_red_noise, max_ln_a_red_noise):
+    if min_ln_a_red_noise < max_ln_a_red_noise:
+        return 0
+    return bilby.prior.Uniform(minimum=min_ln_a_red_noise, maximum=max_ln_a_red_noise).prob(val=dataset['kernel:terms[1]:log_a'])
 
 # def hyper_prior_log_c_red_noise(dataset, mu_ln_c_red_noise, sigma_ln_c_red_noise):
 #     return bilby.prior.Gaussian(mu=mu_ln_c_red_noise, sigma=sigma_ln_c_red_noise).prob(
@@ -149,15 +159,15 @@ max_log_c = np.log(sampling_frequency * 16)
 
 hp_priors = dict(
     min_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{min}$ qpo'),
-    delta_ln_f=bilby.core.prior.Uniform(0, np.log(band_maximum) - np.log(band_minimum), '$\Delta \ln f$ qpo'),
+    max_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{max}$ qpo'),
     min_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ qpo'),
-    delta_ln_c_qpo=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\Delta \ln c$ qpo'),
+    max_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{max}$ qpo'),
     # min_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ qpo'),
-    # delta_ln_a_qpo=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\Delta \ln a$ qpo'),
+    # max_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{max}$ qpo'),
     min_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ red_noise'),
-    delta_ln_c_red_noise=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\Delta \ln c$ red_noise'),
+    max_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{max}$ red_noise'),
     # min_ln_a_red_noise=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ red_noise'),
-    # delta_ln_a_red_noise=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\Delta \ln a$ red_noise')
+    # max_ln_a_red_noise=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{max}$ red_noise'),
 )
 # min_ln_f=Uniform(np.log(5), np.log(64), 'min_ln_f', '$\ln f_{min}$'),
 # max_ln_f=Uniform(np.log(5), np.log(64), 'max_ln_f', '$\ln f_{max}$'))
