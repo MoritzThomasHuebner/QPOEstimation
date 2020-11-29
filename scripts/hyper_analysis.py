@@ -11,7 +11,7 @@ from bilby.hyper.model import Model
 recovery_mode = 'mixed'
 # outdir = 'testing_hyper_pe_qpo'
 outdir = f'testing_hyper_pe_{recovery_mode}'
-label = 'gaussian'
+label = 'min_max'
 
 
 band_minimum = 5
@@ -149,15 +149,15 @@ max_log_c = np.log(sampling_frequency * 16)
 
 hp_priors = dict(
     min_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{min}$ qpo'),
-    delta_ln_f=bilby.core.prior.Uniform(0, np.log(band_maximum) - np.log(band_minimum), '$\ln f_{max}$ qpo')
-    # min_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ qpo'),
-    # delta_ln_c_qpo=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\ln c_{max}$ qpo'),
+    delta_ln_f=bilby.core.prior.Uniform(0, np.log(band_maximum) - np.log(band_minimum), '$\Delta \ln f$ qpo'),
+    min_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ qpo'),
+    delta_ln_c_qpo=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\Delta \ln c$ qpo'),
     # min_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ qpo'),
-    # delta_ln_a_qpo=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\ln a_{max}$ qpo'),
+    # delta_ln_a_qpo=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\Delta \ln a$ qpo'),
     # min_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ red_noise'),
-    # delta_ln_c_red_noise=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\ln c_{max}$ red_noise'),
+    # delta_ln_c_red_noise=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\Delta \ln c$ red_noise'),
     # min_ln_a_red_noise=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ red_noise'),
-    # delta_ln_a_red_noise=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\ln a_{max}$ red_noise')
+    # delta_ln_a_red_noise=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\Delta \ln a$ red_noise')
 )
 # min_ln_f=Uniform(np.log(5), np.log(64), 'min_ln_f', '$\ln f_{min}$'),
 # max_ln_f=Uniform(np.log(5), np.log(64), 'max_ln_f', '$\ln f_{max}$'))
