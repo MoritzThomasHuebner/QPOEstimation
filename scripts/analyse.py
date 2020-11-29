@@ -99,20 +99,21 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    # run_mode = 'sliding_window'
-    run_mode = 'multiple_windows'
+    run_mode = 'sliding_window'
+    # run_mode = 'multiple_windows'
     sampling_frequency = 256
     data_mode = 'smoothed_residual'
+    # data_mode = 'normal'
     alpha = 0.02
 
-    period_number = 5
-    run_id = 20
+    period_number = 20
+    run_id = 11
 
     candidate_id = 3
     miller_candidates = False
 
     injection_id = 0
-    injection_mode = "qpo"
+    injection_mode = "mixed"
 
     polynomial_max = 1000
     min_log_a = -5
@@ -129,12 +130,13 @@ else:
     band_maximum = 64
     # segment_length = 7.56
     # segment_length = 2.268
-    segment_length = 2.268
+    segment_length = 1.5
+    # segment_length = 2.
     segment_step = 0.27   # Requires 28 steps
     # segment_step = 0.54   # Requires 14 steps
 
     nlive = 150
-    use_ratio = False
+    use_ratio = True
 
     try_load = False
     resume = False
@@ -272,7 +274,7 @@ if likelihood_model == "gaussian_process":
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
         priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
     elif recovery_mode == "qpo":
-        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3)
+        kernel = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='log_c')
@@ -287,13 +289,17 @@ if likelihood_model == "gaussian_process":
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='log_c')
     elif recovery_mode == "mixed":
-        kernel = QPOTerm(log_a=0.1, log_b=0.5, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+        kernel = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+        # kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+        # kernel = ExponentialTerm(log_a=0.1, log_c=-0.01) + ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
         priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[0]:log_c')
+        # priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=3.2, name='terms[0]:log_c')
         priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[1]:log_c')
+        # priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=3.2, maximum=np.log(sampling_frequency*16), name='terms[1]:log_c')
     else:
         raise ValueError('Recovery mode not defined')
 
