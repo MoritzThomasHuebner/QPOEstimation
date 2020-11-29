@@ -8,7 +8,7 @@ from bilby.core.result import make_pp_plot
 from bilby.hyper.likelihood import HyperparameterLikelihood
 from bilby.hyper.model import Model
 
-recovery_mode = 'qpo'
+recovery_mode = 'mixed'
 # outdir = 'testing_hyper_pe_qpo'
 outdir = f'testing_hyper_pe_{recovery_mode}'
 label = 'min_max'
@@ -31,7 +31,7 @@ white_noise_results.extend(bilby.result.ResultList([bilby.result.read_in_result(
 def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
     if min_ln_f > max_ln_f:
         return 0
-    return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset['kernel:log_f'])
+    return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset['kernel:terms[0]:log_f'])
 #
 #
 # def hyper_prior_log_c(dataset, mu_ln_c, sigma_ln_c):
@@ -58,7 +58,7 @@ def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
 def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo):
     if min_ln_c_qpo > max_ln_c_qpo:
         return 0
-    return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset['kernel:log_c'])
+    return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset['kernel:terms[0]:log_c'])
 
 
 def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, max_ln_a_qpo):
