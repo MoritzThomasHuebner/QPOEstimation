@@ -82,7 +82,7 @@ def hyper_prior_log_a_red_noise(dataset, min_ln_a_red_noise, delta_ln_a_red_nois
 # hp = bilby.hyper.model.Model(model_functions=[hyper_prior_log_a_qpo, hyper_prior_log_c_qpo,
 #                                               hyper_prior_log_a_red_noise, hyper_prior_log_c_red_noise,
 #                                               hyper_prior_log_f])
-hp = bilby.hyper.model.Model(model_functions=[hyper_prior_log_f, hyper_prior_log_c_qpo])
+hp = bilby.hyper.model.Model(model_functions=[hyper_prior_log_f, hyper_prior_log_c_qpo, hyper_prior_log_c_red_noise])
 
 min_log_a = -5
 max_log_a = 15
@@ -154,8 +154,8 @@ hp_priors = dict(
     delta_ln_c_qpo=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\Delta \ln c$ qpo'),
     # min_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ qpo'),
     # delta_ln_a_qpo=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\Delta \ln a$ qpo'),
-    # min_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ red_noise'),
-    # delta_ln_c_red_noise=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\Delta \ln c$ red_noise'),
+    min_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ red_noise'),
+    delta_ln_c_red_noise=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\Delta \ln c$ red_noise'),
     # min_ln_a_red_noise=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ red_noise'),
     # delta_ln_a_red_noise=bilby.core.prior.Uniform(0, max_log_a - min_log_a, '$\Delta \ln a$ red_noise')
 )
