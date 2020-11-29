@@ -92,7 +92,7 @@ def hyper_prior_log_a_red_noise(dataset, min_ln_a_red_noise, max_ln_a_red_noise)
 # hp = bilby.hyper.model.Model(model_functions=[hyper_prior_log_a_qpo, hyper_prior_log_c_qpo,
 #                                               hyper_prior_log_a_red_noise, hyper_prior_log_c_red_noise,
 #                                               hyper_prior_log_f])
-hp = bilby.hyper.model.Model(model_functions=[hyper_prior_log_f, hyper_prior_log_c_qpo, hyper_prior_log_c_red_noise])
+hp = bilby.hyper.model.Model(model_functions=[hyper_prior_log_f, hyper_prior_log_c_qpo])
 
 min_log_a = -5
 max_log_a = 15
