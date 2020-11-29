@@ -8,7 +8,7 @@ from bilby.core.result import make_pp_plot
 from bilby.hyper.likelihood import HyperparameterLikelihood
 from bilby.hyper.model import Model
 
-recovery_mode = 'mixed'
+recovery_mode = 'qpo'
 # outdir = 'testing_hyper_pe_qpo'
 outdir = f'testing_hyper_pe_{recovery_mode}'
 label = 'min_max'
@@ -98,7 +98,7 @@ min_log_a = -5
 max_log_a = 15
 min_log_c = -6
 sampling_frequency = 256
-run_priors = bilby.core.prior.PriorDict()
+run_priors = bilby.core.prior.ConditionalPriorDict()
 
 run_priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
 run_priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency * 16),
@@ -164,8 +164,8 @@ hp_priors = dict(
     max_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{max}$ qpo'),
     # min_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ qpo'),
     # max_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{max}$ qpo'),
-    min_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ red_noise'),
-    max_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{max}$ red_noise'),
+    # min_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ red_noise'),
+    # max_ln_c_red_noise=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{max}$ red_noise'),
     # min_ln_a_red_noise=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ red_noise'),
     # max_ln_a_red_noise=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{max}$ red_noise'),
 )
