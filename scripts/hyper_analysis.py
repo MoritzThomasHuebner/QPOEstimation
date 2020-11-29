@@ -27,7 +27,7 @@ white_noise_results = bilby.result.ResultList([bilby.result.read_in_result(f'sli
 
 
 def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
-    if max_ln_f < min_ln_f:
+    if min_ln_f > max_ln_f:
         return 0
     return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset['kernel:terms[0]:log_f'])
 #
@@ -54,13 +54,13 @@ def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
 
 
 def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo):
-    if min_ln_c_qpo < max_ln_c_qpo:
+    if min_ln_c_qpo > max_ln_c_qpo:
         return 0
     return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset['kernel:terms[0]:log_c'])
 
 
 def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, max_ln_a_qpo):
-    if min_ln_a_qpo < max_ln_a_qpo:
+    if min_ln_a_qpo > max_ln_a_qpo:
         return 0
     return bilby.prior.Uniform(minimum=min_ln_a_qpo, maximum=max_ln_a_qpo).prob(val=dataset['kernel:terms[0]:log_a'])
 
@@ -68,13 +68,13 @@ def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, max_ln_a_qpo):
 #     return bilby.prior.Gaussian(mu=mu_ln_a_qpo, sigma=sigma_ln_a_qpo).prob(val=dataset['kernel:terms[0]:log_a'])
 
 def hyper_prior_log_c_red_noise(dataset, min_ln_c_red_noise, max_ln_c_red_noise):
-    if min_ln_c_red_noise < max_ln_c_red_noise:
+    if min_ln_c_red_noise > max_ln_c_red_noise:
         return 0
     return bilby.prior.Uniform(minimum=min_ln_c_red_noise, maximum=max_ln_c_red_noise).prob(val=dataset['kernel:terms[1]:log_c'])
 
 
 def hyper_prior_log_a_red_noise(dataset, min_ln_a_red_noise, max_ln_a_red_noise):
-    if min_ln_a_red_noise < max_ln_a_red_noise:
+    if min_ln_a_red_noise > max_ln_a_red_noise:
         return 0
     return bilby.prior.Uniform(minimum=min_ln_a_red_noise, maximum=max_ln_a_red_noise).prob(val=dataset['kernel:terms[1]:log_a'])
 
