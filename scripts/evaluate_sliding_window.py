@@ -60,12 +60,13 @@ for period in range(n_periods):
 
     for run_id in range(len(segments)):
         try:
+            res_white_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/white_noise/results/{run_id}_{likelihood_model}_result.json")
             res_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/qpo/results/{run_id}_{likelihood_model}_result.json")
             res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_{likelihood_model}_result.json")
             res_mixed = bilby.result.read_in_result(f"{outdir}/period_{period}/mixed/results/{run_id}_{likelihood_model}_result.json")
-            log_bf_qpo = res_qpo.log_bayes_factor
-            log_bf_red_noise = res_red_noise.log_bayes_factor
-            log_bf_mixed = res_mixed.log_bayes_factor
+            log_bf_qpo = res_qpo.log_bayes_factor - res_white_noise.log_bayes_factor
+            log_bf_red_noise = res_red_noise.log_bayes_factor - res_white_noise.log_bayes_factor
+            log_bf_mixed = res_mixed.log_bayes_factor - res_white_noise.log_bayes_factor
 
             log_f_samples_qpo = np.array(res_qpo.posterior['kernel:log_f'])
             frequency_samples_qpo = np.exp(log_f_samples_qpo)
