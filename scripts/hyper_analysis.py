@@ -107,7 +107,7 @@ def run_prior(dataset):
 
 samples = [result.posterior for result in results]
 # evidences = [result.log_evidence for result in results]
-evidences = [result.log_bayes_factor for result in results]
+evidences = [result.log_bayes_factor - result_white_noise.log_bayes_factor for result, result_white_noise in zip(results, white_noise_results)]
 print(evidences)
 hp_likelihood = HyperparameterLikelihood(
     posteriors=samples, hyper_prior=hp,
