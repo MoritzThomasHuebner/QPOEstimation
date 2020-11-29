@@ -75,8 +75,8 @@ for period in range(n_periods):
 
             log_f_samples_mixed = np.array(res_mixed.posterior['kernel:terms[0]:log_f'])
             frequency_samples_mixed = np.exp(log_f_samples_mixed)
-            mean_frequency_qpo.append(np.mean(frequency_samples_mixed))
-            std_frequency_qpo.append(np.std(frequency_samples_mixed))
+            mean_frequency_mixed.append(np.mean(frequency_samples_mixed))
+            std_frequency_mixed.append(np.std(frequency_samples_mixed))
 
             # res_no_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/no_qpo/results/{run_id}_whittle_result.json")
             # res_one_qpo_whittle = bilby.result.read_in_result(f"{outdir}/period_{period}/one_qpo/results/{run_id}_whittle_result.json")
