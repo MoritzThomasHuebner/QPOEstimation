@@ -17,8 +17,11 @@ label = 'min_max'
 band_minimum = 5
 band_maximum = 64
 
-results = bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/{recovery_mode}/results/27_gaussian_process_result.json') for i in range(46)])
-white_noise_results = bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/white_noise/results/27_gaussian_process_result.json') for i in range(46)])
+results = bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/{recovery_mode}/results/15_gaussian_process_result.json') for i in range(46)])
+results.extend(bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/{recovery_mode}/results/27_gaussian_process_result.json') for i in range(46)]))
+
+white_noise_results = bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/white_noise/results/15_gaussian_process_result.json') for i in range(46)])
+white_noise_results.extend(bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/white_noise/results/27_gaussian_process_result.json') for i in range(46)]))
 
 
 
