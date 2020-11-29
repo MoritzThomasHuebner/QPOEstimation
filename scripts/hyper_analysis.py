@@ -148,8 +148,8 @@ hp_likelihood = HyperparameterLikelihood(
 max_log_c = np.log(sampling_frequency * 16)
 
 hp_priors = dict(
-    min_ln_f_qpo=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{min}$ qpo'),
-    delta_ln_f_qpo=bilby.core.prior.Uniform(0, np.log(band_maximum) - np.log(band_minimum), '$\ln f_{max}$ qpo'),
+    min_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{min}$ qpo'),
+    delta_ln_f=bilby.core.prior.Uniform(0, np.log(band_maximum) - np.log(band_minimum), '$\ln f_{max}$ qpo'),
     min_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ qpo'),
     delta_ln_c_qpo=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\ln c_{max}$ qpo'),
     min_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ qpo'),
