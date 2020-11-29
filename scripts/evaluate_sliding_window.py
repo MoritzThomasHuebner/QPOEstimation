@@ -87,6 +87,7 @@ for period in range(n_periods):
             print(e)
             log_bf_qpo = np.nan
             log_bf_red_noise = np.nan
+            log_bf_red_mixed = np.nan
             mean_frequency_qpo.append(np.nan)
             std_frequency_qpo.append(np.nan)
         log_bfs_qpo.append(log_bf_qpo)
