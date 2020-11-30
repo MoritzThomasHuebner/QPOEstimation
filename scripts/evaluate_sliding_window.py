@@ -15,8 +15,8 @@ n_periods = 47
 period_one_log_bf_data = []
 period_two_log_bf_data = []
 
-band_minimum = 5
-band_maximum = 64
+band_minimum = 64
+band_maximum = 128
 
 pulse_period = 7.56
 segment_step = 0.23625
