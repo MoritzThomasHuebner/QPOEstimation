@@ -8,7 +8,7 @@ from bilby.core.result import make_pp_plot
 from bilby.hyper.likelihood import HyperparameterLikelihood
 from bilby.hyper.model import Model
 
-recovery_mode = 'mxied'
+recovery_mode = 'qpo'
 band_minimum = 64
 band_maximum = 128
 # outdir = 'testing_hyper_pe_qpo'
