@@ -31,6 +31,8 @@ white_noise_results.extend(bilby.result.ResultList([bilby.result.read_in_result(
 def hyper_prior_log_f(dataset, min_ln_f, max_ln_f, mu_ln_f_peak, sigma_ln_f_peak, eta_ln_f):
     if min_ln_f > max_ln_f:
         return 0
+    if min_ln_f > mu_ln_f_peak or mu_ln_f_peak > max_ln_f:
+        return 0
     if recovery_mode == 'mixed':
         key = 'kernel:terms[0]:log_f'
     else:
@@ -195,6 +197,6 @@ hp_priors = dict(
 
 # And run sampler
 result = bilby.run_sampler(
-    likelihood=hp_likelihood, priors=hp_priors, sampler='dynesty', nlive=1000,
+    likelihood=hp_likelihood, priors=hp_priors, sampler='dynesty', nlive=300,
     use_ratio=False, outdir=outdir, label=label, resume=False, sample='rslice')
 result.plot_corner()
