@@ -9,13 +9,13 @@ from bilby.hyper.likelihood import HyperparameterLikelihood
 from bilby.hyper.model import Model
 
 recovery_mode = 'mixed'
+band_minimum = 64
+band_maximum = 128
 # outdir = 'testing_hyper_pe_qpo'
-outdir = f'testing_hyper_pe_{recovery_mode}'
+outdir = f'hyper_pe_{band_minimum}_{band_maximum}Hz_{recovery_mode}'
 label = 'min_max'
 
 
-band_minimum = 5
-band_maximum = 64
 
 results = bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/{recovery_mode}/results/15_gaussian_process_result.json') for i in range(46)])
 results.extend(bilby.result.ResultList([bilby.result.read_in_result(f'sliding_window_{band_minimum}_{band_maximum}Hz_normal/period_{i}/{recovery_mode}/results/27_gaussian_process_result.json') for i in range(46)]))
