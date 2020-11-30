@@ -8,7 +8,7 @@ from bilby.core.result import make_pp_plot
 from bilby.hyper.likelihood import HyperparameterLikelihood
 from bilby.hyper.model import Model
 
-recovery_mode = 'mixed'
+recovery_mode = 'mxied'
 band_minimum = 64
 band_maximum = 128
 # outdir = 'testing_hyper_pe_qpo'
@@ -31,7 +31,12 @@ white_noise_results.extend(bilby.result.ResultList([bilby.result.read_in_result(
 def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
     if min_ln_f > max_ln_f:
         return 0
-    return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset['kernel:terms[0]:log_f'])
+    if recovery_mode == 'mixed':
+        key = 'kernel:terms[0]:log_f'
+    else:
+        key = 'kernel:log_f'
+    return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset[key])
+
 #
 #
 # def hyper_prior_log_c(dataset, mu_ln_c, sigma_ln_c):
@@ -58,13 +63,22 @@ def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
 def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo):
     if min_ln_c_qpo > max_ln_c_qpo:
         return 0
-    return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset['kernel:terms[0]:log_c'])
+    if recovery_mode == 'mixed':
+        key = 'kernel:terms[0]:log_c'
+    else:
+        key = 'kernel:log_f'
+    return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset[key])
 
 
 def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, max_ln_a_qpo):
     if min_ln_a_qpo > max_ln_a_qpo:
         return 0
-    return bilby.prior.Uniform(minimum=min_ln_a_qpo, maximum=max_ln_a_qpo).prob(val=dataset['kernel:terms[0]:log_a'])
+    if recovery_mode == 'mixed':
+        key = 'kernel:terms[0]:log_a'
+    else:
+        key = 'kernel:log_f'
+
+    return bilby.prior.Uniform(minimum=min_ln_a_qpo, maximum=max_ln_a_qpo).prob(val=dataset[key])
 
 # def hyper_prior_log_a_qpo(dataset, mu_ln_a_qpo, sigma_ln_a_qpo):
 #     return bilby.prior.Gaussian(mu=mu_ln_a_qpo, sigma=sigma_ln_a_qpo).prob(val=dataset['kernel:terms[0]:log_a'])
