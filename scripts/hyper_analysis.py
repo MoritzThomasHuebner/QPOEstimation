@@ -182,11 +182,11 @@ hp_likelihood = HyperparameterLikelihood(
 max_log_c = np.log(sampling_frequency * 16)
 
 hp_priors = dict(
-    # min_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{min}$ qpo'),
-    # max_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{max}$ qpo'),
+    min_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{min}$ qpo'),
+    max_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{max}$ qpo'),
     mu_ln_f_peak=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\mu \ln f_{peak}$'),
     sigma_ln_f_peak=bilby.core.prior.Uniform(0, np.log(band_maximum) - np.log(band_minimum), '$\sigma \ln f_{peak}$'),
-    # eta_ln_f=bilby.core.prior.Uniform(0, 1, '$\eta \ln f$'),
+    eta_ln_f=bilby.core.prior.Uniform(0, 1, '$\eta \ln f$'),
     min_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ qpo'),
     max_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{max}$ qpo'),
     # min_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ qpo'), , mu_ln_f_peak, sigma_ln_f_peak, eta_ln_f
