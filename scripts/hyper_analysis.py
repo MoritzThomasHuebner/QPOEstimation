@@ -66,7 +66,7 @@ def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo):
     if recovery_mode == 'mixed':
         key = 'kernel:terms[0]:log_c'
     else:
-        key = 'kernel:log_f'
+        key = 'kernel:log_c'
     return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset[key])
 
 
@@ -76,7 +76,7 @@ def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, max_ln_a_qpo):
     if recovery_mode == 'mixed':
         key = 'kernel:terms[0]:log_a'
     else:
-        key = 'kernel:log_f'
+        key = 'kernel:log_a'
 
     return bilby.prior.Uniform(minimum=min_ln_a_qpo, maximum=max_ln_a_qpo).prob(val=dataset[key])
 
