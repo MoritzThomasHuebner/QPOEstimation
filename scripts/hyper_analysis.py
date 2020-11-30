@@ -14,7 +14,7 @@ band_maximum = 64
 # outdir = 'testing_hyper_pe_qpo'
 outdir = f'hyper_pe_{band_minimum}_{band_maximum}Hz_{recovery_mode}'
 # label = 'gaussian_min_max'
-label = 'gaussian_min_max'
+label = 'gaussian_ln_c_min_max'
 
 
 
@@ -26,18 +26,18 @@ white_noise_results.extend(bilby.result.ResultList([bilby.result.read_in_result(
 
 
 
-def hyper_prior_log_f(dataset, min_ln_f, max_ln_f, mu_ln_f_peak, sigma_ln_f_peak, eta_ln_f):
-    if min_ln_f > max_ln_f:
-        return 0
-    if min_ln_f > mu_ln_f_peak or mu_ln_f_peak > max_ln_f:
-        return 0
-    if recovery_mode == 'mixed':
-        key = 'kernel:terms[0]:log_f'
-    else:
-        key = 'kernel:log_f'
-    p1 = eta_ln_f * bilby.prior.TruncatedGaussian(mu=mu_ln_f_peak, sigma=sigma_ln_f_peak, minimum=min_ln_f, maximum=max_ln_f).prob(dataset[key])
-    p2 = (1 - eta_ln_f) * bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset[key])
-    return p1 + p2
+# def hyper_prior_log_f(dataset, min_ln_f, max_ln_f, mu_ln_f_peak, sigma_ln_f_peak, eta_ln_f):
+#     if min_ln_f > max_ln_f:
+#         return 0
+#     if min_ln_f > mu_ln_f_peak or mu_ln_f_peak > max_ln_f:
+#         return 0
+#     if recovery_mode == 'mixed':
+#         key = 'kernel:terms[0]:log_f'
+#     else:
+#         key = 'kernel:log_f'
+#     p1 = eta_ln_f * bilby.prior.TruncatedGaussian(mu=mu_ln_f_peak, sigma=sigma_ln_f_peak, minimum=min_ln_f, maximum=max_ln_f).prob(dataset[key])
+#     p2 = (1 - eta_ln_f) * bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset[key])
+#     return p1 + p2
 # def hyper_prior_log_f(dataset, mu_ln_f_peak, sigma_ln_f_peak):
 #     if recovery_mode == 'mixed':
 #         key = 'kernel:terms[0]:log_f'
@@ -50,14 +50,11 @@ def hyper_prior_log_f(dataset, min_ln_f, max_ln_f, mu_ln_f_peak, sigma_ln_f_peak
 # def hyper_prior_log_c(dataset, mu_ln_c, sigma_ln_c):
 #     return bilby.prior.Gaussian(mu=mu_ln_c, sigma=sigma_ln_c).prob(val=dataset['kernel:log_c'])
 #
-#
-# def hyper_prior_log_a(dataset, mu_ln_a, sigma_ln_a):
-#     return bilby.prior.Gaussian(mu=mu_ln_a, sigma=sigma_ln_a).prob(val=dataset['kernel:log_a'])
 
-# def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
-#     if min_ln_f > max_ln_f:
-#         return 0
-#     return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset['kernel:terms[0]:log_f'])
+def hyper_prior_log_f(dataset, min_ln_f, max_ln_f):
+    if min_ln_f > max_ln_f:
+        return 0
+    return bilby.prior.Uniform(minimum=min_ln_f, maximum=max_ln_f).prob(dataset['kernel:terms[0]:log_f'])
 
 
 # def hyper_prior_log_c_qpo(dataset, mu_ln_c_qpo_1, sigma_ln_c_qpo_1, mu_ln_c_qpo_2, sigma_ln_c_qpo_2, eta):
@@ -68,15 +65,27 @@ def hyper_prior_log_f(dataset, min_ln_f, max_ln_f, mu_ln_f_peak, sigma_ln_f_peak
 #     return bilby.prior.Gaussian(mu=mu_ln_c_qpo, sigma=sigma_ln_c_qpo).prob(val=dataset['kernel:terms[0]:log_c'])
 
 
-def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo):
+# def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo):
+#     if min_ln_c_qpo > max_ln_c_qpo:
+#         return 0
+#     if recovery_mode == 'mixed':
+#         key = 'kernel:terms[0]:log_c'
+#     else:
+#         key = 'kernel:log_c'
+#     return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset[key])
+
+def hyper_prior_log_c_qpo(dataset, min_ln_c_qpo, max_ln_c_qpo, mu_ln_c_qpo_peak, sigma_ln_c_qpo_peak, eta_ln_c_qpo):
     if min_ln_c_qpo > max_ln_c_qpo:
+        return 0
+    if min_ln_c_qpo > mu_ln_c_qpo_peak or mu_ln_c_qpo_peak > max_ln_c_qpo:
         return 0
     if recovery_mode == 'mixed':
         key = 'kernel:terms[0]:log_c'
     else:
         key = 'kernel:log_c'
-    return bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset[key])
-
+    p1 = eta_ln_c_qpo * bilby.prior.TruncatedGaussian(mu=mu_ln_c_qpo_peak, sigma=sigma_ln_c_qpo_peak, minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset[key])
+    p2 = (1 - eta_ln_c_qpo) * bilby.prior.Uniform(minimum=min_ln_c_qpo, maximum=max_ln_c_qpo).prob(dataset[key])
+    return p1 + p2
 
 def hyper_prior_log_a_qpo(dataset, min_ln_a_qpo, max_ln_a_qpo):
     if min_ln_a_qpo > max_ln_a_qpo:
@@ -184,9 +193,9 @@ max_log_c = np.log(sampling_frequency * 16)
 hp_priors = dict(
     min_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{min}$ qpo'),
     max_ln_f=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\ln f_{max}$ qpo'),
-    mu_ln_f_peak=bilby.core.prior.Uniform(np.log(band_minimum), np.log(band_maximum), '$\mu \ln f_{peak}$'),
-    sigma_ln_f_peak=bilby.core.prior.Uniform(0, np.log(band_maximum) - np.log(band_minimum), '$\sigma \ln f_{peak}$'),
-    eta_ln_f=bilby.core.prior.Uniform(0, 1, '$\eta \ln f$'),
+    mu_ln_c_qpo_peak=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\mu \ln c_{peak}$ qpo'),
+    sigma_ln_c_qpo_peak=bilby.core.prior.Uniform(0, max_log_c - min_log_c, '$\sigma \ln c_{peak}$ qpo'),
+    eta_ln_c_qpo=bilby.core.prior.Uniform(0, 1, '$\eta \ln c$ qpo'),
     min_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{min}$ qpo'),
     max_ln_c_qpo=bilby.core.prior.Uniform(min_log_c, max_log_c, '$\ln c_{max}$ qpo'),
     # min_ln_a_qpo=bilby.core.prior.Uniform(min_log_a, max_log_a, '$\ln a_{min}$ qpo'), , mu_ln_f_peak, sigma_ln_f_peak, eta_ln_f
