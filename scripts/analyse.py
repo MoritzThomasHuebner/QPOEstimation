@@ -12,10 +12,10 @@ from scipy.signal import periodogram
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
-    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm
+    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm, TransientCeleriteLikelihood
 from QPOEstimation.model.series import *
 
-likelihood_models = ["gaussian_process", "periodogram", "poisson"]
+likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed"]
 
 if len(sys.argv) > 1:
@@ -106,8 +106,8 @@ else:
     # data_mode = 'normal'
     alpha = 0.02
 
-    period_number = 20
-    run_id = 11
+    period_number = 13
+    run_id = 26
 
     candidate_id = 3
     miller_candidates = False
@@ -120,8 +120,8 @@ else:
     max_log_a = 5
     min_log_c = -5
 
-    recovery_mode = "mixed"
-    likelihood_model = "gaussian_process"
+    recovery_mode = "red_noise"
+    likelihood_model = "gaussian_process_windowed"
     background_model = "mean"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
@@ -130,13 +130,13 @@ else:
     band_maximum = 64
     # segment_length = 7.56
     # segment_length = 2.268
-    segment_length = 1.5
+    segment_length = 1.8
     # segment_length = 2.
-    segment_step = 0.27   # Requires 28 steps
+    segment_step = 0.23625   # Requires 32 steps
     # segment_step = 0.54   # Requires 14 steps
 
     nlive = 150
-    use_ratio = True
+    use_ratio = False
 
     try_load = False
     resume = False
@@ -239,7 +239,7 @@ else:
 
 
 priors = bilby.core.prior.PriorDict()
-if likelihood_model == "gaussian_process":
+if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual']:
         stabilised_counts = c
     else:
@@ -305,7 +305,12 @@ if likelihood_model == "gaussian_process":
 
     gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
     gp.compute(t, np.sqrt(stabilised_variance))
-    likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
+    if likelihood_model == "gaussian_process_windowed":
+        priors['window_minimum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=t[-1], name='window_minimum')
+        priors['window_size'] = bilby.core.prior.Uniform(minimum=0, maximum=segment_length, name='window_size')
+        likelihood = TransientCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t, y=stabilised_counts)
+    else:
+        likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 
 elif likelihood_model == "periodogram":
     lc = stingray.Lightcurve(time=t, counts=c)
@@ -362,7 +367,7 @@ if plot:
     else:
         result.plot_corner(outdir=f"{outdir}/corner")
 
-    if likelihood_model == "gaussian_process":
+    if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         if recovery_mode in ["qpo", "zeroed_qpo", "mixed"]:
             try:
                 try:

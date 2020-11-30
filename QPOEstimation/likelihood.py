@@ -146,6 +146,62 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
     def log_likelihood_ratio(self):
         return self.log_likelihood() - self.white_noise_log_likelihood
 
+
+class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
+
+    def __init__(self, mean_model, kernel, fit_mean, t, y, conversion_func=None):
+        self.kernel = kernel
+        self.mean_model = mean_model
+        self.fit_mean = fit_mean
+        self.t = t
+        self.y = y
+        gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
+        gp.compute(t, np.ones(len(y)))
+        parameters = gp.get_parameter_dict()
+        parameters['window_minimum'] = t[0]
+        parameters['window_size'] = 0.5
+        if conversion_func is None:
+            self.conversion_func = lambda x: x
+        else:
+            self.conversion_func = conversion_func
+        super().__init__(parameters)
+
+    def log_likelihood(self):
+        # if self.parameters['window_minimum'] > self.parameters['window_maximum']:
+        #     return -np.inf
+        windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t,
+                                                   self.t < self.parameters['window_minimum'] + self.parameters['window_size']))
+        edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t,
+                                              self.t > self.parameters['window_minimum'] + self.parameters['window_size']))
+        windowed_t = self.t[windowed_indices]
+        windowed_y = self.y[windowed_indices]
+        edge_t = self.t[edge_indices]
+        edge_y = self.y[edge_indices]
+        if len(windowed_t) == 0 or len(edge_t) == 0:
+            return -np.inf
+
+        gp = celerite.GP(kernel=self.kernel, mean=self.mean_model, fit_mean=self.fit_mean)
+        gp.compute(windowed_t, np.ones(len(windowed_y)))
+        white_noise_gp = celerite.GP(kernel=celerite.terms.JitterTerm(log_sigma=-20), mean=self.mean_model, fit_mean=self.fit_mean)
+        white_noise_gp.compute(edge_t, np.ones(len(edge_y)))
+
+
+        celerite_params = self.conversion_func(self.parameters)
+        for name, value in celerite_params.items():
+            if 'window' in name:
+                continue
+            gp.set_parameter(name=name, value=value)
+            if 'mean' in name:
+                white_noise_gp.set_parameter(name=name, value=value)
+        try:
+            log_l = gp.log_likelihood(windowed_y) + white_noise_gp.log_likelihood(edge_y)
+            if np.isnan(log_l):
+                print('test')
+            return log_l
+        except Exception:
+            return -np.inf
+
+
 class QPOTerm(terms.Term):
     parameter_names = ("log_a", "log_b", "log_c", "log_f")
 

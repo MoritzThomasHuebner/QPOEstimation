@@ -3,9 +3,11 @@
 #for segment in {0..27}
 for segment in {0..31}
 do
-  for period in {0..46}
+  for period in 13 26
   do
-    sbatch analyse_submit.sh $segment $period gaussian_process
+    sbatch analyse_submit.sh $segment $period 5 64
+    sbatch analyse_submit.sh $segment $period 64 128
+    sbatch analyse_submit.sh $segment $period 128 256
   done
 done
 
