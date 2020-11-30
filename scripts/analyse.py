@@ -120,7 +120,7 @@ else:
     max_log_a = 5
     min_log_c = -5
 
-    recovery_mode = "red_noise"
+    recovery_mode = "qpo"
     likelihood_model = "gaussian_process_windowed"
     background_model = "mean"
     periodogram_likelihood = "whittle"
@@ -138,7 +138,7 @@ else:
     nlive = 150
     use_ratio = False
 
-    try_load = False
+    try_load = True
     resume = False
     plot = True
 
