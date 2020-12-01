@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #for segment in {0..27}
-for segment in {0..31}
+for segment in 13 26
 do
-  for period in 13 26
+  for period in {0..46}
   do
     sbatch analyse_submit.sh $segment $period 5 64
 #    sbatch analyse_submit.sh $segment $period 64 128
