@@ -106,7 +106,7 @@ else:
     # data_mode = 'normal'
     alpha = 0.02
 
-    period_number = 13
+    period_number = 0
     run_id = 26
 
     candidate_id = 3
@@ -122,6 +122,7 @@ else:
 
     recovery_mode = "qpo"
     likelihood_model = "gaussian_process_windowed"
+    # background_model = "polynomial"
     background_model = "mean"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
@@ -308,6 +309,11 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     if likelihood_model == "gaussian_process_windowed":
         priors['window_minimum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=t[-1], name='window_minimum')
         priors['window_size'] = bilby.core.prior.Uniform(minimum=0, maximum=segment_length, name='window_size')
+        priors['window_maximum'] = bilby.core.prior.Constraint(minimum=t[0], maximum=t[-1], name='window_size')
+        def window_conversion_func(params):
+            params['window_maximum'] = params['window_minimum'] + params['window_size']
+            return params
+        priors.conversion_function = window_conversion_func
         likelihood = TransientCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t, y=stabilised_counts)
     else:
         likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
@@ -404,9 +410,18 @@ if plot:
         plt.savefig(f"{outdir}/fits/{label}_max_like_kernel")
         plt.clf()
 
-        x = np.linspace(t[0], t[-1], 5000)
-        pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
-        pred_std = np.sqrt(pred_var)
+        if likelihood_model == 'gaussian_process_windowed':
+            plt.axvline(max_like_params['window_minimum'], color='cyan', label='start/end stochastic process')
+            plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
+            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
+            windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
+            gp.compute(t[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
+            pred_mean, pred_var = gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
+            pred_std = np.sqrt(pred_var)
+        else:
+            x = np.linspace(t[0], t[-1], 5000)
+            pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
+            pred_std = np.sqrt(pred_var)
 
         color = "#ff7f0e"
         plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
@@ -414,6 +429,7 @@ if plot:
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
         if background_model != "mean":
+            x = np.linspace(t[0], t[-1], 5000)
             trend = mean_model.get_value(x)
             plt.plot(x, trend, color='green', label='Trend')
 
