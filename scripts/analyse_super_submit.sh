@@ -6,8 +6,8 @@ do
   for period in {0..46}
   do
     sbatch analyse_submit.sh $segment $period 5 64
-#    sbatch analyse_submit.sh $segment $period 64 128
-#    sbatch analyse_submit.sh $segment $period 128 256
+    sbatch analyse_submit.sh $segment $period 64 128
+    sbatch analyse_submit.sh $segment $period 128 256
   done
 done
 
