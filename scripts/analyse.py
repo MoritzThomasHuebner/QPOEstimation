@@ -174,8 +174,10 @@ else:
 if sampling_frequency is None:
     if band_maximum <= 64:
         sampling_frequency = 256
+        alpha = 0.02
     elif band_maximum <= 128:
         sampling_frequency = 512
+        alpha = 0.01
     else:
         sampling_frequency = 1024
 
