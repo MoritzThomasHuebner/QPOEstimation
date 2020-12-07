@@ -17,13 +17,19 @@ from QPOEstimation.model.series import *
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed"]
+run_modes = ['select_time', 'sliding_window', 'multiple_windows', 'candidates', 'injection']
+background_models = ["polynomial", "exponential", "mean"]
+data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run_mode", default='sliding_window', choices=['sliding_window', 'multiple_windows', 'candidates', 'injection'])
+    parser.add_argument("--run_mode", default='sliding_window', choices=run_modes)
     parser.add_argument("--sampling_frequency", default=None, type=int)
-    parser.add_argument("--data_mode", choices=['normal', 'smoothed', 'smoothed_residual'], default='normal', type=str)
+    parser.add_argument("--data_mode", choices=data_modes, default='normal', type=str)
     parser.add_argument("--alpha", default=0.02, type=float)
+
+    parser.add_argument("--start_time", default=0., type=float)
+    parser.add_argument("--end_time", default=1., type=float)
 
     parser.add_argument("--period_number", default=0, type=int)
     parser.add_argument("--run_id", default=0, type=int)
@@ -41,7 +47,7 @@ if len(sys.argv) > 1:
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
-    parser.add_argument("--background_model", default="polynomial", choices=["polynomial", "exponential", "mean"])
+    parser.add_argument("--background_model", default="polynomial", choices=background_models)
     parser.add_argument("--periodogram_likelihood", default="whittle", choices=["whittle", "groth"])
     parser.add_argument("--periodogram_noise_model", default="red_noise", choices=["red_noise", "broken_power_law"])
 
@@ -62,6 +68,9 @@ if len(sys.argv) > 1:
     sampling_frequency = args.sampling_frequency
     data_mode = args.data_mode
     alpha = args.alpha
+
+    start_time = args.start_time
+    end_time = args.end_time
 
     period_number = args.period_number
     run_id = args.run_id
@@ -100,14 +109,17 @@ else:
     matplotlib.use('Qt5Agg')
 
     run_mode = 'sliding_window'
-    # run_mode = 'multiple_windows'
+    # run_mode = 'select_time'
     sampling_frequency = 256
+    # data_mode = 'blind_injection'
     data_mode = 'smoothed_residual'
-    # data_mode = 'normal'
     alpha = 0.02
 
-    period_number = 0
-    run_id = 26
+    start_time = 10
+    end_time = 400
+
+    period_number = 13
+    run_id = 13
 
     candidate_id = 3
     miller_candidates = False
@@ -137,9 +149,9 @@ else:
     # segment_step = 0.54   # Requires 14 steps
 
     nlive = 150
-    use_ratio = False
+    use_ratio = True
 
-    try_load = True
+    try_load = False
     resume = False
     plot = True
 
@@ -179,6 +191,8 @@ else:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat')
     elif data_mode == 'smoothed_residual':
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_residual_alpha_{alpha}.dat')
+    elif data_mode == 'blind_injection':
+        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_{data_mode}.dat')
     else:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
 
@@ -234,6 +248,12 @@ else:
 
         outdir = f"{run_mode}_{band}_{data_mode}/period_{period_number}/{recovery_mode}"
         label = f'{run_id}_{likelihood_model}'
+    elif run_mode == 'select_time':
+        start = start_time
+        stop = end_time
+        outdir = f"{run_mode}_{band}_{data_mode}/{start_time}_{end_time}/{recovery_mode}"
+        label = f'{likelihood_model}'
+
     indices = np.where(np.logical_and(times > start, times < stop))[0]
     t = times[indices]
     c = counts[indices]
@@ -241,7 +261,7 @@ else:
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
-    if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual']:
+    if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual', 'blind_injection']:
         stabilised_counts = c
     else:
         stabilised_counts = bar_lev(c)

@@ -164,6 +164,12 @@ class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
             self.conversion_func = lambda x: x
         else:
             self.conversion_func = conversion_func
+
+        self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
+        self._white_noise_gp = celerite.GP(kernel=self._white_noise_kernel)
+        self._white_noise_gp.compute(self.t, np.ones(len(y)))
+        self.white_noise_log_likelihood = self._white_noise_gp.log_likelihood(y=y)
+
         super().__init__(parameters)
 
     def log_likelihood(self):
@@ -200,6 +206,9 @@ class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
             return log_l
         except Exception:
             return -np.inf
+
+    def noise_log_likelihood(self):
+        return self.white_noise_log_likelihood
 
 
 class QPOTerm(terms.Term):
