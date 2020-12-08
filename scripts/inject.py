@@ -101,15 +101,17 @@ maximum_log_c = 5
 # minimum_log_f = np.log(10)
 # maximum_log_f = np.log(64)
 
-log_as = np.linspace(minimum_log_a, maximum_log_a, 10)
-log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
+# log_as = np.linspace(minimum_log_a, maximum_log_a, 10)
+# log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
+log_as = np.linspace(maximum_log_a, maximum_log_a, 10)
+log_cs = np.linspace(maximum_log_c, maximum_log_c, 10)
 log_fs = [np.log(20)] * 10
 # log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
 
 for injection_id in range(minimum_id, maximum_id):
     bilby.core.utils.logger.info(f"ID: {injection_id}")
-    log_a = log_as[int(str(injection_id).zfill(3)[1])]
-    log_c = log_cs[int(str(injection_id).zfill(3)[2])]
+    log_a = log_as[int(str(injection_id%1000).zfill(3)[1])]
+    log_c = log_cs[int(str(injection_id%1000).zfill(3)[2])]
     # log_f = log_fs[int(str(injection_id).zfill(3)[0])]
     log_f = np.log(20)
 
