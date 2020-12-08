@@ -104,7 +104,7 @@ maximum_log_c = 5
 # log_as = np.linspace(minimum_log_a, maximum_log_a, 10)
 # log_cs = np.linspace(minimum_log_c, maximum_log_c, 10)
 log_as = np.linspace(maximum_log_a, maximum_log_a, 10)
-log_cs = np.linspace(maximum_log_c, maximum_log_c, 10)
+log_cs = np.linspace(minimum_log_c, minimum_log_c, 10)
 log_fs = [np.log(20)] * 10
 # log_fs = np.linspace(minimum_log_f, maximum_log_f, 10)
 
