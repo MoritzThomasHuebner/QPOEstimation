@@ -28,7 +28,7 @@ log_evidences_red_noise = []
 averaged_log_bfs_qpo_v_red_noise = []
 averaged_log_bfs_qpo_v_red_noise_err = []
 
-injection_mode = "qpo"
+injection_mode = "red_noise"
 log_bfs = []
 for injection_id in range(1000, 1100):
     res_qpo = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/qpo/results/{injection_id}_{likelihood_model}_result.json")

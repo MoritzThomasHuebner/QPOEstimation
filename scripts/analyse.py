@@ -16,7 +16,7 @@ from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelih
 from QPOEstimation.model.series import *
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
-modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed"]
+modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed", "zeroed_mixed"]
 run_modes = ['select_time', 'sliding_window', 'multiple_windows', 'candidates', 'injection']
 background_models = ["polynomial", "exponential", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
@@ -112,14 +112,14 @@ else:
     # run_mode = 'select_time'
     sampling_frequency = 256
     # data_mode = 'blind_injection'
-    data_mode = 'smoothed_residual'
+    data_mode = 'normal'
     alpha = 0.02
 
     start_time = 10
     end_time = 400
 
     period_number = 13
-    run_id = 13
+    run_id = 0
 
     candidate_id = 3
     miller_candidates = False
@@ -143,7 +143,7 @@ else:
     band_maximum = 64
     # segment_length = 7.56
     # segment_length = 2.268
-    segment_length = 1.8
+    segment_length = 7.56
     # segment_length = 2.
     segment_step = 0.23625   # Requires 32 steps
     # segment_step = 0.54   # Requires 14 steps
@@ -323,6 +323,16 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[1]:log_c')
         # priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=3.2, maximum=np.log(sampling_frequency*16), name='terms[1]:log_c')
+    elif recovery_mode == "zeroed_mixed":
+        kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
+        priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
+        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[0]:log_c')
+        # priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=3.2, name='terms[0]:log_c')
+        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
+        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
+        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[1]:log_c')
+        # priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=3.2, maximum=np.log(sampling_frequency*16), name='terms[1]:log_c')
     else:
         raise ValueError('Recovery mode not defined')
 
@@ -396,7 +406,7 @@ if plot:
         result.plot_corner(outdir=f"{outdir}/corner")
 
     if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
-        if recovery_mode in ["qpo", "zeroed_qpo", "mixed"]:
+        if recovery_mode in ["qpo", "zeroed_qpo", "mixed", "zeroed_mixed"]:
             try:
                 try:
                     frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
@@ -478,7 +488,7 @@ if plot:
 
     elif likelihood_model == "periodogram":
         result.plot_corner(outdir=f"{outdir}/corner")
-        if recovery_mode in ["qpo", "zeroed_qpo", "mixed"]:
+        if recovery_mode in ["qpo", "mixed"]:
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')
