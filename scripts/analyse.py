@@ -119,7 +119,7 @@ else:
     end_time = 400
 
     period_number = 13
-    run_id = 0
+    run_id = 11
 
     candidate_id = 3
     miller_candidates = False
@@ -132,10 +132,10 @@ else:
     max_log_a = 5
     min_log_c = -5
 
-    recovery_mode = "qpo"
-    likelihood_model = "gaussian_process_windowed"
-    # background_model = "polynomial"
-    background_model = "mean"
+    recovery_mode = "zeroed_mixed"
+    likelihood_model = "gaussian_process"
+    background_model = "polynomial"
+    # background_model = "mean"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -143,7 +143,8 @@ else:
     band_maximum = 64
     # segment_length = 7.56
     # segment_length = 2.268
-    segment_length = 7.56
+    # segment_length = 7.56
+    segment_length = 1.8
     # segment_length = 2.
     segment_step = 0.23625   # Requires 32 steps
     # segment_step = 0.54   # Requires 14 steps
@@ -326,7 +327,6 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     elif recovery_mode == "zeroed_mixed":
         kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
-        priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
         priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(sampling_frequency*16), name='terms[0]:log_c')
         # priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=3.2, name='terms[0]:log_c')
         priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
