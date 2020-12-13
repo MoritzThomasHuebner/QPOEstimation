@@ -11,7 +11,7 @@
 
 #srun python analyse.py  --run_id ${1} --period_number ${2} --recovery_mode white_noise  --model gaussian_process --band_minimum ${3} --band_maximum ${4} --background_model mean --data_mode smoothed_residual --segment_length 1.8 --segment_step 0.23625 --plot True --try_load True
 srun python analyse.py  --run_id ${1} --period_number ${2} --recovery_mode ${6}          --model ${5}             --band_minimum ${3} --band_maximum ${4} --background_model polynomial --data_mode normal --segment_length 1.8 --segment_step 0.23625 --plot True --try_load False --use_ratio False
-srun python analyse.py  --run_id ${1} --period_number ${2} --recovery_mode ${6}          --model ${5}             --band_minimum ${3} --band_maximum ${4} --background_model mean --data_mode smoothed_residual --segment_length 1.8 --segment_step 0.23625 --plot True --try_load False --use_ratio False
+#srun python analyse.py  --run_id ${1} --period_number ${2} --recovery_mode ${6}          --model ${5}             --band_minimum ${3} --band_maximum ${4} --background_model mean --data_mode smoothed_residual --segment_length 1.8 --segment_step 0.23625 --plot True --try_load False --use_ratio True
 
 #srun python analyse.py  --run_id ${1} --period_number ${2} --recovery_mode qpo          --model ${5}             --band_minimum ${3} --band_maximum ${4} --background_model polynomial --data_mode normal --segment_length 1.8 --segment_step 0.23625 --plot True --try_load True --use_ratio True
 #srun python analyse.py  --run_id ${1} --period_number ${2} --recovery_mode red_noise    --model ${5}             --band_minimum ${3} --band_maximum ${4} --background_model polynomial --data_mode normal --segment_length 1.8 --segment_step 0.23625 --plot True --try_load True --use_ratio True

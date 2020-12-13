@@ -21,6 +21,13 @@ run_modes = ['select_time', 'sliding_window', 'multiple_windows', 'candidates', 
 background_models = ["polynomial", "exponential", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
 
+
+def boolean_string(s):
+    if s not in {'False', 'True'}:
+        raise ValueError('Not a valid boolean string')
+    return s == 'True'
+
+
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run_mode", default='sliding_window', choices=run_modes)
@@ -35,7 +42,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--run_id", default=0, type=int)
 
     parser.add_argument("--candidate_id", default=0, type=int)
-    parser.add_argument("--miller_candidates", default=False, type=bool)
+    parser.add_argument("--miller_candidates", default=False, type=str)
 
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
@@ -57,11 +64,11 @@ if len(sys.argv) > 1:
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--segment_step", default=0.27, type=float)
     parser.add_argument("--nlive", default=150, type=int)
-    parser.add_argument("--use_ratio", default=False, type=bool)
+    parser.add_argument("--use_ratio", default=False, type=str)
 
-    parser.add_argument("--try_load", default=True, type=bool)
-    parser.add_argument("--resume", default=False, type=bool)
-    parser.add_argument("--plot", default=True, type=bool)
+    parser.add_argument("--try_load", default=True, type=str)
+    parser.add_argument("--resume", default=False, type=str)
+    parser.add_argument("--plot", default=True, type=str)
     args = parser.parse_args()
 
     run_mode = args.run_mode
@@ -76,7 +83,7 @@ if len(sys.argv) > 1:
     run_id = args.run_id
 
     candidate_id = args.candidate_id
-    miller_candidates = args.miller_candidates
+    miller_candidates = boolean_string(args.miller_candidates)
 
     polynomial_max = args.polynomial_max
     min_log_a = args.min_log_a
@@ -100,11 +107,11 @@ if len(sys.argv) > 1:
     segment_step = args.segment_step
 
     nlive = args.nlive
-    use_ratio = args.use_ratio
+    use_ratio = boolean_string(args.use_ratio)
 
-    try_load = args.try_load
-    resume = args.resume
-    plot = args.plot
+    try_load = boolean_string(args.try_load)
+    resume = boolean_string(args.resume)
+    plot = boolean_string(args.plot)
 else:
     matplotlib.use('Qt5Agg')
 
