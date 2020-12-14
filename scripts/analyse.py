@@ -42,7 +42,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--run_id", default=0, type=int)
 
     parser.add_argument("--candidate_id", default=0, type=int)
-    parser.add_argument("--miller_candidates", default=False, type=str)
+    parser.add_argument("--miller_candidates", default='False', type=str)
 
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
@@ -64,11 +64,11 @@ if len(sys.argv) > 1:
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--segment_step", default=0.27, type=float)
     parser.add_argument("--nlive", default=150, type=int)
-    parser.add_argument("--use_ratio", default=False, type=str)
+    parser.add_argument("--use_ratio", default='False', type=str)
 
-    parser.add_argument("--try_load", default=True, type=str)
-    parser.add_argument("--resume", default=False, type=str)
-    parser.add_argument("--plot", default=True, type=str)
+    parser.add_argument("--try_load", default='True', type=str)
+    parser.add_argument("--resume", default='False', type=str)
+    parser.add_argument("--plot", default='True', type=str)
     args = parser.parse_args()
 
     run_mode = args.run_mode
