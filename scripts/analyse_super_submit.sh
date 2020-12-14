@@ -11,14 +11,15 @@ do
 #    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process white_noise
 #    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process qpo
 #    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process mixed
-#    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process red_noise
+    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process red_noise
 #    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process zeroed_qpo
 #    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process zeroed_mixed
-    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed qpo
+#    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed qpo
     sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed red_noise
-    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed mixed
-    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed zeroed_qpo
-    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed zeroed_mixed
+#    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed mixed
+#    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed zeroed_qpo
+#    sbatch analyse_submit.sh $segment $period 5 64 gaussian_process_windowed zeroed_mixed
+
 #    sbatch analyse_submit.sh $segment $period 64 128 gaussian_process white_noise
 #    sbatch analyse_submit.sh $segment $period 64 128 gaussian_process qpo
 #    sbatch analyse_submit.sh $segment $period 64 128 gaussian_process red_noise

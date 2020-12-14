@@ -357,12 +357,14 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         priors['window_maximum'] = bilby.core.prior.Constraint(minimum=t[0], maximum=t[-1], name='window_size')
         def window_conversion_func(params):
             params['window_maximum'] = params['window_minimum'] + params['window_size']
-            params = conversion_function(sample=params)
+            if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+                params = conversion_function(sample=params)
             return params
         priors.conversion_function = window_conversion_func
         likelihood = TransientCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t, y=stabilised_counts)
     else:
-        priors.conversion_function = conversion_function
+        if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+            priors.conversion_function = conversion_function
         likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
 
 elif likelihood_model == "periodogram":
