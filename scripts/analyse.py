@@ -125,8 +125,8 @@ else:
     start_time = 10
     end_time = 400
 
-    period_number = 18
-    run_id = 26
+    period_number = 20
+    run_id = 13
 
     candidate_id = 3
     miller_candidates = False
@@ -140,7 +140,7 @@ else:
     min_log_c = -5
 
     recovery_mode = "zeroed_mixed"
-    likelihood_model = "gaussian_process_windowed"
+    likelihood_model = "gaussian_process"
     # background_model = "polynomial"
     background_model = "mean"
     periodogram_likelihood = "whittle"
