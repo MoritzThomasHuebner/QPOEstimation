@@ -119,14 +119,14 @@ else:
     # run_mode = 'select_time'
     sampling_frequency = 256
     # data_mode = 'blind_injection'
-    data_mode = 'normal'
+    data_mode = 'smoothed_residual'
     alpha = 0.02
 
     start_time = 10
     end_time = 400
 
-    period_number = 13
-    run_id = 11
+    period_number = 18
+    run_id = 26
 
     candidate_id = 3
     miller_candidates = False
@@ -140,9 +140,9 @@ else:
     min_log_c = -5
 
     recovery_mode = "zeroed_mixed"
-    likelihood_model = "gaussian_process"
-    background_model = "polynomial"
-    # background_model = "mean"
+    likelihood_model = "gaussian_process_windowed"
+    # background_model = "polynomial"
+    background_model = "mean"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -301,6 +301,14 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         mean_model = np.mean(stabilised_counts)
         fit_mean = False
 
+
+    def conversion_function(sample):
+        out_sample = deepcopy(sample)
+        if 'kernel:log_c' in sample.keys():
+            out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
+        else:
+            out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
+        return out_sample
     if recovery_mode == "white_noise":
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
         priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
@@ -310,11 +318,13 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
         priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
+        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     elif recovery_mode == "zeroed_qpo":
         kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
         priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
+        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     elif recovery_mode == "red_noise":
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
@@ -327,6 +337,7 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='terms[1]:log_c')
+        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     elif recovery_mode == "zeroed_mixed":
         kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
         priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
@@ -334,6 +345,7 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
         priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
         priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='terms[1]:log_c')
+        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     else:
         raise ValueError('Recovery mode not defined')
 
