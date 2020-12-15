@@ -13,7 +13,7 @@ from QPOEstimation.model.series import PolynomialMeanModel
 class InjectionCreator(object):
 
     def __init__(self, params, injection_mode, sampling_frequency, segment_length,
-                 outdir='injection_files', injection_id=0):
+                 outdir='injection_files', injection_id=0, likelihood_model='gaussian_process'):
         self.params = params
         self.injection_mode = injection_mode
         self.sampling_frequency = sampling_frequency
@@ -22,6 +22,7 @@ class InjectionCreator(object):
         self.injection_id = str(injection_id).zfill(2)
         self.create_outdir()
 
+        self.likelihood_model = likelihood_model
         self.mean_model = PolynomialMeanModel(**self.params_mean)
 
         self.times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
@@ -79,28 +80,35 @@ class InjectionCreator(object):
         return kernel
 
     def get_cov(self):
-        cov = np.diag(np.ones(self.n))
-        taus = np.zeros(shape=(self.n, self.n))
-        for i in range(self.n):
-            for j in range(self.n):
-                taus[i][j] = np.abs(i - j) * self.dt
-        cov += self.kernel.get_value(tau=taus)
-        return cov
+        if self.likelihood_model == 'gaussian_process_windowed':
+            windowed_indices = np.where(
+                np.logical_and(self.params['window_minimum'] < self.times, self.times < self.params['window_maximum']))[0]
+            edge_indices = np.where(
+                np.logical_or(self.params['window_minimum'] > self.times, self.times > self.params['window_maximum']))[0]
+            # windowed_t = self.times[windowed_indices]
+            # edge_t = self.times[edge_indices]
+            cov = np.diag(np.ones(self.n))
+            taus = np.zeros(shape=(len(windowed_indices), len(windowed_indices)))
+            # taus = np.zeros(shape=(self.n, self.n))
+            for i in windowed_indices:
+                for j in windowed_indices:
+                    taus[i - windowed_indices[0]][j - windowed_indices[0]] = np.abs(i - j) * self.dt
+            cov[windowed_indices[0]:windowed_indices[-1] + 1, windowed_indices[0]:windowed_indices[-1] + 1] += self.kernel.get_value(tau=taus)
+            return cov
+        else:
+            cov = np.diag(np.ones(self.n))
+            taus = np.zeros(shape=(self.n, self.n))
+            for i in range(self.n):
+                for j in range(self.n):
+                    taus[i][j] = np.abs(i - j) * self.dt
+            cov += self.kernel.get_value(tau=taus)
+            return cov
 
-    def get_cov_non_stationary(self):
-        cov = np.diag(np.ones(self.n))
-        t_0 = np.zeros(shape=(self.n, self.n))
-        t_1 = np.zeros(shape=(self.n, self.n))
-        for i in range(self.n):
-            for j in range(self.n):
-                t_0[i][j] = i * self.dt
-                t_1[i][j] = j * self.dt
-        cov += self.kernel.get_value(t_0=t_0, t_1=t_1)
-        return cov
 
     def get_y(self):
         self.y = np.random.multivariate_normal(self.mean_model.get_value(self.times), self.cov)
         return self.y
+
 
     def save(self):
         np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.txt',
@@ -109,33 +117,49 @@ class InjectionCreator(object):
             json.dump(self.params, f)
 
     def plot(self):
-        x = np.linspace(self.times[0], self.times[-1], 5000)
         color = "#ff7f0e"
         plt.errorbar(self.times, self.y, yerr=np.ones(self.n), fmt=".k", capsize=0, label='data')
         if self.injection_mode != 'white_nosie':
             gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
             gp.compute(self.times, self.yerr)
             for param, value in self.params.items():
-                gp.set_parameter(param, value)
-            pred_mean, pred_var = gp.predict(self.y, x, return_var=True)
-            pred_std = np.sqrt(pred_var)
+                try:
+                    gp.set_parameter(param, value)
+                except ValueError:
+                    continue
+            if self.likelihood_model == 'gaussian_process_windowed':
+                x = np.linspace(self.params['window_minimum'], self.params['window_maximum'], 5000)
+                plt.axvline(self.params['window_minimum'], color='cyan', label='start/end stochastic process')
+                plt.axvline(self.params['window_maximum'], color='cyan')
+                windowed_indices = np.where(
+                    np.logical_and(self.params['window_minimum'] < self.times,
+                                   self.times < self.params['window_maximum']))
+                gp.compute(self.times[windowed_indices], self.yerr[windowed_indices])
+                pred_mean, pred_var = gp.predict(self.y[windowed_indices], x, return_var=True)
+                pred_std = np.sqrt(pred_var)
+            else:
+                x = np.linspace(self.times[0], self.times[-1], 5000)
+                pred_mean, pred_var = gp.predict(self.y, x, return_var=True)
+                pred_std = np.sqrt(pred_var)
             plt.plot(x, pred_mean, color=color, label='Prediction')
             plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std,
                              color=color, alpha=0.3, edgecolor="none")
 
-        pred_mean_poly = self.mean_model.get_value(x)
-        plt.plot(x, pred_mean_poly, color='green', label='Mean function')
+        pred_mean_poly = self.mean_model.get_value(self.times)
+        plt.plot(self.times, pred_mean_poly, color='green', label='Mean function')
         plt.legend()
         plt.savefig(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.pdf')
         plt.show()
         plt.clf()
 
 
+
+
 def create_injection(params, injection_mode, sampling_frequency, segment_length,
-                     outdir='injection_files', injection_id=0, plot=False):
+                     outdir='injection_files', injection_id=0, plot=False, likelihood_model='gaussian_process'):
     injection_creator = InjectionCreator(params=params, injection_mode=injection_mode,
                                          sampling_frequency=sampling_frequency, segment_length=segment_length,
-                                         outdir=outdir, injection_id=injection_id)
+                                         outdir=outdir, injection_id=injection_id, likelihood_model=likelihood_model)
 
     injection_creator.save()
     if plot:
