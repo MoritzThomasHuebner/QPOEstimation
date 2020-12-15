@@ -148,9 +148,8 @@ else:
 
 for injection_id in range(minimum_id, maximum_id):
     params = priors.sample()
-    if params['window_maximum'] > t[-1]:
-        print(priors.ln_prob(params))
-        continue
+    while np.isinf(priors.ln_prob(params)):
+        params = priors.sample()
     Path(f'injection_files/{injection_mode}').mkdir(exist_ok=True, parents=True)
     create_injection(params=params, injection_mode=injection_mode, sampling_frequency=sampling_frequency,
                      segment_length=segment_length, outdir=outdir, injection_id=injection_id, plot=plot,
