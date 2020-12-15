@@ -21,6 +21,7 @@ class MinimumPrior(ConditionalBeta):
             self.reference_name = reference_name
         self._required_variables = [self.reference_name]
         self.minimum_spacing = minimum_spacing
+        self.__class__.__name__ = 'MinimumPrior'
 
     def minimum_condition(self, reference_params, **kwargs):
         return dict(minimum=kwargs[self.reference_name] + self.minimum_spacing)
