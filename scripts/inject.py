@@ -146,7 +146,7 @@ else:
 
 
 
-for injection_id in range(2000, 2100):
+for injection_id in range(minimum_id, maximum_id):
     params = priors.sample()
     if params['window_maximum'] > t[-1]:
         print(priors.ln_prob(params))
