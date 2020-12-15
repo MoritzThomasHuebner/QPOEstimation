@@ -14,6 +14,7 @@ import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
     GrothLikelihood, ExponentialTerm, ZeroedQPOTerm, TransientCeleriteLikelihood
 from QPOEstimation.model.series import *
+from QPOEstimation.prior.minimum import MinimumPrior
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed", "zeroed_mixed"]
@@ -125,7 +126,7 @@ else:
     start_time = 10
     end_time = 400
 
-    period_number = 20
+    period_number = 11
     run_id = 13
 
     candidate_id = 3
@@ -139,8 +140,8 @@ else:
     max_log_a = 5
     min_log_c = -5
 
-    recovery_mode = "zeroed_mixed"
-    likelihood_model = "gaussian_process"
+    recovery_mode = "red_noise"
+    likelihood_model = "gaussian_process_windowed"
     # background_model = "polynomial"
     background_model = "mean"
     periodogram_likelihood = "whittle"
@@ -269,7 +270,7 @@ else:
     c = counts[indices]
 
 
-priors = bilby.core.prior.PriorDict()
+priors = bilby.core.prior.ConditionalPriorDict()
 if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual', 'blind_injection']:
         stabilised_counts = c
@@ -353,14 +354,17 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     gp.compute(t, np.sqrt(stabilised_variance))
     if likelihood_model == "gaussian_process_windowed":
         priors['window_minimum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=t[-1], name='window_minimum')
-        priors['window_size'] = bilby.core.prior.Uniform(minimum=0, maximum=segment_length, name='window_size')
-        priors['window_maximum'] = bilby.core.prior.Constraint(minimum=t[0], maximum=t[-1], name='window_size')
+        priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum')
+        # priors['window_size'] = bilby.core.prior.Uniform(minimum=0, maximum=segment_length, name='window_size')
+        # priors['window_maximum'] = bilby.core.prior.Constraint(minimum=t[0], maximum=t[-1], name='window_size')
         def window_conversion_func(params):
             params['window_maximum'] = params['window_minimum'] + params['window_size']
             if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
                 params = conversion_function(sample=params)
             return params
-        priors.conversion_function = window_conversion_func
+        # priors.conversion_function = window_conversion_func
+        if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+            priors.conversion_function = conversion_function
         likelihood = TransientCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t, y=stabilised_counts)
     else:
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
@@ -461,9 +465,12 @@ if plot:
 
         if likelihood_model == 'gaussian_process_windowed':
             plt.axvline(max_like_params['window_minimum'], color='cyan', label='start/end stochastic process')
-            plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
-            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
-            windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
+            # plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
+            plt.axvline(max_like_params['window_maximum'], color='cyan')
+            # x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
+            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
+            # windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
+            windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
             gp.compute(t[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
             pred_mean, pred_var = gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
             pred_std = np.sqrt(pred_var)

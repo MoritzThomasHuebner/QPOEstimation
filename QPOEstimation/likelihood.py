@@ -159,7 +159,8 @@ class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
         gp.compute(t, np.ones(len(y)))
         parameters = gp.get_parameter_dict()
         parameters['window_minimum'] = t[0]
-        parameters['window_size'] = 0.5
+        # parameters['window_size'] = 0.5
+        parameters['window_maximum'] = t[-1]
         if conversion_func is None:
             self.conversion_func = lambda x: x
         else:
@@ -175,10 +176,10 @@ class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
     def log_likelihood(self):
         # if self.parameters['window_minimum'] > self.parameters['window_maximum']:
         #     return -np.inf
-        windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t,
-                                                   self.t < self.parameters['window_minimum'] + self.parameters['window_size']))
-        edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t,
-                                              self.t > self.parameters['window_minimum'] + self.parameters['window_size']))
+        # windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_minimum'] + self.parameters['window_size']))
+        # edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_minimum'] + self.parameters['window_size']))
+        windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_maximum']))
+        edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_maximum']))
         windowed_t = self.t[windowed_indices]
         windowed_y = self.y[windowed_indices]
         edge_t = self.t[edge_indices]
