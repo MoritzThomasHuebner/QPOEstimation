@@ -52,6 +52,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--min_log_a", default=-5, type=float)
     parser.add_argument("--max_log_a", default=15, type=float)
     parser.add_argument("--min_log_c", default=-6, type=float)
+    parser.add_argument("--minimum_window_spacing", default=0, type=float)
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
@@ -90,6 +91,7 @@ if len(sys.argv) > 1:
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
     min_log_c = args.min_log_c
+    minimum_window_spacing = args.minimum_window_spacing
 
     injection_id = args.injection_id
     injection_mode = args.injection_mode
@@ -139,6 +141,7 @@ else:
     min_log_a = -5
     max_log_a = 5
     min_log_c = -5
+    minimum_window_spacing = 0
 
     recovery_mode = "red_noise"
     likelihood_model = "gaussian_process_windowed"
@@ -354,7 +357,7 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     gp.compute(t, np.sqrt(stabilised_variance))
     if likelihood_model == "gaussian_process_windowed":
         priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2, name='window_minimum')
-        priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum')
+        priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum', minimum_spacing=minimum_window_spacing)
         # priors['window_size'] = bilby.core.prior.Uniform(minimum=0, maximum=segment_length, name='window_size')
         # priors['window_maximum'] = bilby.core.prior.Constraint(minimum=t[0], maximum=t[-1], name='window_size')
         def window_conversion_func(params):
