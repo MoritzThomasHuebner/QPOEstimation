@@ -120,6 +120,7 @@ class GrothLikelihood(WhittleLikelihood):
 class CeleriteLikelihood(bilby.likelihood.Likelihood):
 
     def __init__(self, gp, y, conversion_func=None):
+        """ Celerite to bilby likelihood interface """
         parameters = gp.get_parameter_dict()
         if conversion_func is None:
             self.conversion_func = lambda x: x
@@ -150,6 +151,7 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
 class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
 
     def __init__(self, mean_model, kernel, fit_mean, t, y, conversion_func=None):
+        """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
         self.kernel = kernel
         self.mean_model = mean_model
         self.fit_mean = fit_mean

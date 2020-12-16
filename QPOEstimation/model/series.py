@@ -197,6 +197,7 @@ def two_frequency_model(time_array, mu_1, mu_2, sigma_1, sigma_2, amplitude_1, a
 
 
 class PolynomialMeanModel(Model):
+    """ Celerite compatible polynomial mean model """
 
     parameter_names = ("a0", "a1", "a2", "a3", "a4")
 
@@ -211,6 +212,7 @@ class PolynomialMeanModel(Model):
 
 
 class ExponentialMeanModel(Model):
+    """ Celerite compatible exponential mean model """
     parameter_names = ("tau", "offset")
 
     def get_value(self, t):
@@ -221,6 +223,7 @@ class ExponentialMeanModel(Model):
 
 
 class ExponentialStabilisedMeanModel(Model):
+    """ Celerite compatible exponential mean model """
     parameter_names = ("tau", "offset")
 
     def get_value(self, t):
