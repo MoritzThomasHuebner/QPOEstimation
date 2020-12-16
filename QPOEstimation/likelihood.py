@@ -174,12 +174,10 @@ class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
         super().__init__(parameters)
 
     def log_likelihood(self):
-        # if self.parameters['window_minimum'] > self.parameters['window_maximum']:
-        #     return -np.inf
-        # windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_minimum'] + self.parameters['window_size']))
-        # edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_minimum'] + self.parameters['window_size']))
-        windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_maximum']))
-        edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_maximum']))
+        windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t,
+                                                   self.t < self.parameters['window_maximum']))
+        edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t,
+                                              self.t > self.parameters['window_maximum']))
         windowed_t = self.t[windowed_indices]
         windowed_y = self.y[windowed_indices]
         edge_t = self.t[edge_indices]
@@ -189,9 +187,9 @@ class TransientCeleriteLikelihood(bilby.likelihood.Likelihood):
 
         gp = celerite.GP(kernel=self.kernel, mean=self.mean_model, fit_mean=self.fit_mean)
         gp.compute(windowed_t, np.ones(len(windowed_y)))
-        white_noise_gp = celerite.GP(kernel=celerite.terms.JitterTerm(log_sigma=-20), mean=self.mean_model, fit_mean=self.fit_mean)
+        white_noise_gp = celerite.GP(kernel=celerite.terms.JitterTerm(log_sigma=-20),
+                                     mean=self.mean_model, fit_mean=self.fit_mean)
         white_noise_gp.compute(edge_t, np.ones(len(edge_y)))
-
 
         celerite_params = self.conversion_func(self.parameters)
         for name, value in celerite_params.items():
@@ -298,7 +296,8 @@ class GaussianProcessLikelihood(bilby.core.likelihood.Likelihood):
         return np.linalg.det(self.cov)
 
     def log_likelihood(self):
-        return -0.5 * (self.residual.T @ self.inverse_cov @ self.residual) - 0.5 * np.log(self.cov_det) - self.n/2 * np.log(2*np.pi)
+        return -0.5 * (self.residual.T @ self.inverse_cov @ self.residual) \
+               - 0.5 * np.log(self.cov_det) - self.n/2 * np.log(2*np.pi)
 
 
 class RedNoiseGaussianProcessLikelihood(GaussianProcessLikelihood):

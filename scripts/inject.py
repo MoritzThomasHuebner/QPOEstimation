@@ -121,6 +121,7 @@ elif injection_mode == "zeroed_mixed":
 else:
     raise ValueError('Recovery mode not defined')
 
+
 def conversion_function(sample):
     out_sample = deepcopy(sample)
     if 'kernel:log_c' in sample.keys():
@@ -129,14 +130,17 @@ def conversion_function(sample):
         out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
     return out_sample
 
+
 if likelihood_model == "gaussian_process_windowed":
     priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2, name='window_minimum')
     priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum', minimum_spacing=0.5)
-    def window_conversion_func(params):
-        params['window_maximum'] = params['window_minimum'] + params['window_size']
+
+    def window_conversion_func(sample):
+        sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
         if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-            params = conversion_function(sample=params)
-        return params
+            sample = conversion_function(sample=sample)
+        return sample
+
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
         priors.conversion_function = conversion_function
 else:

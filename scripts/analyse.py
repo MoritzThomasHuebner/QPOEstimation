@@ -8,7 +8,6 @@ import bilby
 import celerite
 import matplotlib
 import matplotlib.pyplot as plt
-from scipy.signal import periodogram
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
@@ -96,7 +95,6 @@ if len(sys.argv) > 1:
     injection_id = args.injection_id
     injection_mode = args.injection_mode
 
-
     recovery_mode = args.recovery_mode
     likelihood_model = args.model
     background_model = args.background_model
@@ -157,7 +155,7 @@ else:
     # segment_length = 7.56
     segment_length = 1.8
     # segment_length = 2.
-    segment_step = 0.23625   # Requires 32 steps
+    segment_step = 0.23625  # Requires 32 steps
     # segment_step = 0.54   # Requires 14 steps
 
     nlive = 150
@@ -209,7 +207,6 @@ else:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_{data_mode}.dat')
     else:
         data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
-
 
 times = data[:, 0]
 counts = data[:, 1]
@@ -272,7 +269,6 @@ else:
     t = times[indices]
     c = counts[indices]
 
-
 priors = bilby.core.prior.ConditionalPriorDict()
 if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual', 'blind_injection']:
@@ -294,11 +290,16 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
             priors['mean:a4'] = 0
             fit_mean = False
         else:
-            priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
-            priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
-            priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
-            priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a3')
-            priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a4')
+            priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
+                                                         name='mean:a0')
+            priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
+                                                         name='mean:a1')
+            priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
+                                                         name='mean:a2')
+            priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
+                                                         name='mean:a3')
+            priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
+                                                         name='mean:a4')
             fit_mean = True
         mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)
     else:
@@ -313,6 +314,8 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         else:
             out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
         return out_sample
+
+
     if recovery_mode == "white_noise":
         kernel = celerite.terms.JitterTerm(log_sigma=-20)
         priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
@@ -321,13 +324,15 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
+        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum),
+                                                          name='log_f')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     elif recovery_mode == "zeroed_qpo":
         kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
         priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='log_f')
+        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum),
+                                                          name='log_f')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     elif recovery_mode == "red_noise":
         kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
@@ -335,20 +340,30 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
     elif recovery_mode == "mixed":
         kernel = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
-        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
+        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
+                                                                   name='terms[0]:log_a')
         priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
-        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
-        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='terms[1]:log_c')
+        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
+                                                                   name='terms[0]:log_c')
+        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
+                                                                   maximum=np.log(band_maximum), name='terms[0]:log_f')
+        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
+                                                                   name='terms[1]:log_a')
+        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
+                                                                   name='terms[1]:log_c')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     elif recovery_mode == "zeroed_mixed":
         kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
-        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[0]:log_a')
-        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum), name='terms[0]:log_f')
-        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='terms[1]:log_a')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='terms[1]:log_c')
+        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
+                                                                   name='terms[0]:log_a')
+        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
+                                                                   name='terms[0]:log_c')
+        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
+                                                                   maximum=np.log(band_maximum), name='terms[0]:log_f')
+        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
+                                                                   name='terms[1]:log_a')
+        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
+                                                                   name='terms[1]:log_c')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     else:
         raise ValueError('Recovery mode not defined')
@@ -356,19 +371,18 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
     gp.compute(t, np.sqrt(stabilised_variance))
     if likelihood_model == "gaussian_process_windowed":
-        priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2, name='window_minimum')
-        priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum', minimum_spacing=minimum_window_spacing)
-        # priors['window_size'] = bilby.core.prior.Uniform(minimum=0, maximum=segment_length, name='window_size')
-        # priors['window_maximum'] = bilby.core.prior.Constraint(minimum=t[0], maximum=t[-1], name='window_size')
-        def window_conversion_func(params):
-            params['window_maximum'] = params['window_minimum'] + params['window_size']
-            if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-                params = conversion_function(sample=params)
-            return params
-        # priors.conversion_function = window_conversion_func
+        priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2,
+                                                         name='window_minimum')
+        priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum',
+                                                name='window_maximum', minimum_spacing=minimum_window_spacing)
+
+
+
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
             priors.conversion_function = conversion_function
-        likelihood = TransientCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t, y=stabilised_counts)
+
+        likelihood = TransientCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
+                                                 y=stabilised_counts)
     else:
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
             priors.conversion_function = conversion_function
@@ -400,7 +414,7 @@ elif likelihood_model == "periodogram":
         priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
     if periodogram_likelihood == "whittle":
         likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=periodogram_noise_model,
-                                       frequency_mask=[True]*len(frequencies))
+                                       frequency_mask=[True] * len(frequencies))
     else:
         priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
         likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=periodogram_noise_model)
@@ -418,7 +432,6 @@ if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample='rwalk',
                                resume=resume, use_ratio=use_ratio)
-
 
 if plot:
     if run_mode == 'injection' and injection_mode == recovery_mode:
@@ -441,7 +454,8 @@ if plot:
                 plt.ylabel('normalised PDF')
                 median = np.median(frequency_samples)
                 percentiles = np.percentile(frequency_samples, [16, 84])
-                plt.title(f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+                plt.title(
+                    f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
                 plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
                 plt.clf()
             except Exception as e:
@@ -473,7 +487,8 @@ if plot:
             # x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
             x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
             # windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
-            windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
+            windowed_indices = np.where(
+                np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
             gp.compute(t[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
             pred_mean, pred_var = gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
             pred_std = np.sqrt(pred_var)
@@ -500,11 +515,11 @@ if plot:
         plt.clf()
 
         psd_freqs = np.exp(np.linspace(np.log(1.0), np.log(band_maximum), 5000))
-        psd = gp.kernel.get_psd(psd_freqs*2*np.pi)
+        psd = gp.kernel.get_psd(psd_freqs * 2 * np.pi)
 
         plt.loglog(psd_freqs, psd, label='complete GP')
         for i, k in enumerate(gp.kernel.terms):
-            plt.loglog(psd_freqs, k.get_psd(psd_freqs*2*np.pi), "--", label=f'term {i}')
+            plt.loglog(psd_freqs, k.get_psd(psd_freqs * 2 * np.pi), "--", label=f'term {i}')
 
         plt.xlim(psd_freqs[0], psd_freqs[-1])
         plt.xlabel("f[Hz]")
@@ -538,9 +553,8 @@ if plot:
         plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
         # plt.show()
 
-
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', #'_corner.png',
+for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',  # '_corner.png',
                   '_dynesty.pickle', '_resume.pickle', '_result.json.old', '_samples.dat']:
     try:
         os.remove(f"{outdir}/results/{label}{extension}")

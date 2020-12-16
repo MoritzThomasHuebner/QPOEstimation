@@ -1,1 +1,1 @@
-from . import minimum, psd, series, slabspike
+from . import minimum, psd

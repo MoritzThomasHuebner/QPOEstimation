@@ -81,19 +81,15 @@ class InjectionCreator(object):
 
     def get_cov(self):
         if self.likelihood_model == 'gaussian_process_windowed':
-            windowed_indices = np.where(
-                np.logical_and(self.params['window_minimum'] < self.times, self.times < self.params['window_maximum']))[0]
-            edge_indices = np.where(
-                np.logical_or(self.params['window_minimum'] > self.times, self.times > self.params['window_maximum']))[0]
-            # windowed_t = self.times[windowed_indices]
-            # edge_t = self.times[edge_indices]
+            windowed_indices = np.where(np.logical_and(self.params['window_minimum'] < self.times,
+                                                       self.times < self.params['window_maximum']))[0]
             cov = np.diag(np.ones(self.n))
             taus = np.zeros(shape=(len(windowed_indices), len(windowed_indices)))
-            # taus = np.zeros(shape=(self.n, self.n))
             for i in windowed_indices:
                 for j in windowed_indices:
                     taus[i - windowed_indices[0]][j - windowed_indices[0]] = np.abs(i - j) * self.dt
-            cov[windowed_indices[0]:windowed_indices[-1] + 1, windowed_indices[0]:windowed_indices[-1] + 1] += self.kernel.get_value(tau=taus)
+            cov[windowed_indices[0]:windowed_indices[-1] + 1, windowed_indices[0]:windowed_indices[-1] + 1] += \
+                self.kernel.get_value(tau=taus)
             return cov
         else:
             cov = np.diag(np.ones(self.n))
@@ -104,11 +100,9 @@ class InjectionCreator(object):
             cov += self.kernel.get_value(tau=taus)
             return cov
 
-
     def get_y(self):
         self.y = np.random.multivariate_normal(self.mean_model.get_value(self.times), self.cov)
         return self.y
-
 
     def save(self):
         np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.txt',
@@ -151,8 +145,6 @@ class InjectionCreator(object):
         plt.savefig(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.pdf')
         plt.show()
         plt.clf()
-
-
 
 
 def create_injection(params, injection_mode, sampling_frequency, segment_length,
