@@ -38,8 +38,8 @@ if len(sys.argv) > 1:
     outdir = args.outdir
 else:
     matplotlib.use('Qt5Agg')
-    minimum_id = 0
-    maximum_id = 1000
+    minimum_id = 2100
+    maximum_id = 2200
 
     sampling_frequency = 256
     polynomial_max = 10
@@ -47,13 +47,9 @@ else:
     likelihood_model = "gaussian_process_windowed"
     plot = True
     segment_length = 1
-    outdir = 'testing'
+    outdir = "injection_files"
 
 
-# def conversion_function(sample):
-#     out_sample = deepcopy(sample)
-#     out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
-#     return out_sample
 t = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 min_log_a = -2
 max_log_a = 1
@@ -62,7 +58,7 @@ min_log_c = -1
 band_minimum = 5
 band_maximum = 64
 
-priors = bilby.core.prior.ConditionalPriorDict()
+priors = bilby.core.prior.PriorDict()
 priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
 priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
 priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
@@ -132,8 +128,12 @@ def conversion_function(sample):
 
 
 if likelihood_model == "gaussian_process_windowed":
-    priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2, name='window_minimum')
-    priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum', minimum_spacing=0.5)
+    # priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2, name='window_minimum')
+    # priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum', minimum_spacing=0.5)
+    # priors['window_maximum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=t[-1], name='window_maximum')
+    priors['window_minimum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=t[-1], name='window_minimum')
+    priors['window_size'] = bilby.core.prior.Uniform(minimum=0.3, maximum=0.7, name='window_size')
+    priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=1, name='window_maximum')
 
     def window_conversion_func(sample):
         sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
@@ -142,7 +142,7 @@ if likelihood_model == "gaussian_process_windowed":
         return sample
 
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-        priors.conversion_function = conversion_function
+        priors.conversion_function = window_conversion_func
 else:
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
         priors.conversion_function = conversion_function
@@ -152,8 +152,8 @@ else:
 
 for injection_id in range(minimum_id, maximum_id):
     params = priors.sample()
-    while np.isinf(priors.ln_prob(params)):
-        params = priors.sample()
+    # while np.isinf(priors.ln_prob(params)):
+    #     params = priors.sample()
     Path(f'injection_files/{injection_mode}').mkdir(exist_ok=True, parents=True)
     create_injection(params=params, injection_mode=injection_mode, sampling_frequency=sampling_frequency,
                      segment_length=segment_length, outdir=outdir, injection_id=injection_id, plot=plot,
