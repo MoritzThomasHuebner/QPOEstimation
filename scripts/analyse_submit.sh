@@ -6,8 +6,8 @@
 #SBATCH --time=4:00:00
 #SBATCH --mem-per-cpu=1G
 
-srun python analyse.py --run_mode injection --injection_id ${1} --injection_mode qpo --recovery_mode qpo --model gaussian_process_windowed --plot True --band_minimum 5 --band_maximum 64 --min_log_a -2 --max_log_a 1 --min_log_c -1 --minimum_window_spacing 0.5 --background_model polynomial --polynomial_max 10 --segment_length 1 --nlive 250
-srun python analyse.py --run_mode injection --injection_id ${1} --injection_mode qpo --recovery_mode qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --min_log_a -2 --max_log_a 1 --min_log_c -1 --minimum_window_spacing 0.5 --background_model polynomial --polynomial_max 10 --segment_length 1 --nlive 250
+srun python analyse.py --run_mode injection --injection_id ${1} --injection_mode qpo --recovery_mode qpo --model gaussian_process_windowed --plot True --band_minimum 5 --band_maximum 64 --min_log_a -2 --max_log_a 1 --min_log_c -1 --minimum_window_spacing 0.5 --background_model polynomial --polynomial_max 10 --segment_length 1 --nlive 1500
+srun python analyse.py --run_mode injection --injection_id ${1} --injection_mode qpo --recovery_mode qpo --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --min_log_a -2 --max_log_a 1 --min_log_c -1 --minimum_window_spacing 0.5 --background_model polynomial --polynomial_max 10 --segment_length 1 --nlive 1500
 #srun python analyse.py --run_mode injection --injection_id ${1} --injection_mode ${2} --recovery_mode red_noise --model gaussian_process --plot True --band_minimum 5 --band_maximum 64 --min_log_a -2 --max_log_a 4 --min_log_c -4 --background_model mean
 
 #srun python analyse.py  --run_id ${1} --period_number ${2} --recovery_mode white_noise  --model gaussian_process --band_minimum ${3} --band_maximum ${4} --background_model mean --data_mode smoothed_residual --segment_length 1.8 --segment_step 0.23625 --plot True --try_load True
