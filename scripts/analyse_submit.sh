@@ -3,7 +3,7 @@
 #SBATCH --job-name=qpo
 #
 #SBATCH --ntasks=1
-#SBATCH --time=4:00:00
+#SBATCH --time=8:00:00
 #SBATCH --mem-per-cpu=1G
 
 srun python analyse.py --run_mode injection --injection_id ${1} --injection_mode qpo --recovery_mode qpo --model gaussian_process_windowed --plot True --band_minimum 5 --band_maximum 64 --min_log_a -2 --max_log_a 1 --min_log_c -1 --minimum_window_spacing 0.5 --background_model polynomial --polynomial_max 10 --segment_length 1 --nlive 1500
