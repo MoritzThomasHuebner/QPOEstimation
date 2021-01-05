@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
-    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm, TransientCeleriteLikelihood
+    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm, WindowedCeleriteLikelihood
 from QPOEstimation.model.series import *
 from QPOEstimation.prior.minimum import MinimumPrior
 
@@ -120,14 +120,14 @@ else:
     # run_mode = 'select_time'
     sampling_frequency = 256
     # data_mode = 'blind_injection'
-    data_mode = 'smoothed_residual'
+    data_mode = 'normal'
     alpha = 0.02
 
     start_time = 10
     end_time = 400
 
     period_number = 11
-    run_id = 13
+    run_id = 11
 
     candidate_id = 3
     miller_candidates = False
@@ -144,7 +144,7 @@ else:
     recovery_mode = "red_noise"
     likelihood_model = "gaussian_process_windowed"
     # background_model = "polynomial"
-    background_model = "mean"
+    background_model = "polynomial"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -269,6 +269,10 @@ else:
     t = times[indices]
     c = counts[indices]
 
+# Move center of light curve to 0
+t -= t[0]
+t -= t[-1]/2
+
 priors = bilby.core.prior.PriorDict()
 if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual', 'blind_injection']:
@@ -368,8 +372,8 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     else:
         raise ValueError('Recovery mode not defined')
 
-    gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
-    gp.compute(t, np.sqrt(stabilised_variance))
+    # gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
+    # gp.compute(t, np.sqrt(stabilised_variance))
     if likelihood_model == "gaussian_process_windowed":
         priors['window_minimum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=t[-1], name='window_minimum')
         priors['window_size'] = bilby.core.prior.Uniform(minimum=0.3, maximum=0.7, name='window_size')
@@ -390,12 +394,12 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
             # priors.conversion_function = conversion_function
             priors.conversion_function = window_conversion_func
 
-        likelihood = TransientCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
-                                                 y=stabilised_counts)
+        likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
+                                                y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
     else:
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
             priors.conversion_function = conversion_function
-        likelihood = CeleriteLikelihood(gp=gp, y=stabilised_counts)
+        likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t, y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
 
 elif likelihood_model == "periodogram":
     lc = stingray.Lightcurve(time=t, counts=c)
@@ -473,7 +477,7 @@ if plot:
         max_like_params = result.posterior.iloc[-1]
         for name, value in max_like_params.items():
             try:
-                gp.set_parameter(name=name, value=value)
+                likelihood.gp.set_parameter(name=name, value=value)
             except ValueError:
                 continue
             try:
@@ -483,7 +487,7 @@ if plot:
 
         Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
         taus = np.linspace(-0.5, 0.5, 1000)
-        plt.plot(taus, gp.kernel.get_value(taus))
+        plt.plot(taus, likelihood.gp.kernel.get_value(taus))
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
         plt.savefig(f"{outdir}/fits/{label}_max_like_kernel")
@@ -491,19 +495,19 @@ if plot:
 
         if likelihood_model == 'gaussian_process_windowed':
             plt.axvline(max_like_params['window_minimum'], color='cyan', label='start/end stochastic process')
-            # plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
-            plt.axvline(max_like_params['window_maximum'], color='cyan')
-            # x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
-            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
-            # windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
-            windowed_indices = np.where(
-                np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
-            gp.compute(t[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
-            pred_mean, pred_var = gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
+            plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
+            # plt.axvline(max_like_params['window_maximum'], color='cyan')
+            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
+            # x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
+            windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
+            # windowed_indices = np.where(
+            #     np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
+            likelihood.gp.compute(t[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
+            pred_mean, pred_var = likelihood.gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
             pred_std = np.sqrt(pred_var)
         else:
             x = np.linspace(t[0], t[-1], 5000)
-            pred_mean, pred_var = gp.predict(stabilised_counts, x, return_var=True)
+            pred_mean, pred_var = likelihood.gp.predict(stabilised_counts, x, return_var=True)
             pred_std = np.sqrt(pred_var)
 
         color = "#ff7f0e"
@@ -524,10 +528,10 @@ if plot:
         plt.clf()
 
         psd_freqs = np.exp(np.linspace(np.log(1.0), np.log(band_maximum), 5000))
-        psd = gp.kernel.get_psd(psd_freqs * 2 * np.pi)
+        psd = likelihood.gp.kernel.get_psd(psd_freqs * 2 * np.pi)
 
         plt.loglog(psd_freqs, psd, label='complete GP')
-        for i, k in enumerate(gp.kernel.terms):
+        for i, k in enumerate(likelihood.gp.kernel.terms):
             plt.loglog(psd_freqs, k.get_psd(psd_freqs * 2 * np.pi), "--", label=f'term {i}')
 
         plt.xlim(psd_freqs[0], psd_freqs[-1])

@@ -139,8 +139,8 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         self.y = y
 
         self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel)
-        self.white_noise_gp.compute(self.gp._t, np.ones(len(y)))
+        self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel, mean=self.mean_model, fit_mean=self.fit_mean)
+        self.white_noise_gp.compute(self.gp._t, self.y_err)
         self.white_noise_log_likelihood = self.white_noise_gp.log_likelihood(y=y)
         super().__init__(parameters=self.gp.get_parameter_dict())
 
@@ -161,31 +161,11 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
     def __init__(self, mean_model, kernel, fit_mean, t, y, yerr, conversion_func=None):
         """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
-        self.kernel = kernel
-        self.mean_model = mean_model
-        self.fit_mean = fit_mean
-        self.t = t
-        self.y = y
-        self.y_err = yerr
-
-        gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
-        gp.compute(t, yerr=yerr)
-        parameters = gp.get_parameter_dict()
-        parameters['window_minimum'] = t[0]
-        # parameters['window_size'] = 0.5
-        parameters['window_maximum'] = t[-1]
-        if conversion_func is None:
-            self.conversion_func = lambda x: x
-        else:
-            self.conversion_func = conversion_func
-
-        self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel, mean=self.mean_model, fit_mean=self.fit_mean)
-        self.white_noise_gp.compute(self.t, np.ones(len(y)))
-        self.white_noise_log_likelihood = self.white_noise_gp.log_likelihood(y=y)
-
-        self.gp = celerite.GP(kernel=self.kernel, mean=self.mean_model, fit_mean=self.fit_mean)
-        super().__init__(parameters)
+        super(WindowedCeleriteLikelihood, self).__init__(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
+                                                         y=y, yerr=yerr, conversion_func=conversion_func)
+        self.parameters['window_minimum'] = t[0]
+        # self.parameters['window_size'] = 0.5
+        self.parameters['window_maximum'] = t[-1]
 
     def log_likelihood(self):
         if len(self.windowed_indices) == 0 or len(self.edge_indices) == 0:
@@ -201,8 +181,8 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
                 self.white_noise_gp.set_parameter(name=name, value=value)
             self.gp.set_parameter(name=name, value=value)
 
-        log_l = self.gp.log_likelihood(self.y[self.windowed_indices]) + self.white_noise_gp.log_likelihood(self.y[self.edge_indices])
-
+        log_l = self.gp.log_likelihood(self.y[self.windowed_indices]) + \
+            self.white_noise_gp.log_likelihood(self.y[self.edge_indices])
         return np.nan_to_num(log_l, nan=-np.inf)
 
     @property

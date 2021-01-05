@@ -51,6 +51,9 @@ else:
 
 
 t = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
+t -= t[0]
+t -= t[-1]/2
+
 min_log_a = -2
 max_log_a = 1
 min_log_c = -1
