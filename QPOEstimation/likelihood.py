@@ -119,21 +119,30 @@ class GrothLikelihood(WhittleLikelihood):
 
 class CeleriteLikelihood(bilby.likelihood.Likelihood):
 
-    def __init__(self, gp, y, conversion_func=None):
+    def __init__(self, kernel, mean_model, fit_mean, t, y, yerr, conversion_func=None):
         """ Celerite to bilby likelihood interface """
-        parameters = gp.get_parameter_dict()
+
+        self.kernel = kernel
+        self.mean_model = mean_model
+        self.fit_mean = fit_mean
+        self.t = t
+        self.y = y
+        self.y_err = yerr
+
+
         if conversion_func is None:
             self.conversion_func = lambda x: x
         else:
             self.conversion_func = conversion_func
-        self.gp = gp
+        self.gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
+        self.gp.compute(t=t, yerr=yerr)
         self.y = y
 
         self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        self._white_noise_gp = celerite.GP(kernel=self._white_noise_kernel)
-        self._white_noise_gp.compute(self.gp._t, np.ones(len(y)))
-        self.white_noise_log_likelihood = self._white_noise_gp.log_likelihood(y=y)
-        super().__init__(parameters)
+        self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel)
+        self.white_noise_gp.compute(self.gp._t, np.ones(len(y)))
+        self.white_noise_log_likelihood = self.white_noise_gp.log_likelihood(y=y)
+        super().__init__(parameters=self.gp.get_parameter_dict())
 
     def log_likelihood(self):
         celerite_params = self.conversion_func(self.parameters)
@@ -148,7 +157,7 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         return self.white_noise_log_likelihood
 
 
-class WindowedCeleriteLikelihood(bilby.core.likelihood.Likelihood):
+class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
     def __init__(self, mean_model, kernel, fit_mean, t, y, yerr, conversion_func=None):
         """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
