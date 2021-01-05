@@ -202,9 +202,7 @@ class PolynomialMeanModel(Model):
     parameter_names = ("a0", "a1", "a2", "a3", "a4")
 
     def get_value(self, t):
-        times = t - t[0]
-        times /= times[-1]
-        times -= 0.5  # Normalise times to be from -0.5 to +0.5
+        times = t
         return self.a0 + self.a1 * times + self.a2 * times**2 + self.a3 * times**3 + self.a4 * times**4
 
     def compute_gradient(self, *args, **kwargs):
