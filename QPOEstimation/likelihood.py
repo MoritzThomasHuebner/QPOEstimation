@@ -179,14 +179,11 @@ class WindowedCeleriteLikelihood(bilby.core.likelihood.Likelihood):
         super().__init__(parameters)
 
     def log_likelihood(self):
-        windowed_indices = np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_maximum']))
-        edge_indices = np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_maximum']))
-
-        if len(windowed_indices) == 0 or len(edge_indices) == 0:
+        if len(self.windowed_indices) == 0 or len(self.edge_indices) == 0:
             return -np.inf
 
-        self.gp.compute(self.t[windowed_indices], self.y_err)
-        self.white_noise_gp.compute(self.t[edge_indices], self.y_err)
+        self.gp.compute(self.t[self.windowed_indices], self.y_err)
+        self.white_noise_gp.compute(self.t[self.edge_indices], self.y_err)
 
         celerite_params = self.conversion_func(self.parameters)
         for name, value in celerite_params.items():
@@ -196,15 +193,20 @@ class WindowedCeleriteLikelihood(bilby.core.likelihood.Likelihood):
                 self.white_noise_gp.set_parameter(name=name, value=value)
             self.gp.set_parameter(name=name, value=value)
 
-        log_l = self.gp.log_likelihood(self.y[windowed_indices]) + self.white_noise_gp.log_likelihood(self.y[edge_indices])
+        log_l = self.gp.log_likelihood(self.y[self.windowed_indices]) + self.white_noise_gp.log_likelihood(self.y[self.edge_indices])
 
         return np.nan_to_num(log_l, nan=-np.inf)
 
+    @property
+    def edge_indices(self):
+        return np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_maximum']))
+
+    @property
+    def windowed_indices(self):
+        return np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_maximum']))
+
     def noise_log_likelihood(self):
         return self.white_noise_log_likelihood
-
-    def log_likelihood_ratio(self):
-        return self.log_likelihood() - self.white_noise_log_likelihood
 
 
 class QPOTerm(terms.Term):
