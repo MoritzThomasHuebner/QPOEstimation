@@ -144,8 +144,8 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         except Exception:
             return -np.inf
 
-    def log_likelihood_ratio(self):
-        return self.log_likelihood() - self.white_noise_log_likelihood
+    def noise_log_likelihood(self):
+        return self.white_noise_log_likelihood
 
 
 class WindowedCeleriteLikelihood(bilby.core.likelihood.Likelihood):
@@ -182,9 +182,8 @@ class WindowedCeleriteLikelihood(bilby.core.likelihood.Likelihood):
         if len(self.windowed_indices) == 0 or len(self.edge_indices) == 0:
             return -np.inf
 
-        self.gp.compute(self.t[self.windowed_indices], self.y_err)
-        self.white_noise_gp.compute(self.t[self.edge_indices], self.y_err)
-
+        self.gp.compute(self.t[self.windowed_indices], self.y_err[self.windowed_indices])
+        self.white_noise_gp.compute(self.t[self.edge_indices], self.y_err[self.edge_indices])
         celerite_params = self.conversion_func(self.parameters)
         for name, value in celerite_params.items():
             if 'window' in name:
@@ -199,11 +198,11 @@ class WindowedCeleriteLikelihood(bilby.core.likelihood.Likelihood):
 
     @property
     def edge_indices(self):
-        return np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_maximum']))
+        return np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_maximum']))[0]
 
     @property
     def windowed_indices(self):
-        return np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_maximum']))
+        return np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_maximum']))[0]
 
     def noise_log_likelihood(self):
         return self.white_noise_log_likelihood
