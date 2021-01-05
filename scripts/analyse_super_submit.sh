@@ -43,7 +43,7 @@
 #  done
 #done
 #
-for injection in {2100..2199}
+for injection in {2200..2299}
 do
 #  sbatch analyse_submit.sh $injection red_noise
   sbatch analyse_submit.sh $injection qpo
