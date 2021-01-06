@@ -5,17 +5,16 @@ import sys
 from pathlib import Path
 
 import bilby
-import celerite
 import matplotlib
 import matplotlib.pyplot as plt
 
 import QPOEstimation
-from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
-    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm, WindowedCeleriteLikelihood, get_kernel
+from QPOEstimation.likelihood import CeleriteLikelihood, WhittleLikelihood, \
+    GrothLikelihood, WindowedCeleriteLikelihood, get_kernel
 from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.model.series import *
+from QPOEstimation.prior.gp import *
 from QPOEstimation.stabilisation import bar_lev
-from QPOEstimation.prior.gp import get_kernel_prior
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed", "zeroed_mixed"]
@@ -288,38 +287,13 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     plt.clf()
 
     if background_model == 'polynomial':
-        if polynomial_max == 0:
-            priors['mean:a0'] = 0
-            priors['mean:a1'] = 0
-            priors['mean:a2'] = 0
-            priors['mean:a3'] = 0
-            priors['mean:a4'] = 0
-            fit_mean = False
-        else:
-            priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
-                                                         name='mean:a0')
-            priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
-                                                         name='mean:a1')
-            priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
-                                                         name='mean:a2')
-            priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
-                                                         name='mean:a3')
-            priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max,
-                                                         name='mean:a4')
-            fit_mean = True
+        fit_mean = (polynomial_max != 0)
+        mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
+        priors.update(mean_priors)
         mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)
     else:
-        mean_model = np.mean(stabilised_counts)
         fit_mean = False
-
-
-    def conversion_function(sample):
-        out_sample = sample.copy()
-        if 'kernel:log_c' in sample.keys():
-            out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
-        else:
-            out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
-        return out_sample
+        mean_model = np.mean(stabilised_counts)
 
     gp_priors = get_kernel_prior(kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
                                  min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
@@ -336,7 +310,7 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         def window_conversion_func(sample):
             sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
             if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-                sample = conversion_function(sample=sample)
+                sample = decay_constrain_conversion_function(sample=sample)
             return sample
 
         # priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2,
@@ -352,7 +326,7 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
                                                 y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
     else:
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-            priors.conversion_function = conversion_function
+            priors.conversion_function = decay_constrain_conversion_function
         likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
                                         y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
 

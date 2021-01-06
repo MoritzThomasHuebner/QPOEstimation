@@ -62,3 +62,28 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
     else:
         raise ValueError('Recovery mode not defined')
     return priors
+
+def get_polynomial_prior(polynomial_max=10):
+    priors = dict()
+    if polynomial_max == 0:
+        priors['mean:a0'] = 0
+        priors['mean:a1'] = 0
+        priors['mean:a2'] = 0
+        priors['mean:a3'] = 0
+        priors['mean:a4'] = 0
+    else:
+        priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
+        priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
+        priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
+        priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a3')
+        priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a4')
+    return True
+
+
+def decay_constrain_conversion_function(sample):
+    out_sample = sample.copy()
+    if 'kernel:log_c' in sample.keys():
+        out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
+    else:
+        out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
+    return out_sample

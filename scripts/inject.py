@@ -10,9 +10,10 @@ import celerite
 import matplotlib
 import numpy as np
 
-from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, ZeroedQPOTerm
+from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, ZeroedQPOTerm, get_kernel
 from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.injection import create_injection
+from QPOEstimation.prior.gp import *
 from QPOEstimation.prior.minimum import MinimumPrior
 
 if len(sys.argv) > 1:
@@ -62,72 +63,13 @@ band_minimum = 5
 band_maximum = 64
 
 priors = bilby.core.prior.PriorDict()
-priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
-priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
-priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
-priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a3')
-priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a4')
+mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
+priors.update(mean_priors)
 
-if injection_mode == "white_noise":
-    kernel = celerite.terms.JitterTerm(log_sigma=-20)
-    priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-elif injection_mode == "qpo":
-    kernel = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
-    priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-    priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-    priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-    priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum),
-                                                      name='log_f')
-    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-elif injection_mode == "zeroed_qpo":
-    kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
-    priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-    priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-    priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum),
-                                                      name='log_f')
-    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-elif injection_mode == "red_noise":
-    kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
-    priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-    priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-elif injection_mode == "mixed":
-    kernel = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
-    priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                               name='terms[0]:log_a')
-    priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
-    priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                               name='terms[0]:log_c')
-    priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
-                                                               maximum=np.log(band_maximum), name='terms[0]:log_f')
-    priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                               name='terms[1]:log_a')
-    priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                               name='terms[1]:log_c')
-    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-elif injection_mode == "zeroed_mixed":
-    kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
-    priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                               name='terms[0]:log_a')
-    priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                               name='terms[0]:log_c')
-    priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
-                                                               maximum=np.log(band_maximum), name='terms[0]:log_f')
-    priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                               name='terms[1]:log_a')
-    priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                               name='terms[1]:log_c')
-    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-else:
-    raise ValueError('Recovery mode not defined')
+kernel_priors = get_kernel_prior(kernel_type=injection_mode, min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+priors.update(kernel_priors)
+kernel = get_kernel(kernel_type=injection_mode)
 
-
-def conversion_function(sample):
-    out_sample = deepcopy(sample)
-    if 'kernel:log_c' in sample.keys():
-        out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
-    else:
-        out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
-    return out_sample
 
 
 if likelihood_model == "gaussian_process_windowed":
@@ -141,14 +83,14 @@ if likelihood_model == "gaussian_process_windowed":
     def window_conversion_func(sample):
         sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
         if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-            sample = conversion_function(sample=sample)
+            sample = decay_constrain_conversion_function(sample=sample)
         return sample
 
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
         priors.conversion_function = window_conversion_func
 else:
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-        priors.conversion_function = conversion_function
+        priors.conversion_function = decay_constrain_conversion_function
 
 
 
