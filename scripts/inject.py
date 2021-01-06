@@ -38,8 +38,8 @@ if len(sys.argv) > 1:
     outdir = args.outdir
 else:
     matplotlib.use('Qt5Agg')
-    minimum_id = 2100
-    maximum_id = 2200
+    minimum_id = 2200
+    maximum_id = 2300
 
     sampling_frequency = 256
     polynomial_max = 10
