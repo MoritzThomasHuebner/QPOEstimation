@@ -295,17 +295,14 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         fit_mean = False
         mean_model = np.mean(stabilised_counts)
 
-    gp_priors = get_kernel_prior(kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
-                                 min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
-    priors.update(gp_priors)
+    kernel_priors = get_kernel_prior(kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
+                                     min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+    priors.update(kernel_priors)
     kernel = get_kernel(kernel_type=recovery_mode)
 
     if likelihood_model == "gaussian_process_windowed":
-        priors['window_minimum'] = bilby.core.prior.Uniform(minimum=times[0], maximum=times[0] + 0.3,
-                                                            name='window_minimum')
-        priors['window_size'] = bilby.core.prior.Uniform(minimum=0.3, maximum=0.7, name='window_size')
-        priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=times[-1], name='window_maximum')
-
+        window_priors = get_window_priors(times=t)
+        priors.update(window_priors)
 
         def window_conversion_func(sample):
             sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
@@ -313,13 +310,8 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
                 sample = decay_constrain_conversion_function(sample=sample)
             return sample
 
-        # priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2,
-        #                                                  name='window_minimum')
-        # priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum',
-        #                                         name='window_maximum', minimum_spacing=minimum_window_spacing)
 
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-            # priors.conversion_function = conversion_function
             priors.conversion_function = window_conversion_func
 
         likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
@@ -376,11 +368,10 @@ if result is None:
                                resume=resume, use_ratio=use_ratio)
 
 if plot:
-    if run_mode == 'injection' and injection_mode == recovery_mode:
-        try:
-            result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
-        except Exception:
-            result.plot_corner(outdir=f"{outdir}/corner")
+    try:
+        result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
+    except Exception:
+        result.plot_corner(outdir=f"{outdir}/corner")
     else:
         result.plot_corner(outdir=f"{outdir}/corner")
 
