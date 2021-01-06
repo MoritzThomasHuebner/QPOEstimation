@@ -19,27 +19,27 @@ sampling_frequency = 256
 t = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 
 likelihood_model = 'gaussian_process'
+for likelihood_model in ['gaussian_process', 'gaussian_process_windowed']:
+    for i in range(2200, 2300):
+        try:
+            with open(f'injection_files/qpo/{i}_params.json') as f:
+                injection_params = json.load(f)
 
-for i in range(2200, 2300):
-    try:
-        with open(f'injection_files/qpo/{i}_params.json') as f:
-            injection_params = json.load(f)
+            if likelihood_model == 'gaussian_process_windowed':
+                res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_windowed_result.json')
+            else:
+                res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_result.json')
+                # del injection_params['window_minimum']
+                # del injection_params['window_maximum']
 
-        if likelihood_model == 'gaussian_process_windowed':
-            res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_windowed_result.json')
-        else:
-            res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_result.json')
-            # del injection_params['window_minimum']
-            # del injection_params['window_maximum']
-
-        reslist.append(res)
-        reslist[-1].injection_parameters = injection_params
-    except (OSError, FileNotFoundError) as e:
-        print(e)
-        continue
+            reslist.append(res)
+            reslist[-1].injection_parameters = injection_params
+        except (OSError, FileNotFoundError) as e:
+            print(e)
+            continue
 
 
-if likelihood_model == 'gaussian_process_windowed':
-    bilby.result.make_pp_plot(results=reslist, filename='qpo_pp_plot_windowed_new.png')
-else:
-    bilby.result.make_pp_plot(results=reslist, filename='qpo_pp_plot_unwindowed_new.png')
+    if likelihood_model == 'gaussian_process_windowed':
+        bilby.result.make_pp_plot(results=reslist, filename='qpo_pp_plot_windowed_new.png')
+    else:
+        bilby.result.make_pp_plot(results=reslist, filename='qpo_pp_plot_unwindowed_new.png')
