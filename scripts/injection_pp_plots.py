@@ -29,8 +29,8 @@ for i in range(2200, 2300):
             res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_windowed_result.json')
         else:
             res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_result.json')
-            del injection_params['window_minimum']
-            del injection_params['window_maximum']
+            # del injection_params['window_minimum']
+            # del injection_params['window_maximum']
 
         reslist.append(res)
         reslist[-1].injection_parameters = injection_params
