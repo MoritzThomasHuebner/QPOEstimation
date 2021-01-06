@@ -1,1 +1,1 @@
-from . import psd, series
+from . import celerite, psd, series

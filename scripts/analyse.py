@@ -11,9 +11,11 @@ import matplotlib.pyplot as plt
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, QPOTerm, WhittleLikelihood, \
-    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm, WindowedCeleriteLikelihood
+    GrothLikelihood, ExponentialTerm, ZeroedQPOTerm, WindowedCeleriteLikelihood, get_kernel
+from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.model.series import *
-from QPOEstimation.prior.minimum import MinimumPrior
+from QPOEstimation.stabilisation import bar_lev
+from QPOEstimation.prior.gp import get_kernel_prior
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed", "zeroed_mixed"]
@@ -116,7 +118,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    run_mode = 'sliding_window'
+    run_mode = 'injection'
     # run_mode = 'select_time'
     sampling_frequency = 256
     # data_mode = 'blind_injection'
@@ -132,8 +134,8 @@ else:
     candidate_id = 3
     miller_candidates = False
 
-    injection_id = 0
-    injection_mode = "mixed"
+    injection_id = 2201
+    injection_mode = "qpo"
 
     polynomial_max = 1000
     min_log_a = -5
@@ -141,7 +143,7 @@ else:
     min_log_c = -5
     minimum_window_spacing = 0
 
-    recovery_mode = "red_noise"
+    recovery_mode = "qpo"
     likelihood_model = "gaussian_process_windowed"
     # background_model = "polynomial"
     background_model = "polynomial"
@@ -158,7 +160,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
     # segment_step = 0.54   # Requires 14 steps
 
-    nlive = 150
+    nlive = 100
     use_ratio = True
 
     try_load = False
@@ -312,68 +314,18 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
 
 
     def conversion_function(sample):
-        out_sample = deepcopy(sample)
+        out_sample = sample.copy()
         if 'kernel:log_c' in sample.keys():
             out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
         else:
             out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
         return out_sample
 
+    gp_priors = get_kernel_prior(kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
+                                 min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+    priors.update(gp_priors)
+    kernel = get_kernel(kernel_type=recovery_mode)
 
-    if recovery_mode == "white_noise":
-        kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-    elif recovery_mode == "qpo":
-        kernel = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
-        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum),
-                                                          name='log_f')
-        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-    elif recovery_mode == "zeroed_qpo":
-        kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
-        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-        priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum), maximum=np.log(band_maximum),
-                                                          name='log_f')
-        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-    elif recovery_mode == "red_noise":
-        kernel = ExponentialTerm(log_a=0.1, log_c=-0.01)
-        priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum), name='log_c')
-    elif recovery_mode == "mixed":
-        kernel = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
-        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                                   name='terms[0]:log_a')
-        priors['kernel:terms[0]:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='terms[0]:log_b')
-        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                                   name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
-                                                                   maximum=np.log(band_maximum), name='terms[0]:log_f')
-        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                                   name='terms[1]:log_a')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                                   name='terms[1]:log_c')
-        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-    elif recovery_mode == "zeroed_mixed":
-        kernel = ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
-        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                                   name='terms[0]:log_a')
-        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                                   name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
-                                                                   maximum=np.log(band_maximum), name='terms[0]:log_f')
-        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                                   name='terms[1]:log_a')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=np.log(band_maximum),
-                                                                   name='terms[1]:log_c')
-        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-    else:
-        raise ValueError('Recovery mode not defined')
-
-    # gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
-    # gp.compute(t, np.sqrt(stabilised_variance))
     if likelihood_model == "gaussian_process_windowed":
         priors['window_minimum'] = bilby.core.prior.Uniform(minimum=times[0], maximum=times[0] + 0.3,
                                                             name='window_minimum')
@@ -401,7 +353,8 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     else:
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
             priors.conversion_function = conversion_function
-        likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t, y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
+        likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
+                                        y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
 
 elif likelihood_model == "periodogram":
     lc = stingray.Lightcurve(time=t, counts=c)

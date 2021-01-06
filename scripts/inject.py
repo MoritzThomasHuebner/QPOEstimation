@@ -11,7 +11,7 @@ import matplotlib
 import numpy as np
 
 from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, ZeroedQPOTerm
-from QPOEstimation.model.series import PolynomialMeanModel
+from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.injection import create_injection
 from QPOEstimation.prior.minimum import MinimumPrior
 

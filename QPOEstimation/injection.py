@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, RedNoiseKernel, ZeroedQPOTerm
-from QPOEstimation.model.series import PolynomialMeanModel
+from QPOEstimation.model.celerite import PolynomialMeanModel
 
 
 class InjectionCreator(object):
