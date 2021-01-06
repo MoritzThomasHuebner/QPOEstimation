@@ -50,9 +50,9 @@ else:
     outdir = "injection_files"
 
 
-t = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
-t -= t[0]
-t -= t[-1]/2
+times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
+times -= times[0]
+times -= times[-1] / 2
 
 min_log_a = -2
 max_log_a = 1
@@ -134,9 +134,9 @@ if likelihood_model == "gaussian_process_windowed":
     # priors['window_minimum'] = bilby.core.prior.Beta(minimum=t[0], maximum=t[-1], alpha=1, beta=2, name='window_minimum')
     # priors['window_maximum'] = MinimumPrior(minimum=t[0], maximum=t[-1], order=1, reference_name='window_minimum', name='window_maximum', minimum_spacing=0.5)
     # priors['window_maximum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=t[-1], name='window_maximum')
-    priors['window_minimum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=0.3, name='window_minimum')
+    priors['window_minimum'] = bilby.core.prior.Uniform(minimum=times[0], maximum=times[0]+0.3, name='window_minimum')
     priors['window_size'] = bilby.core.prior.Uniform(minimum=0.3, maximum=0.7, name='window_size')
-    priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=1, name='window_maximum')
+    priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=times[-1], name='window_maximum')
 
     def window_conversion_func(sample):
         sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
@@ -158,9 +158,8 @@ for injection_id in range(minimum_id, maximum_id):
     # while np.isinf(priors.ln_prob(params)):
     #     params = priors.sample()
     Path(f'injection_files/{injection_mode}').mkdir(exist_ok=True, parents=True)
-    create_injection(params=params, injection_mode=injection_mode, sampling_frequency=sampling_frequency,
-                     segment_length=segment_length, outdir=outdir, injection_id=injection_id, plot=plot,
-                     likelihood_model=likelihood_model)
+    create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
+                     injection_id=injection_id, plot=plot, likelihood_model=likelihood_model)
 
 #
 #

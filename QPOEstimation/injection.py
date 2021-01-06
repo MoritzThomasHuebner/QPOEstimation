@@ -12,7 +12,7 @@ from QPOEstimation.model.series import PolynomialMeanModel
 
 class InjectionCreator(object):
 
-    def __init__(self, params, injection_mode, sampling_frequency, segment_length,
+    def __init__(self, params, injection_mode, sampling_frequency=None, segment_length=None, times=None,
                  outdir='injection_files', injection_id=0, likelihood_model='gaussian_process'):
         self.params = params
         self.injection_mode = injection_mode
@@ -24,8 +24,10 @@ class InjectionCreator(object):
 
         self.likelihood_model = likelihood_model
         self.mean_model = PolynomialMeanModel(**self.params_mean)
-
-        self.times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
+        if times is None:
+            self.times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
+        else:
+            self.times = times
         self.n = len(self.times)
         self.dt = self.times[1] - self.times[0]
         self.kernel = self.get_kernel()
@@ -147,11 +149,12 @@ class InjectionCreator(object):
         plt.clf()
 
 
-def create_injection(params, injection_mode, sampling_frequency, segment_length,
+def create_injection(params, injection_mode, sampling_frequency=None, segment_length=None, times=None,
                      outdir='injection_files', injection_id=0, plot=False, likelihood_model='gaussian_process'):
     injection_creator = InjectionCreator(params=params, injection_mode=injection_mode,
                                          sampling_frequency=sampling_frequency, segment_length=segment_length,
-                                         outdir=outdir, injection_id=injection_id, likelihood_model=likelihood_model)
+                                         times=times, outdir=outdir, injection_id=injection_id,
+                                         likelihood_model=likelihood_model)
 
     injection_creator.save()
     if plot:

@@ -375,9 +375,11 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     # gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
     # gp.compute(t, np.sqrt(stabilised_variance))
     if likelihood_model == "gaussian_process_windowed":
-        priors['window_minimum'] = bilby.core.prior.Uniform(minimum=t[0], maximum=0.3, name='window_minimum')
+        priors['window_minimum'] = bilby.core.prior.Uniform(minimum=times[0], maximum=times[0] + 0.3,
+                                                            name='window_minimum')
         priors['window_size'] = bilby.core.prior.Uniform(minimum=0.3, maximum=0.7, name='window_size')
-        priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=t[-1], name='window_maximum')
+        priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=times[-1], name='window_maximum')
+
 
         def window_conversion_func(sample):
             sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
