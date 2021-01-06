@@ -187,11 +187,19 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
     @property
     def edge_indices(self):
-        return np.where(np.logical_or(self.parameters['window_minimum'] > self.t, self.t > self.parameters['window_maximum']))[0]
+        return np.where(np.logical_or(self.window_minimum > self.t, self.t > self.window_maximum))[0]
 
     @property
     def windowed_indices(self):
-        return np.where(np.logical_and(self.parameters['window_minimum'] < self.t, self.t < self.parameters['window_maximum']))[0]
+        return np.where(np.logical_and(self.window_minimum < self.t, self.t < self.window_maximum))[0]
+
+    @property
+    def window_minimum(self):
+        return self.parameters['window_minimum']
+
+    @property
+    def window_maximum(self):
+        return self.parameters['window_minimum'] + self.parameters['window_size']
 
     def noise_log_likelihood(self):
         return self.white_noise_log_likelihood
