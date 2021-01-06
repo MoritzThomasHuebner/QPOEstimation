@@ -46,7 +46,8 @@
 for injection in {2200..2299}
 do
 #  sbatch analyse_submit.sh $injection red_noise
-  sbatch analyse_submit.sh $injection qpo
+  sbatch analyse_submit.sh $injection gaussian_process
+  sbatch analyse_submit.sh $injection gaussian_process_windowed
 done
 
 #for i in {0..44}
