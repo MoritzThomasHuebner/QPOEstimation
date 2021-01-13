@@ -136,7 +136,6 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
             self.conversion_func = conversion_func
         self.gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
         self.gp.compute(t=t, yerr=yerr)
-        self.y = y
 
         self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
         self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel, mean=self.mean_model, fit_mean=self.fit_mean)
@@ -360,6 +359,46 @@ class RedNoiseKernel(object):
     def get_value(self, t_0, t_1):
         return np.minimum(t_0, t_1) / self.tau
 
+
+class QPOGaussianProcessLikelihood(Likelihood):
+
+    def __init__(self, t, y, parameters):
+        self.t = t
+        self.y = y
+        self.n = len(y)
+        self.taus = np.zeros(shape=(len(self.t), len(self.t)))
+        super().__init__(parameters=parameters)
+        for j in range(self.n):
+            for i in range(self.n):
+                self.taus[i][j] = np.abs(self.t[j] - self.t[i])
+
+    def get_cov(self):
+        cov = np.diag(np.ones(self.n))
+        return self.get_kernel(tau=self.taus) + cov
+
+    def get_kernel(self, tau):
+        return self.a / 2 * np.exp(-self.c * tau) * (1 * np.cos(2*np.pi*self.f))
+
+    @property
+    def a(self):
+        return np.exp(self.parameters['log_a'])
+
+    @property
+    def c(self):
+        return np.exp(self.parameters['log_c'])
+
+    @property
+    def f(self):
+        return np.exp(self.parameters['log_f'])
+
+    def log_likelihood(self):
+        cov = self.get_cov()
+        inverse_cov = np.linalg.inv(cov)
+        _, log_cov_det = np.linalg.slogdet(cov)
+        log_l = -0.5 * (self.y.T @ inverse_cov @ self.y)
+        log_l -= 0.5 * log_cov_det
+        log_l -= self.n/2 * np.log(2*np.pi)
+        return np.nan_to_num(log_l, -np.inf)
 
 class GaussianProcessLikelihood(bilby.core.likelihood.Likelihood):
 
