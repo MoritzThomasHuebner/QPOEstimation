@@ -3,7 +3,7 @@ import json
 import numpy as np
 from copy import deepcopy
 from QPOEstimation.prior.minimum import MinimumPrior
-reslist = []
+
 samples = []
 injection_mode = 'qpo'
 polynomial_max = 10
@@ -18,8 +18,8 @@ segment_length = 1
 sampling_frequency = 256
 t = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 
-likelihood_model = 'gaussian_process'
 for likelihood_model in ['gaussian_process', 'gaussian_process_windowed']:
+    reslist = []
     for i in range(2200, 2300):
         try:
             with open(f'injection_files/qpo/{i}_params.json') as f:
