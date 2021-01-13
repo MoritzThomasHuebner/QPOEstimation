@@ -205,6 +205,83 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
         return self.white_noise_log_likelihood
 
 
+class DoubleCeleriteLikelihood(Likelihood):
+
+    def __init__(self, mean_model, kernel_0, kernel_1, fit_mean, t, y, y_err,
+                 joint_parameters=None, conversion_func=None):
+        """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
+        self.kernel_0 = kernel_0
+        self.kernel_1 = kernel_1
+        self.mean_model = mean_model
+        self.fit_mean = fit_mean
+        self.t = t
+        self.y = y
+        self.y_err = y_err
+
+        if conversion_func is None:
+            self.conversion_func = lambda x: x
+        else:
+            self.conversion_func = conversion_func
+
+        self.parameters = dict(transition_time=0)
+        self.gp_0 = celerite.GP(kernel=kernel_0, mean=mean_model, fit_mean=fit_mean)
+        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.y_err[self.before_transition_indices])
+        self.gp_1 = celerite.GP(kernel=kernel_1, mean=mean_model, fit_mean=fit_mean)
+        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.y_err[self.after_transition_indices])
+        if joint_parameters is None:
+            self.joint_parameters = []
+        else:
+            self.joint_parameters = joint_parameters
+        for name, val in self.gp_0.get_parameter_dict().items():
+            if 'mean' in name:
+                self.joint_parameters.append(name)
+
+        parameters_0 = self.gp_0.get_parameter_dict()
+        parameters_1 = self.gp_1.get_parameter_dict()
+        parameters = dict()
+        for param in self.joint_parameters:
+            parameters[param] = parameters_0[param]
+            del parameters_0[param]
+            del parameters_1[param]
+
+        for param, val in parameters_0.items():
+            parameters[f"{param}_0"] = val
+
+        for param, val in parameters_1.items():
+            parameters[f"{param}_1"] = val
+
+        super().__init__(parameters=parameters)
+        self.parameters['transition_time'] = t[-1] - t[0]
+
+    @property
+    def before_transition_indices(self):
+        return np.where(self.t < self.parameters['transition_time'])[0]
+
+    @property
+    def after_transition_indices(self):
+        return np.where(self.t >= self.parameters['transition_time'])[0]
+
+    def log_likelihood(self):
+        if len(self.before_transition_indices) == 0 or len(self.after_transition_indices) == 0:
+            return -np.inf
+        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.y_err[self.before_transition_indices])
+        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.y_err[self.after_transition_indices])
+
+        celerite_params = self.conversion_func(self.parameters)
+        for name, value in celerite_params.items():
+            if name in self.joint_parameters:
+                self.gp_0.set_parameter(name=name, value=value)
+                self.gp_1.set_parameter(name=name, value=value)
+            elif name.endswith("_0"):
+                self.gp_0.set_parameter(name=name.rstrip("_0"), value=value)
+            elif name.endswith("_1"):
+                self.gp_1.set_parameter(name=name.rstrip("_1"), value=value)
+
+        log_l = self.gp_0.log_likelihood(self.y[self.before_transition_indices]) + \
+            self.gp_1.log_likelihood(self.y[self.after_transition_indices])
+        return np.nan_to_num(log_l, nan=-np.inf)
+
+
 class QPOTerm(terms.Term):
     parameter_names = ("log_a", "log_b", "log_c", "log_f")
 
