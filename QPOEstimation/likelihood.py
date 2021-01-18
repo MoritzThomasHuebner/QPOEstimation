@@ -198,7 +198,8 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
     @property
     def window_maximum(self):
-        return self.parameters['window_minimum'] + self.parameters['window_size']
+        # return self.parameters['window_minimum'] + self.parameters['window_size']
+        return self.parameters['window_maximum']
 
     def noise_log_likelihood(self):
         return self.white_noise_log_likelihood

@@ -117,17 +117,17 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    run_mode = 'injection'
+    run_mode = 'sliding_window'
     # run_mode = 'select_time'
     sampling_frequency = 256
-    # data_mode = 'blind_injection'
-    data_mode = 'normal'
+    data_mode = 'smoothed_residual'
+    # data_mode = 'normal'
     alpha = 0.02
 
     start_time = 10
     end_time = 400
 
-    period_number = 11
+    period_number = 13
     run_id = 11
 
     candidate_id = 3
@@ -142,10 +142,10 @@ else:
     min_log_c = -5
     minimum_window_spacing = 0
 
-    recovery_mode = "qpo"
+    recovery_mode = "zeroed_mixed"
     likelihood_model = "gaussian_process_windowed"
     # background_model = "polynomial"
-    background_model = "polynomial"
+    background_model = "mean"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -154,7 +154,7 @@ else:
     # segment_length = 7.56
     # segment_length = 2.268
     # segment_length = 7.56
-    segment_length = 1.8
+    segment_length = 2.4
     # segment_length = 2.
     segment_step = 0.23625  # Requires 32 steps
     # segment_step = 0.54   # Requires 14 steps
@@ -162,7 +162,7 @@ else:
     nlive = 100
     use_ratio = True
 
-    try_load = False
+    try_load = True
     resume = False
     plot = True
 
@@ -311,8 +311,9 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
             return sample
 
 
-        if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-            priors.conversion_function = window_conversion_func
+        # if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+        #     priors.conversion_function = window_conversion_func
+        priors.conversion_function = decay_constrain_conversion_function
 
         likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
                                                 y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
@@ -415,13 +416,13 @@ if plot:
 
         if likelihood_model == 'gaussian_process_windowed':
             plt.axvline(max_like_params['window_minimum'], color='cyan', label='start/end stochastic process')
-            plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
-            # plt.axvline(max_like_params['window_maximum'], color='cyan')
-            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
-            # x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
-            windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
-            # windowed_indices = np.where(
-            #     np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
+            # plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
+            plt.axvline(max_like_params['window_maximum'], color='cyan')
+            # x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
+            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
+            # windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
+            windowed_indices = np.where(
+                np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
             likelihood.gp.compute(t[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
             pred_mean, pred_var = likelihood.gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
             pred_std = np.sqrt(pred_var)
