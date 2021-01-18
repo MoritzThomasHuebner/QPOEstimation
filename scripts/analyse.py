@@ -313,7 +313,8 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
 
         # if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
         #     priors.conversion_function = window_conversion_func
-        priors.conversion_function = decay_constrain_conversion_function
+        if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+            priors.conversion_function = decay_constrain_conversion_function
 
         likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
                                                 y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
