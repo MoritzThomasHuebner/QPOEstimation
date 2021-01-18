@@ -142,7 +142,7 @@ else:
     min_log_c = -5
     minimum_window_spacing = 0
 
-    recovery_mode = "zeroed_mixed"
+    recovery_mode = "red_noise"
     likelihood_model = "gaussian_process_windowed"
     # background_model = "polynomial"
     background_model = "mean"
@@ -313,7 +313,7 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
 
         # if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
         #     priors.conversion_function = window_conversion_func
-        if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+        if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
             priors.conversion_function = decay_constrain_conversion_function
 
         likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
