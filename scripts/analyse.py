@@ -153,7 +153,6 @@ else:
     band_maximum = 64
     # segment_length = 7.56
     # segment_length = 2.268
-    # segment_length = 7.56
     segment_length = 2.4
     # segment_length = 2.
     segment_step = 0.23625  # Requires 32 steps
@@ -310,9 +309,6 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
                 sample = decay_constrain_conversion_function(sample=sample)
             return sample
 
-
-        # if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-        #     priors.conversion_function = window_conversion_func
         if recovery_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
             priors.conversion_function = decay_constrain_conversion_function
 
