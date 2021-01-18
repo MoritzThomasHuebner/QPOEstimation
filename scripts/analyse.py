@@ -43,7 +43,6 @@ if len(sys.argv) > 1:
     parser.add_argument("--run_id", default=0, type=int)
 
     parser.add_argument("--candidate_id", default=0, type=int)
-    parser.add_argument("--miller_candidates", default='False', type=str)
 
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
@@ -85,7 +84,6 @@ if len(sys.argv) > 1:
     run_id = args.run_id
 
     candidate_id = args.candidate_id
-    miller_candidates = boolean_string(args.miller_candidates)
 
     polynomial_max = args.polynomial_max
     min_log_a = args.min_log_a
@@ -131,7 +129,6 @@ else:
     run_id = 11
 
     candidate_id = 3
-    miller_candidates = False
 
     injection_id = 2201
     injection_mode = "qpo"
@@ -171,15 +168,7 @@ pulse_period = 7.56  # see papers
 n_pulse_periods = 47
 time_offset = 20.0
 
-if miller_candidates:
-    miller_band_bounds = [(16, 64), (60, 128), (60, 128), (16, 64), (60, 128), (60, 128), (16, 64), (16, 64), (60, 128),
-                          (10, 32), (128, 256), (16, 64), (16, 64), (16, 64), (128, 256), (16, 64), (16, 64), (60, 128),
-                          (60, 128), (60, 128), (60, 128), (16, 64), (32, 64)]
-    band_minimum = miller_band_bounds[candidate_id][0]
-    band_maximum = miller_band_bounds[candidate_id][1]
-    band = 'miller'
-else:
-    band = f'{band_minimum}_{band_maximum}Hz'
+band = f'{band_minimum}_{band_maximum}Hz'
 
 if sampling_frequency is None:
     if band_maximum <= 64:
@@ -240,9 +229,6 @@ else:
         candidates = np.loadtxt(f'candidates/candidates_{band}_{data_mode}.txt')
         start = candidates[candidate_id][0]
         stop = start + segment_length
-        if miller_candidates:  # Miller et al. time segments are shifted by 20 s
-            start += time_offset
-            stop += time_offset
         segment_length = stop - start
 
         outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}"
