@@ -13,17 +13,24 @@ from QPOEstimation.model.celerite import PolynomialMeanModel
 class InjectionCreator(object):
 
     def __init__(self, params, injection_mode, sampling_frequency=None, segment_length=None, times=None,
-                 outdir='injection_files', injection_id=0, likelihood_model='gaussian_process'):
+                 outdir='injection_files', injection_id=0, likelihood_model='gaussian_process', mean_model=None,
+                 poisson_data=False):
         self.params = params
         self.injection_mode = injection_mode
         self.sampling_frequency = sampling_frequency
         self.segment_length = segment_length
         self.outdir = outdir
         self.injection_id = str(injection_id).zfill(2)
+        self.poisson_data = poisson_data
         self.create_outdir()
 
         self.likelihood_model = likelihood_model
-        self.mean_model = PolynomialMeanModel(**self.params_mean)
+        if mean_model is None:
+            self.mean_model = PolynomialMeanModel(**self.params_mean)
+        else:
+            self.mean_model = mean_model
+            for key, value in params.items():
+                self.mean_model.__setattr__(key.replace('mean:', ''), value)
         if times is None:
             self.times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
         else:
@@ -31,8 +38,10 @@ class InjectionCreator(object):
         self.n = len(self.times)
         self.dt = self.times[1] - self.times[0]
         self.kernel = self.get_kernel()
-
-        self.yerr = np.ones(self.n)
+        if self.poisson_data:
+            self.yerr = np.sqrt(self.mean_model.get_value(self.times))
+        else:
+            self.yerr = np.ones(self.n)
         self.cov = self.get_cov()
         self.y = self.get_y()
 
@@ -85,7 +94,7 @@ class InjectionCreator(object):
         if self.likelihood_model == 'gaussian_process_windowed':
             windowed_indices = np.where(np.logical_and(self.params['window_minimum'] < self.times,
                                                        self.times < self.params['window_maximum']))[0]
-            cov = np.diag(np.ones(self.n))
+            cov = np.diag(self.yerr)
             taus = np.zeros(shape=(len(windowed_indices), len(windowed_indices)))
             for i in windowed_indices:
                 for j in windowed_indices:
@@ -94,7 +103,7 @@ class InjectionCreator(object):
                 self.kernel.get_value(tau=taus)
             return cov
         else:
-            cov = np.diag(np.ones(self.n))
+            cov = np.diag(self.yerr)
             taus = np.zeros(shape=(self.n, self.n))
             for i in range(self.n):
                 for j in range(self.n):
@@ -108,13 +117,13 @@ class InjectionCreator(object):
 
     def save(self):
         np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.txt',
-                   np.array([self.times, self.y]).T)
+                   np.array([self.times, self.y, self.yerr]).T)
         with open(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_params.json', 'w') as f:
             json.dump(self.params, f)
 
     def plot(self):
         color = "#ff7f0e"
-        plt.errorbar(self.times, self.y, yerr=np.ones(self.n), fmt=".k", capsize=0, label='data')
+        plt.errorbar(self.times, self.y, yerr=self.yerr, fmt=".k", capsize=0, label='data')
         if self.injection_mode != 'white_nosie':
             gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
             gp.compute(self.times, self.yerr)
