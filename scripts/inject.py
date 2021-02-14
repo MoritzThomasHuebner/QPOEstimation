@@ -21,7 +21,8 @@ if len(sys.argv) > 1:
     parser.add_argument("--minimum_id", default=0, type=int)
     parser.add_argument("--maximum_id", default=100, type=int)
     parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise"], type=str)
-    parser.add_argument("--likelihood_model", default="gaussian_process", choices=["gaussian_process", "gaussian_process_windowed"], type=str)
+    parser.add_argument("--likelihood_model", default="gaussian_process",
+                        choices=["gaussian_process", "gaussian_process_windowed"], type=str)
     parser.add_argument("--sampling_frequency", default=256, type=int)
     parser.add_argument("--polynomial_max", default=10, type=int)
     parser.add_argument("--plot", default=False, type=bool)
@@ -66,7 +67,8 @@ priors = bilby.core.prior.PriorDict()
 mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
 priors.update(mean_priors)
 
-kernel_priors = get_kernel_prior(kernel_type=injection_mode, min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+kernel_priors = get_kernel_prior(kernel_type=injection_mode, min_log_a=min_log_a, max_log_a=max_log_a,
+                                 min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
 priors.update(kernel_priors)
 kernel = get_kernel(kernel_type=injection_mode)
 
