@@ -51,7 +51,7 @@ def get_n_component_mean_model(model, n_models=1, defaults=None):
         def get_value(self, t):
             res = np.zeros(len(t))
             for i in range(n_models):
-                res += model(times=t, **{f"{base}": getattr(self, f"{base}_{i}") for base in base_names})
+                res += model(t, **{f"{base}": getattr(self, f"{base}_{i}") for base in base_names})
             return res
 
         def compute_gradient(self, *args, **kwargs):
@@ -74,7 +74,8 @@ def get_fred_priors(n_freds=1, t_min=0, t_max=2000, minimum_spacing=0):
     if n_freds == 1:
         priors[f'mean:amplitude_0'] = bilby.core.prior.LogUniform(minimum=1e-3, maximum=1e12, name='A')
         priors[f'mean:sigma_0'] = bilby.core.prior.LogUniform(minimum=1e-3, maximum=10000, name='sigma')
-        priors[f'mean:log_skewness_0'] = bilby.core.prior.Uniform(minimum=-20, maximum=20, name='log skewness')
+        priors[f'mean:skewness_0'] = bilby.core.prior.LogUniform(minimum=np.exp(-20), maximum=np.exp(20),
+                                                                    name=f'skewness_0')
         priors[f'mean:t_max_0'] = Uniform(t_min, t_max, name="t_max")
         return priors
     for ii in range(n_freds):

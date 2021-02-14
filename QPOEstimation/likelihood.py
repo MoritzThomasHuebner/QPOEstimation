@@ -129,7 +129,6 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         self.y = y
         self.y_err = yerr
 
-
         if conversion_func is None:
             self.conversion_func = lambda x: x
         else:
