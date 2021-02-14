@@ -47,7 +47,7 @@ else:
     polynomial_max = 10
     injection_mode = "qpo"
     likelihood_model = "gaussian_process_windowed"
-    plot = True
+    plot = False
     segment_length = 1
     outdir = "injection_files"
 
@@ -63,7 +63,7 @@ min_log_c = -1
 band_minimum = 5
 band_maximum = 64
 
-priors = bilby.core.prior.PriorDict()
+priors = bilby.core.prior.ConditionalPriorDict()
 mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
 priors.update(mean_priors)
 
