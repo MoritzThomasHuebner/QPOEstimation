@@ -5,12 +5,9 @@ import bilby
 import numpy as np
 import celerite
 import matplotlib.pyplot as plt
-import matplotlib
 
 from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.likelihood import get_kernel
-
-matplotlib.use('Qt5Agg')
 
 
 class InjectionCreator(object):
