@@ -22,7 +22,7 @@ for likelihood_model in ['gaussian_process', 'gaussian_process_windowed']:
     reslist = []
     for i in range(0, 100):
         try:
-            with open(f'injection_files/qpo/{i}_params.json') as f:
+            with open(f'injection_files/{injection_mode}/{i}_params.json') as f:
                 injection_params = json.load(f)
 
             if likelihood_model == 'gaussian_process_windowed':
