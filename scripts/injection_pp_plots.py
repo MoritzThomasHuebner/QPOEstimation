@@ -6,7 +6,7 @@ from QPOEstimation.prior.minimum import MinimumPrior
 
 samples = []
 injection_mode = 'red_noise'
-polynomial_max = 0
+polynomial_max = 10
 min_log_a = -2
 max_log_a = 1
 min_log_c = -1
