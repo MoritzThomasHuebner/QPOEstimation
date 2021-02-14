@@ -20,15 +20,15 @@ t = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 
 for likelihood_model in ['gaussian_process', 'gaussian_process_windowed']:
     reslist = []
-    for i in range(2200, 2300):
+    for i in range(0, 100):
         try:
             with open(f'injection_files/qpo/{i}_params.json') as f:
                 injection_params = json.load(f)
 
             if likelihood_model == 'gaussian_process_windowed':
-                res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_windowed_result.json')
+                res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_qpo/qpo/results/{i}_gaussian_process_windowed_result.json')
             else:
-                res = bilby.result.read_in_result(f'injection_5_64Hz_normal_qpo/qpo/results/{i}_gaussian_process_result.json')
+                res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_qpo/qpo/results/{i}_gaussian_process_result.json')
 
             reslist.append(res)
             reslist[-1].injection_parameters = injection_params
