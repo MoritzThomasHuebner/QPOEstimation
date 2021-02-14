@@ -26,9 +26,9 @@ for likelihood_model in ['gaussian_process', 'gaussian_process_windowed']:
                 injection_params = json.load(f)
 
             if likelihood_model == 'gaussian_process_windowed':
-                res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_{injection_mode}/{injection_mode}/results/{str(i).zfill(1)}_gaussian_process_windowed_result.json')
+                res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_{injection_mode}/{injection_mode}/results/{str(i).zfill(2)}_gaussian_process_windowed_result.json')
             else:
-                res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_{injection_mode}/{injection_mode}/results/{str(i).zfill(1)}_gaussian_process_result.json')
+                res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_{injection_mode}/{injection_mode}/results/{str(i).zfill(2)}_gaussian_process_result.json')
 
             reslist.append(res)
             reslist[-1].injection_parameters = injection_params
