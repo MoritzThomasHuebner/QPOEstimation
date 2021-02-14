@@ -2,15 +2,15 @@ import json
 from pathlib import Path
 
 import bilby
+import numpy as np
 import celerite
 import matplotlib.pyplot as plt
 import matplotlib
 
-matplotlib.use('Qt5Agg')
-import numpy as np
-
-from QPOEstimation.likelihood import get_kernel
 from QPOEstimation.model.celerite import PolynomialMeanModel
+from QPOEstimation.likelihood import get_kernel
+
+matplotlib.use('Qt5Agg')
 
 
 class InjectionCreator(object):
@@ -28,6 +28,7 @@ class InjectionCreator(object):
         self.create_outdir()
         self.likelihood_model = likelihood_model
         self.kernel = get_kernel(self.injection_mode)
+
         self.times = times
 
         if mean_model is None:
@@ -38,6 +39,7 @@ class InjectionCreator(object):
                 self.mean_model.__setattr__(key.replace('mean:', ''), value)
         self.gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
         self.gp.compute(self.windowed_times, self.windowed_yerr)
+        self.update_params()
         self.y_realisation = self.gp.mean.get_value(self.times)
         self.y_realisation[self.windowed_indices] = self.gp.sample()
         self.y_realisation[self.outside_window_indices] += \
@@ -123,7 +125,7 @@ class InjectionCreator(object):
             if param.startswith('kernel:'):
                 params_kernel[param.replace('kernel:', '')] = value
         if self.injection_mode == 'qpo':
-            params_kernel['log_b'] = -10
+            params_kernel['log_b'] = -15
         return params_kernel
 
     def update_params(self):
