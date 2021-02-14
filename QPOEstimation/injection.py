@@ -6,7 +6,7 @@ import celerite
 import matplotlib.pyplot as plt
 import numpy as np
 
-from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, RedNoiseKernel, ZeroedQPOTerm
+from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, RedNoiseKernel, ZeroedQPOTerm, get_kernel
 from QPOEstimation.model.celerite import PolynomialMeanModel
 
 
@@ -37,7 +37,7 @@ class InjectionCreator(object):
             self.times = times
         self.n = len(self.times)
         self.dt = self.times[1] - self.times[0]
-        self.kernel = self.get_kernel()
+        self.kernel = get_kernel(injection_mode)
         if self.poisson_data:
             self.yerr = np.sqrt(self.mean_model.get_value(self.times))
         else:
@@ -76,19 +76,6 @@ class InjectionCreator(object):
         if self.injection_mode == 'qpo':
             params_kernel['log_b'] = -10
         return params_kernel
-
-    def get_kernel(self):
-        if self.injection_mode == "red_noise":
-            kernel = ExponentialTerm(**self.params_kernel)
-        elif self.injection_mode == "qpo":
-            kernel = QPOTerm(**self.params_kernel)
-        elif self.injection_mode == "zeroed_qpo":
-            kernel = ZeroedQPOTerm(**self.params_kernel)
-        elif self.injection_mode == "red_noise_proper":
-            kernel = RedNoiseKernel(**self.params_kernel)
-        else:
-            kernel = None
-        return kernel
 
     def get_cov(self):
         if self.likelihood_model == 'gaussian_process_windowed':
