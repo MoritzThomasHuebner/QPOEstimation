@@ -73,7 +73,6 @@ priors.update(kernel_priors)
 kernel = get_kernel(kernel_type=injection_mode)
 
 
-
 if likelihood_model == "gaussian_process_windowed":
     window_priors = get_window_priors(times=times)
     priors.update(window_priors)
@@ -89,8 +88,6 @@ if likelihood_model == "gaussian_process_windowed":
 else:
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
         priors.conversion_function = decay_constrain_conversion_function
-
-
 
 
 for injection_id in range(minimum_id, maximum_id):
