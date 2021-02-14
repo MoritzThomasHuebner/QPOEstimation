@@ -4,15 +4,18 @@ from pathlib import Path
 import bilby
 import celerite
 import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.use('Qt5Agg')
 import numpy as np
 
-from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, RedNoiseKernel, ZeroedQPOTerm
+from QPOEstimation.likelihood import get_kernel
 from QPOEstimation.model.celerite import PolynomialMeanModel
 
 
 class InjectionCreator(object):
 
-    def __init__(self, params, injection_mode, sampling_frequency=None, segment_length=None, times=None,
+    def __init__(self, params, injection_mode, sampling_frequency=256, segment_length=1., times=None,
                  outdir='injection_files', injection_id=0, likelihood_model='gaussian_process', mean_model=None,
                  poisson_data=False):
         self.params = params
@@ -23,30 +26,76 @@ class InjectionCreator(object):
         self.injection_id = str(injection_id).zfill(2)
         self.poisson_data = poisson_data
         self.create_outdir()
-
         self.likelihood_model = likelihood_model
+        self.kernel = get_kernel(self.injection_mode)
+        self.times = times
+
         if mean_model is None:
             self.mean_model = PolynomialMeanModel(**self.params_mean)
         else:
             self.mean_model = mean_model
             for key, value in params.items():
                 self.mean_model.__setattr__(key.replace('mean:', ''), value)
-        if times is None:
-            self.times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
-        else:
-            self.times = times
-        self.n = len(self.times)
-        self.dt = self.times[1] - self.times[0]
-        self.kernel = self.get_kernel()
-        if self.poisson_data:
-            self.yerr = np.sqrt(self.mean_model.get_value(self.times))
-        else:
-            self.yerr = np.ones(self.n)
-        self.cov = self.get_cov()
-        self.y = self.get_y()
+        self.gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
+        self.gp.compute(self.windowed_times, self.windowed_yerr)
+        self.y_realisation = self.gp.mean.get_value(self.times)
+        self.y_realisation[self.windowed_indices] = self.gp.sample()
+        self.y_realisation[self.outside_window_indices] += \
+            np.random.normal(size=len(self.outside_window_indices)) * self.yerr[self.outside_window_indices]
 
     def create_outdir(self):
         Path(f'{self.outdir}/{self.injection_mode}').mkdir(exist_ok=True, parents=True)
+
+    @property
+    def times(self):
+        return self._times
+
+    @times.setter
+    def times(self, times):
+        if times is None:
+            self._times = np.linspace(0, self.segment_length, int(self.sampling_frequency * self.segment_length))
+        else:
+            self._times = times
+
+    @property
+    def windowed_indices(self):
+        if self.likelihood_model == 'gaussian_process':
+            return np.where(np.logical_and(-np.inf < self.times, self.times < np.inf))[0]
+
+        else:
+            return np.where(np.logical_and(self.params['window_minimum'] < self.times,
+                                           self.times < self.params['window_maximum']))[0]
+
+    @property
+    def outside_window_indices(self):
+        if self.likelihood_model == 'gaussian_process_windowed':
+            return np.where(np.logical_or(self.params['window_minimum'] >= self.times,
+                                          self.times >= self.params['window_maximum']))[0]
+        else:
+            return []
+
+    @property
+    def windowed_times(self):
+        return self.times[self.windowed_indices]
+
+    @property
+    def n(self):
+        return len(self.times)
+
+    @property
+    def dt(self):
+        return self.times[1] - self.times[0]
+
+    @property
+    def yerr(self):
+        if self.poisson_data:
+            return np.sqrt(self.mean_model.get_value(self.times))
+        else:
+            return np.ones(self.n)
+
+    @property
+    def windowed_yerr(self):
+        return self.yerr[self.windowed_indices]
 
     @property
     def params(self):
@@ -77,81 +126,46 @@ class InjectionCreator(object):
             params_kernel['log_b'] = -10
         return params_kernel
 
-    def get_kernel(self):
-        if self.injection_mode == "red_noise":
-            kernel = ExponentialTerm(**self.params_kernel)
-        elif self.injection_mode == "qpo":
-            kernel = QPOTerm(**self.params_kernel)
-        elif self.injection_mode == "zeroed_qpo":
-            kernel = ZeroedQPOTerm(**self.params_kernel)
-        elif self.injection_mode == "red_noise_proper":
-            kernel = RedNoiseKernel(**self.params_kernel)
-        else:
-            kernel = None
-        return kernel
+    def update_params(self):
+        for param, value in self.params.items():
+            try:
+                self.gp.set_parameter(param, value)
+            except ValueError:
+                continue
 
-    def get_cov(self):
-        if self.likelihood_model == 'gaussian_process_windowed':
-            windowed_indices = np.where(np.logical_and(self.params['window_minimum'] < self.times,
-                                                       self.times < self.params['window_maximum']))[0]
-            cov = np.diag(self.yerr)
-            taus = np.zeros(shape=(len(windowed_indices), len(windowed_indices)))
-            for i in windowed_indices:
-                for j in windowed_indices:
-                    taus[i - windowed_indices[0]][j - windowed_indices[0]] = np.abs(i - j) * self.dt
-            cov[windowed_indices[0]:windowed_indices[-1] + 1, windowed_indices[0]:windowed_indices[-1] + 1] += \
-                self.kernel.get_value(tau=taus)
-            return cov
-        else:
-            cov = np.diag(self.yerr)
-            taus = np.zeros(shape=(self.n, self.n))
-            for i in range(self.n):
-                for j in range(self.n):
-                    taus[i][j] = np.abs(i - j) * self.dt
-            cov += self.kernel.get_value(tau=taus)
-            return cov
+    @property
+    def cov(self):
+        self.gp.compute(self.windowed_times, self.windowed_yerr)
+        return self.gp.get_matrix()
 
-    def get_y(self):
-        self.y = np.random.multivariate_normal(self.mean_model.get_value(self.times), self.cov)
-        return self.y
+    @property
+    def y(self):
+        self.gp.compute(self.windowed_times, self.windowed_yerr)
+        return self.gp.get_value()
 
     def save(self):
         np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.txt',
-                   np.array([self.times, self.y, self.yerr]).T)
+                   np.array([self.times, self.y_realisation, self.yerr]).T)
         with open(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_params.json', 'w') as f:
             json.dump(self.params, f)
 
     def plot(self):
         color = "#ff7f0e"
-        plt.errorbar(self.times, self.y, yerr=self.yerr, fmt=".k", capsize=0, label='data')
+        plt.errorbar(self.times, self.y_realisation, yerr=self.yerr, fmt=".k", capsize=0, label='data')
         if self.injection_mode != 'white_nosie':
-            gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
-            gp.compute(self.times, self.yerr)
-            for param, value in self.params.items():
-                try:
-                    gp.set_parameter(param, value)
-                except ValueError:
-                    continue
+            self.update_params()
+            x = np.linspace(self.windowed_times[0], self.windowed_times[-1], 5000)
+            self.gp.compute(self.windowed_times, self.windowed_yerr)
             if self.likelihood_model == 'gaussian_process_windowed':
-                x = np.linspace(self.params['window_minimum'], self.params['window_maximum'], 5000)
                 plt.axvline(self.params['window_minimum'], color='cyan', label='start/end stochastic process')
                 plt.axvline(self.params['window_maximum'], color='cyan')
-                windowed_indices = np.where(
-                    np.logical_and(self.params['window_minimum'] < self.times,
-                                   self.times < self.params['window_maximum']))
-                gp.compute(self.times[windowed_indices], self.yerr[windowed_indices])
-                pred_mean, pred_var = gp.predict(self.y[windowed_indices], x, return_var=True)
-                pred_std = np.sqrt(pred_var)
-            else:
-                x = np.linspace(self.times[0], self.times[-1], 5000)
-                pred_mean, pred_var = gp.predict(self.y, x, return_var=True)
-                pred_std = np.sqrt(pred_var)
+            pred_mean, pred_var = self.gp.predict(self.y_realisation[self.windowed_indices], x, return_var=True)
+            pred_std = np.sqrt(pred_var)
             plt.plot(x, pred_mean, color=color, label='Prediction')
             plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std,
                              color=color, alpha=0.3, edgecolor="none")
 
-        pred_mean_poly = self.mean_model.get_value(self.times)
-        plt.plot(self.times, pred_mean_poly, color='green', label='Mean function')
+        plt.plot(self.times, self.gp.mean.get_value(self.times), color='green', label='Mean function')
         plt.legend()
         plt.savefig(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.pdf')
         plt.show()
