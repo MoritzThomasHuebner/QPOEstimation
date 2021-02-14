@@ -76,15 +76,17 @@ kernel = get_kernel(kernel_type=injection_mode)
 if likelihood_model == "gaussian_process_windowed":
     window_priors = get_window_priors(times=times)
     priors.update(window_priors)
-
-    def window_conversion_func(sample):
-        sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
-        if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-            sample = decay_constrain_conversion_function(sample=sample)
-        return sample
-
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-        priors.conversion_function = window_conversion_func
+        priors.conversion_function = decay_constrain_conversion_function
+
+    # def window_conversion_func(sample):
+    #     sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
+    #     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+    #         sample = decay_constrain_conversion_function(sample=sample)
+    #     return sample
+
+    # if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+    #     priors.conversion_function = window_conversion_func
 else:
     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
         priors.conversion_function = decay_constrain_conversion_function
