@@ -18,7 +18,8 @@ segment_length = 1
 sampling_frequency = 256
 t = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 
-for likelihood_model in ['gaussian_process', 'gaussian_process_windowed']:
+# for likelihood_model in ['gaussian_process', 'gaussian_process_windowed']:
+for likelihood_model in ['gaussian_process']:
     reslist = []
     for i in range(0, 100):
         try:
