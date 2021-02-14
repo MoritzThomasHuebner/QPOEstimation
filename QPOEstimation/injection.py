@@ -101,6 +101,7 @@ class InjectionCreator(object):
 
     @property
     def params(self):
+        self.update_params()
         return self._params
 
     @params.setter
@@ -129,10 +130,10 @@ class InjectionCreator(object):
         return params_kernel
 
     def update_params(self):
-        for param, value in self.params.items():
+        for param, value in self._params.items():
             try:
                 self.gp.set_parameter(param, value)
-            except ValueError:
+            except (ValueError, AttributeError):
                 continue
 
     @property
