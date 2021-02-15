@@ -144,9 +144,9 @@ class InjectionCreator(object):
         return self.gp.get_value()
 
     def save(self):
-        np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.txt',
+        np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}_data.txt',
                    np.array([self.times, self.y_realisation, self.yerr]).T)
-        with open(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_params.json', 'w') as f:
+        with open(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}_params.json', 'w') as f:
             json.dump(self.params, f)
 
     def plot(self):
@@ -167,7 +167,7 @@ class InjectionCreator(object):
 
         plt.plot(self.times, self.gp.mean.get_value(self.times), color='green', label='Mean function')
         plt.legend()
-        plt.savefig(f'{self.outdir}/{self.injection_mode}/{self.injection_id}_data.pdf')
+        plt.savefig(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}_data.pdf')
         plt.show()
         plt.clf()
 
