@@ -339,7 +339,7 @@ def get_kernel(kernel_type):
         return celerite.terms.JitterTerm(log_sigma=-20)
     elif kernel_type == "qpo":
         return QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
-    elif kernel_type == "zeroed_qpo":
+    elif kernel_type == "pure_qpo":
         return ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
     elif kernel_type == "red_noise":
         return ExponentialTerm(log_a=0.1, log_c=-0.01)

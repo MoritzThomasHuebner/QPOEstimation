@@ -21,7 +21,7 @@ from QPOEstimation.prior.gp import *
 from QPOEstimation.stabilisation import bar_lev
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
-modes = ["qpo", "white_noise", "red_noise", "zeroed_qpo", "mixed", "zeroed_mixed"]
+modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "mixed", "general_qpo"]
 run_modes = ['select_time', 'sliding_window', 'multiple_windows', 'candidates', 'injection']
 background_models = ["polynomial", "exponential", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
@@ -259,7 +259,7 @@ except Exception:
 # plt.show()
 # assert False
 if plot:
-    if recovery_mode in ["qpo", "zeroed_qpo", "mixed", "zeroed_mixed"]:
+    if recovery_mode in ["qpo", "pure_qpo", "mixed", "general_qpo"]:
         try:
             try:
                 frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))

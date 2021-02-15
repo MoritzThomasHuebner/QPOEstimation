@@ -33,7 +33,7 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
         priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
         priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0,
                                                                  name='decay_constraint')
-    elif kernel_type == "zeroed_qpo":
+    elif kernel_type == "pure_qpo":
         if min_log_a == max_log_a:
             priors['kernel:log_a'] = bilby.core.prior.DeltaFunction(peak=max_log_a, name='log_a')
         else:

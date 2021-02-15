@@ -17,7 +17,7 @@ from QPOEstimation.prior.gp import *
 from QPOEstimation.stabilisation import bar_lev
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
-modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "mixed", "zeroed_mixed"]
+modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
 run_modes = ['select_time', 'sliding_window', 'multiple_windows', 'candidates', 'injection']
 background_models = ["polynomial", "exponential", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
@@ -291,17 +291,17 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
 
         def window_conversion_func(sample):
             sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
-            if injection_mode in ['qpo', 'pure_qpo', 'mixed', 'zeroed_mixed']:
+            if injection_mode in ['qpo', 'pure_qpo', 'mixed', 'general_qpo']:
                 sample = decay_constrain_conversion_function(sample=sample)
             return sample
 
-        if recovery_mode in ['qpo', 'pure_qpo', 'mixed', 'zeroed_mixed']:
+        if recovery_mode in ['qpo', 'pure_qpo', 'mixed', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
 
         likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
                                                 y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
     else:
-        if recovery_mode in ['qpo', 'pure_qpo', 'mixed', 'zeroed_mixed']:
+        if recovery_mode in ['qpo', 'pure_qpo', 'mixed', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
         likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
                                         y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
@@ -360,7 +360,7 @@ if plot:
         result.plot_corner(outdir=f"{outdir}/corner")
 
     if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
-        if recovery_mode in ["qpo", "pure_qpo", "mixed", "zeroed_mixed"]:
+        if recovery_mode in ["qpo", "pure_qpo", "mixed", "general_qpo"]:
             try:
                 try:
                     frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
