@@ -1,20 +1,12 @@
 import argparse
-import json
 import sys
-from copy import deepcopy
 from pathlib import Path
-import matplotlib.pyplot as plt
 
-import bilby
-import celerite
 import matplotlib
-import numpy as np
 
-from QPOEstimation.likelihood import QPOTerm, ExponentialTerm, ZeroedQPOTerm, get_kernel
-from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.injection import create_injection
+from QPOEstimation.likelihood import get_kernel
 from QPOEstimation.prior.gp import *
-from QPOEstimation.prior.minimum import MinimumPrior
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
