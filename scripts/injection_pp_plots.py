@@ -35,7 +35,7 @@ band_maximum = 64
 reslist = []
 for i in range(minimum_id, maximum_id):
     try:
-        with open(f'injection_files/{injection_mode}/{str(i).zfill(2)}_params.json') as f:
+        with open(f'injection_files/{injection_mode}/{likelihood_model}/{str(i).zfill(2)}_params.json') as f:
             injection_params = json.load(f)
         res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_{injection_mode}/{injection_mode}/{likelihood_model}/results/{str(i).zfill(2)}_{likelihood_model}_result.json')
         reslist.append(res)
