@@ -8,7 +8,12 @@
 #  done
 #done
 
-for injection in {1000..1999}
+for injection in {0..99}
 do
   sbatch analyse_submit.sh ${injection} gaussian_process
+done
+
+for injection in {100..199}
+do
+  sbatch analyse_submit.sh ${injection} gaussian_process_windowed
 done
