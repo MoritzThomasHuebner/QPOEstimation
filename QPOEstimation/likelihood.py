@@ -319,7 +319,7 @@ class ExponentialTerm(terms.Term):
         )
 
 
-class ZeroedQPOTerm(terms.Term):
+class PureQPOTerm(terms.Term):
     parameter_names = ("log_a", "log_c", "log_f")
 
     def get_real_coefficients(self, params):
@@ -340,13 +340,11 @@ def get_kernel(kernel_type):
     elif kernel_type == "qpo":
         return QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
     elif kernel_type == "pure_qpo":
-        return ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
+        return PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
     elif kernel_type == "red_noise":
         return ExponentialTerm(log_a=0.1, log_c=-0.01)
-    elif kernel_type == "mixed":
-        return QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
-    elif kernel_type == "zeroed_mixed":
-        return ZeroedQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+    elif kernel_type == "general_qpo":
+        return PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
     else:
         raise ValueError('Recovery mode not defined')
 

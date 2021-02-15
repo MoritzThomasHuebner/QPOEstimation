@@ -3,7 +3,7 @@ import json
 import os
 import sys
 from pathlib import Path
-
+import stingray
 import bilby
 import matplotlib
 import matplotlib.pyplot as plt
@@ -291,17 +291,17 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
 
         def window_conversion_func(sample):
             sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
-            if injection_mode in ['qpo', 'pure_qpo', 'mixed', 'general_qpo']:
+            if injection_mode in ['qpo', 'pure_qpo', 'general_qpo']:
                 sample = decay_constrain_conversion_function(sample=sample)
             return sample
 
-        if recovery_mode in ['qpo', 'pure_qpo', 'mixed', 'general_qpo']:
+        if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
 
         likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
                                                 y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
     else:
-        if recovery_mode in ['qpo', 'pure_qpo', 'mixed', 'general_qpo']:
+        if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
         likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
                                         y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
@@ -360,7 +360,7 @@ if plot:
         result.plot_corner(outdir=f"{outdir}/corner")
 
     if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
-        if recovery_mode in ["qpo", "pure_qpo", "mixed", "general_qpo"]:
+        if recovery_mode in ["qpo", "pure_qpo", "general_qpo"]:
             try:
                 try:
                     frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
@@ -447,7 +447,7 @@ if plot:
 
     elif likelihood_model == "periodogram":
         result.plot_corner(outdir=f"{outdir}/corner")
-        if recovery_mode in ["qpo", "mixed"]:
+        if recovery_mode == "qpo":
             frequency_samples = result.posterior['central_frequency']
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')

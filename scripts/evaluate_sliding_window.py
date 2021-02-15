@@ -47,7 +47,7 @@ counts = data[:, 1]
 
 
 for period in range(n_periods):
-    log_bfs_zeroed_mixed = []
+    log_bfs_general_qpo = []
     mean_frequency_qpo = []
     std_frequency_qpo = []
     mean_frequency_mixed = []
@@ -57,24 +57,24 @@ for period in range(n_periods):
         try:
             # res_white_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/white_noise/results/{run_id}_{likelihood_model}_result.json")
             res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_{likelihood_model}_result.json")
-            res_zeroed_mixed = bilby.result.read_in_result(f"{outdir}/period_{period}/zeroed_mixed/results/{run_id}_{likelihood_model}_result.json")
-            log_bf_zeroed_mixed = res_zeroed_mixed.log_bayes_factor - res_red_noise.log_bayes_factor
+            res_general_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/general_qpo/results/{run_id}_{likelihood_model}_result.json")
+            log_bf_general_qpo = res_general_qpo.log_bayes_factor - res_red_noise.log_bayes_factor
 
-            log_f_samples_mixed = np.array(res_zeroed_mixed.posterior['kernel:terms[0]:log_f'])
+            log_f_samples_mixed = np.array(res_general_qpo.posterior['kernel:terms[0]:log_f'])
             frequency_samples_mixed = np.exp(log_f_samples_mixed)
             mean_frequency_mixed.append(np.mean(frequency_samples_mixed))
             std_frequency_mixed.append(np.std(frequency_samples_mixed))
 
         except Exception as e:
             print(e)
-            log_bf_zeroed_mixed = np.nan
+            log_bf_general_qpo = np.nan
             mean_frequency_qpo.append(np.nan)
             std_frequency_qpo.append(np.nan)
-        log_bfs_zeroed_mixed.append(log_bf_zeroed_mixed)
+        log_bfs_general_qpo.append(log_bf_general_qpo)
 
-        print(f"{period} {run_id} zeroed mixed: {log_bf_zeroed_mixed}")
+        print(f"{period} {run_id} zeroed mixed: {log_bf_general_qpo}")
 
-    np.savetxt(f'{outdir}/log_bfs_period_mixed_{period}', np.array(log_bfs_zeroed_mixed))
+    np.savetxt(f'{outdir}/log_bfs_period_mixed_{period}', np.array(log_bfs_general_qpo))
     np.savetxt(f'{outdir}/mean_frequencies_{period}', np.array(mean_frequency_qpo))
     np.savetxt(f'{outdir}/std_frequencies_{period}', np.array(std_frequency_qpo))
 
@@ -83,7 +83,7 @@ for period in range(n_periods):
     color = 'tab:red'
     ax1.set_xlabel('segment start time [s]')
     ax1.set_ylabel('ln BF', color=color)
-    ax1.plot(xs, log_bfs_zeroed_mixed, color=color, ls='solid', label='One QPO vs white noise')
+    ax1.plot(xs, log_bfs_general_qpo, color=color, ls='solid', label='One QPO vs white noise')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis

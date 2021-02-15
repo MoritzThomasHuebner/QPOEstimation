@@ -12,7 +12,7 @@ if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument("--minimum_id", default=0, type=int)
     parser.add_argument("--maximum_id", default=100, type=int)
-    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise", "general_qpo"], type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise", "general_qpo", "pure_qpo"], type=str)
     parser.add_argument("--likelihood_model", default="gaussian_process",
                         choices=["gaussian_process", "gaussian_process_windowed"], type=str)
     parser.add_argument("--polynomial_max", default=10, type=int)
