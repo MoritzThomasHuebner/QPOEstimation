@@ -91,7 +91,7 @@ if injection_mode in ['qpo', 'pure_qpo', 'general_qpo']:
 
 for injection_id in range(minimum_id, maximum_id):
     params = priors.sample()
-    Path(f'injection_files/{injection_mode}').mkdir(exist_ok=True, parents=True)
+    Path(f'injection_files/{injection_mode}/{likelihood_model}').mkdir(exist_ok=True, parents=True)
     create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
                      injection_id=injection_id, plot=plot, likelihood_model=likelihood_model)
 

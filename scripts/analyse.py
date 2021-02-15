@@ -181,9 +181,9 @@ if sampling_frequency is None:
         sampling_frequency = 1024
 
 if run_mode == 'injection':
-    data = np.loadtxt(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_data.txt')
+    data = np.loadtxt(f'injection_files/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_data.txt')
     if injection_mode == recovery_mode:
-        with open(f'injection_files/{injection_mode}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
+        with open(f'injection_files/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
             truths = json.load(f)
     else:
         truths = {}
