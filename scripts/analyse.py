@@ -289,12 +289,6 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
         window_priors = get_window_priors(times=t)
         priors.update(window_priors)
 
-        def window_conversion_func(sample):
-            sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
-            if injection_mode in ['qpo', 'pure_qpo', 'general_qpo']:
-                sample = decay_constrain_conversion_function(sample=sample)
-            return sample
-
         if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
 
