@@ -40,23 +40,51 @@ band = f'{band_minimum}_{band_maximum}Hz'
 
 # averaged runs
 
-log_bfs = []
+# log_bfs = []
+# for injection_id in range(minimum_id, maximum_id):
+#     res_qpo = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/qpo/results/{injection_id}_{likelihood_model}_result.json")
+#     res_red_noise = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/red_noise/results/{injection_id}_{likelihood_model}_result.json")
+#     log_bfs.append(res_qpo.log_evidence - res_red_noise.log_evidence)
+#     print(log_bfs[-1])
+#     print(injection_id)
+#
+# min_ln_bf = np.min(log_bfs)
+# max_ln_bf = np.max(log_bfs)
+#
+# plt.hist(log_bfs, bins="fd", label="1000 injections")
+# plt.axvline(min_ln_bf, label=f"minimum ln BF {min_ln_bf:.2f}", color='orange')
+# plt.axvline(max_ln_bf, label=f"maximum ln BF {max_ln_bf:.2f}", color='green')
+# plt.xlabel("ln BF QPO")
+# plt.ylabel('counts')
+# plt.legend()
+# plt.title(f'{injection_mode} injections')
+# plt.savefig(f'identical_{injection_mode}_injections.png')
+# plt.show()
+
+
+log_bfs_red_noise_injection = []
+log_bfs_qpo_injection = []
 for injection_id in range(minimum_id, maximum_id):
-    res_qpo = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/qpo/results/{injection_id}_{likelihood_model}_result.json")
-    res_red_noise = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/red_noise/results/{injection_id}_{likelihood_model}_result.json")
-    log_bfs.append(res_qpo.log_evidence - res_red_noise.log_evidence)
-    print(log_bfs[-1])
+    res_qpo_rn_injected = bilby.result.read_in_result(f"injection_{band}_normal_red_noise/qpo/results/{injection_id}_{likelihood_model}_result.json")
+    res_red_noise_rn_injected = bilby.result.read_in_result(f"injection_{band}_normal_red_noise/red_noise/results/{injection_id}_{likelihood_model}_result.json")
+    res_qpo_qpo_injected = bilby.result.read_in_result(f"injection_{band}_normal_qpo/qpo/results/{injection_id}_{likelihood_model}_result.json")
+    res_red_noise_qpo_injected = bilby.result.read_in_result(f"injection_{band}_normal_qpo/red_noise/results/{injection_id}_{likelihood_model}_result.json")
+    log_bfs_red_noise_injection.append(res_qpo_rn_injected.log_evidence - res_red_noise_rn_injected.log_evidence)
+    log_bfs_qpo_injection.append(res_qpo_qpo_injected.log_evidence - res_red_noise_qpo_injected.log_evidence)
+    print(log_bfs_red_noise_injection[-1])
+    print(log_bfs_qpo_injection[-1])
     print(injection_id)
 
-min_ln_bf = np.min(log_bfs)
-max_ln_bf = np.max(log_bfs)
+# min_ln_bf = np.min(log_bfs_red_noise_injection)
+# max_ln_bf = np.max(log_bfs_red_noise_injection)
 
-plt.hist(log_bfs, bins="fd", label="1000 injections")
-plt.axvline(min_ln_bf, label=f"minimum ln BF {min_ln_bf:.2f}", color='orange')
-plt.axvline(max_ln_bf, label=f"maximum ln BF {max_ln_bf:.2f}", color='green')
+# plt.axvline(min_ln_bf, label=f"minimum ln BF {min_ln_bf:.2f}", color='orange')
+# plt.axvline(max_ln_bf, label=f"maximum ln BF {max_ln_bf:.2f}", color='green')
+plt.hist(log_bfs_red_noise_injection, bins="fd", label="Red noise injected", density=True)
+plt.hist(log_bfs_qpo_injection, bins="fd", label="QPO injected", density=True)
 plt.xlabel("ln BF QPO")
-plt.ylabel('counts')
-plt.legend()
+plt.ylabel('p(ln BF)')
 plt.title(f'{injection_mode} injections')
-plt.savefig(f'identical_{injection_mode}_injections.png')
+plt.legend()
+plt.savefig(f'identical_injections_comparison.png')
 plt.show()
