@@ -18,8 +18,8 @@ if len(sys.argv) > 1:
     parser.add_argument("--sampling_frequency", default=256, type=int)
 
     parser.add_argument("--polynomial_max", default=10, type=int)
-    parser.add_argument("--min_log_a", default=-1, type=float)
-    parser.add_argument("--max_log_a", default=2, type=float)
+    parser.add_argument("--min_log_a", default=-2, type=float)
+    parser.add_argument("--max_log_a", default=1, type=float)
     parser.add_argument("--min_log_c", default=-1, type=float)
     parser.add_argument("--max_log_c", default=None, type=float)
     parser.add_argument("--band_minimum", default=5, type=float)
