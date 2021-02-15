@@ -20,7 +20,7 @@ if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument("--minimum_id", default=0, type=int)
     parser.add_argument("--maximum_id", default=100, type=int)
-    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise"], type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise", "mixed"], type=str)
     parser.add_argument("--likelihood_model", default="gaussian_process",
                         choices=["gaussian_process", "gaussian_process_windowed"], type=str)
     parser.add_argument("--sampling_frequency", default=256, type=int)
@@ -94,7 +94,7 @@ kernel = get_kernel(kernel_type=injection_mode)
 if likelihood_model == "gaussian_process_windowed":
     priors.update(get_window_priors(times=times))
 
-if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+if injection_mode in ['qpo', 'pure_qpo', 'mixed', 'zeroed_mixed']:
     priors.conversion_function = decay_constrain_conversion_function
 
 for injection_id in range(minimum_id, maximum_id):
