@@ -24,7 +24,15 @@ if len(sys.argv) > 1:
     parser.add_argument("--likelihood_model", default="gaussian_process",
                         choices=["gaussian_process", "gaussian_process_windowed"], type=str)
     parser.add_argument("--sampling_frequency", default=256, type=int)
+
     parser.add_argument("--polynomial_max", default=10, type=int)
+    parser.add_argument("--min_log_a", default=-1, type=float)
+    parser.add_argument("--max_log_a", default=2, type=float)
+    parser.add_argument("--min_log_c", default=-1, type=float)
+    parser.add_argument("--max_log_c", default=None, type=float)
+    parser.add_argument("--band_minimum", default=5, type=float)
+    parser.add_argument("--band_maximum", default=64, type=float)
+
     parser.add_argument("--plot", default=False, type=bool)
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--outdir", default='injection_files', type=str)
@@ -34,7 +42,15 @@ if len(sys.argv) > 1:
     injection_mode = args.injection_mode
     likelihood_model = args.likelihood_model
     sampling_frequency = args.sampling_frequency
+
     polynomial_max = args.polynomial_max
+    min_log_a = args.min_log_a
+    max_log_a = args.max_log_a
+    min_log_c = args.min_log_c
+    max_log_c = args.max_log_c
+    band_minimum = args.band_minimum
+    band_maximum = args.band_maximum
+
     plot = args.plot
     segment_length = args.segment_length
     outdir = args.outdir
@@ -44,9 +60,17 @@ else:
     maximum_id = 2300
 
     sampling_frequency = 256
-    polynomial_max = 10
+
+    polynomial_max = 0
+    min_log_a = 2
+    max_log_a = 2
+    min_log_c = 0
+    max_log_c = 0
+    band_minimum = 20
+    band_maximum = 20
+
     injection_mode = "qpo"
-    likelihood_model = "gaussian_process_windowed"
+    likelihood_model = "gaussian_process"
     plot = False
     segment_length = 1
     outdir = "injection_files"
@@ -56,41 +80,22 @@ times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 times -= times[0]
 times -= times[-1] / 2
 
-min_log_a = -2
-max_log_a = 1
-min_log_c = -1
-
-band_minimum = 5
-band_maximum = 64
-
 priors = bilby.core.prior.ConditionalPriorDict()
 mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
 priors.update(mean_priors)
 
 kernel_priors = get_kernel_prior(kernel_type=injection_mode, min_log_a=min_log_a, max_log_a=max_log_a,
-                                 min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+                                 min_log_c=min_log_c, max_log_c=max_log_c,
+                                 band_minimum=band_minimum, band_maximum=band_maximum)
 priors.update(kernel_priors)
 kernel = get_kernel(kernel_type=injection_mode)
 
 
 if likelihood_model == "gaussian_process_windowed":
-    window_priors = get_window_priors(times=times)
-    priors.update(window_priors)
-    if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-        priors.conversion_function = decay_constrain_conversion_function
+    priors.update(get_window_priors(times=times))
 
-    # def window_conversion_func(sample):
-    #     sample['window_maximum'] = sample['window_minimum'] + sample['window_size']
-    #     if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-    #         sample = decay_constrain_conversion_function(sample=sample)
-    #     return sample
-
-    # if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-    #     priors.conversion_function = window_conversion_func
-else:
-    if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
-        priors.conversion_function = decay_constrain_conversion_function
-
+if injection_mode in ['qpo', 'zeroed_qpo', 'mixed', 'zeroed_mixed']:
+    priors.conversion_function = decay_constrain_conversion_function
 
 for injection_id in range(minimum_id, maximum_id):
     params = priors.sample()
