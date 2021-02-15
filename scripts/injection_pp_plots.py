@@ -15,25 +15,19 @@ if len(sys.argv) > 1:
     parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise", "general_qpo", "pure_qpo"], type=str)
     parser.add_argument("--likelihood_model", default="gaussian_process",
                         choices=["gaussian_process", "gaussian_process_windowed"], type=str)
-    parser.add_argument("--polynomial_max", default=10, type=int)
     args = parser.parse_args()
     minimum_id = args.minimum_id
     maximum_id = args.maximum_id
     injection_mode = args.injection_mode
     likelihood_model = args.likelihood_model
-    polynomial_max = args.polynomial_max
 else:
     minimum_id = 0
     maximum_id = 100
 
-    polynomial_max = 10
     injection_mode = "qpo"
     likelihood_model = "gaussian_process"
 
 samples = []
-min_log_a = -2
-max_log_a = 1
-min_log_c = -1
 
 band_minimum = 5
 band_maximum = 64
