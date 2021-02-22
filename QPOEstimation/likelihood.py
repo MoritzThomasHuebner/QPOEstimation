@@ -162,7 +162,6 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
         super(WindowedCeleriteLikelihood, self).__init__(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
                                                          y=y, yerr=yerr, conversion_func=conversion_func)
         self.parameters['window_minimum'] = t[0]
-        # self.parameters['window_size'] = 0.5
         self.parameters['window_maximum'] = t[-1]
 
     def log_likelihood(self):
