@@ -80,10 +80,10 @@ def get_fred_priors(n_freds=1, t_min=0, t_max=2000, minimum_spacing=0):
         return priors
     for ii in range(n_freds):
         if ii == 0:
-            priors[f"mean:t_max_{ii}"] = Beta(minimum=t_min, maximum=t_max, alpha=1, beta=n_freds, name=f"t_max_{ii}")
+            priors[f"mean:t_max_{ii}"] = Beta(minimum=t_min, maximum=t_max, alpha=1, beta=n_freds, name=f"mean:t_max_{ii}")
         else:
             priors[f"mean:t_max_{ii}"] = QPOEstimation.prior.minimum.MinimumPrior(
-                order=n_freds-ii, minimum_spacing=minimum_spacing, minimum=t_min, maximum=t_max, name=f"t_max_{ii}")
+                order=n_freds-ii, minimum_spacing=minimum_spacing, minimum=t_min, maximum=t_max, name=f"mean:t_max_{ii}")
         priors[f'mean:amplitude_{ii}'] = bilby.core.prior.LogUniform(minimum=1e-3, maximum=1e12, name=f'A_{ii}')
         priors[f'mean:sigma_{ii}'] = bilby.core.prior.LogUniform(minimum=1e-3, maximum=10000, name=f'sigma_{ii}')
         priors[f'mean:skewness_{ii}'] = bilby.core.prior.LogUniform(minimum=np.exp(-20), maximum=np.exp(20), name=f'log skewness_{ii}')
