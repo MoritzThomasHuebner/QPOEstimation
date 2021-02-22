@@ -1,5 +1,8 @@
-from bilby.core.prior import Prior, ConditionalPriorDict, ConditionalBeta, Uniform, Beta
+import json
 import numpy as np
+
+import bilby
+from bilby.core.prior import Prior, ConditionalPriorDict, ConditionalBeta, Uniform, Beta
 
 
 class MinimumPrior(ConditionalBeta):
@@ -14,7 +17,11 @@ class MinimumPrior(ConditionalBeta):
             name=name, latex_label=latex_label, unit=unit,
             boundary=boundary, condition_func=self.minimum_condition
         )
+        print(self.reference_params)
+        self.reference_params['order'] = order
+        self.reference_params['minimum_spacing'] = minimum_spacing
         self.order = order
+
         if reference_name is None:
             self.reference_name = self.name[:-1] + str(int(self.name[-1]) - 1)
         else:
@@ -22,6 +29,7 @@ class MinimumPrior(ConditionalBeta):
         self._required_variables = [self.reference_name]
         self.minimum_spacing = minimum_spacing
         self.__class__.__name__ = 'MinimumPrior'
+        self.__class__.__qualname__ = 'MinimumPrior'
 
     def minimum_condition(self, reference_params, **kwargs):
         return dict(minimum=kwargs[self.reference_name] + self.minimum_spacing)
@@ -31,6 +39,10 @@ class MinimumPrior(ConditionalBeta):
 
     def get_instantiation_dict(self):
         return Prior.get_instantiation_dict(self)
+
+    def to_json(self):
+        self.reset_to_reference_parameters()
+        return json.dumps(self, cls=bilby.utils.BilbyJsonEncoder)
 
 
 def get_frequency_mode_priors(n_freqs=1, f_min=5, f_max=32, minimum_spacing=0):
