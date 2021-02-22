@@ -16,6 +16,7 @@ from QPOEstimation.model.series import *
 from QPOEstimation.prior.gp import *
 from QPOEstimation.prior.mean import get_polynomial_prior
 from QPOEstimation.stabilisation import bar_lev
+from QPOEstimation.get_data import *
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
@@ -181,94 +182,48 @@ if sampling_frequency is None:
     else:
         sampling_frequency = 1024
 
-if run_mode == 'injection':
-    data = np.loadtxt(f'injection_files/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_data.txt')
-    if injection_mode == recovery_mode:
-        with open(f'injection_files/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json', 'r') as f:
-            truths = json.load(f)
-    else:
-        truths = {}
+
+if run_mode == 'candidates':
+    times, counts = get_candidates_data(
+        candidates_file_dir='candidates', band=band, data_mode=data_mode, candidate_id=candidate_id,
+        segment_length=segment_length, sampling_frequency=sampling_frequency, alpha=alpha)
+    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}/{likelihood_model}"
+    label = f"{candidate_id}"
+elif run_mode == 'injection':
+    times, counts, truths = get_injection_data(
+        injection_file_dir='injection_files', injection_mode=injection_mode, recovery_mode=recovery_mode,
+        likelihood_model=likelihood_model, injection_id=injection_id)
+    outdir = f"{run_mode}_{band}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
+    label = f"{str(injection_id).zfill(2)}"
+elif run_mode == 'sliding_window':
+    times, counts = get_giant_flare_data_from_period(
+        data_mode=data_mode, period_number=period_number, run_id=run_id, segment_step=segment_step,
+        segment_length=segment_length, sampling_frequency=sampling_frequency, alpha=alpha)
+    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}/{likelihood_model}/period_{period_number}"
+    label = f'{run_id}'
+elif run_mode == 'select_time':
+    times, counts = get_giant_flare_data_from_segment(
+        start_time=start_time, end_time=end_time, data_mode=data_mode,
+        sampling_frequency=sampling_frequency, alpha=alpha)
+    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}/{likelihood_model}"
+    label = f'{start_time}_{end_time}'
 else:
-    if data_mode == 'smoothed':
-        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat')
-    elif data_mode == 'smoothed_residual':
-        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_residual_alpha_{alpha}.dat')
-    elif data_mode == 'blind_injection':
-        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_{data_mode}.dat')
-    else:
-        data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz.dat')
+    raise ValueError
 
-times = data[:, 0]
-counts = data[:, 1]
-outdir = 'outdir'
-label = 'run'
-start = times[0] - 0.1
-stop = times[-1] + 0.1
-
-starts = []
-stops = []
-
-if run_mode == 'multiple_windows':
-    interpulse_periods = []
-    for i in range(n_pulse_periods):
-        interpulse_periods.append((time_offset + i * pulse_period, time_offset + (i + 1) * pulse_period))
-
-    for i in range(20):
-        starts.append(interpulse_periods[period_number + i][0] + run_id * segment_step)
-        stops.append(starts[-1] + segment_length)
-    outdir = f"{run_mode}_{band}_{data_mode}/period_{period_number}/{recovery_mode}"
-    label = f'{run_id}_{likelihood_model}'
-
-    indices = np.array([], dtype=int)
-    for start, stop in zip(starts, stops):
-        indices = np.append(indices, np.where(np.logical_and(times > start, times < stop))[0])
-
-    t = times[indices]
-    c = counts[indices]
-else:
-    if run_mode == 'candidates':
-        candidates = np.loadtxt(f'candidates/candidates_{band}_{data_mode}.txt')
-        start = candidates[candidate_id][0]
-        stop = start + segment_length
-        segment_length = stop - start
-
-        outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}"
-        label = f"{candidate_id}_{likelihood_model}"
-    elif run_mode == 'injection':
-        outdir = f"{run_mode}_{band}_{data_mode}_{injection_mode}/{recovery_mode}"
-        label = f"{str(injection_id).zfill(2)}_{likelihood_model}"
-    elif run_mode == 'sliding_window':
-        interpulse_periods = []
-        for i in range(n_pulse_periods):
-            interpulse_periods.append((time_offset + i * pulse_period, time_offset + (i + 1) * pulse_period))
-        start = interpulse_periods[period_number][0] + run_id * segment_step
-        stop = start + segment_length
-
-        outdir = f"{run_mode}_{band}_{data_mode}/period_{period_number}/{recovery_mode}"
-        label = f'{run_id}_{likelihood_model}'
-    elif run_mode == 'select_time':
-        start = start_time
-        stop = end_time
-        outdir = f"{run_mode}_{band}_{data_mode}/{start_time}_{end_time}/{recovery_mode}"
-        label = f'{likelihood_model}'
-
-    indices = np.where(np.logical_and(times > start, times < stop))[0]
-    t = times[indices]
-    c = counts[indices]
 
 # Move center of light curve to 0
-t -= t[0]
-t -= t[-1]/2
+times -= times[0]
+times -= times[-1] / 2
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual', 'blind_injection']:
-        stabilised_counts = c
+        stabilised_counts = counts
     else:
-        stabilised_counts = bar_lev(c)
+        stabilised_counts = bar_lev(counts)
 
-    stabilised_variance = np.ones(len(c))
-    plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
+    stabilised_variance = np.ones(len(counts))
+    plt.errorbar(times, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
     plt.show()
     plt.clf()
 
@@ -287,22 +242,22 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
     kernel = get_kernel(kernel_type=recovery_mode)
 
     if likelihood_model == "gaussian_process_windowed":
-        window_priors = get_window_priors(times=t)
+        window_priors = get_window_priors(times=times)
         priors.update(window_priors)
 
         if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
 
-        likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=t,
+        likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=times,
                                                 y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
     else:
         if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
-        likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
+        likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=times,
                                         y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
 
 elif likelihood_model == "periodogram":
-    lc = stingray.Lightcurve(time=t, counts=c)
+    lc = stingray.Lightcurve(time=times, counts=counts)
     ps = stingray.Powerspectrum(lc=lc, norm="leahy")
     frequencies = ps.freq
     powers = ps.power
@@ -400,22 +355,22 @@ if plot:
             x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
             # windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
             windowed_indices = np.where(
-                np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_maximum']))
-            likelihood.gp.compute(t[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
+                np.logical_and(max_like_params['window_minimum'] < times, times < max_like_params['window_maximum']))
+            likelihood.gp.compute(times[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
             pred_mean, pred_var = likelihood.gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
             pred_std = np.sqrt(pred_var)
         else:
-            x = np.linspace(t[0], t[-1], 5000)
+            x = np.linspace(times[0], times[-1], 5000)
             pred_mean, pred_var = likelihood.gp.predict(stabilised_counts, x, return_var=True)
             pred_std = np.sqrt(pred_var)
 
         color = "#ff7f0e"
-        plt.errorbar(t, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
+        plt.errorbar(times, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
         if background_model != "mean":
-            x = np.linspace(t[0], t[-1], 5000)
+            x = np.linspace(times[0], times[-1], 5000)
             trend = mean_model.get_value(x)
             plt.plot(x, trend, color='green', label='Trend')
 
