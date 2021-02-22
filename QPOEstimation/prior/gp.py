@@ -6,99 +6,83 @@ from QPOEstimation.prior.minimum import MinimumPrior
 
 
 def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum, band_maximum, max_log_c=None):
-    priors = dict()
     if max_log_c is None:
         max_log_c = np.log(band_maximum)
 
     if kernel_type == "white_noise":
-        priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
+        priors = get_white_noise_prior()
     elif kernel_type == "qpo":
-        if min_log_a == max_log_a:
-            priors['kernel:log_a'] = bilby.core.prior.DeltaFunction(peak=max_log_a, name='log_a')
-        else:
-            priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        if min_log_c == max_log_c:
-            priors['kernel:log_c'] = bilby.core.prior.DeltaFunction(peak=min_log_c, name='log_c')
-        else:
-            priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=max_log_c, name='log_c')
-
-        if band_maximum == band_minimum:
-            priors['kernel:log_f'] = bilby.core.prior.DeltaFunction(peak=np.log(band_minimum),
-                                                                    name='log_f')
-        else:
-            priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
-                                                              maximum=np.log(band_maximum),
-                                                              name='log_f')
-
-        priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0,
-                                                                 name='decay_constraint')
+        priors = get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "pure_qpo":
-        if min_log_a == max_log_a:
-            priors['kernel:log_a'] = bilby.core.prior.DeltaFunction(peak=max_log_a, name='log_a')
-        else:
-            priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        if min_log_c == max_log_c:
-            priors['kernel:log_c'] = bilby.core.prior.DeltaFunction(peak=min_log_c, name='log_c')
-        else:
-            priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=max_log_c, name='log_c')
-
-        if band_maximum == band_minimum:
-            priors['kernel:log_f'] = bilby.core.prior.DeltaFunction(peak=np.log(band_minimum),
-                                                                    name='log_f')
-        else:
-            priors['kernel:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
-                                                              maximum=np.log(band_maximum),
-                                                              name='log_f')
-        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0,
-                                                                 name='decay_constraint')
+        priors = get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "red_noise":
-        if min_log_a == max_log_a:
-            priors['kernel:log_a'] = bilby.core.prior.DeltaFunction(peak=max_log_a, name='log_a')
-        else:
-            priors['kernel:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_a')
-        if min_log_c == max_log_c:
-            priors['kernel:log_c'] = bilby.core.prior.DeltaFunction(peak=min_log_c, name='log_c')
-        else:
-            priors['kernel:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=max_log_c, name='log_c')
+        priors = get_red_noise_prior(max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "general_qpo":
-        priors['kernel:terms[0]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                                   name='terms[0]:log_a')
-        priors['kernel:terms[0]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=max_log_c,
-                                                                   name='terms[0]:log_c')
-        priors['kernel:terms[0]:log_f'] = bilby.core.prior.Uniform(minimum=np.log(band_minimum),
-                                                                   maximum=np.log(band_maximum),
-                                                                   name='terms[0]:log_f')
-        priors['kernel:terms[1]:log_a'] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a,
-                                                                   name='terms[1]:log_a')
-        priors['kernel:terms[1]:log_c'] = bilby.core.prior.Uniform(minimum=min_log_c, maximum=max_log_c,
-                                                                   name='terms[1]:log_c')
-        priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0,
-                                                                 name='decay_constraint')
+        priors = get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     else:
         raise ValueError('Recovery mode not defined')
     return priors
 
 
-def get_polynomial_prior(polynomial_max=10):
+def get_white_noise_prior():
     priors = dict()
-    if polynomial_max == 0:
-        priors['mean:a0'] = 0
-        priors['mean:a1'] = 0
-        priors['mean:a2'] = 0
-        priors['mean:a3'] = 0
-        priors['mean:a4'] = 0
-    else:
-        priors['mean:a0'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a0')
-        priors['mean:a1'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a1')
-        priors['mean:a2'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a2')
-        priors['mean:a3'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a3')
-        priors['mean:a4'] = bilby.core.prior.Uniform(minimum=-polynomial_max, maximum=polynomial_max, name='mean:a4')
+    priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
     return priors
 
 
-def get_window_priors(times):
+def get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
+    min_log_f = np.log(band_minimum)
+    max_log_f = np.log(band_maximum)
+
     priors = dict()
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[0]:log_a')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='terms[0]:log_c')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='terms[0]:log_f')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[1]:log_a')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='terms[1]:log_c')
+    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
+    return priors
+
+
+def get_red_noise_prior(max_log_a, max_log_c, min_log_a, min_log_c):
+    priors = dict()
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
+    return priors
+
+
+def get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
+    min_log_f = np.log(band_minimum)
+    max_log_f = np.log(band_maximum)
+
+    priors = dict()
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='log_f')
+    return priors
+
+
+def get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
+    min_log_f = np.log(band_minimum)
+    max_log_f = np.log(band_maximum)
+
+    priors = dict()
+    priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='log_f')
+    return priors
+
+
+def _add_individual_kernel_prior(priors, minimum, maximum, label):
+    if minimum == maximum:
+        priors[f'kernel:{label}'] = bilby.core.prior.DeltaFunction(peak=maximum, name=label)
+    else:
+        priors[f'kernel:{label}'] = bilby.core.prior.Uniform(minimum=minimum, maximum=maximum, name=label)
+
+
+def get_window_priors(times):
+    priors = bilby.core.prior.ConditionalPriorDict()
     priors['window_minimum'] = bilby.core.prior.Beta(minimum=times[0], maximum=times[-1], alpha=1, beta=2,
                                                      name='window_minimum', boundary='reflective')
     priors['window_maximum'] = MinimumPrior(minimum=times[0], maximum=times[-1], order=1,

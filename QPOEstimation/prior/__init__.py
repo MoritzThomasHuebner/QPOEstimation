@@ -1,1 +1,1 @@
-from . import minimum, psd, gp
+from . import minimum, psd, gp, mean
