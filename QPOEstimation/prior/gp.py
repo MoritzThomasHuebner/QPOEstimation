@@ -104,13 +104,6 @@ def get_window_priors(times):
     priors['window_maximum'] = MinimumPrior(minimum=times[0], maximum=times[-1], order=1,
                                             reference_name='window_minimum', name='window_maximum',
                                             minimum_spacing=0.1, boundary='reflective')
-    # priors['window_maximum'] = bilby.core.prior.Uniform(minimum=times[0], maximum=times[-1], name='window_maximum')
-    # priors['window_minimum'] = bilby.core.prior.Uniform(minimum=times[0], maximum=times[0]+0.3, name='window_minimum')
-    # priors['window_size'] = bilby.core.prior.Uniform(minimum=0.3, maximum=0.7, name='window_size')
-    # priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=times[-1], name='window_maximum')
-    # priors['window_minimum'] = bilby.core.prior.Uniform(minimum=times[0], maximum=times[-1], name='window_minimum')
-    # priors['window_size'] = bilby.core.prior.Uniform(minimum=0.1, maximum=times[-1] - times[0], name='window_size')
-    # priors['window_maximum'] = bilby.core.prior.Constraint(minimum=-1000, maximum=times[-1], name='window_maximum')
     return priors
 
 
@@ -118,6 +111,6 @@ def decay_constrain_conversion_function(sample):
     out_sample = sample.copy()
     if 'kernel:log_c' in sample.keys():
         out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
-    else:
+    elif "kernel:terms[0]:log_c" in sample.keys():
         out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
     return out_sample
