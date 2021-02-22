@@ -14,6 +14,7 @@ from QPOEstimation.likelihood import CeleriteLikelihood, WhittleLikelihood, \
 from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.model.series import *
 from QPOEstimation.prior.gp import *
+from QPOEstimation.prior.mean import get_polynomial_prior
 from QPOEstimation.stabilisation import bar_lev
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
