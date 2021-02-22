@@ -47,3 +47,17 @@ def two_sided_second_order_exponential_smoothing(ys, alpha, beta):
     backwards = second_order_exponential_smoothing(ys[::-1], alpha, beta)[::-1]
     res = (forward + backwards)/2
     return res
+
+
+def boxcar_filter(ys, n):
+    res = np.zeros(len(ys))
+    for i, c in enumerate(ys):
+        if i < (n - 1)/2:
+            boxcar = ys[0: int(i + (n - 1) / 2)]
+        elif i > len(ys) - (n - 1)/2:
+            boxcar = ys[int(i - (n - 1) / 2):-1]
+        else:
+            boxcar = ys[int(i - (n - 1) / 2): int(i + (n - 1) / 2)]
+        res[i] = sum(boxcar) / len(boxcar)
+
+    return res
