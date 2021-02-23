@@ -187,25 +187,25 @@ if run_mode == 'candidates':
     times, counts = get_candidates_data(
         candidates_file_dir='candidates', band=band, data_mode=data_mode, candidate_id=candidate_id,
         segment_length=segment_length, sampling_frequency=sampling_frequency, alpha=alpha)
-    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}/{likelihood_model}"
+    outdir = f"{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}"
     label = f"{candidate_id}"
 elif run_mode == 'injection':
     times, counts, truths = get_injection_data(
         injection_file_dir='injection_files', injection_mode=injection_mode, recovery_mode=recovery_mode,
         likelihood_model=likelihood_model, injection_id=injection_id)
-    outdir = f"{run_mode}_{band}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
+    outdir = f"{run_mode}/{band}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
     label = f"{str(injection_id).zfill(2)}"
 elif run_mode == 'sliding_window':
     times, counts = get_giant_flare_data_from_period(
         data_mode=data_mode, period_number=period_number, run_id=run_id, segment_step=segment_step,
         segment_length=segment_length, sampling_frequency=sampling_frequency, alpha=alpha)
-    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}/{likelihood_model}/period_{period_number}"
+    outdir = f"{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}/period_{period_number}"
     label = f'{run_id}'
 elif run_mode == 'select_time':
     times, counts = get_giant_flare_data_from_segment(
         start_time=start_time, end_time=end_time, data_mode=data_mode,
         sampling_frequency=sampling_frequency, alpha=alpha)
-    outdir = f"{run_mode}_{band}_{data_mode}/{recovery_mode}/{likelihood_model}"
+    outdir = f"{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}"
     label = f'{start_time}_{end_time}'
 else:
     raise ValueError
