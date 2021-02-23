@@ -1,26 +1,21 @@
 import argparse
-import json
 import os
 import sys
-from pathlib import Path
-import stingray
-import bilby
+
 import matplotlib
 import matplotlib.pyplot as plt
 
 import QPOEstimation
-from QPOEstimation.likelihood import CeleriteLikelihood, WhittleLikelihood, \
-    GrothLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model, get_celerite_likelihood
-from QPOEstimation.model.celerite import PolynomialMeanModel
-from QPOEstimation.model.series import *
+from QPOEstimation.get_data import *
+from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_likelihood
 from QPOEstimation.prior.gp import *
 from QPOEstimation.prior.mean import get_mean_prior
 from QPOEstimation.stabilisation import bar_lev
-from QPOEstimation.get_data import *
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
-run_modes = ['select_time', 'sliding_window', 'multiple_windows', 'candidates', 'injection']
+data_sources = ['injection', 'giant_flare', 'solar_flare']
+run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment']
 background_models = ["polynomial", "exponential", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
 
@@ -33,11 +28,14 @@ def boolean_string(s):
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--data_source", default='giant_flare', choices=data_sources)
     parser.add_argument("--run_mode", default='sliding_window', choices=run_modes)
     parser.add_argument("--sampling_frequency", default=None, type=int)
     parser.add_argument("--data_mode", choices=data_modes, default='normal', type=str)
     parser.add_argument("--alpha", default=0.02, type=float)
     parser.add_argument("--variance_stabilisation", default='True', type=str)
+
+    parser.add_argument("--solar_flare_id", default='120704187', type=str)
 
     parser.add_argument("--start_time", default=0., type=float)
     parser.add_argument("--end_time", default=1., type=float)
@@ -75,11 +73,14 @@ if len(sys.argv) > 1:
     parser.add_argument("--plot", default='True', type=str)
     args = parser.parse_args()
 
+    data_source = args.data_source
     run_mode = args.run_mode
     sampling_frequency = args.sampling_frequency
     data_mode = args.data_mode
     alpha = args.alpha
-    variance_stabilisation = args.variance_stabilisation
+    variance_stabilisation = boolean_string(args.variance_stabilisation)
+
+    solar_flare_id = args.solar_flare_id
 
     start_time = args.start_time
     end_time = args.end_time
@@ -101,8 +102,6 @@ if len(sys.argv) > 1:
     recovery_mode = args.recovery_mode
     likelihood_model = args.model
     background_model = args.background_model
-    periodogram_likelihood = args.periodogram_likelihood
-    periodogram_noise_model = args.periodogram_noise_model
 
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
@@ -119,13 +118,14 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
+    data_source = 'giant_flare'
     run_mode = 'sliding_window'
-    # run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
-    # data_mode = 'normal'
     alpha = 0.02
     variance_stabilisation = True
+
+    solar_flare_id = "120704187"
 
     start_time = 10
     end_time = 400
@@ -147,18 +147,11 @@ else:
     recovery_mode = "red_noise"
     likelihood_model = "gaussian_process_windowed"
     background_model = "polynomial"
-    # background_model = "mean"
-    periodogram_likelihood = "whittle"
-    periodogram_noise_model = "red_noise"
 
     band_minimum = 5
     band_maximum = 64
-    # segment_length = 7.56
-    # segment_length = 2.268
     segment_length = 1.0
-    # segment_length = 2.
     segment_step = 0.23625  # Requires 32 steps
-    # segment_step = 0.54   # Requires 14 steps
 
     nlive = 150
     use_ratio = True
@@ -175,32 +168,42 @@ if sampling_frequency is None:
     sampling_frequency = 4*int(np.round(2**np.ceil(np.log2(band_maximum))))
 
 truths = None
-if run_mode == 'candidates':
-    times, counts = get_candidates_data(
-        candidates_file_dir='candidates', band=band, data_mode=data_mode, candidate_id=candidate_id,
-        segment_length=segment_length, sampling_frequency=sampling_frequency, alpha=alpha)
-    outdir = f"{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}"
-    label = f"{candidate_id}"
-elif run_mode == 'injection':
+
+if data_source == 'giant_flare':
+    times, counts = get_giant_flare_data(
+        run_mode, band=band, data_mode=data_mode, segment_length=segment_length, sampling_frequency=sampling_frequency,
+        alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id, period_number=period_number,
+        run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time)
+    outdir = f"SGR_1806_20/{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}"
+    if run_mode == 'candidates':
+        label = f"{candidate_id}"
+    elif run_mode == 'sliding_window':
+        label = f'period_{period_number}/{run_id}'
+    elif run_mode == 'select_time':
+        label = f'{start_time}_{end_time}'
+    elif run_mode == 'entire_segment':
+        label = 'entire_segment'
+    else:
+        raise ValueError
+elif data_source == 'solar_flare':
+    times, counts = get_solar_flare_data(run_mode, solar_flare_id=solar_flare_id,
+                                         start_time=start_time, end_time=end_time)
+    outdir = f"solar_flare_{solar_flare_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
+    if run_mode == 'select_time':
+        label = f'{start_time}_{end_time}'
+    elif run_mode == 'entire_segment':
+        label = 'entire_segment'
+    else:
+        raise ValueError
+elif data_source == 'injection':
     times, counts, truths = get_injection_data(
         injection_file_dir='injection_files', injection_mode=injection_mode, recovery_mode=recovery_mode,
         likelihood_model=likelihood_model, injection_id=injection_id)
     outdir = f"{run_mode}/{band}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
     label = f"{str(injection_id).zfill(2)}"
-elif run_mode == 'sliding_window':
-    times, counts = get_giant_flare_data_from_period(
-        data_mode=data_mode, period_number=period_number, run_id=run_id, segment_step=segment_step,
-        segment_length=segment_length, sampling_frequency=sampling_frequency, alpha=alpha)
-    outdir = f"{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}/period_{period_number}"
-    label = f'{run_id}'
-elif run_mode == 'select_time':
-    times, counts = get_giant_flare_data_from_segment(
-        start_time=start_time, end_time=end_time, data_mode=data_mode,
-        sampling_frequency=sampling_frequency, alpha=alpha)
-    outdir = f"{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}"
-    label = f'{start_time}_{end_time}'
 else:
     raise ValueError
+
 
 if variance_stabilisation:
     y = counts
