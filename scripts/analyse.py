@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, WhittleLikelihood, \
-    GrothLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model
+    GrothLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model, get_celerite_likelihood
 from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.model.series import *
 from QPOEstimation.prior.gp import *
-from QPOEstimation.prior.mean import get_polynomial_prior
+from QPOEstimation.prior.mean import get_mean_prior
 from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.get_data import *
 
@@ -37,6 +37,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--sampling_frequency", default=None, type=int)
     parser.add_argument("--data_mode", choices=data_modes, default='normal', type=str)
     parser.add_argument("--alpha", default=0.02, type=float)
+    parser.add_argument("--variance_stabilisation", default='True', type=str)
 
     parser.add_argument("--start_time", default=0., type=float)
     parser.add_argument("--end_time", default=1., type=float)
@@ -78,6 +79,7 @@ if len(sys.argv) > 1:
     sampling_frequency = args.sampling_frequency
     data_mode = args.data_mode
     alpha = args.alpha
+    variance_stabilisation = args.variance_stabilisation
 
     start_time = args.start_time
     end_time = args.end_time
@@ -120,9 +122,10 @@ else:
     run_mode = 'sliding_window'
     # run_mode = 'select_time'
     sampling_frequency = 256
-    data_mode = 'smoothed_residual'
+    data_mode = 'normal'
     # data_mode = 'normal'
     alpha = 0.02
+    variance_stabilisation = True
 
     start_time = 10
     end_time = 400
@@ -143,8 +146,8 @@ else:
 
     recovery_mode = "red_noise"
     likelihood_model = "gaussian_process_windowed"
-    # background_model = "polynomial"
-    background_model = "mean"
+    background_model = "polynomial"
+    # background_model = "mean"
     periodogram_likelihood = "whittle"
     periodogram_noise_model = "red_noise"
 
@@ -152,36 +155,24 @@ else:
     band_maximum = 64
     # segment_length = 7.56
     # segment_length = 2.268
-    segment_length = 2.4
+    segment_length = 1.0
     # segment_length = 2.
     segment_step = 0.23625  # Requires 32 steps
     # segment_step = 0.54   # Requires 14 steps
 
-    nlive = 100
+    nlive = 150
     use_ratio = True
 
-    try_load = True
+    try_load = False
     resume = False
     plot = True
 
     suffix = ""
 
-pulse_period = 7.56  # see papers
-n_pulse_periods = 47
-time_offset = 20.0
-
 band = f'{band_minimum}_{band_maximum}Hz'
 
 if sampling_frequency is None:
-    if band_maximum <= 64:
-        sampling_frequency = 256
-        alpha = 0.02
-    elif band_maximum <= 128:
-        sampling_frequency = 512
-        alpha = 0.01
-    else:
-        sampling_frequency = 1024
-
+    sampling_frequency = 4*int(np.round(2**np.ceil(np.log2(band_maximum))))
 
 truths = None
 if run_mode == 'candidates':
@@ -211,62 +202,48 @@ elif run_mode == 'select_time':
 else:
     raise ValueError
 
+if variance_stabilisation:
+    y = counts
+    yerr = np.sqrt(counts)
+    yerr[np.where(yerr == 0)[0]] = 1
+else:
+    y = bar_lev(counts)
+    yerr = np.ones(len(counts))
 
-# Move center of light curve to 0
-times -= times[0]
-times -= times[-1] / 2
-
-priors = bilby.core.prior.PriorDict()
-if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
-    if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual']:
-        y = counts
-        yerr = np.sqrt(counts)
-    else:
-        y = bar_lev(counts)
-        yerr = np.ones(len(counts))
+if plot:
     plt.errorbar(times, y, yerr=np.sqrt(yerr), fmt=".k", capsize=0, label='data')
     plt.show()
     plt.clf()
 
-    mean_model, fit_mean = get_mean_model(model_type=background_model, y=y)
 
-    if background_model == 'polynomial':
-        fit_mean = (polynomial_max != 0)
-        mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
-        priors.update(mean_priors)
-    else:
-        fit_mean = False
+priors = bilby.core.prior.ConditionalPriorDict()
+mean_model, fit_mean = get_mean_model(model_type=background_model, y=y)
+mean_priors = get_mean_prior(model_type=background_model, polynomial_max=polynomial_max)
 
-    kernel_priors = get_kernel_prior(kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
-                                     min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
-    priors.update(kernel_priors)
-    kernel = get_kernel(kernel_type=recovery_mode)
+kernel = get_kernel(kernel_type=recovery_mode)
+kernel_priors = get_kernel_prior(
+    kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
+    min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
 
-    if likelihood_model == "gaussian_process_windowed":
-        window_priors = get_window_priors(times=times)
-        priors.update(window_priors)
+likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
+                                     y=y, yerr=yerr, likelihood_model=likelihood_model)
 
-        if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
-            priors.conversion_function = decay_constrain_conversion_function
-
-        likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=times,
-                                                y=y, yerr=yerr)
-    else:
-        if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
-            priors.conversion_function = decay_constrain_conversion_function
-        likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=times,
-                                        y=y, yerr=yerr)
+window_priors = get_window_priors(times=times, likelihood_model=likelihood_model)
 
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths)
 
+priors.update(mean_priors)
+priors.update(kernel_priors)
+priors.update(window_priors)
+priors._resolve_conditions()
 
 result = None
 if try_load:
     try:
-        result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
-    except Exception:
-        pass
+        result = QPOEstimation.result.GPResult.from_json(outdir=f"{outdir}/results", label=label)
+    except IOError:
+        bilby.utils.logger.info("No result file found. Starting from scratch")
 else:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample='rwalk',
@@ -278,7 +255,7 @@ if plot:
 
 
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',  # '_corner.png',
+for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',
                   '_dynesty.pickle', '_resume.pickle', '_result.json.old', '_samples.dat']:
     try:
         os.remove(f"{outdir}/results/{label}{extension}")

@@ -3,11 +3,16 @@ import numpy as np
 from bilby.core.likelihood import Likelihood
 import celerite
 from celerite import terms
-from scipy.special import gammaln, gamma
+from scipy.special import gamma
 
 
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 from QPOEstimation.model.celerite import PolynomialMeanModel
+
+
+def get_celerite_likelihood(mean_model, kernel, fit_mean, times, y, yerr, likelihood_model='gaussian_process'):
+    return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel,
+                                               fit_mean=fit_mean, t=times, y=y, yerr=yerr)
 
 
 class ParameterAccessor(object):
@@ -356,3 +361,7 @@ def get_mean_model(model_type, y=None):
         return np.mean(y), False
     else:
         raise ValueError
+
+
+LIKELIHOOD_MODELS = dict(gaussian_process=CeleriteLikelihood, gaussian_process_windowed=WindowedCeleriteLikelihood)
+

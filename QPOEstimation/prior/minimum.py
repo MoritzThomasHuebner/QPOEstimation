@@ -17,7 +17,6 @@ class MinimumPrior(ConditionalBeta):
             name=name, latex_label=latex_label, unit=unit,
             boundary=boundary, condition_func=self.minimum_condition
         )
-        print(self.reference_params)
         self.reference_params['order'] = order
         self.reference_params['minimum_spacing'] = minimum_spacing
         self.order = order

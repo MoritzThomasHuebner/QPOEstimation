@@ -73,7 +73,10 @@ def exponential_background(times, tau, offset, **kwargs):
 
 
 def polynomial(t, a0, a1, a2, a3, a4):
-    return a0 + a1 * t + a2 * t**2 + a3 * t**3 + a4 * t**4
+    times = t.copy()
+    times -= times[0]
+    times -= times[-1] / 2
+    return a0 + a1 * times + a2 * times**2 + a3 * times**3 + a4 * times**4
 
 
 def gaussian(t, amplitude, t_0, sigma):

@@ -41,6 +41,7 @@ def get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[1]:log_a')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='terms[1]:log_c')
     priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
+    priors.conversion_function = decay_constrain_conversion_function
     return priors
 
 
@@ -59,6 +60,8 @@ def get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='log_f')
+    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
+    priors.conversion_function = decay_constrain_conversion_function
     return priors
 
 
@@ -71,6 +74,8 @@ def get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, m
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='log_f')
+    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
+    priors.conversion_function = decay_constrain_conversion_function
     return priors
 
 
@@ -81,14 +86,17 @@ def _add_individual_kernel_prior(priors, minimum, maximum, label):
         priors[f'kernel:{label}'] = bilby.core.prior.Uniform(minimum=minimum, maximum=maximum, name=label)
 
 
-def get_window_priors(times):
-    priors = bilby.core.prior.ConditionalPriorDict()
-    priors['window_minimum'] = bilby.core.prior.Beta(minimum=times[0], maximum=times[-1], alpha=1, beta=2,
-                                                     name='window_minimum', boundary='reflective')
-    priors['window_maximum'] = MinimumPrior(minimum=times[0], maximum=times[-1], order=1,
-                                            reference_name='window_minimum', name='window_maximum',
-                                            minimum_spacing=0.1, boundary='reflective')
-    return priors
+def get_window_priors(times, likelihood_model='gaussian_process_windowed'):
+    if likelihood_model == 'gaussian_process_windowed':
+        priors = bilby.core.prior.ConditionalPriorDict()
+        priors['window_minimum'] = bilby.core.prior.Beta(minimum=times[0], maximum=times[-1], alpha=1, beta=2,
+                                                         name='window_minimum', boundary='reflective')
+        priors['window_maximum'] = MinimumPrior(minimum=times[0], maximum=times[-1], order=1,
+                                                reference_name='window_minimum', name='window_maximum',
+                                                minimum_spacing=0.1, boundary='reflective')
+        return priors
+    else:
+        return dict()
 
 
 def decay_constrain_conversion_function(sample):

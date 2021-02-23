@@ -10,3 +10,10 @@ def get_polynomial_prior(polynomial_max=10, order=4):
             priors[f'mean:a{i}'] = bilby.core.prior.Uniform(
                 minimum=-polynomial_max, maximum=polynomial_max, name=f'mean:a{i}')
     return priors
+
+
+def get_mean_prior(model_type, **kwargs):
+    if model_type == 'polynomial':
+        return get_polynomial_prior(polynomial_max=kwargs['polynomial_max'])
+    else:
+        return dict()

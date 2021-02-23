@@ -27,7 +27,6 @@ class GPResult(bilby.result.Result):
     def max_likelihood_parameters(self):
         return self.posterior.iloc[-1]
 
-
     def get_likelihood(self):
         if self.likelihood_model == "gaussian_process_windowed":
             likelihood = WindowedCeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
@@ -56,7 +55,8 @@ class GPResult(bilby.result.Result):
         return get_kernel(kernel_type=self.kernel_type)
 
     def get_mean_model(self):
-        return get_mean_model(model_type=self.mean_model, y=self.y)
+        mean_model, _ = get_mean_model(model_type=self.mean_model, y=self.y)
+        return mean_model
 
     @property
     def sampling_frequncy(self):
@@ -67,8 +67,8 @@ class GPResult(bilby.result.Result):
         return self.times[-1] - self.times[0]
 
     def plot_max_likelihood_psd(self):
+        Path(f"{self.outdir}/fits/").mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
-
         psd_freqs = np.exp(np.linspace(1/self.segment_length, self.sampling_frequncy, 5000))
         psd = likelihood.gp.kernel.get_psd(psd_freqs * 2 * np.pi)
 
@@ -84,8 +84,8 @@ class GPResult(bilby.result.Result):
         plt.clf()
 
     def plot_kernel(self):
-        likelihood = self.get_likelihood()
         Path(f"{self.outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
         plt.plot(taus, likelihood.gp.kernel.get_value(taus))
         plt.xlabel('tau [s]')
@@ -94,6 +94,7 @@ class GPResult(bilby.result.Result):
         plt.clf()
 
     def plot_lightcurve(self):
+        Path(f"{self.outdir}/fits/").mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         if self.likelihood_model == 'gaussian_process_windowed':
             plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan', label='start/end stochastic process')
@@ -110,13 +111,13 @@ class GPResult(bilby.result.Result):
         pred_std = np.sqrt(pred_var)
 
         color = "#ff7f0e"
-        plt.errorbar(self.times, y, yerr=np.sqrt(self.yerr), fmt=".k", capsize=0, label='data')
+        plt.errorbar(self.times, self.y, yerr=np.sqrt(self.yerr), fmt=".k", capsize=0, label='data')
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
         if self.mean_model != "mean":
             x = np.linspace(self.times[0], self.times[-1], 5000)
-            trend = self.mean_model.get_value(x)
+            trend = likelihood.mean_model.get_value(x)
             plt.plot(x, trend, color='green', label='Trend')
 
         plt.xlabel("time [s]")
