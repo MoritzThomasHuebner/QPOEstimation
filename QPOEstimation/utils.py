@@ -18,3 +18,7 @@ class MetaDataAccessor(object):
 
     def __set__(self, instance, value):
         getattr(instance, self.container_instance_name)[self.property_name] = value
+
+
+def get_injection_outdir(band, injection_mode, recovery_mode, likelihood_model):
+    return f"injection/{band}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"

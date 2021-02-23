@@ -11,6 +11,7 @@ from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_li
 from QPOEstimation.prior.gp import *
 from QPOEstimation.prior.mean import get_mean_prior
 from QPOEstimation.stabilisation import bar_lev
+from QPOEstimation.utils import get_injection_outdir
 
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
@@ -131,7 +132,7 @@ else:
     end_time = 400
 
     period_number = 13
-    run_id = 11
+    run_id = 14
 
     candidate_id = 3
 
@@ -199,7 +200,8 @@ elif data_source == 'injection':
     times, counts, truths = get_injection_data(
         injection_file_dir='injection_files', injection_mode=injection_mode, recovery_mode=recovery_mode,
         likelihood_model=likelihood_model, injection_id=injection_id)
-    outdir = f"{run_mode}/{band}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
+    outdir = get_injection_outdir(band=band, injection_mode=injection_mode, recovery_mode=recovery_mode,
+                                  likelihood_model=likelihood_model)
     label = f"{str(injection_id).zfill(2)}"
 else:
     raise ValueError
