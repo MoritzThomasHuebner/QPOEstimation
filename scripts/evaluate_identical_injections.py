@@ -6,6 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+from QPOEstimation.utils import get_injection_outdir
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -65,10 +66,18 @@ band = f'{band_minimum}_{band_maximum}Hz'
 log_bfs_red_noise_injection = []
 log_bfs_qpo_injection = []
 for injection_id in range(minimum_id, maximum_id):
-    res_qpo_rn_injected = bilby.result.read_in_result(f"injection_{band}_normal_red_noise/qpo/results/{injection_id}_{likelihood_model}_result.json")
-    res_red_noise_rn_injected = bilby.result.read_in_result(f"injection_{band}_normal_red_noise/red_noise/results/{injection_id}_{likelihood_model}_result.json")
-    res_qpo_qpo_injected = bilby.result.read_in_result(f"injection_{band}_normal_qpo/qpo/results/{injection_id}_{likelihood_model}_result.json")
-    res_red_noise_qpo_injected = bilby.result.read_in_result(f"injection_{band}_normal_qpo/red_noise/results/{injection_id}_{likelihood_model}_result.json")
+    res_qpo_rn_injected = bilby.result.read_in_result(
+        outdir=get_injection_outdir(band=band, injection_mode='red_noise', recovery_mode='qpo',
+                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
+    res_red_noise_rn_injected = bilby.result.read_in_result(
+        outdir=get_injection_outdir(band=band, injection_mode='red_noise', recovery_mode='red_noise',
+                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
+    res_qpo_qpo_injected = bilby.result.read_in_result(
+        outdir=get_injection_outdir(band=band, injection_mode='qpo', recovery_mode='qpo',
+                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
+    res_red_noise_qpo_injected = bilby.result.read_in_result(
+        outdir=get_injection_outdir(band=band, injection_mode='qpo', recovery_mode='red_noise',
+                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
     log_bfs_red_noise_injection.append(res_qpo_rn_injected.log_evidence - res_red_noise_rn_injected.log_evidence)
     log_bfs_qpo_injection.append(res_qpo_qpo_injected.log_evidence - res_red_noise_qpo_injected.log_evidence)
     print(log_bfs_red_noise_injection[-1])
