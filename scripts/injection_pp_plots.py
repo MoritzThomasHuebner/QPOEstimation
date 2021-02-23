@@ -1,12 +1,10 @@
-import bilby
-import json
-import numpy as np
-from copy import deepcopy
-from QPOEstimation.prior.minimum import MinimumPrior
-
-import sys
 import argparse
+import json
+import sys
 
+import bilby
+
+from QPOEstimation.utils import get_injection_outdir
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -31,13 +29,16 @@ samples = []
 
 band_minimum = 5
 band_maximum = 64
+band = f'{band_minimum}_{band_maximum}Hz'
 
 reslist = []
 for i in range(minimum_id, maximum_id):
     try:
         with open(f'injection_files/{injection_mode}/{likelihood_model}/{str(i).zfill(2)}_params.json') as f:
             injection_params = json.load(f)
-        res = bilby.result.read_in_result(f'injection_{band_minimum}_{band_maximum}Hz_normal_{injection_mode}/{injection_mode}/results/{str(i).zfill(2)}_{likelihood_model}_result.json')
+        res = bilby.result.read_in_result(bilby.result.read_in_result(
+            outdir=get_injection_outdir(band=band, injection_mode=injection_mode, recovery_mode=injection_mode,
+                                        likelihood_model=likelihood_model), label=f"{str(i).zfill(2)}"))
         reslist.append(res)
         reslist[-1].injection_parameters = injection_params
     except (OSError, FileNotFoundError) as e:
