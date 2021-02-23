@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 import QPOEstimation
 from QPOEstimation.likelihood import CeleriteLikelihood, WhittleLikelihood, \
-    GrothLikelihood, WindowedCeleriteLikelihood, get_kernel
+    GrothLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model
 from QPOEstimation.model.celerite import PolynomialMeanModel
 from QPOEstimation.model.series import *
 from QPOEstimation.prior.gp import *
@@ -183,6 +183,7 @@ if sampling_frequency is None:
         sampling_frequency = 1024
 
 
+truths = None
 if run_mode == 'candidates':
     times, counts = get_candidates_data(
         candidates_file_dir='candidates', band=band, data_mode=data_mode, candidate_id=candidate_id,
@@ -217,24 +218,24 @@ times -= times[-1] / 2
 
 priors = bilby.core.prior.PriorDict()
 if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
-    if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual', 'blind_injection']:
-        stabilised_counts = counts
+    if run_mode == 'injection' or data_mode in ['smoothed', 'smoothed_residual']:
+        y = counts
+        yerr = np.sqrt(counts)
     else:
-        stabilised_counts = bar_lev(counts)
-
-    stabilised_variance = np.ones(len(counts))
-    plt.errorbar(times, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
+        y = bar_lev(counts)
+        yerr = np.ones(len(counts))
+    plt.errorbar(times, y, yerr=np.sqrt(yerr), fmt=".k", capsize=0, label='data')
     plt.show()
     plt.clf()
+
+    mean_model, fit_mean = get_mean_model(model_type=background_model, y=y)
 
     if background_model == 'polynomial':
         fit_mean = (polynomial_max != 0)
         mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
         priors.update(mean_priors)
-        mean_model = PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)
     else:
         fit_mean = False
-        mean_model = np.mean(stabilised_counts)
 
     kernel_priors = get_kernel_prior(kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
                                      min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
@@ -249,45 +250,16 @@ if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
             priors.conversion_function = decay_constrain_conversion_function
 
         likelihood = WindowedCeleriteLikelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, t=times,
-                                                y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
+                                                y=y, yerr=yerr)
     else:
         if recovery_mode in ['qpo', 'pure_qpo', 'general_qpo']:
             priors.conversion_function = decay_constrain_conversion_function
         likelihood = CeleriteLikelihood(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=times,
-                                        y=stabilised_counts, yerr=np.sqrt(stabilised_variance))
+                                        y=y, yerr=yerr)
 
-elif likelihood_model == "periodogram":
-    lc = stingray.Lightcurve(time=times, counts=counts)
-    ps = stingray.Powerspectrum(lc=lc, norm="leahy")
-    frequencies = ps.freq
-    powers = ps.power
-    if periodogram_likelihood == "groth":
-        powers /= 2
+meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
+                 y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths)
 
-    frequency_mask = [True] * len(frequencies)
-    plt.loglog(frequencies[frequency_mask], powers[frequency_mask])
-    plt.show()
-    plt.clf()
-    priors = QPOEstimation.prior.psd.get_full_prior(periodogram_noise_model, frequencies=frequencies)
-    priors['beta'] = bilby.core.prior.Uniform(minimum=1, maximum=100000, name='beta')
-    priors['sigma'].maximum = 10
-    priors['width'].maximum = 10
-    priors['width'].minimum = frequencies[1] - frequencies[0]
-    priors['central_frequency'].maximum = band_maximum
-    priors['central_frequency'].minimum = band_minimum
-    priors['amplitude'] = bilby.core.prior.LogUniform(minimum=1, maximum=10000)
-    if recovery_mode == "white_noise":
-        priors['amplitude'] = bilby.core.prior.DeltaFunction(0.0, name='amplitude')
-        priors['width'] = bilby.core.prior.DeltaFunction(1.0, name='width')
-        priors['central_frequency'] = bilby.core.prior.DeltaFunction(1.0, name='central_frequency')
-    if periodogram_likelihood == "whittle":
-        likelihood = WhittleLikelihood(frequencies=frequencies, periodogram=powers, noise_model=periodogram_noise_model,
-                                       frequency_mask=[True] * len(frequencies))
-    else:
-        priors['sigma'] = bilby.core.prior.DeltaFunction(peak=0)
-        likelihood = GrothLikelihood(frequencies=frequencies, periodogram=powers, noise_model=periodogram_noise_model)
-else:
-    raise ValueError("Likelihood model not defined")
 
 result = None
 if try_load:
@@ -295,130 +267,15 @@ if try_load:
         result = bilby.result.read_in_result(outdir=f"{outdir}/results", label=label)
     except Exception:
         pass
-
-if result is None:
+else:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample='rwalk',
-                               resume=resume, use_ratio=use_ratio)
+                               resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
+                               meta_data=meta_data)
 
 if plot:
-    try:
-        result.plot_corner(outdir=f"{outdir}/corner", truths=truths)
-    except Exception:
-        result.plot_corner(outdir=f"{outdir}/corner")
-    else:
-        result.plot_corner(outdir=f"{outdir}/corner")
+    result.plot_all()
 
-    if likelihood_model in ["gaussian_process", "gaussian_process_windowed"]:
-        if recovery_mode in ["qpo", "pure_qpo", "general_qpo"]:
-            try:
-                try:
-                    frequency_samples = np.exp(np.array(result.posterior['kernel:log_f']))
-                except Exception as e:
-                    frequency_samples = np.exp(np.array(result.posterior['kernel:terms[0]:log_f']))
-                plt.hist(frequency_samples, bins="fd", density=True)
-                plt.xlabel('frequency [Hz]')
-                plt.ylabel('normalised PDF')
-                median = np.median(frequency_samples)
-                percentiles = np.percentile(frequency_samples, [16, 84])
-                plt.title(
-                    f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-                plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
-                plt.clf()
-            except Exception as e:
-                bilby.core.utils.logger.info(e)
-
-        max_like_params = result.posterior.iloc[-1]
-        for name, value in max_like_params.items():
-            try:
-                likelihood.gp.set_parameter(name=name, value=value)
-            except ValueError:
-                continue
-            try:
-                mean_model.set_parameter(name=name, value=value)
-            except (ValueError, AttributeError):
-                continue
-
-        Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
-        taus = np.linspace(-0.5, 0.5, 1000)
-        plt.plot(taus, likelihood.gp.kernel.get_value(taus))
-        plt.xlabel('tau [s]')
-        plt.ylabel('kernel')
-        plt.savefig(f"{outdir}/fits/{label}_max_like_kernel")
-        plt.clf()
-
-        if likelihood_model == 'gaussian_process_windowed':
-            plt.axvline(max_like_params['window_minimum'], color='cyan', label='start/end stochastic process')
-            # plt.axvline(max_like_params['window_minimum'] + max_like_params['window_size'], color='cyan')
-            plt.axvline(max_like_params['window_maximum'], color='cyan')
-            # x = np.linspace(max_like_params['window_minimum'], max_like_params['window_minimum'] + max_like_params['window_size'], 5000)
-            x = np.linspace(max_like_params['window_minimum'], max_like_params['window_maximum'], 5000)
-            # windowed_indices = np.where(np.logical_and(max_like_params['window_minimum'] < t, t < max_like_params['window_minimum'] + max_like_params['window_size']))
-            windowed_indices = np.where(
-                np.logical_and(max_like_params['window_minimum'] < times, times < max_like_params['window_maximum']))
-            likelihood.gp.compute(times[windowed_indices], np.sqrt(stabilised_variance[windowed_indices]))
-            pred_mean, pred_var = likelihood.gp.predict(stabilised_counts[windowed_indices], x, return_var=True)
-            pred_std = np.sqrt(pred_var)
-        else:
-            x = np.linspace(times[0], times[-1], 5000)
-            pred_mean, pred_var = likelihood.gp.predict(stabilised_counts, x, return_var=True)
-            pred_std = np.sqrt(pred_var)
-
-        color = "#ff7f0e"
-        plt.errorbar(times, stabilised_counts, yerr=np.sqrt(stabilised_variance), fmt=".k", capsize=0, label='data')
-        plt.plot(x, pred_mean, color=color, label='Prediction')
-        plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
-                         edgecolor="none")
-        if background_model != "mean":
-            x = np.linspace(times[0], times[-1], 5000)
-            trend = mean_model.get_value(x)
-            plt.plot(x, trend, color='green', label='Trend')
-
-        plt.xlabel("time [s]")
-        plt.ylabel("variance stabilised data")
-        plt.legend()
-        plt.savefig(f"{outdir}/fits/{label}_max_like_fit")
-        plt.show()
-        plt.clf()
-
-        psd_freqs = np.exp(np.linspace(np.log(1.0), np.log(band_maximum), 5000))
-        psd = likelihood.gp.kernel.get_psd(psd_freqs * 2 * np.pi)
-
-        plt.loglog(psd_freqs, psd, label='complete GP')
-        for i, k in enumerate(likelihood.gp.kernel.terms):
-            plt.loglog(psd_freqs, k.get_psd(psd_freqs * 2 * np.pi), "--", label=f'term {i}')
-
-        plt.xlim(psd_freqs[0], psd_freqs[-1])
-        plt.xlabel("f[Hz]")
-        plt.ylabel("$S(f)$")
-        plt.legend()
-        plt.savefig(f"{outdir}/fits/{label}_psd")
-        plt.clf()
-
-    elif likelihood_model == "periodogram":
-        result.plot_corner(outdir=f"{outdir}/corner")
-        if recovery_mode == "qpo":
-            frequency_samples = result.posterior['central_frequency']
-            plt.hist(frequency_samples, bins="fd", density=True)
-            plt.xlabel('frequency [Hz]')
-            plt.ylabel('normalised PDF')
-            median = np.median(frequency_samples)
-            percentiles = np.percentile(frequency_samples, [16, 84])
-            plt.title(
-                f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.savefig(f"{outdir}/corner/{label}_frequency_posterior")
-            plt.clf()
-
-        likelihood.parameters = result.posterior.iloc[-1]
-        plt.loglog(frequencies[frequency_mask], powers[frequency_mask], label="Measured")
-        plt.loglog(likelihood.frequencies, likelihood.model + likelihood.psd, color='r', label='max_likelihood')
-        for i in range(10):
-            likelihood.parameters = result.posterior.iloc[np.random.randint(len(result.posterior))]
-            plt.loglog(likelihood.frequencies, likelihood.model + likelihood.psd, color='r', alpha=0.2)
-        plt.legend()
-        Path(f"{outdir}/fits/").mkdir(parents=True, exist_ok=True)
-        plt.savefig(f'{outdir}/fits/{label}_fitted_spectrum.png')
-        # plt.show()
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',  # '_corner.png',

@@ -7,6 +7,7 @@ from scipy.special import gammaln, gamma
 
 
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
+from QPOEstimation.model.celerite import PolynomialMeanModel
 
 
 class ParameterAccessor(object):
@@ -346,3 +347,12 @@ def get_kernel(kernel_type):
         return PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
     else:
         raise ValueError('Recovery mode not defined')
+
+
+def get_mean_model(model_type, y=None):
+    if model_type == 'polynomial':
+        return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0), True
+    elif model_type == 'mean':
+        return np.mean(y), False
+    else:
+        raise ValueError
