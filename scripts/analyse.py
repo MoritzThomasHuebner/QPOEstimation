@@ -231,7 +231,7 @@ if try_load:
         result = QPOEstimation.result.GPResult.from_json(outdir=f"{outdir}/results", label=label)
     except IOError:
         bilby.utils.logger.info("No result file found. Starting from scratch")
-else:
+if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
