@@ -59,7 +59,7 @@ if len(sys.argv) > 1:
     injection_mode = args.injection_mode
 
     recovery_mode = args.recovery_mode
-    likelihood_model = args.model
+    likelihood_model = args.likelihood_model
     background_model = args.background_model
     n_components = args.n_components
 

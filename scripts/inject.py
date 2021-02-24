@@ -40,7 +40,7 @@ if len(sys.argv) > 1:
     max_log_c = args.max_log_c
     minimum_window_spacing = args.minimum_window_spacing
 
-    likelihood_model = args.model
+    likelihood_model = args.likelihood_model
     background_model = args.background_model
     n_components = args.n_components
 
