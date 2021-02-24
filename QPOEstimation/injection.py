@@ -22,14 +22,14 @@ class InjectionCreator(object):
         self.outdir = outdir
         self.injection_id = str(injection_id).zfill(2)
         self.poisson_data = poisson_data
-        self.create_outdir()
         self.likelihood_model = likelihood_model
         self.kernel = get_kernel(self.injection_mode)
 
         self.times = times
-        self.mean_model = get_mean_model(model_type=mean_model, n_components=n_components, y=0)
+        self.mean_model, _ = get_mean_model(model_type=mean_model, n_components=n_components, y=0)
         for key, value in params.items():
-            self.mean_model.__setattr__(key.replace('mean:', ''), value)
+            if key.startswith("mean"):
+                self.mean_model.__setattr__(key.replace('mean:', ''), value)
         self.gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
         self.gp.compute(self.windowed_times, self.windowed_yerr)
         self.update_params()
@@ -37,6 +37,7 @@ class InjectionCreator(object):
         self.y_realisation[self.windowed_indices] = self.gp.sample()
         self.y_realisation[self.outside_window_indices] += \
             np.random.normal(size=len(self.outside_window_indices)) * self.yerr[self.outside_window_indices]
+        self.create_outdir()
 
     def create_outdir(self):
         Path(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}').mkdir(exist_ok=True, parents=True)

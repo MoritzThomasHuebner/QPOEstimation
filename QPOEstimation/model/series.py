@@ -8,7 +8,7 @@ def polynomial(t, a0, a1, a2, a3, a4):
     return a0 + a1 * times + a2 * times**2 + a3 * times**3 + a4 * times**4
 
 
-def fast_rise_exponential_decay(times, amplitude, t_0, sigma, skewness):
+def fred(times, amplitude, t_0, sigma, skewness):
     if amplitude == 0:
         return np.zeros(len(times))
     before_burst_indices = np.where(times <= t_0)

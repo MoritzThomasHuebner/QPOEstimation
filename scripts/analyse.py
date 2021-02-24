@@ -8,59 +8,14 @@ import matplotlib.pyplot as plt
 import QPOEstimation
 from QPOEstimation.get_data import *
 from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_likelihood
+from QPOEstimation.parse import parse_args
 from QPOEstimation.prior.gp import *
 from QPOEstimation.prior.mean import get_mean_prior
 from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.utils import *
 
-
 if len(sys.argv) > 1:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data_source", default='giant_flare', choices=data_sources)
-    parser.add_argument("--run_mode", default='sliding_window', choices=run_modes)
-    parser.add_argument("--sampling_frequency", default=None, type=int)
-    parser.add_argument("--data_mode", choices=data_modes, default='normal', type=str)
-    parser.add_argument("--alpha", default=0.02, type=float)
-    parser.add_argument("--variance_stabilisation", default='True', type=str)
-
-    parser.add_argument("--solar_flare_id", default='120704187', type=str)
-
-    parser.add_argument("--start_time", default=0., type=float)
-    parser.add_argument("--end_time", default=1., type=float)
-
-    parser.add_argument("--period_number", default=0, type=int)
-    parser.add_argument("--run_id", default=0, type=int)
-
-    parser.add_argument("--candidate_id", default=0, type=int)
-
-    parser.add_argument("--injection_id", default=0, type=int)
-    parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
-
-    parser.add_argument("--polynomial_max", default=1000, type=float)
-    parser.add_argument("--min_log_a", default=-5, type=float)
-    parser.add_argument("--max_log_a", default=15, type=float)
-    parser.add_argument("--min_log_c", default=-6, type=float)
-    parser.add_argument("--max_log_c", default=np.nan, type=float)
-    parser.add_argument("--minimum_window_spacing", default=0, type=float)
-
-    parser.add_argument("--recovery_mode", default="qpo", choices=modes)
-    parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
-    parser.add_argument("--background_model", default="polynomial", choices=background_models)
-    parser.add_argument("--n_components", default=1, type=int)
-
-    parser.add_argument("--band_minimum", default=10, type=int)
-    parser.add_argument("--band_maximum", default=32, type=int)
-
-    parser.add_argument("--segment_length", default=1.0, type=float)
-    parser.add_argument("--segment_step", default=0.27, type=float)
-
-    parser.add_argument("--nlive", default=150, type=int)
-    parser.add_argument("--sample", default='rwalk', type=str)
-    parser.add_argument("--use_ratio", default='False', type=str)
-
-    parser.add_argument("--try_load", default='True', type=str)
-    parser.add_argument("--resume", default='False', type=str)
-    parser.add_argument("--plot", default='True', type=str)
+    parser = parse_args()
     args = parser.parse_args()
 
     data_source = args.data_source
@@ -81,6 +36,19 @@ if len(sys.argv) > 1:
     candidate_id = args.candidate_id
 
     polynomial_max = args.polynomial_max
+    amplitude_min = args.amplitude_min
+    amplitude_max = args.amplitude_max
+    offset_min = args.offset_min
+    offset_max = args.offset_max
+    skewness_min = args.skewness_min
+    skewness_max = args.skewness_max
+    sigma_min = args.sigma_min
+    sigma_max = args.sigma_max
+    t_0_min = args.t_0_min
+    t_0_max = args.t_0_max
+    tau_min = args.tau_min
+    tau_max = args.tau_max
+
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
     min_log_c = args.min_log_c
@@ -132,6 +100,19 @@ else:
     injection_mode = "qpo"
 
     polynomial_max = 1000
+    amplitude_min = 0.1
+    amplitude_max = 10
+    offset_min = -10
+    offset_max = 10
+    skewness_min = 0.1
+    skewness_max = 10
+    sigma_min = 0.1
+    sigma_max = 10
+    t_0_min = 0
+    t_0_max = 1
+    tau_min = -10
+    tau_max = 10
+
     min_log_a = -5
     max_log_a = 25
     min_log_c = -25
@@ -143,7 +124,7 @@ else:
     background_model = "gaussian"
     n_components = 3
 
-    band_minimum = 1/400
+    band_minimum = 1 / 400
     band_maximum = 1
     segment_length = 1.0
     segment_step = 0.23625  # Requires 32 steps
@@ -158,10 +139,25 @@ else:
 
     suffix = ""
 
+mean_prior_bound_dict = dict(
+    amplitude_min=amplitude_min,
+    amplitude_max=amplitude_max,
+    offset_min=offset_min,
+    offset_max=offset_max,
+    skewness_min=skewness_min,
+    skewness_max=skewness_max,
+    sigma_min=sigma_min,
+    sigma_max=sigma_max,
+    t_0_min=t_0_min,
+    t_0_max=t_0_max,
+    tau_min=tau_min,
+    tau_max=tau_max
+)
+
 band = f'{band_minimum}_{band_maximum}Hz'
 
 if sampling_frequency is None:
-    sampling_frequency = 4*int(np.round(2**np.ceil(np.log2(band_maximum))))
+    sampling_frequency = 4 * int(np.round(2 ** np.ceil(np.log2(band_maximum))))
 
 truths = None
 
@@ -201,7 +197,6 @@ elif data_source == 'injection':
 else:
     raise ValueError
 
-
 if variance_stabilisation:
     y = bar_lev(counts)
     yerr = np.ones(len(counts))
@@ -210,17 +205,15 @@ else:
     yerr = np.sqrt(counts)
     yerr[np.where(yerr == 0)[0]] = 1
 
-
 if plot:
     plt.errorbar(times, y, yerr=np.sqrt(yerr), fmt=".k", capsize=0, label='data')
     plt.show()
     plt.clf()
 
-
 priors = bilby.core.prior.ConditionalPriorDict()
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
-mean_priors = get_mean_prior(model_type=background_model, n_components=n_components, t_min=times[0], t_max=times[-1],
-                             minimum_spacing=0, polynomial_max=polynomial_max)
+mean_priors = get_mean_prior(model_type=background_model, n_components=n_components, minimum_spacing=0,
+                             polynomial_max=polynomial_max, **mean_prior_bound_dict)
 
 kernel = get_kernel(kernel_type=recovery_mode)
 kernel_priors = get_kernel_prior(
@@ -254,7 +247,6 @@ else:
 
 if plot:
     result.plot_all()
-
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',

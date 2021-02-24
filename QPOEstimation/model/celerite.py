@@ -2,7 +2,7 @@ import numpy as np
 
 from celerite.modeling import Model
 
-from QPOEstimation.model.series import exponential_background, fast_rise_exponential_decay, polynomial, gaussian, log_normal, \
+from QPOEstimation.model.series import exponential_background, fred, polynomial, gaussian, log_normal, \
     lorentzian
 import bilby
 
@@ -26,7 +26,7 @@ ExponentialMeanModel = function_to_celerite_mean_model(exponential_background)
 GaussianMeanModel = function_to_celerite_mean_model(gaussian)
 LogNormalMeanModel = function_to_celerite_mean_model(log_normal)
 LorentzianMeanModel = function_to_celerite_mean_model(lorentzian)
-FastRiseExponentialDecayMeanModel = function_to_celerite_mean_model(fast_rise_exponential_decay)
+FREDMeanModel = function_to_celerite_mean_model(fred)
 
 
 def get_n_component_mean_model(model, n_models=1, defaults=None):
