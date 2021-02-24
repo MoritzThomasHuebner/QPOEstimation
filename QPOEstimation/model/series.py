@@ -8,19 +8,19 @@ def polynomial(t, a0, a1, a2, a3, a4):
     return a0 + a1 * times + a2 * times**2 + a3 * times**3 + a4 * times**4
 
 
-def fast_rise_exponential_decay(times, amplitude, t_max, sigma, skewness):
+def fast_rise_exponential_decay(times, amplitude, t_0, sigma, skewness):
     if amplitude == 0:
         return np.zeros(len(times))
-    before_burst_indices = np.where(times <= t_max)
-    after_burst_indices = np.where(times > t_max)
+    before_burst_indices = np.where(times <= t_0)
+    after_burst_indices = np.where(times > t_0)
     envelope = np.zeros(len(times))
-    envelope[before_burst_indices] = amplitude * np.exp((times[before_burst_indices] - t_max) / sigma)
-    envelope[after_burst_indices] = amplitude * np.exp(-(times[after_burst_indices] - t_max) / sigma / skewness)
+    envelope[before_burst_indices] = amplitude * np.exp((times[before_burst_indices] - t_0) / sigma)
+    envelope[after_burst_indices] = amplitude * np.exp(-(times[after_burst_indices] - t_0) / sigma / skewness)
     return envelope
 
 
-def exponential_background(times, tau, offset, **kwargs):
-    return np.exp(times/tau) + offset
+def exponential_background(times, amplitude, tau, offset, **kwargs):
+    return amplitude * np.exp(times/tau) + offset
 
 
 def gaussian(t, amplitude, t_0, sigma):

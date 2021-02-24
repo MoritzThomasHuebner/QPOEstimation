@@ -361,7 +361,7 @@ def get_mean_model(model_type, n_components=1, y=None):
     elif model_type == 'mean':
         return np.mean(y), False
     elif model_type in mean_model_dict:
-        return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components)
+        return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components), True
     else:
         raise ValueError
 

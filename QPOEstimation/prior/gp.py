@@ -25,7 +25,7 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
 
 
 def get_white_noise_prior():
-    priors = dict()
+    priors = bilby.prior.PriorDict()
     priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
     return priors
 
@@ -34,7 +34,7 @@ def get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_
     min_log_f = np.log(band_minimum)
     max_log_f = np.log(band_maximum)
 
-    priors = dict()
+    priors = bilby.prior.PriorDict()
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[0]:log_a')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='terms[0]:log_c')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='terms[0]:log_f')
@@ -46,7 +46,7 @@ def get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_
 
 
 def get_red_noise_prior(max_log_a, max_log_c, min_log_a, min_log_c):
-    priors = dict()
+    priors = bilby.prior.PriorDict()
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
     return priors
@@ -56,7 +56,7 @@ def get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log
     min_log_f = np.log(band_minimum)
     max_log_f = np.log(band_maximum)
 
-    priors = dict()
+    priors = bilby.prior.PriorDict()
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='log_f')
@@ -69,7 +69,7 @@ def get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, m
     min_log_f = np.log(band_minimum)
     max_log_f = np.log(band_maximum)
 
-    priors = dict()
+    priors = bilby.prior.PriorDict()
     priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
@@ -96,7 +96,7 @@ def get_window_priors(times, likelihood_model='gaussian_process_windowed'):
                                                 minimum_spacing=0.1, boundary='reflective')
         return priors
     else:
-        return dict()
+        return bilby.prior.PriorDict()
 
 
 def decay_constrain_conversion_function(sample):

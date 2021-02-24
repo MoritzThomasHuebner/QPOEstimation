@@ -14,6 +14,7 @@ class GPResult(bilby.result.Result):
 
     kernel_type = MetaDataAccessor('kernel_type')
     mean_model = MetaDataAccessor('mean_model')
+    n_components = MetaDataAccessor('n_components')
     times = MetaDataAccessor('times')
     y = MetaDataAccessor('y')
     yerr = MetaDataAccessor('yerr')
@@ -55,7 +56,7 @@ class GPResult(bilby.result.Result):
         return get_kernel(kernel_type=self.kernel_type)
 
     def get_mean_model(self):
-        mean_model, _ = get_mean_model(model_type=self.mean_model, y=self.y)
+        mean_model, _ = get_mean_model(model_type=self.mean_model, n_components=self.n_components, y=self.y)
         return mean_model
 
     @property

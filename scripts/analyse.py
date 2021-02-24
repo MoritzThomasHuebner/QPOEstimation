@@ -18,7 +18,7 @@ likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogr
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
 data_sources = ['injection', 'giant_flare', 'solar_flare']
 run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment']
-background_models = ["polynomial", "n_component", "mean"]
+background_models = ["polynomial", "exponential", "fred", "gaussian", "log_normal", "lorentzian", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
 
 
@@ -66,7 +66,9 @@ if len(sys.argv) > 1:
 
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--segment_step", default=0.27, type=float)
+
     parser.add_argument("--nlive", default=150, type=int)
+    parser.add_argument("--sample", default='rwalk', type=str)
     parser.add_argument("--use_ratio", default='False', type=str)
 
     parser.add_argument("--try_load", default='True', type=str)
@@ -112,6 +114,7 @@ if len(sys.argv) > 1:
     segment_step = args.segment_step
 
     nlive = args.nlive
+    sample = args.sample
     use_ratio = boolean_string(args.use_ratio)
 
     try_load = boolean_string(args.try_load)
@@ -120,17 +123,17 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'giant_flare'
-    run_mode = 'sliding_window'
+    data_source = 'solar_flare'
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
-    variance_stabilisation = True
+    variance_stabilisation = False
 
     solar_flare_id = "120704187"
 
-    start_time = 10
-    end_time = 400
+    start_time = 380
+    end_time = 800
 
     period_number = 13
     run_id = 14
@@ -142,21 +145,22 @@ else:
 
     polynomial_max = 1000
     min_log_a = -5
-    max_log_a = 5
-    min_log_c = -5
+    max_log_a = 25
+    min_log_c = -25
     minimum_window_spacing = 0
 
-    recovery_mode = "red_noise"
-    likelihood_model = "gaussian_process_windowed"
-    background_model = "polynomial"
-    n_components = 1
+    recovery_mode = "pure_qpo"
+    likelihood_model = "gaussian_process"
+    background_model = "gaussian"
+    n_components = 3
 
-    band_minimum = 5
-    band_maximum = 64
+    band_minimum = 1/400
+    band_maximum = 1
     segment_length = 1.0
     segment_step = 0.23625  # Requires 32 steps
 
-    nlive = 150
+    sample = 'rslice'
+    nlive = 300
     use_ratio = True
 
     try_load = False
@@ -210,12 +214,13 @@ else:
 
 
 if variance_stabilisation:
+    y = bar_lev(counts)
+    yerr = np.ones(len(counts))
+else:
     y = counts
     yerr = np.sqrt(counts)
     yerr[np.where(yerr == 0)[0]] = 1
-else:
-    y = bar_lev(counts)
-    yerr = np.ones(len(counts))
+
 
 if plot:
     plt.errorbar(times, y, yerr=np.sqrt(yerr), fmt=".k", capsize=0, label='data')
@@ -225,7 +230,8 @@ if plot:
 
 priors = bilby.core.prior.ConditionalPriorDict()
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
-mean_priors = get_mean_prior(model_type=background_model, polynomial_max=polynomial_max)
+mean_priors = get_mean_prior(model_type=background_model, n_components=n_components, t_min=times[0], t_max=times[-1],
+                             minimum_spacing=0, polynomial_max=polynomial_max)
 
 kernel = get_kernel(kernel_type=recovery_mode)
 kernel_priors = get_kernel_prior(
@@ -238,7 +244,7 @@ likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_m
 window_priors = get_window_priors(times=times, likelihood_model=likelihood_model)
 
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
-                 y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths)
+                 y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components)
 
 priors.update(mean_priors)
 priors.update(kernel_priors)
@@ -253,7 +259,7 @@ if try_load:
         bilby.utils.logger.info("No result file found. Starting from scratch")
 else:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                               label=label, sampler='dynesty', nlive=nlive, sample='rwalk',
+                               label=label, sampler='dynesty', nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
                                meta_data=meta_data)
 
