@@ -124,7 +124,7 @@ else:
     matplotlib.use('Qt5Agg')
 
     data_source = 'solar_flare'
-    run_mode = 'select_time'
+    run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -138,7 +138,7 @@ else:
     period_number = 13
     run_id = 14
 
-    candidate_id = 3
+    candidate_id = 5
 
     injection_id = 2201
     injection_mode = "qpo"

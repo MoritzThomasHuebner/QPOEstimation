@@ -6,15 +6,15 @@ import numpy as np
 import celerite
 import matplotlib.pyplot as plt
 
-from QPOEstimation.model.celerite import PolynomialMeanModel
-from QPOEstimation.likelihood import get_kernel
+from QPOEstimation.likelihood import get_kernel, get_mean_model
+from QPOEstimation.utils import get_injection_outdir
 
 
 class InjectionCreator(object):
 
     def __init__(self, params, injection_mode, sampling_frequency=256, segment_length=1., times=None,
                  outdir='injection_files', injection_id=0, likelihood_model='gaussian_process', mean_model=None,
-                 poisson_data=False):
+                 n_components=1, poisson_data=False):
         self.params = params
         self.injection_mode = injection_mode
         self.sampling_frequency = sampling_frequency
@@ -27,13 +27,9 @@ class InjectionCreator(object):
         self.kernel = get_kernel(self.injection_mode)
 
         self.times = times
-
-        if mean_model is None:
-            self.mean_model = PolynomialMeanModel(**self.params_mean)
-        else:
-            self.mean_model = mean_model
-            for key, value in params.items():
-                self.mean_model.__setattr__(key.replace('mean:', ''), value)
+        self.mean_model = get_mean_model(model_type=mean_model, n_components=n_components, y=0)
+        for key, value in params.items():
+            self.mean_model.__setattr__(key.replace('mean:', ''), value)
         self.gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
         self.gp.compute(self.windowed_times, self.windowed_yerr)
         self.update_params()
@@ -43,7 +39,7 @@ class InjectionCreator(object):
             np.random.normal(size=len(self.outside_window_indices)) * self.yerr[self.outside_window_indices]
 
     def create_outdir(self):
-        Path(f'{self.outdir}/{self.injection_mode}').mkdir(exist_ok=True, parents=True)
+        Path(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}').mkdir(exist_ok=True, parents=True)
 
     @property
     def times(self):
@@ -60,7 +56,6 @@ class InjectionCreator(object):
     def windowed_indices(self):
         if self.likelihood_model == 'gaussian_process':
             return np.where(np.logical_and(-np.inf < self.times, self.times < np.inf))[0]
-
         else:
             return np.where(np.logical_and(self.params['window_minimum'] < self.times,
                                            self.times < self.params['window_maximum']))[0]
@@ -143,16 +138,20 @@ class InjectionCreator(object):
         self.gp.compute(self.windowed_times, self.windowed_yerr)
         return self.gp.get_value()
 
+    @property
+    def outdir_path(self):
+        return f"{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}"
+
     def save(self):
-        np.savetxt(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}_data.txt',
+        np.savetxt(f'{self.outdir_path}_data.txt',
                    np.array([self.times, self.y_realisation, self.yerr]).T)
-        with open(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}_params.json', 'w') as f:
+        with open(f'{self.outdir_path}_params.json', 'w') as f:
             json.dump(self.params, f)
 
     def plot(self):
         color = "#ff7f0e"
         plt.errorbar(self.times, self.y_realisation, yerr=self.yerr, fmt=".k", capsize=0, label='data')
-        if self.injection_mode != 'white_nosie':
+        if self.injection_mode != 'white_noise':
             self.update_params()
             x = np.linspace(self.windowed_times[0], self.windowed_times[-1], 5000)
             self.gp.compute(self.windowed_times, self.windowed_yerr)
@@ -167,7 +166,7 @@ class InjectionCreator(object):
 
         plt.plot(self.times, self.gp.mean.get_value(self.times), color='green', label='Mean function')
         plt.legend()
-        plt.savefig(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}_data.pdf')
+        plt.savefig(f'{self.outdir_path}_data.pdf')
         plt.show()
         plt.clf()
 
