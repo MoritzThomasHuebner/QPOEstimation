@@ -77,7 +77,6 @@ else:
     max_log_c = 1
     minimum_window_spacing = 0
 
-    recovery_mode = "pure_qpo"
     likelihood_model = "gaussian_process"
     background_model = "fred"
     n_components = 1
