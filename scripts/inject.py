@@ -119,16 +119,16 @@ priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                     n_components=n_components, **mean_prior_bounds_dict)
 
-params = priors.sample()
 outdir = f'injection_files'
 Path(outdir).mkdir(exist_ok=True, parents=True)
 
+if minimum_id == maximum_id:
+    minimum_id = injection_id
+    maximum_id = injection_id + 1
+
 if minimum_id != maximum_id:
     for injection_id in range(minimum_id, maximum_id):
+        params = priors.sample()
         create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
                          injection_id=injection_id, plot=plot, likelihood_model=likelihood_model,
                          mean_model=background_model, n_components=n_components,  poisson_data=False)
-else:
-    create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
-                     injection_id=injection_id, plot=plot, likelihood_model=likelihood_model,
-                     mean_model=background_model, n_components=n_components, poisson_data=False)
