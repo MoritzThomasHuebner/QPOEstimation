@@ -15,9 +15,13 @@ from QPOEstimation.prior import get_priors
 
 if len(sys.argv) > 1:
     parser = parse_args()
+    parser.add_argument("--minimum_id", default=-1, type=int)
+    parser.add_argument("--maximum_id", default=-1, type=int)
     args = parser.parse_args()
 
     injection_id = args.injection_id
+    minimum_id = args.minimum_id
+    maximum_id = args.maximum_id
     injection_mode = args.injection_mode
 
     polynomial_max = args.polynomial_max
@@ -54,6 +58,8 @@ else:
     matplotlib.use('Qt5Agg')
 
     injection_id = 0
+    minimum_id = -1
+    maximum_id = -1
     injection_mode = "qpo"
 
     polynomial_max = 1000
@@ -117,6 +123,12 @@ params = priors.sample()
 outdir = f'injection_files/{injection_mode}/{likelihood_model}'
 Path(outdir).mkdir(exist_ok=True, parents=True)
 
-create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir, injection_id=injection_id,
-                 plot=plot, likelihood_model=likelihood_model, mean_model=background_model,
-                 n_components=n_components,  poisson_data=False)
+if minimum_id != maximum_id:
+    for injection_id in range(minimum_id, maximum_id):
+        create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
+                         injection_id=injection_id, plot=plot, likelihood_model=likelihood_model,
+                         mean_model=background_model, n_components=n_components,  poisson_data=False)
+else:
+    create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
+                     injection_id=injection_id, plot=plot, likelihood_model=likelihood_model,
+                     mean_model=background_model, n_components=n_components, poisson_data=False)
