@@ -79,12 +79,12 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'solar_flare'
+    data_source = 'injection'
     run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
-    variance_stabilisation = False
+    variance_stabilisation = True
 
     solar_flare_id = "120704187"
 
@@ -96,12 +96,12 @@ else:
 
     candidate_id = 5
 
-    injection_id = 2201
-    injection_mode = "qpo"
+    injection_id = 0
+    injection_mode = "pure_qpo"
 
     polynomial_max = 1000
-    amplitude_min = 0.1
-    amplitude_max = 10
+    amplitude_min = 10
+    amplitude_max = 100
     offset_min = -10
     offset_max = 10
     skewness_min = 0.1
@@ -109,24 +109,25 @@ else:
     sigma_min = 0.1
     sigma_max = 10
     t_0_min = 0
-    t_0_max = 1
+    t_0_max = 3
     tau_min = -10
     tau_max = 10
 
-    min_log_a = -5
-    max_log_a = 25
-    min_log_c = -25
-    max_log_c = np.nan
+    min_log_a = -1
+    max_log_a = 1
+    min_log_c = -1
+    # max_log_c = np.nan
+    max_log_c = 1
     minimum_window_spacing = 0
 
     recovery_mode = "pure_qpo"
     likelihood_model = "gaussian_process"
     background_model = "gaussian"
-    n_components = 3
+    n_components = 1
 
-    band_minimum = 1 / 400
-    band_maximum = 1
-    segment_length = 1.0
+    band_minimum = 1
+    band_maximum = 64
+    segment_length = 3.0
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
@@ -197,7 +198,10 @@ elif data_source == 'injection':
 else:
     raise ValueError
 
-if variance_stabilisation:
+if data_source == 'injection':
+    y = counts
+    yerr = np.ones(len(counts))
+elif variance_stabilisation:
     y = bar_lev(counts)
     yerr = np.ones(len(counts))
 else:
