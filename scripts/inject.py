@@ -120,7 +120,7 @@ priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=
                     n_components=n_components, **mean_prior_bounds_dict)
 
 params = priors.sample()
-outdir = f'injection_files/{injection_mode}/{likelihood_model}'
+outdir = f'injection_files'
 Path(outdir).mkdir(exist_ok=True, parents=True)
 
 if minimum_id != maximum_id:
