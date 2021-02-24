@@ -10,6 +10,7 @@ from QPOEstimation.likelihood import get_kernel
 from QPOEstimation.parse import parse_args
 from QPOEstimation.prior.gp import get_kernel_prior, get_window_priors
 from QPOEstimation.prior.mean import get_mean_prior
+from QPOEstimation.prior import get_priors
 
 
 if len(sys.argv) > 1:
@@ -105,19 +106,13 @@ mean_prior_bounds_dict = dict(
 
 times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 
-priors = bilby.core.prior.ConditionalPriorDict()
 kernel = get_kernel(kernel_type=injection_mode)
-mean_priors = get_mean_prior(model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
-                             n_components=n_components, **mean_prior_bounds_dict)
-kernel_priors = get_kernel_prior(
-    kernel_type=injection_mode, min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
-    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
 
-window_priors = get_window_priors(times=times, likelihood_model=likelihood_model)
-priors.update(mean_priors)
-priors.update(kernel_priors)
-priors.update(window_priors)
-priors._resolve_conditions()
+priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=injection_mode,
+                    min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
+                    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
+                    model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
+                    n_components=n_components, **mean_prior_bounds_dict)
 
 params = priors.sample()
 outdir = f'injection_files/{injection_mode}/{likelihood_model}'

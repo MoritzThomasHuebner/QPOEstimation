@@ -5,7 +5,8 @@ import bilby
 from QPOEstimation.prior.minimum import MinimumPrior
 
 
-def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum, band_maximum, max_log_c=np.nan):
+def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum, band_maximum, max_log_c=np.nan,
+                     **kwargs):
     if np.isnan(max_log_c):
         max_log_c = np.log(band_maximum)
 
@@ -86,7 +87,7 @@ def _add_individual_kernel_prior(priors, minimum, maximum, label):
         priors[f'kernel:{label}'] = bilby.core.prior.Uniform(minimum=minimum, maximum=maximum, name=label)
 
 
-def get_window_priors(times, likelihood_model='gaussian_process_windowed'):
+def get_window_priors(times, likelihood_model='gaussian_process_windowed', **kwargs):
     if likelihood_model == 'gaussian_process_windowed':
         priors = bilby.core.prior.ConditionalPriorDict()
         priors['window_minimum'] = bilby.core.prior.Beta(minimum=times[0], maximum=times[-1], alpha=1, beta=2,

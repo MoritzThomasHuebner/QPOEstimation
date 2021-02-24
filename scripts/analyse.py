@@ -10,7 +10,7 @@ from QPOEstimation.get_data import *
 from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_likelihood
 from QPOEstimation.parse import parse_args
 from QPOEstimation.prior.gp import *
-from QPOEstimation.prior.mean import get_mean_prior
+from QPOEstimation.prior import get_priors
 from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.utils import *
 
@@ -210,28 +210,20 @@ if plot:
     plt.show()
     plt.clf()
 
-priors = bilby.core.prior.ConditionalPriorDict()
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
-mean_priors = get_mean_prior(model_type=background_model, n_components=n_components, minimum_spacing=0,
-                             polynomial_max=polynomial_max, **mean_prior_bound_dict)
-
 kernel = get_kernel(kernel_type=recovery_mode)
-kernel_priors = get_kernel_prior(
-    kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
-    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+
+priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=injection_mode,
+                    min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
+                    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
+                    model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
+                    n_components=n_components, **mean_prior_bound_dict)
 
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
                                      y=y, yerr=yerr, likelihood_model=likelihood_model)
-
-window_priors = get_window_priors(times=times, likelihood_model=likelihood_model)
-
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components)
 
-priors.update(mean_priors)
-priors.update(kernel_priors)
-priors.update(window_priors)
-priors._resolve_conditions()
 
 result = None
 if try_load:
