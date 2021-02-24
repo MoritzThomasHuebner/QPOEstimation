@@ -6,8 +6,9 @@ from celerite import terms
 from scipy.special import gamma
 
 
+from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
-from QPOEstimation.model.celerite import PolynomialMeanModel
+from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model
 
 
 def get_celerite_likelihood(mean_model, kernel, fit_mean, times, y, yerr, likelihood_model='gaussian_process'):
@@ -354,11 +355,13 @@ def get_kernel(kernel_type):
         raise ValueError('Recovery mode not defined')
 
 
-def get_mean_model(model_type, y=None):
+def get_mean_model(model_type, n_components=1, y=None):
     if model_type == 'polynomial':
         return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0), True
     elif model_type == 'mean':
         return np.mean(y), False
+    elif model_type in mean_model_dict:
+        return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components)
     else:
         raise ValueError
 

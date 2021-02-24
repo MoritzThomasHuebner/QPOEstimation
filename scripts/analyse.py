@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import QPOEstimation
 from QPOEstimation.get_data import *
 from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_likelihood
+from QPOEstimation.model import mean_model_dict
 from QPOEstimation.prior.gp import *
 from QPOEstimation.prior.mean import get_mean_prior
 from QPOEstimation.stabilisation import bar_lev
@@ -17,7 +18,7 @@ likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogr
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
 data_sources = ['injection', 'giant_flare', 'solar_flare']
 run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment']
-background_models = ["polynomial", "exponential", "mean"]
+background_models = ["polynomial", "n_component", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
 
 
@@ -58,8 +59,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
     parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
     parser.add_argument("--background_model", default="polynomial", choices=background_models)
-    parser.add_argument("--periodogram_likelihood", default="whittle", choices=["whittle", "groth"])
-    parser.add_argument("--periodogram_noise_model", default="red_noise", choices=["red_noise", "broken_power_law"])
+    parser.add_argument("--n_components", default=1, type=int)
 
     parser.add_argument("--band_minimum", default=10, type=int)
     parser.add_argument("--band_maximum", default=32, type=int)
@@ -103,6 +103,7 @@ if len(sys.argv) > 1:
     recovery_mode = args.recovery_mode
     likelihood_model = args.model
     background_model = args.background_model
+    n_components = args.n_components
 
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
@@ -148,6 +149,7 @@ else:
     recovery_mode = "red_noise"
     likelihood_model = "gaussian_process_windowed"
     background_model = "polynomial"
+    n_components = 1
 
     band_minimum = 5
     band_maximum = 64
@@ -222,7 +224,7 @@ if plot:
 
 
 priors = bilby.core.prior.ConditionalPriorDict()
-mean_model, fit_mean = get_mean_model(model_type=background_model, y=y)
+mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
 mean_priors = get_mean_prior(model_type=background_model, polynomial_max=polynomial_max)
 
 kernel = get_kernel(kernel_type=recovery_mode)
