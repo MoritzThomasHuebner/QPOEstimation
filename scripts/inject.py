@@ -1,97 +1,138 @@
-import argparse
 import sys
 from pathlib import Path
-
+import numpy as np
 import matplotlib
+
+import bilby
 
 from QPOEstimation.injection import create_injection
 from QPOEstimation.likelihood import get_kernel
-from QPOEstimation.prior.gp import *
+from QPOEstimation.parse import parse_args
+from QPOEstimation.prior.gp import get_kernel_prior, get_window_priors
+from QPOEstimation.prior.mean import get_mean_prior
+from QPOEstimation.utils import *
+
 
 if len(sys.argv) > 1:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--minimum_id", default=0, type=int)
-    parser.add_argument("--maximum_id", default=100, type=int)
-    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"], type=str)
-    parser.add_argument("--likelihood_model", default="gaussian_process",
-                        choices=["gaussian_process", "gaussian_process_windowed"], type=str)
-    parser.add_argument("--sampling_frequency", default=256, type=int)
-
-    parser.add_argument("--polynomial_max", default=10, type=int)
-    parser.add_argument("--min_log_a", default=-2, type=float)
-    parser.add_argument("--max_log_a", default=1, type=float)
-    parser.add_argument("--min_log_c", default=-1, type=float)
-    parser.add_argument("--max_log_c", default=None, type=float)
-    parser.add_argument("--band_minimum", default=5, type=float)
-    parser.add_argument("--band_maximum", default=64, type=float)
-
-    parser.add_argument("--plot", default=False, type=bool)
-    parser.add_argument("--segment_length", default=1.0, type=float)
-    parser.add_argument("--outdir", default='injection_files', type=str)
+    parser = parse_args()
     args = parser.parse_args()
-    minimum_id = args.minimum_id
-    maximum_id = args.maximum_id
-    injection_mode = args.injection_mode
-    likelihood_model = args.likelihood_model
+
+    data_source = args.data_source
+    run_mode = args.run_mode
     sampling_frequency = args.sampling_frequency
+    data_mode = args.data_mode
+    alpha = args.alpha
+    variance_stabilisation = boolean_string(args.variance_stabilisation)
+
+    solar_flare_id = args.solar_flare_id
+
+    start_time = args.start_time
+    end_time = args.end_time
+
+    period_number = args.period_number
+    run_id = args.run_id
+
+    candidate_id = args.candidate_id
 
     polynomial_max = args.polynomial_max
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
     min_log_c = args.min_log_c
     max_log_c = args.max_log_c
+    minimum_window_spacing = args.minimum_window_spacing
+
+    injection_id = args.injection_id
+    injection_mode = args.injection_mode
+
+    recovery_mode = args.recovery_mode
+    likelihood_model = args.model
+    background_model = args.background_model
+    n_components = args.n_components
+
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
 
-    plot = args.plot
     segment_length = args.segment_length
-    outdir = args.outdir
+    segment_step = args.segment_step
+
+    nlive = args.nlive
+    sample = args.sample
+    use_ratio = boolean_string(args.use_ratio)
+
+    try_load = boolean_string(args.try_load)
+    resume = boolean_string(args.resume)
+    plot = boolean_string(args.plot)
 else:
     matplotlib.use('Qt5Agg')
-    minimum_id = 2200
-    maximum_id = 2300
 
+    data_source = 'solar_flare'
+    run_mode = 'entire_segment'
     sampling_frequency = 256
+    data_mode = 'normal'
+    alpha = 0.02
+    variance_stabilisation = False
 
-    polynomial_max = 0
-    min_log_a = 2
-    max_log_a = 2
-    min_log_c = 0
-    max_log_c = 0
-    band_minimum = 20
-    band_maximum = 20
+    solar_flare_id = "120704187"
 
+    start_time = 380
+    end_time = 800
+
+    period_number = 13
+    run_id = 14
+
+    candidate_id = 5
+
+    injection_id = 2201
     injection_mode = "qpo"
+
+    polynomial_max = 1000
+    min_log_a = -5
+    max_log_a = 25
+    min_log_c = -25
+    max_log_c = 1
+    minimum_window_spacing = 0
+
+    recovery_mode = "pure_qpo"
     likelihood_model = "gaussian_process"
-    plot = False
-    segment_length = 1
-    outdir = "injection_files"
+    background_model = "gaussian"
+    n_components = 3
+
+    band_minimum = 1/400
+    band_maximum = 1
+    segment_length = 1.0
+    segment_step = 0.23625  # Requires 32 steps
+
+    sample = 'rslice'
+    nlive = 300
+    use_ratio = True
+
+    try_load = False
+    resume = False
+    plot = True
+
+    suffix = ""
 
 
 times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
-times -= times[0]
-times -= times[-1] / 2
 
 priors = bilby.core.prior.ConditionalPriorDict()
-mean_priors = get_polynomial_prior(polynomial_max=polynomial_max)
-priors.update(mean_priors)
-
-kernel_priors = get_kernel_prior(kernel_type=injection_mode, min_log_a=min_log_a, max_log_a=max_log_a,
-                                 min_log_c=min_log_c, max_log_c=max_log_c,
-                                 band_minimum=band_minimum, band_maximum=band_maximum)
-priors.update(kernel_priors)
 kernel = get_kernel(kernel_type=injection_mode)
+mean_priors = get_mean_prior(model_type=background_model, polynomial_max=polynomial_max, t_min=times[0],
+                             t_max=times[-1], minimum_spacing=0, n_components=0)
+kernel_priors = get_kernel_prior(
+    kernel_type=injection_mode, min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
+    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
 
+window_priors = get_window_priors(times=times, likelihood_model=likelihood_model)
+priors.update(mean_priors)
+priors.update(kernel_priors)
+priors.update(window_priors)
+priors._resolve_conditions()
 
-if likelihood_model == "gaussian_process_windowed":
-    priors.update(get_window_priors(times=times))
+params = priors.sample()
+outdir = f'injection_files/{injection_mode}/{likelihood_model}'
+Path(outdir).mkdir(exist_ok=True, parents=True)
 
-if injection_mode in ['qpo', 'pure_qpo', 'general_qpo']:
-    priors.conversion_function = decay_constrain_conversion_function
-
-for injection_id in range(minimum_id, maximum_id):
-    params = priors.sample()
-    Path(f'injection_files/{injection_mode}/{likelihood_model}').mkdir(exist_ok=True, parents=True)
-    create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
-                     injection_id=injection_id, plot=plot, likelihood_model=likelihood_model)
-
+create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir, injection_id=injection_id,
+                 plot=plot, likelihood_model=likelihood_model, mean_model=background_model,
+                 n_components=n_components,  poisson_data=False)

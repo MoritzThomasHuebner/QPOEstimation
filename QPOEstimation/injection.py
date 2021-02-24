@@ -139,13 +139,13 @@ class InjectionCreator(object):
         return self.gp.get_value()
 
     @property
-    def outdir_path(self):
+    def outdir_path_stub(self):
         return f"{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}"
 
     def save(self):
-        np.savetxt(f'{self.outdir_path}_data.txt',
+        np.savetxt(f'{self.outdir_path_stub}_data.txt',
                    np.array([self.times, self.y_realisation, self.yerr]).T)
-        with open(f'{self.outdir_path}_params.json', 'w') as f:
+        with open(f'{self.outdir_path_stub}_params.json', 'w') as f:
             json.dump(self.params, f)
 
     def plot(self):
@@ -166,17 +166,19 @@ class InjectionCreator(object):
 
         plt.plot(self.times, self.gp.mean.get_value(self.times), color='green', label='Mean function')
         plt.legend()
-        plt.savefig(f'{self.outdir_path}_data.pdf')
+        plt.savefig(f'{self.outdir_path_stub}_data.pdf')
         plt.show()
         plt.clf()
 
 
 def create_injection(params, injection_mode, sampling_frequency=None, segment_length=None, times=None,
-                     outdir='injection_files', injection_id=0, plot=False, likelihood_model='gaussian_process'):
+                     outdir='injection_files', injection_id=0, plot=False, likelihood_model='gaussian_process',
+                     mean_model='mean', n_components=1, poisson_data=False):
     injection_creator = InjectionCreator(params=params, injection_mode=injection_mode,
                                          sampling_frequency=sampling_frequency, segment_length=segment_length,
                                          times=times, outdir=outdir, injection_id=injection_id,
-                                         likelihood_model=likelihood_model)
+                                         likelihood_model=likelihood_model, mean_model=mean_model,
+                                         n_components=n_components, poisson_data=poisson_data)
 
     injection_creator.save()
     if plot:

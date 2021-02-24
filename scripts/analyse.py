@@ -8,24 +8,10 @@ import matplotlib.pyplot as plt
 import QPOEstimation
 from QPOEstimation.get_data import *
 from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_likelihood
-from QPOEstimation.model import mean_model_dict
 from QPOEstimation.prior.gp import *
 from QPOEstimation.prior.mean import get_mean_prior
 from QPOEstimation.stabilisation import bar_lev
-from QPOEstimation.utils import get_injection_outdir
-
-likelihood_models = ["gaussian_process", "gaussian_process_windowed", "periodogram", "poisson"]
-modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
-data_sources = ['injection', 'giant_flare', 'solar_flare']
-run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment']
-background_models = ["polynomial", "exponential", "fred", "gaussian", "log_normal", "lorentzian", "mean"]
-data_modes = ['normal', 'smoothed', 'smoothed_residual', 'blind_injection']
-
-
-def boolean_string(s):
-    if s not in {'False', 'True'}:
-        raise ValueError('Not a valid boolean string')
-    return s == 'True'
+from QPOEstimation.utils import *
 
 
 if len(sys.argv) > 1:
@@ -54,6 +40,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--min_log_a", default=-5, type=float)
     parser.add_argument("--max_log_a", default=15, type=float)
     parser.add_argument("--min_log_c", default=-6, type=float)
+    parser.add_argument("--max_log_c", default=np.nan, type=float)
     parser.add_argument("--minimum_window_spacing", default=0, type=float)
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
@@ -97,6 +84,7 @@ if len(sys.argv) > 1:
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
     min_log_c = args.min_log_c
+    max_log_c = args.max_log_c
     minimum_window_spacing = args.minimum_window_spacing
 
     injection_id = args.injection_id
@@ -147,6 +135,7 @@ else:
     min_log_a = -5
     max_log_a = 25
     min_log_c = -25
+    max_log_c = np.nan
     minimum_window_spacing = 0
 
     recovery_mode = "pure_qpo"
@@ -235,8 +224,8 @@ mean_priors = get_mean_prior(model_type=background_model, n_components=n_compone
 
 kernel = get_kernel(kernel_type=recovery_mode)
 kernel_priors = get_kernel_prior(
-    kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a,
-    min_log_c=min_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+    kernel_type=recovery_mode, min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
+    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
 
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
                                      y=y, yerr=yerr, likelihood_model=likelihood_model)
