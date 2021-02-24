@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument("--minimum_window_spacing", default=0, type=float)
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
-    parser.add_argument("--model", default="gaussian_process", choices=likelihood_models)
+    parser.add_argument("--likelihood_model", default="gaussian_process", choices=likelihood_models)
     parser.add_argument("--background_model", default="polynomial", choices=background_models)
     parser.add_argument("--n_components", default=1, type=int)
 
