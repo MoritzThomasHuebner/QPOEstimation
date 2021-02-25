@@ -70,7 +70,7 @@ class GPResult(bilby.result.Result):
     def plot_max_likelihood_psd(self):
         Path(f"{self.outdir}/fits/").mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
-        psd_freqs = np.exp(np.linspace(1/self.segment_length, self.sampling_frequncy, 5000))
+        psd_freqs = np.linspace(1/self.segment_length, self.sampling_frequncy, 5000)
         psd = likelihood.gp.kernel.get_psd(psd_freqs * 2 * np.pi)
 
         plt.loglog(psd_freqs, psd, label='complete GP')
@@ -81,6 +81,7 @@ class GPResult(bilby.result.Result):
         plt.xlabel("f[Hz]")
         plt.ylabel("$S(f)$")
         plt.legend()
+        plt.tight_layout()
         plt.savefig(f"{self.outdir}/fits/{self.label}_psd")
         plt.clf()
 
@@ -91,6 +92,7 @@ class GPResult(bilby.result.Result):
         plt.plot(taus, likelihood.gp.kernel.get_value(taus))
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
+        plt.tight_layout()
         plt.savefig(f"{self.outdir}/fits/{self.label}_max_like_kernel")
         plt.clf()
 
@@ -124,6 +126,7 @@ class GPResult(bilby.result.Result):
         plt.xlabel("time [s]")
         plt.ylabel("y")
         plt.legend()
+        plt.tight_layout()
         plt.savefig(f"{self.outdir}/fits/{self.label}_max_like_fit")
         plt.show()
         plt.clf()
@@ -146,6 +149,7 @@ class GPResult(bilby.result.Result):
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+            plt.tight_layout()
             plt.savefig(f"{self.outdir}/corner/{self.label}_frequency_posterior")
             plt.clf()
 
