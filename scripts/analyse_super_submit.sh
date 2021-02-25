@@ -10,6 +10,7 @@
 
 for injection_id in {0..99}
 do
-  sbatch analyse_submit.sh injection ${injection_id}
+  sbatch analyse_submit.sh injection ${injection_id} gaussian_process
+  sbatch analyse_submit.sh injection ${injection_id} gaussian_process_windowed
 done
 
