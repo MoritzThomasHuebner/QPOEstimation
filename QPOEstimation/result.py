@@ -25,6 +25,14 @@ class GPResult(bilby.result.Result):
         super().__init__(**kwargs)
 
     @property
+    def corner_outdir(self):
+        return self.outdir.replace('result', 'corner')
+
+    @property
+    def fits_outdir(self):
+        return self.outdir.replace('result', 'fits')
+
+    @property
     def max_likelihood_parameters(self):
         return self.posterior.iloc[-1]
 
@@ -68,7 +76,7 @@ class GPResult(bilby.result.Result):
         return self.times[-1] - self.times[0]
 
     def plot_max_likelihood_psd(self):
-        Path(f"{self.outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         psd_freqs = np.linspace(1/self.segment_length, self.sampling_frequncy, 5000)
         psd = likelihood.gp.kernel.get_psd(psd_freqs * 2 * np.pi)
@@ -82,22 +90,22 @@ class GPResult(bilby.result.Result):
         plt.ylabel("$S(f)$")
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"{self.outdir}/fits/{self.label}_psd")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_psd")
         plt.clf()
 
     def plot_kernel(self):
-        Path(f"{self.outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
         plt.plot(taus, likelihood.gp.kernel.get_value(taus))
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
         plt.tight_layout()
-        plt.savefig(f"{self.outdir}/fits/{self.label}_max_like_kernel")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel")
         plt.clf()
 
     def plot_lightcurve(self):
-        Path(f"{self.outdir}/fits/").mkdir(parents=True, exist_ok=True)
+        Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         if self.likelihood_model == 'gaussian_process_windowed':
             plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan', label='start/end stochastic process')
@@ -127,12 +135,12 @@ class GPResult(bilby.result.Result):
         plt.ylabel("y")
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"{self.outdir}/fits/{self.label}_max_like_fit")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit")
         plt.show()
         plt.clf()
 
     def plot_corner(self, **kwargs):
-        super().plot_corner(outdir=f"{self.outdir}/corner", truths=self.truths)
+        super().plot_corner(outdir=self.corner_outdir, truths=self.truths)
 
     def plot_frequency_posterior(self):
         if self.kernel_type in OSCILLATORY_MODELS:
@@ -150,7 +158,7 @@ class GPResult(bilby.result.Result):
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
             plt.tight_layout()
-            plt.savefig(f"{self.outdir}/corner/{self.label}_frequency_posterior")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior")
             plt.clf()
 
     def plot_all(self):
