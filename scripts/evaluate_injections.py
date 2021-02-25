@@ -6,34 +6,26 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from QPOEstimation.utils import get_injection_outdir
+from QPOEstimation.utils import get_injection_outdir, modes
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise"], type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
     parser.add_argument("--n_injections", default=100, type=int)
-    parser.add_argument("--band_minimum", default=5, type=int)
-    parser.add_argument("--band_maximum", default=64, type=int)
     args = parser.parse_args()
 
     injection_mode = args.injection_mode
     n_injections = args.n_injections
-    band_minimum = args.band_minimum
-    band_maximum = args.band_maximum
 else:
     matplotlib.use('Qt5Agg')
     injection_mode = "red_noise"
     n_injections = 100
-    band_minimum = 10
-    band_maximum = 64
 
 likelihood_model = 'gaussian_process'
 injections = np.arange(0, n_injections)
 
-band = f'{band_minimum}_{band_maximum}Hz'
 
 log_bfs_one_qpo_gpr = []
-log_bfs_one_qpo_whittle = []
 
 
 # averaged runs

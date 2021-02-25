@@ -4,15 +4,15 @@ import sys
 
 import bilby
 
-from QPOEstimation.utils import get_injection_outdir
+from QPOEstimation.utils import get_injection_outdir, modes, likelihood_models
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument("--minimum_id", default=0, type=int)
     parser.add_argument("--maximum_id", default=100, type=int)
-    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise", "general_qpo", "pure_qpo"], type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
     parser.add_argument("--likelihood_model", default="gaussian_process",
-                        choices=["gaussian_process", "gaussian_process_windowed"], type=str)
+                        choices=likelihood_models, type=str)
     args = parser.parse_args()
     minimum_id = args.minimum_id
     maximum_id = args.maximum_id
@@ -26,10 +26,6 @@ else:
     likelihood_model = "gaussian_process"
 
 samples = []
-
-band_minimum = 5
-band_maximum = 64
-band = f'{band_minimum}_{band_maximum}Hz'
 
 reslist = []
 for i in range(minimum_id, maximum_id):
@@ -45,7 +41,4 @@ for i in range(minimum_id, maximum_id):
         print(e)
         continue
 
-if likelihood_model == 'gaussian_process_windowed':
-    bilby.result.make_pp_plot(results=reslist, filename=f'{injection_mode}_pp_plot_windowed_new.png')
-else:
-    bilby.result.make_pp_plot(results=reslist, filename=f'{injection_mode}_pp_plot_unwindowed_new.png')
+bilby.result.make_pp_plot(results=reslist, filename=f'{injection_mode}_{likelihood_model}_pp_plot.png')
