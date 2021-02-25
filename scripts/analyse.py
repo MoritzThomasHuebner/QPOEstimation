@@ -122,7 +122,7 @@ else:
 
     recovery_mode = "pure_qpo"
     likelihood_model = "gaussian_process"
-    background_model = "gaussian"
+    background_model = "fred"
     n_components = 1
 
     band_minimum = 1
@@ -192,7 +192,7 @@ elif data_source == 'injection':
     times, counts, truths = get_injection_data(
         injection_file_dir='injection_files', injection_mode=injection_mode, recovery_mode=recovery_mode,
         likelihood_model=likelihood_model, injection_id=injection_id)
-    outdir = get_injection_outdir(band=band, injection_mode=injection_mode, recovery_mode=recovery_mode,
+    outdir = get_injection_outdir(injection_mode=injection_mode, recovery_mode=recovery_mode,
                                   likelihood_model=likelihood_model)
     label = f"{str(injection_id).zfill(2)}"
 else:

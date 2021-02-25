@@ -67,16 +67,16 @@ log_bfs_red_noise_injection = []
 log_bfs_qpo_injection = []
 for injection_id in range(minimum_id, maximum_id):
     res_qpo_rn_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(band=band, injection_mode='red_noise', recovery_mode='qpo',
+        outdir=get_injection_outdir(injection_mode='red_noise', recovery_mode='qpo',
                                     likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
     res_red_noise_rn_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(band=band, injection_mode='red_noise', recovery_mode='red_noise',
+        outdir=get_injection_outdir(injection_mode='red_noise', recovery_mode='red_noise',
                                     likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
     res_qpo_qpo_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(band=band, injection_mode='qpo', recovery_mode='qpo',
+        outdir=get_injection_outdir(injection_mode='qpo', recovery_mode='qpo',
                                     likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
     res_red_noise_qpo_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(band=band, injection_mode='qpo', recovery_mode='red_noise',
+        outdir=get_injection_outdir(injection_mode='qpo', recovery_mode='red_noise',
                                     likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
     log_bfs_red_noise_injection.append(res_qpo_rn_injected.log_evidence - res_red_noise_rn_injected.log_evidence)
     log_bfs_qpo_injection.append(res_qpo_qpo_injected.log_evidence - res_red_noise_qpo_injected.log_evidence)

@@ -37,7 +37,7 @@ for i in range(minimum_id, maximum_id):
         with open(f'injection_files/{injection_mode}/{likelihood_model}/{str(i).zfill(2)}_params.json') as f:
             injection_params = json.load(f)
         res = bilby.result.read_in_result(bilby.result.read_in_result(
-            outdir=get_injection_outdir(band=band, injection_mode=injection_mode, recovery_mode=injection_mode,
+            outdir=get_injection_outdir(injection_mode=injection_mode, recovery_mode=injection_mode,
                                         likelihood_model=likelihood_model), label=f"{str(i).zfill(2)}"))
         reslist.append(res)
         reslist[-1].injection_parameters = injection_params

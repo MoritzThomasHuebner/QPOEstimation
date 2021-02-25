@@ -64,10 +64,10 @@ for injection_id in range(100):
     for j in range(10):
         try:
             res_qpo = bilby.result.read_in_result(
-                outdir=get_injection_outdir(band=band, injection_mode=injection_mode, recovery_mode='qpo',
+                outdir=get_injection_outdir(injection_mode=injection_mode, recovery_mode='qpo',
                                             likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
             res_red_noise = bilby.result.read_in_result(
-                outdir=get_injection_outdir(band=band, injection_mode=injection_mode, recovery_mode='red_noise',
+                outdir=get_injection_outdir(injection_mode=injection_mode, recovery_mode='red_noise',
                                             likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
             individual_log_bfs_qpo_v_red_noise.append((res_qpo.log_evidence - res_red_noise.log_evidence))
         except Exception as e:
