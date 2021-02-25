@@ -4,6 +4,7 @@ import sys
 
 import bilby
 
+from QPOEstimation.result import GPResult
 from QPOEstimation.utils import get_injection_outdir, modes, likelihood_models
 
 if len(sys.argv) > 1:
@@ -28,15 +29,16 @@ else:
 samples = []
 
 reslist = []
-outdir = get_injection_outdir(injection_mode=injection_mode, recovery_mode=injection_mode, likelihood_model=likelihood_model)
+outdir = get_injection_outdir(injection_mode=injection_mode, recovery_mode=injection_mode,
+                              likelihood_model=likelihood_model)
 outdir = f"{outdir}/results"
 
 for i in range(minimum_id, maximum_id):
     try:
         with open(f'injection_files/{injection_mode}/{likelihood_model}/{str(i).zfill(2)}_params.json') as f:
             injection_params = json.load(f)
-        res = bilby.result.read_in_result(bilby.result.read_in_result(
-            outdir=outdir, label=f"{str(i).zfill(2)}"))
+        label = f"{str(i).zfill(2)}"
+        res = GPResult.from_json(outdir=outdir, label=label)
         reslist.append(res)
         reslist[-1].injection_parameters = injection_params
     except (OSError, FileNotFoundError) as e:
