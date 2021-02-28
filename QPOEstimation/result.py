@@ -68,7 +68,7 @@ class GPResult(bilby.result.Result):
         return mean_model
 
     @property
-    def sampling_frequncy(self):
+    def sampling_frequency(self):
         return 1 / (self.times[1] - self.times[0])
 
     @property
