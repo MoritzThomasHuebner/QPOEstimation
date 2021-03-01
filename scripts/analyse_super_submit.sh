@@ -2,7 +2,7 @@
 
 for segment in {0..7}
 do
-  for period in {0..46}
+  for period in {13..14}
   do
     sbatch analyse_submit.sh giant_flare ${period} ${segment} red_noise  gaussian_process
     sbatch analyse_submit.sh giant_flare ${period} ${segment} general_qpo  gaussian_process
