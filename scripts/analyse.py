@@ -171,7 +171,8 @@ if data_source == 'giant_flare':
     if run_mode == 'candidates':
         label = f"{candidate_id}"
     elif run_mode == 'sliding_window':
-        label = f'period_{period_number}/{run_id}'
+        outdir += f'period_{period_number}/'
+        label = f'{run_id}'
     elif run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     elif run_mode == 'entire_segment':
