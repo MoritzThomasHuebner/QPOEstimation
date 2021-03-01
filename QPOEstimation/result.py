@@ -14,11 +14,11 @@ class GPResult(bilby.result.Result):
 
     kernel_type = MetaDataAccessor('kernel_type')
     mean_model = MetaDataAccessor('mean_model')
-    n_components = MetaDataAccessor('n_components')
+    n_components = MetaDataAccessor('n_components', default=1)
     times = MetaDataAccessor('times')
     y = MetaDataAccessor('y')
     yerr = MetaDataAccessor('yerr')
-    likelihood_model = MetaDataAccessor('likelihood_model')
+    likelihood_model = MetaDataAccessor('likelihood_model', default='gaussian_process')
     truths = MetaDataAccessor('truths')
 
     def __init__(self, **kwargs):
@@ -78,7 +78,7 @@ class GPResult(bilby.result.Result):
     def plot_max_likelihood_psd(self):
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
-        psd_freqs = np.linspace(1/self.segment_length, self.sampling_frequncy, 5000)
+        psd_freqs = np.linspace(1/self.segment_length, self.sampling_frequency, 5000)
         psd = likelihood.gp.kernel.get_psd(psd_freqs * 2 * np.pi)
 
         plt.loglog(psd_freqs, psd, label='complete GP')
