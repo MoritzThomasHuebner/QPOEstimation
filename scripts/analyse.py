@@ -218,7 +218,7 @@ if plot:
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
 kernel = get_kernel(kernel_type=recovery_mode)
 
-priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=injection_mode,
+priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
