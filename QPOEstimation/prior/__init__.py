@@ -1,10 +1,24 @@
-from . import minimum, psd, gp, mean
+import numpy as np
 
 import bilby
+
+from . import minimum, psd, gp, mean
 
 
 def get_priors(**kwargs):
     """ Catch all function"""
+
+    if kwargs['min_log_c'] is None:
+        if kwargs['kernel_type'] == 'red_noise':
+            kwargs['min_log_c'] = np.log(1 / kwargs['segment_length'])
+        else:
+            kwargs['min_log_c'] = -10
+    if kwargs['max_log_c'] is None:
+        if kwargs['kernel_type'] == 'red_noise':
+            kwargs['max_log_c'] = np.log(kwargs['sampling_frequency'])
+        else:
+            kwargs['max_log_c'] = np.log(kwargs['band_maximum'])
+
     priors = bilby.core.prior.ConditionalPriorDict()
     mean_priors = mean.get_mean_prior(**kwargs)
     kernel_priors = gp.get_kernel_prior(**kwargs)

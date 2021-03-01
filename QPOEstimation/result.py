@@ -26,11 +26,11 @@ class GPResult(bilby.result.Result):
 
     @property
     def corner_outdir(self):
-        return self.outdir.replace('result', 'corner')
+        return self.outdir.replace('results', 'corner')
 
     @property
     def fits_outdir(self):
-        return self.outdir.replace('result', 'fits')
+        return self.outdir.replace('results', 'fits')
 
     @property
     def max_likelihood_parameters(self):

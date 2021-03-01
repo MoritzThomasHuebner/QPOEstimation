@@ -167,7 +167,7 @@ if data_source == 'giant_flare':
         run_mode, band=band, data_mode=data_mode, segment_length=segment_length, sampling_frequency=sampling_frequency,
         alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id, period_number=period_number,
         run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time)
-    outdir = f"SGR_1806_20/{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}"
+    outdir = f"SGR_1806_20/{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}/"
     if run_mode == 'candidates':
         label = f"{candidate_id}"
     elif run_mode == 'sliding_window':
