@@ -211,7 +211,7 @@ else:
     yerr[np.where(yerr == 0)[0]] = 1
 
 if plot:
-    plt.errorbar(times, y, yerr=np.sqrt(yerr), fmt=".k", capsize=0, label='data')
+    plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
     plt.show()
     plt.clf()
 

@@ -114,7 +114,7 @@ class GPResult(bilby.result.Result):
             windowed_indices = np.where(
                 np.logical_and(self.max_likelihood_parameters['window_minimum'] < self.times,
                                self.times < self.max_likelihood_parameters['window_maximum']))
-            likelihood.gp.compute(self.times[windowed_indices], np.sqrt(self.yerr[windowed_indices]))
+            likelihood.gp.compute(self.times[windowed_indices], self.yerr[windowed_indices])
             pred_mean, pred_var = likelihood.gp.predict(self.y[windowed_indices], x, return_var=True)
         else:
             x = np.linspace(self.times[0], self.times[-1], 5000)
@@ -122,7 +122,7 @@ class GPResult(bilby.result.Result):
         pred_std = np.sqrt(pred_var)
 
         color = "#ff7f0e"
-        plt.errorbar(self.times, self.y, yerr=np.sqrt(self.yerr), fmt=".k", capsize=0, label='data')
+        plt.errorbar(self.times, self.y, yerr=self.yerr, fmt=".k", capsize=0, label='data')
         plt.plot(x, pred_mean, color=color, label='Prediction')
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
