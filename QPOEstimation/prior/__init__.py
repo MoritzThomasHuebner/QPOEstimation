@@ -9,6 +9,7 @@ def get_priors(**kwargs):
     """ Catch all function"""
 
     segment_length = kwargs['times'][-1] - kwargs['times'][0]
+    sampling_frequency = 1 / (kwargs['times'][1] - kwargs['times'][0])
     if kwargs['min_log_c'] is None:
         if kwargs['kernel_type'] == 'red_noise':
             kwargs['min_log_c'] = np.log(1 / segment_length)
@@ -16,7 +17,7 @@ def get_priors(**kwargs):
             kwargs['min_log_c'] = -10
     if kwargs['max_log_c'] is None:
         if kwargs['kernel_type'] == 'red_noise':
-            kwargs['max_log_c'] = np.log(kwargs['sampling_frequency'])
+            kwargs['max_log_c'] = np.log(sampling_frequency)
         else:
             kwargs['max_log_c'] = np.log(kwargs['band_maximum'])
 
