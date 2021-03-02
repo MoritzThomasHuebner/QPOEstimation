@@ -53,9 +53,6 @@ for period in range(n_periods):
     log_bfs_general_qpo = []
     mean_frequency_qpo = []
     std_frequency_qpo = []
-    mean_frequency_mixed = []
-    std_frequency_mixed = []
-
     for run_id in range(len(segments)):
         try:
             res_general_qpo = bilby.result.read_in_result(f"{outdir_general_qpo}/period_{period}/results/{run_id}_result.json")
@@ -64,8 +61,8 @@ for period in range(n_periods):
 
             log_f_samples_mixed = np.array(res_general_qpo.posterior['kernel:terms[0]:log_f'])
             frequency_samples_mixed = np.exp(log_f_samples_mixed)
-            mean_frequency_mixed.append(np.mean(frequency_samples_mixed))
-            std_frequency_mixed.append(np.std(frequency_samples_mixed))
+            mean_frequency_qpo.append(np.mean(frequency_samples_mixed))
+            std_frequency_qpo.append(np.std(frequency_samples_mixed))
 
         except Exception as e:
             print(e)
