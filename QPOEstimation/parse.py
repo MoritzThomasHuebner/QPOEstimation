@@ -63,4 +63,5 @@ def parse_args():
     parser.add_argument("--try_load", default='True', type=str)
     parser.add_argument("--resume", default='False', type=str)
     parser.add_argument("--plot", default='True', type=str)
+    parser.add_argument("--suffix", default='', type=str)
     return parser

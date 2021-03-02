@@ -73,7 +73,7 @@ for period in range(n_periods):
 
         print(f"{period} {run_id}: {log_bf_general_qpo}")
 
-    np.savetxt(f'{outdir_general_qpo}/log_bfs_period_mixed_{period}', np.array(log_bfs_general_qpo))
+    np.savetxt(f'{outdir_general_qpo}/log_bfs_general_qpo_period_{period}', np.array(log_bfs_general_qpo))
     np.savetxt(f'{outdir_general_qpo}/mean_frequencies_{period}', np.array(mean_frequency_qpo))
     np.savetxt(f'{outdir_general_qpo}/std_frequencies_{period}', np.array(std_frequency_qpo))
 
