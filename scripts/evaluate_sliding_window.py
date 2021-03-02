@@ -19,9 +19,11 @@ band_maximum = 64
 pulse_period = 7.56
 segment_step = 0.945
 segment_length = 2.8
-data_mode = "smoothed_residual"
+data_mode = "normal"
 likelihood_model = "gaussian_process_windowed"
 alpha = 0.02
+
+run_mode = 'sliding_window'
 
 if band_maximum <= 64:
     sampling_frequency = 256
@@ -32,8 +34,9 @@ else:
 
 band = f'{band_minimum}_{band_maximum}Hz'
 suffix = ''
-
-outdir = f'sliding_window_{band}_{data_mode}'
+outdir = f"SGR_1806_20/{run_mode}/{band}/{data_mode}"
+outdir_general_qpo = f"{outdir}/general_qpo/{likelihood_model}/"
+outdir_red_noise = f"{outdir}/red_noise/{likelihood_model}/"
 
 if data_mode == 'smoothed':
     data = np.loadtxt(f'data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat')
@@ -56,8 +59,8 @@ for period in range(n_periods):
     for run_id in range(len(segments)):
         try:
             # res_white_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/white_noise/results/{run_id}_{likelihood_model}_result.json")
-            res_red_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/red_noise/results/{run_id}_{likelihood_model}_result.json")
-            res_general_qpo = bilby.result.read_in_result(f"{outdir}/period_{period}/general_qpo/results/{run_id}_{likelihood_model}_result.json")
+            res_general_qpo = bilby.result.read_in_result(f"{outdir_general_qpo}/period_{period}/result/{run_id}_result.json")
+            res_red_noise = bilby.result.read_in_result(f"{outdir_red_noise}/period_{period}/result/{run_id}_result.json")
             log_bf_general_qpo = res_general_qpo.log_bayes_factor - res_red_noise.log_bayes_factor
 
             log_f_samples_mixed = np.array(res_general_qpo.posterior['kernel:terms[0]:log_f'])
@@ -72,7 +75,7 @@ for period in range(n_periods):
             std_frequency_qpo.append(np.nan)
         log_bfs_general_qpo.append(log_bf_general_qpo)
 
-        print(f"{period} {run_id} zeroed mixed: {log_bf_general_qpo}")
+        print(f"{period} {run_id}: {log_bf_general_qpo}")
 
     np.savetxt(f'{outdir}/log_bfs_period_mixed_{period}', np.array(log_bfs_general_qpo))
     np.savetxt(f'{outdir}/mean_frequencies_{period}', np.array(mean_frequency_qpo))
@@ -83,7 +86,7 @@ for period in range(n_periods):
     color = 'tab:red'
     ax1.set_xlabel('segment start time [s]')
     ax1.set_ylabel('ln BF', color=color)
-    ax1.plot(xs, log_bfs_general_qpo, color=color, ls='solid', label='One QPO vs white noise')
+    ax1.plot(xs, log_bfs_general_qpo, color=color, ls='solid', label='QPO + Red noise vs Red noise')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
