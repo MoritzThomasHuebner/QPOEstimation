@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -77,19 +78,19 @@ if len(sys.argv) > 1:
     resume = boolean_string(args.resume)
     plot = boolean_string(args.plot)
 else:
-    matplotlib.use('Qt5Agg')
+    # matplotlib.use('Qt5Agg')
 
-    data_source = 'injection'
-    run_mode = 'entire_segment'
+    data_source = 'solar_flare'
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
-    variance_stabilisation = True
+    variance_stabilisation = False
 
-    solar_flare_id = "120704187"
+    solar_flare_id = "121022782"
 
-    start_time = 380
-    end_time = 800
+    start_time = 1000
+    end_time = 1500
 
     period_number = 13
     run_id = 14
@@ -101,32 +102,32 @@ else:
 
     polynomial_max = 1000
     amplitude_min = 10
-    amplitude_max = 100
+    amplitude_max = 1e9
     offset_min = -10
     offset_max = 10
     skewness_min = 0.1
-    skewness_max = 10
+    skewness_max = 10000
     sigma_min = 0.1
-    sigma_max = 10
+    sigma_max = 10000
     t_0_min = 0
-    t_0_max = 3
+    t_0_max = 2000
     tau_min = -10
     tau_max = 10
 
-    min_log_a = -1
-    max_log_a = 1
-    min_log_c = -1
+    min_log_a = -30
+    max_log_a = 30
+    min_log_c = -30
     # max_log_c = np.nan
-    max_log_c = 1
+    max_log_c = 30
     minimum_window_spacing = 0
 
     recovery_mode = "pure_qpo"
     likelihood_model = "gaussian_process"
-    background_model = "fred"
-    n_components = 1
+    background_model = "gaussian"
+    n_components = 3
 
-    band_minimum = 1
-    band_maximum = 64
+    band_minimum = 1/400
+    band_maximum = 1
     segment_length = 3.0
     segment_step = 0.23625  # Requires 32 steps
 
@@ -138,7 +139,7 @@ else:
     resume = False
     plot = True
 
-    suffix = ""
+    suffix = f"_{n_components}_fred"
 
 mean_prior_bound_dict = dict(
     amplitude_min=amplitude_min,
@@ -230,6 +231,7 @@ meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=t
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components)
 
 
+label += suffix
 result = None
 if try_load:
     try:
@@ -237,6 +239,7 @@ if try_load:
     except IOError:
         bilby.utils.logger.info("No result file found. Starting from scratch")
 if result is None:
+    Path(f"{outdir}/results").mkdir(parents=True, exist_ok=True)
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,

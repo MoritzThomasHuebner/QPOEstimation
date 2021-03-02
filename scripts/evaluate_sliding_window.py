@@ -58,9 +58,8 @@ for period in range(n_periods):
 
     for run_id in range(len(segments)):
         try:
-            # res_white_noise = bilby.result.read_in_result(f"{outdir}/period_{period}/white_noise/results/{run_id}_{likelihood_model}_result.json")
-            res_general_qpo = bilby.result.read_in_result(f"{outdir_general_qpo}/period_{period}/result/{run_id}_result.json")
-            res_red_noise = bilby.result.read_in_result(f"{outdir_red_noise}/period_{period}/result/{run_id}_result.json")
+            res_general_qpo = bilby.result.read_in_result(f"{outdir_general_qpo}/period_{period}/results/{run_id}_result.json")
+            res_red_noise = bilby.result.read_in_result(f"{outdir_red_noise}/period_{period}/results/{run_id}_result.json")
             log_bf_general_qpo = res_general_qpo.log_bayes_factor - res_red_noise.log_bayes_factor
 
             log_f_samples_mixed = np.array(res_general_qpo.posterior['kernel:terms[0]:log_f'])
