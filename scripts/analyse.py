@@ -124,7 +124,7 @@ else:
     recovery_mode = "pure_qpo"
     likelihood_model = "gaussian_process"
     background_model = "gaussian"
-    n_components = 3
+    n_components = 5
 
     band_minimum = 1/400
     band_maximum = 1

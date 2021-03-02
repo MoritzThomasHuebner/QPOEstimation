@@ -20,7 +20,7 @@ pulse_period = 7.56
 segment_step = 0.945
 segment_length = 2.8
 data_mode = "normal"
-likelihood_model = "gaussian_process_windowed"
+likelihood_model = "gaussian_process"
 alpha = 0.02
 
 run_mode = 'sliding_window'
@@ -73,9 +73,9 @@ for period in range(n_periods):
 
         print(f"{period} {run_id}: {log_bf_general_qpo}")
 
-    np.savetxt(f'{outdir}/log_bfs_period_mixed_{period}', np.array(log_bfs_general_qpo))
-    np.savetxt(f'{outdir}/mean_frequencies_{period}', np.array(mean_frequency_qpo))
-    np.savetxt(f'{outdir}/std_frequencies_{period}', np.array(std_frequency_qpo))
+    np.savetxt(f'{outdir_general_qpo}/log_bfs_period_mixed_{period}', np.array(log_bfs_general_qpo))
+    np.savetxt(f'{outdir_general_qpo}/mean_frequencies_{period}', np.array(mean_frequency_qpo))
+    np.savetxt(f'{outdir_general_qpo}/std_frequencies_{period}', np.array(std_frequency_qpo))
 
     xs = np.arange(len(segments))
     fig, ax1 = plt.subplots()
