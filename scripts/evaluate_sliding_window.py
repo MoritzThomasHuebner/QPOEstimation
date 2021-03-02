@@ -98,5 +98,5 @@ for period in range(n_periods):
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     ax1.legend()
-    plt.savefig(f'{outdir}/log_bfs_period_{period}')
+    plt.savefig(f'{outdir_general_qpo}/log_bfs_period_{period}')
     plt.clf()
