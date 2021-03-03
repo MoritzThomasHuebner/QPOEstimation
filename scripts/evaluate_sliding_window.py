@@ -19,6 +19,7 @@ band_maximum = 64
 pulse_period = 7.56
 segment_step = 0.945
 segment_length = 2.8
+kernel_type = 'general_qpo'
 data_mode = "normal"
 likelihood_model = "gaussian_process"
 alpha = 0.02
@@ -35,7 +36,7 @@ else:
 band = f'{band_minimum}_{band_maximum}Hz'
 suffix = ''
 outdir = f"SGR_1806_20/{run_mode}/{band}/{data_mode}"
-outdir_general_qpo = f"{outdir}/general_qpo/{likelihood_model}/"
+outdir_qpo_model = f"{outdir}/{kernel_type}/{likelihood_model}/"
 outdir_red_noise = f"{outdir}/red_noise/{likelihood_model}/"
 
 if data_mode == 'smoothed':
@@ -50,39 +51,39 @@ counts = data[:, 1]
 
 
 for period in range(n_periods):
-    log_bfs_general_qpo = []
+    log_bfs_qpo_model = []
     mean_frequency_qpo = []
     std_frequency_qpo = []
     for run_id in range(len(segments)):
         try:
-            res_general_qpo = bilby.result.read_in_result(f"{outdir_general_qpo}/period_{period}/results/{run_id}_result.json")
+            res_qpo_model = bilby.result.read_in_result(f"{outdir_qpo_model}/period_{period}/results/{run_id}_result.json")
             res_red_noise = bilby.result.read_in_result(f"{outdir_red_noise}/period_{period}/results/{run_id}_result.json")
-            log_bf_general_qpo = res_general_qpo.log_bayes_factor - res_red_noise.log_bayes_factor
+            log_bf_qpo_model = res_qpo_model.log_bayes_factor - res_red_noise.log_bayes_factor
 
-            log_f_samples_mixed = np.array(res_general_qpo.posterior['kernel:terms[0]:log_f'])
+            log_f_samples_mixed = np.array(res_qpo_model.posterior['kernel:terms[0]:log_f'])
             frequency_samples_mixed = np.exp(log_f_samples_mixed)
             mean_frequency_qpo.append(np.mean(frequency_samples_mixed))
             std_frequency_qpo.append(np.std(frequency_samples_mixed))
 
         except Exception as e:
             print(e)
-            log_bf_general_qpo = np.nan
+            log_bf_qpo_model = np.nan
             mean_frequency_qpo.append(np.nan)
             std_frequency_qpo.append(np.nan)
-        log_bfs_general_qpo.append(log_bf_general_qpo)
+        log_bfs_qpo_model.append(log_bf_qpo_model)
 
-        print(f"{period} {run_id}: {log_bf_general_qpo}")
+        print(f"{period} {run_id}: {log_bf_qpo_model}")
 
-    np.savetxt(f'{outdir_general_qpo}/log_bfs_general_qpo_period_{period}', np.array(log_bfs_general_qpo))
-    np.savetxt(f'{outdir_general_qpo}/mean_frequencies_{period}', np.array(mean_frequency_qpo))
-    np.savetxt(f'{outdir_general_qpo}/std_frequencies_{period}', np.array(std_frequency_qpo))
+    np.savetxt(f'{outdir_qpo_model}/log_bfs_{kernel_type}_period_{period}', np.array(log_bfs_qpo_model))
+    np.savetxt(f'{outdir_qpo_model}/mean_frequencies_{period}', np.array(mean_frequency_qpo))
+    np.savetxt(f'{outdir_qpo_model}/std_frequencies_{period}', np.array(std_frequency_qpo))
 
     xs = np.arange(len(segments))
     fig, ax1 = plt.subplots()
     color = 'tab:red'
     ax1.set_xlabel('segment start time [s]')
     ax1.set_ylabel('ln BF', color=color)
-    ax1.plot(xs, log_bfs_general_qpo, color=color, ls='solid', label='QPO + Red noise vs Red noise')
+    ax1.plot(xs, log_bfs_qpo_model, color=color, ls='solid', label='QPO + Red noise vs Red noise')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
@@ -98,5 +99,5 @@ for period in range(n_periods):
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     ax1.legend()
-    plt.savefig(f'{outdir_general_qpo}/log_bfs_period_{period}')
+    plt.savefig(f'{outdir_qpo_model}/log_bfs_period_{period}')
     plt.clf()
