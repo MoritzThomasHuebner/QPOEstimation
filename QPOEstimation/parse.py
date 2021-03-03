@@ -50,8 +50,8 @@ def parse_args():
     parser.add_argument("--background_model", default="polynomial", choices=background_models)
     parser.add_argument("--n_components", default=1, type=int)
 
-    parser.add_argument("--band_minimum", default=10, type=int)
-    parser.add_argument("--band_maximum", default=32, type=int)
+    parser.add_argument("--band_minimum", default=10, type=float)
+    parser.add_argument("--band_maximum", default=32, type=float)
 
     parser.add_argument("--segment_length", default=1.0, type=float)
     parser.add_argument("--segment_step", default=0.27, type=float)
