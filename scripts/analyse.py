@@ -77,7 +77,7 @@ if len(sys.argv) > 1:
     try_load = boolean_string(args.try_load)
     resume = boolean_string(args.resume)
     plot = boolean_string(args.plot)
-    suffix = args.plot
+    suffix = args.suffix
 else:
     # matplotlib.use('Qt5Agg')
 
