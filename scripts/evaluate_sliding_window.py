@@ -60,10 +60,13 @@ for period in range(n_periods):
             res_red_noise = bilby.result.read_in_result(f"{outdir_red_noise}/period_{period}/results/{run_id}_result.json")
             log_bf_qpo_model = res_qpo_model.log_bayes_factor - res_red_noise.log_bayes_factor
 
-            log_f_samples_mixed = np.array(res_qpo_model.posterior['kernel:terms[0]:log_f'])
-            frequency_samples_mixed = np.exp(log_f_samples_mixed)
-            mean_frequency_qpo.append(np.mean(frequency_samples_mixed))
-            std_frequency_qpo.append(np.std(frequency_samples_mixed))
+            try:
+                log_f_samples_qpo = np.array(res_qpo_model.posterior['kernel:terms[0]:log_f'])
+            except Exception as e:
+                log_f_samples_qpo = np.array(res_qpo_model.posterior['kernel:log_f'])
+            frequency_samples_qpo = np.exp(log_f_samples_qpo)
+            mean_frequency_qpo.append(np.mean(frequency_samples_qpo))
+            std_frequency_qpo.append(np.std(frequency_samples_qpo))
 
         except Exception as e:
             print(e)
