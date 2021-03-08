@@ -20,6 +20,7 @@ class GPResult(bilby.result.Result):
     yerr = MetaDataAccessor('yerr')
     likelihood_model = MetaDataAccessor('likelihood_model', default='gaussian_process')
     truths = MetaDataAccessor('truths')
+    offset = MetaDataAccessor('offset')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -64,7 +65,8 @@ class GPResult(bilby.result.Result):
         return get_kernel(kernel_type=self.kernel_type)
 
     def get_mean_model(self):
-        mean_model, _ = get_mean_model(model_type=self.mean_model, n_components=self.n_components, y=self.y)
+        mean_model, _ = get_mean_model(model_type=self.mean_model, n_components=self.n_components, y=self.y,
+                                       offset=self.offset)
         return mean_model
 
     @property

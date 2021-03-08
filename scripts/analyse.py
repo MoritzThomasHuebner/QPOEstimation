@@ -267,7 +267,8 @@ kernel = get_kernel(kernel_type=recovery_mode)
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
                                      y=y, yerr=yerr, likelihood_model=likelihood_model)
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
-                 y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components)
+                 y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components,
+                 offset=offset)
 
 
 label += suffix
