@@ -34,8 +34,8 @@ def parse_args():
     parser.add_argument("--skewness_max", default=1e12, type=float)
     parser.add_argument("--sigma_min", default=1e-12, type=float)
     parser.add_argument("--sigma_max", default=1e12, type=float)
-    parser.add_argument("--tau_min", default=-1e12, type=float)
-    parser.add_argument("--tau_max", default=1e12, type=float)
+    parser.add_argument("--tau_min", default=None, type=float)
+    parser.add_argument("--tau_max", default=None, type=float)
     parser.add_argument("--t_0_min", default=-1e12, type=float)
     parser.add_argument("--t_0_max", default=1e12, type=float)
 

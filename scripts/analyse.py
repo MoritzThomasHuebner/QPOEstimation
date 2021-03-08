@@ -79,10 +79,10 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    # matplotlib.use('Qt5Agg')
+    matplotlib.use('Qt5Agg')
 
-    data_source = 'solar_flare'
-    run_mode = 'select_time'
+    data_source = 'giant_flare'
+    run_mode = 'sliding_window'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -90,28 +90,28 @@ else:
 
     solar_flare_id = "121022782"
 
-    start_time = 1000
+    start_time = 1100
     end_time = 1500
 
     period_number = 13
-    run_id = 14
+    run_id = 10
 
     candidate_id = 5
 
     injection_id = 0
-    injection_mode = "pure_qpo"
+    injection_mode = "qpo"
 
     polynomial_max = 1000
-    amplitude_min = 10
-    amplitude_max = 1e9
+    amplitude_min = 1e-3
+    amplitude_max = 1e3
     offset_min = -10
     offset_max = 10
     skewness_min = 0.1
     skewness_max = 10000
     sigma_min = 0.1
     sigma_max = 10000
-    t_0_min = 0
-    t_0_max = 2000
+    t_0_min = None
+    t_0_max = None
     tau_min = -10
     tau_max = 10
 
@@ -122,14 +122,15 @@ else:
     max_log_c = 30
     minimum_window_spacing = 0
 
-    recovery_mode = "pure_qpo"
+    recovery_mode = "white_noise"
     likelihood_model = "gaussian_process"
     background_model = "gaussian"
-    n_components = 5
+    n_components = 2
 
-    band_minimum = 1/400
-    band_maximum = 1
-    segment_length = 3.0
+    band_minimum = 5
+    band_maximum = 64
+    segment_length = 2
+    # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
@@ -140,7 +141,13 @@ else:
     resume = False
     plot = True
 
-    suffix = f"_{n_components}_fred"
+    # suffix = f"_{n_components}_fred"
+    if variance_stabilisation:
+        suffix = f"_variance_stabilised"
+    else:
+        suffix = ""
+    suffix += f"_{n_components}_{background_model}s"
+    # suffix = f"_piecewise"
 
 mean_prior_bound_dict = dict(
     amplitude_min=amplitude_min,
@@ -218,6 +225,33 @@ if plot:
     plt.ylabel("counts")
     plt.show()
     plt.clf()
+
+# from scipy.signal import periodogram
+# freqs, powers = periodogram(counts[np.logic], fs=256)
+# plt.xlim(1, 128)
+# plt.loglog(freqs[1:], powers[1:])
+# plt.xlabel('frequency [Hz]')
+# plt.ylabel('Power [AU]')
+# plt.show()
+# def piecewise_linear_model(times, t_0, t_1, a_0, y_0, a_1, y_1, a_2, y_2):
+#     return np.piecewise(times, [times < t_0, np.logical_and(t_0 < times, times < t_1)], [lambda x: a_0 * times + y_0, lambda x: a_1 * times + y_1, lambda x: a_2 * times + y_2])
+#
+# mean_model = QPOEstimation.model.celerite.function_to_celerite_mean_model(piecewise_linear_model)
+# fit_mean = True
+#
+#
+# priors = get_kernel_prior(times=times, likelihood_model=likelihood_model, kernel_type=recovery_mode,
+#                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
+#                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
+# priors['mean:t_0'] = bilby.prior.Uniform(minimum=times[0], maximum=times[200], name='t_0')
+# priors['mean:t_1'] = bilby.prior.Uniform(minimum=times[200], maximum=times[400], name='t_1')
+# priors['mean:t_2'] = bilby.prior.Uniform(minimum=times[400], maximum=times[-1], name='t_2')
+# priors['mean:a_0'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_0')
+# priors['mean:a_1'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_1')
+# priors['mean:a_2'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_2')
+# priors['mean:y_0'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_0')
+# priors['mean:y_1'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_1')
+# priors['mean:y_2'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_2')
 
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
 
