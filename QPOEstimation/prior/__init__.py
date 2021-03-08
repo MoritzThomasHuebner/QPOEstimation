@@ -21,6 +21,12 @@ def get_priors(**kwargs):
         else:
             kwargs['max_log_c'] = np.log(kwargs['band_maximum'])
 
+    if kwargs['t_0_min'] is None:
+        kwargs['t_0_min'] = kwargs['times'][0] - 1
+
+    if kwargs['t_0_max'] is None:
+        kwargs['t_0_max'] = kwargs['times'][-1] + 1
+
     priors = bilby.core.prior.ConditionalPriorDict()
     mean_priors = mean.get_mean_prior(**kwargs)
     kernel_priors = gp.get_kernel_prior(**kwargs)

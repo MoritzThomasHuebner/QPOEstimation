@@ -214,11 +214,12 @@ else:
 
 if plot:
     plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
+    plt.xlabel("time [s]")
+    plt.ylabel("counts")
     plt.show()
     plt.clf()
 
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
-kernel = get_kernel(kernel_type=recovery_mode)
 
 priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
@@ -226,6 +227,7 @@ priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                     n_components=n_components, **mean_prior_bound_dict)
 
+kernel = get_kernel(kernel_type=recovery_mode)
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
                                      y=y, yerr=yerr, likelihood_model=likelihood_model)
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
