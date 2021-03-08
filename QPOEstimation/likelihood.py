@@ -355,13 +355,13 @@ def get_kernel(kernel_type):
         raise ValueError('Recovery mode not defined')
 
 
-def get_mean_model(model_type, n_components=1, y=None):
+def get_mean_model(model_type, n_components=1, y=None, offset=False):
     if model_type == 'polynomial':
         return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0), True
     elif model_type == 'mean':
         return np.mean(y), False
     elif model_type in mean_model_dict:
-        return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components), True
+        return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components, offset=offset), True
     else:
         raise ValueError
 

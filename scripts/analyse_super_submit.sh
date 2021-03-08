@@ -13,8 +13,8 @@
 
 for period in {0..46}
 do
-  sbatch analyse_submit.sh giant_flare ${period} 10 red_noise  gaussian_process_windowed 2 2
-  sbatch analyse_submit.sh giant_flare ${period} 10 qpo  gaussian_process_windowed 2 2
+  sbatch analyse_submit.sh giant_flare ${period} 10 red_noise  gaussian_process_windowed 2 2.5
+  sbatch analyse_submit.sh giant_flare ${period} 10 qpo  gaussian_process_windowed 2 2.5
 done
 
 for period in {0..46}

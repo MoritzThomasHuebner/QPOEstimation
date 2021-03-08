@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
 
+    parser.add_argument("--offset", default='True', type=str)
     parser.add_argument("--polynomial_max", default=1000, type=float)
     parser.add_argument("--amplitude_min", default=1e-12, type=float)
     parser.add_argument("--amplitude_max", default=1e12, type=float)

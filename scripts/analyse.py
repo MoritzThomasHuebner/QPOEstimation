@@ -49,6 +49,7 @@ if len(sys.argv) > 1:
     t_0_max = args.t_0_max
     tau_min = args.tau_min
     tau_max = args.tau_max
+    offset = boolean_string(args.offset)
 
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
@@ -101,11 +102,12 @@ else:
     injection_id = 0
     injection_mode = "qpo"
 
+    offset = True
     polynomial_max = 1000
     amplitude_min = 1e-3
     amplitude_max = 1e3
-    offset_min = -10
-    offset_max = 10
+    offset_min = 0
+    offset_max = 100
     skewness_min = 0.1
     skewness_max = 10000
     sigma_min = 0.1
@@ -122,14 +124,14 @@ else:
     max_log_c = 30
     minimum_window_spacing = 0
 
-    recovery_mode = "white_noise"
-    likelihood_model = "gaussian_process"
+    recovery_mode = "qpo"
+    likelihood_model = "gaussian_process_windowed"
     background_model = "gaussian"
     n_components = 2
 
     band_minimum = 5
     band_maximum = 64
-    segment_length = 2
+    segment_length = 2.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
@@ -253,13 +255,13 @@ if plot:
 # priors['mean:y_1'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_1')
 # priors['mean:y_2'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_2')
 
-mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y)
+mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset)
 
 priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
-                    n_components=n_components, **mean_prior_bound_dict)
+                    n_components=n_components, offset=offset, **mean_prior_bound_dict)
 
 kernel = get_kernel(kernel_type=recovery_mode)
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,

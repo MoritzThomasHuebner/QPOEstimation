@@ -7,11 +7,14 @@ import QPOEstimation
 
 def get_mean_prior(model_type, **kwargs):
     if model_type == 'polynomial':
-        return get_polynomial_prior(**kwargs)
+        priors = get_polynomial_prior(**kwargs)
     elif model_type in _N_COMPONENT_PRIORS:
-        return _N_COMPONENT_PRIORS[model_type](**kwargs)
+        priors = _N_COMPONENT_PRIORS[model_type](**kwargs)
     else:
-        return dict()
+        priors = dict()
+    if kwargs.get('offset', False):
+        priors['mean:offset'] = bilby.prior.Uniform(minimum=kwargs['offset_min'], maximum=kwargs['offset_max'], name="offset")
+    return priors
 
 
 def get_polynomial_prior(order=4, **kwargs):

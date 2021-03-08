@@ -29,12 +29,15 @@ LorentzianMeanModel = function_to_celerite_mean_model(lorentzian)
 FREDMeanModel = function_to_celerite_mean_model(fred)
 
 
-def get_n_component_mean_model(model, n_models=1, defaults=None):
+def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False):
     base_names = bilby.core.utils.infer_args_from_function_except_n_args(func=model, n=1)
     names = []
     for i in range(n_models):
         for base in base_names:
             names.extend([f"{base}_{i}"])
+    if offset:
+        names.extend(['offset'])
+
     names = tuple(names)
     if defaults is None:
         defaults = dict()
@@ -48,6 +51,8 @@ def get_n_component_mean_model(model, n_models=1, defaults=None):
             res = np.zeros(len(t))
             for i in range(n_models):
                 res += model(t, **{f"{base}": getattr(self, f"{base}_{i}") for base in base_names})
+            if offset:
+                res += getattr(self, "offset")
             return res
 
         def compute_gradient(self, *args, **kwargs):
@@ -57,6 +62,6 @@ def get_n_component_mean_model(model, n_models=1, defaults=None):
 
 
 def get_n_component_fred_model(n_freds=1):
-    return get_n_component_mean_model(model=fast_rise_exponential_decay, n_models=n_freds)
+    return get_n_component_mean_model(model=fred, n_models=n_freds)
 
 
