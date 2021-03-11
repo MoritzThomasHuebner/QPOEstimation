@@ -92,7 +92,7 @@ class GPResult(bilby.result.Result):
         plt.ylabel("$S(f)$")
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"{self.fits_outdir}/{self.label}_psd")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_psd.png")
         plt.clf()
 
     def plot_kernel(self):
@@ -103,7 +103,7 @@ class GPResult(bilby.result.Result):
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
         plt.tight_layout()
-        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.png")
         plt.clf()
 
     def plot_lightcurve(self, start_time=None, end_time=None):
@@ -141,7 +141,7 @@ class GPResult(bilby.result.Result):
         plt.ylabel("y")
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.png")
         plt.show()
         plt.clf()
 
@@ -164,7 +164,7 @@ class GPResult(bilby.result.Result):
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
             plt.tight_layout()
-            plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior.png")
             plt.clf()
 
     def plot_all(self):
