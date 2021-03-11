@@ -146,11 +146,11 @@ else:
     plot = True
 
     # suffix = f"_{n_components}_fred"
-    if variance_stabilisation:
-        suffix = f"_variance_stabilised"
-    else:
-        suffix = ""
-    suffix += f"_{n_components}_{background_model}s"
+if variance_stabilisation:
+    suffix = f"_variance_stabilised"
+else:
+    suffix = ""
+suffix += f"_{n_components}_{background_model}s"
 
 mean_prior_bound_dict = dict(
     amplitude_min=amplitude_min,
