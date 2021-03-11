@@ -35,5 +35,6 @@ def get_priors(**kwargs):
     priors.update(kernel_priors)
     priors.update(window_priors)
     priors._resolve_conditions()
+    priors.conversion_function = gp.decay_constrain_conversion_function
     return priors
 

@@ -11,16 +11,23 @@
 #  done
 #done
 
-for period in {0..46}
-do
-  sbatch analyse_submit.sh giant_flare ${period} 6 red_noise  gaussian_process_windowed 2 3.5
-  sbatch analyse_submit.sh giant_flare ${period} 6 qpo  gaussian_process_windowed 2 3.5
-  sbatch analyse_submit.sh giant_flare ${period} 6 general_qpo  gaussian_process_windowed 2 3.5
+#for period in {0..46}
+#do
+#  sbatch analyse_submit.sh giant_flare ${period} 6 red_noise  gaussian_process_windowed 2 3.5
+#  sbatch analyse_submit.sh giant_flare ${period} 6 qpo  gaussian_process_windowed 2 3.5
+#  sbatch analyse_submit.sh giant_flare ${period} 6 general_qpo  gaussian_process_windowed 2 3.5
 #  sbatch analyse_submit.sh giant_flare ${period} 27 red_noise  gaussian_process_windowed 1 1.2
 #  sbatch analyse_submit.sh giant_flare ${period} 27 qpo  gaussian_process_windowed 1 1.2
 #  sbatch analyse_submit.sh giant_flare ${period} 27 general_qpo  gaussian_process_windowed 1 1.2
-done
+#done
 
+for n_components in {0..4}
+do
+   for model in red_noise qpo pure_qpo general_qpo
+   do
+     sbatch analyse_submit.sh ${model} ${n_components}
+   done
+done
 
 #for injection_id in {0..99}
 #do

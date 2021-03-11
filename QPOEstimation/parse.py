@@ -13,6 +13,8 @@ def parse_args():
     parser.add_argument("--variance_stabilisation", default='True', type=str)
 
     parser.add_argument("--solar_flare_id", default='120704187', type=str)
+    parser.add_argument("--grb_id", default='090709A', type=str)
+    parser.add_argument("--grb_binning", default='1s', type=str)
 
     parser.add_argument("--start_time", default=0., type=float)
     parser.add_argument("--end_time", default=1., type=float)
@@ -27,12 +29,10 @@ def parse_args():
 
     parser.add_argument("--offset", default='True', type=str)
     parser.add_argument("--polynomial_max", default=1000, type=float)
-    parser.add_argument("--amplitude_min", default=1e-12, type=float)
-    parser.add_argument("--amplitude_max", default=1e12, type=float)
-    parser.add_argument("--offset_min", default=-1e12, type=float)
-    parser.add_argument("--offset_max", default=1e12, type=float)
-    parser.add_argument("--skewness_min", default=1e-12, type=float)
-    parser.add_argument("--skewness_max", default=1e12, type=float)
+    parser.add_argument("--amplitude_min", default=None, type=float)
+    parser.add_argument("--amplitude_max", default=None, type=float)
+    parser.add_argument("--offset_min", default=None, type=float)
+    parser.add_argument("--offset_max", default=None, type=float)
     parser.add_argument("--sigma_min", default=1e-12, type=float)
     parser.add_argument("--sigma_max", default=1e12, type=float)
     parser.add_argument("--tau_min", default=-1e12, type=float)

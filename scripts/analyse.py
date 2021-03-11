@@ -27,6 +27,8 @@ if len(sys.argv) > 1:
     variance_stabilisation = boolean_string(args.variance_stabilisation)
 
     solar_flare_id = args.solar_flare_id
+    grb_id = args.grb_id
+    grb_binning = args.grb_binning
 
     start_time = args.start_time
     end_time = args.end_time
@@ -82,17 +84,19 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'solar_flare'
-    run_mode = 'entire_segment'
+    data_source = 'grb'
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
     variance_stabilisation = False
 
     solar_flare_id = "121022782"
+    grb_id = "090709A"
+    grb_binning = "1s"
 
-    start_time = 300
-    end_time = 780
+    start_time = -4
+    end_time = 103
 
     period_number = 14
     run_id = 6
@@ -109,15 +113,15 @@ else:
     offset_max = None
     sigma_min = 0.1
     sigma_max = 10000
-    t_0_min = start_time - 200
+    t_0_min = start_time - 20
     # t_0_min = None
     t_0_max = None
     tau_min = -10
     tau_max = 10
 
-    min_log_a = -30
-    max_log_a = 30
-    min_log_c = None
+    min_log_a = -10
+    max_log_a = 5
+    min_log_c = -10
     # min_log_c = -30
     # max_log_c = np.nan
     max_log_c = 30
@@ -130,7 +134,7 @@ else:
     n_components = 2
 
     band_minimum = 1/200
-    band_maximum = 1/4
+    band_maximum = 1/2
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
@@ -149,8 +153,6 @@ else:
     else:
         suffix = ""
     suffix += f"_{n_components}_{background_model}s"
-    if min_log_c is None:
-        suffix += f"_log_c_restricted"
 
 mean_prior_bound_dict = dict(
     amplitude_min=amplitude_min,
@@ -199,6 +201,18 @@ elif data_source == 'solar_flare':
         label = 'entire_segment'
     else:
         raise ValueError
+elif data_source == 'grb':
+    times, y, yerr = get_grb_data(
+        run_mode, grb_id=grb_id, grb_binning=grb_binning,
+        start_time=start_time, end_time=end_time)
+    outdir = f"GRB{grb_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
+    if run_mode == 'select_time':
+        label = f'{start_time}_{end_time}'
+    elif run_mode == 'entire_segment':
+        label = 'entire_segment'
+    else:
+        raise ValueError
+
 elif data_source == 'injection':
     times, counts, truths = get_injection_data(
         injection_file_dir='injection_files', injection_mode=injection_mode, recovery_mode=recovery_mode,
@@ -209,7 +223,18 @@ elif data_source == 'injection':
 else:
     raise ValueError
 
-if data_source == 'injection':
+
+# from scipy.signal import periodogram
+# freqs, powers = periodogram(counts, fs=1)
+# # plt.xlim(1, 128)
+# plt.loglog(freqs[1:], powers[1:])
+# plt.xlabel('frequency [Hz]')
+# plt.ylabel('Power [AU]')
+# plt.show()
+
+if data_source == 'grb':
+    pass
+elif data_source == 'injection':
     y = counts
     yerr = np.ones(len(counts))
 elif variance_stabilisation:
@@ -220,39 +245,16 @@ else:
     yerr = np.sqrt(counts)
     yerr[np.where(yerr == 0)[0]] = 1
 
+# y /= 1000
+# yerr /= 1000
+
+
 if plot:
     plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
     plt.show()
     plt.clf()
-
-# from scipy.signal import periodogram
-# freqs, powers = periodogram(counts[np.logic], fs=256)
-# plt.xlim(1, 128)
-# plt.loglog(freqs[1:], powers[1:])
-# plt.xlabel('frequency [Hz]')
-# plt.ylabel('Power [AU]')
-# plt.show()
-# def piecewise_linear_model(times, t_0, t_1, a_0, y_0, a_1, y_1, a_2, y_2):
-#     return np.piecewise(times, [times < t_0, np.logical_and(t_0 < times, times < t_1)], [lambda x: a_0 * times + y_0, lambda x: a_1 * times + y_1, lambda x: a_2 * times + y_2])
-#
-# mean_model = QPOEstimation.model.celerite.function_to_celerite_mean_model(piecewise_linear_model)
-# fit_mean = True
-#
-#
-# priors = get_kernel_prior(times=times, likelihood_model=likelihood_model, kernel_type=recovery_mode,
-#                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
-#                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum)
-# priors['mean:t_0'] = bilby.prior.Uniform(minimum=times[0], maximum=times[200], name='t_0')
-# priors['mean:t_1'] = bilby.prior.Uniform(minimum=times[200], maximum=times[400], name='t_1')
-# priors['mean:t_2'] = bilby.prior.Uniform(minimum=times[400], maximum=times[-1], name='t_2')
-# priors['mean:a_0'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_0')
-# priors['mean:a_1'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_1')
-# priors['mean:a_2'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_2')
-# priors['mean:y_0'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_0')
-# priors['mean:y_1'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_1')
-# priors['mean:y_2'] = bilby.prior.Uniform(minimum=-1e6, maximum=1e6, name='t_2')
 
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset)
 
@@ -286,6 +288,7 @@ if result is None:
 
 if plot:
     result.plot_all()
+    result.plot_lightcurve(end_time=times[-1] + 50)
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',
