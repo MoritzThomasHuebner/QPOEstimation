@@ -6,12 +6,24 @@ import QPOEstimation
 
 
 def get_mean_prior(model_type, **kwargs):
+
+    if kwargs['amplitude_min'] is None:
+        kwargs['amplitude_min'] = min(kwargs['y']) / 10
+    if kwargs['amplitude_max'] is None:
+        kwargs['amplitude_max'] = max(kwargs['y']) * 2
+
     if model_type == 'polynomial':
         priors = get_polynomial_prior(**kwargs)
     elif model_type in _N_COMPONENT_PRIORS:
         priors = _N_COMPONENT_PRIORS[model_type](**kwargs)
     else:
         priors = dict()
+
+    if kwargs['offset_min'] is None:
+        kwargs['offset_min'] = min(kwargs['y']) / 10
+    if kwargs['offset_max'] is None:
+        kwargs['offset_max'] = max(kwargs['y']) * 2
+
     if kwargs.get('offset', False):
         priors['mean:offset'] = bilby.prior.Uniform(minimum=kwargs['offset_min'], maximum=kwargs['offset_max'], name="offset")
     return priors
@@ -76,9 +88,19 @@ def get_lorentzian_prior(n_components=1, minimum_spacing=0, **kwargs):
 
 def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+    for p in list(priors.keys()):
+        if 'sigma' in p:
+            del priors[p]
     for ii in range(n_components):
-        priors[f'mean:skewness_{ii}'] = bilby.core.prior.LogUniform(
-            minimum=kwargs['skewness_min'], maximum=kwargs['skewness_max'], name=f'skewness_{ii}')
+        duration = kwargs['times'][-1] - kwargs['times'][0]
+        dt = kwargs['times'][1] - kwargs['times'][0]
+
+        # priors[f'mean:skewness_{ii}'] = bilby.core.prior.LogUniform(
+        #     minimum=kwargs['skewness_min'], maximum=kwargs['skewness_max'], name=f'skewness_{ii}')
+        priors[f'mean:sigma_rise_{ii}'] = bilby.core.prior.LogUniform(
+            minimum=dt, maximum=duration, name=f'sigma_rise_{ii}')
+        priors[f'mean:sigma_fall_{ii}'] = bilby.core.prior.LogUniform(
+            minimum=dt, maximum=duration, name=f'sigma_fall_{ii}')
     return priors
 
 

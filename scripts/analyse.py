@@ -82,8 +82,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'giant_flare'
-    run_mode = 'sliding_window'
+    data_source = 'solar_flare'
+    run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -91,53 +91,53 @@ else:
 
     solar_flare_id = "121022782"
 
-    start_time = 1100
-    end_time = 1500
+    start_time = 300
+    end_time = 780
 
-    period_number = 13
-    run_id = 10
+    period_number = 14
+    run_id = 6
 
     candidate_id = 5
 
     injection_id = 0
-    injection_mode = "qpo"
 
     offset = True
-    polynomial_max = 1000
-    amplitude_min = 1e-3
-    amplitude_max = 1e3
-    offset_min = 0
-    offset_max = 100
-    skewness_min = 0.1
-    skewness_max = 10000
+    polynomial_max = 1000000
+    amplitude_min = None
+    amplitude_max = None
+    offset_min = None
+    offset_max = None
     sigma_min = 0.1
     sigma_max = 10000
-    t_0_min = None
+    t_0_min = start_time - 200
+    # t_0_min = None
     t_0_max = None
     tau_min = -10
     tau_max = 10
 
     min_log_a = -30
     max_log_a = 30
-    min_log_c = -30
+    min_log_c = None
+    # min_log_c = -30
     # max_log_c = np.nan
     max_log_c = 30
     minimum_window_spacing = 0
 
-    recovery_mode = "qpo"
-    likelihood_model = "gaussian_process_windowed"
-    background_model = "gaussian"
+    injection_mode = "qpo"
+    recovery_mode = "general_qpo"
+    likelihood_model = "gaussian_process"
+    background_model = "fred"
     n_components = 2
 
-    band_minimum = 5
-    band_maximum = 64
-    segment_length = 2.5
+    band_minimum = 1/200
+    band_maximum = 1/4
+    segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
     nlive = 300
-    use_ratio = True
+    use_ratio = False
 
     try_load = False
     resume = False
@@ -149,15 +149,14 @@ else:
     else:
         suffix = ""
     suffix += f"_{n_components}_{background_model}s"
-    # suffix = f"_piecewise"
+    if min_log_c is None:
+        suffix += f"_log_c_restricted"
 
 mean_prior_bound_dict = dict(
     amplitude_min=amplitude_min,
     amplitude_max=amplitude_max,
     offset_min=offset_min,
     offset_max=offset_max,
-    skewness_min=skewness_min,
-    skewness_max=skewness_max,
     sigma_min=sigma_min,
     sigma_max=sigma_max,
     t_0_min=t_0_min,
@@ -257,7 +256,7 @@ if plot:
 
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset)
 
-priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=recovery_mode,
+priors = get_priors(times=times, y=y, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,

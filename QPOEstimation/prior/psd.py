@@ -20,7 +20,7 @@ def get_qpo_prior(frequencies=None):
     prior = bilby.core.prior.PriorDict()
     prior['amplitude'] = bilby.core.prior.LogUniform(1e-4, 100, name='amplitude')
     prior['width'] = bilby.core.prior.LogUniform(df/np.pi, 100, name='width')
-    prior['central_frequency'] = bilby.core.prior.Uniform(1.0, max_frequency, name='central_frequency')
+    prior['central_frequency'] = bilby.core.prior.Uniform(df, max_frequency, name='central_frequency')
     # prior['offset'] = bilby.core.prior.Uniform(0, 1, name='offset')
     prior['offset'] = bilby.core.prior.DeltaFunction(0, name='offset')
     return prior

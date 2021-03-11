@@ -106,7 +106,11 @@ class GPResult(bilby.result.Result):
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel")
         plt.clf()
 
-    def plot_lightcurve(self):
+    def plot_lightcurve(self, start_time=None, end_time=None):
+        if start_time is None:
+            start_time = self.times[0]
+        if end_time is None:
+            end_time = self.times[-1]
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         if self.likelihood_model == 'gaussian_process_windowed':
@@ -119,7 +123,7 @@ class GPResult(bilby.result.Result):
             likelihood.gp.compute(self.times[windowed_indices], self.yerr[windowed_indices])
             pred_mean, pred_var = likelihood.gp.predict(self.y[windowed_indices], x, return_var=True)
         else:
-            x = np.linspace(self.times[0], self.times[-1], 5000)
+            x = np.linspace(start_time, end_time, 5000)
             pred_mean, pred_var = likelihood.gp.predict(self.y, x, return_var=True)
         pred_std = np.sqrt(pred_var)
 
@@ -129,7 +133,7 @@ class GPResult(bilby.result.Result):
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
         if self.mean_model != "mean":
-            x = np.linspace(self.times[0], self.times[-1], 5000)
+            x = np.linspace(start_time, end_time, 5000)
             trend = likelihood.mean_model.get_value(x)
             plt.plot(x, trend, color='green', label='Trend')
 

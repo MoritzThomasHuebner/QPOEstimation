@@ -21,7 +21,7 @@ segment_step = 0.945
 segment_length = 2.8
 kernel_type = 'general_qpo'
 data_mode = "normal"
-likelihood_model = "gaussian_process"
+likelihood_model = "gaussian_process_windowed"
 alpha = 0.02
 
 run_mode = 'sliding_window'

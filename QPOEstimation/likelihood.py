@@ -44,7 +44,7 @@ class WhittleLikelihood(Likelihood):
     def __init__(self, frequencies, periodogram, frequency_mask, noise_model='red_noise'):
         super(WhittleLikelihood, self).__init__(
             parameters=dict(alpha=0, alpha_1=0, alpha_2=0, beta=0, sigma=0, delta=0, rho=0,
-                            amplitude=0, width=0, central_frequency=127, offset=0))
+                            amplitude=0, width=1, central_frequency=127, offset=0))
         self.frequencies = frequencies
         self._periodogram = periodogram
         self.frequency_mask = frequency_mask
@@ -68,7 +68,10 @@ class WhittleLikelihood(Likelihood):
 
     def log_likelihood(self):
         psd = self.psd + self.model
-        return -np.sum(np.log(psd) + self.periodogram / psd)
+        log_l = -np.sum(np.log(psd) + self.periodogram / psd)
+        if np.isnan(log_l):
+            print(log_l)
+        return log_l
 
     @property
     def lorentzian(self):
