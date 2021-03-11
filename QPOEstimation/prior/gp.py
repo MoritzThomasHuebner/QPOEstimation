@@ -102,8 +102,8 @@ def get_window_priors(times, likelihood_model='gaussian_process_windowed', **kwa
 
 def decay_constrain_conversion_function(sample):
     out_sample = sample.copy()
-    if 'kernel:log_c' in sample.keys():
+    if 'kernel:log_f' in sample.keys():
         out_sample['decay_constraint'] = out_sample['kernel:log_c'] - out_sample['kernel:log_f']
-    elif "kernel:terms[0]:log_c" in sample.keys():
+    elif "kernel:terms[0]:log_f" in sample.keys():
         out_sample['decay_constraint'] = out_sample['kernel:terms[0]:log_c'] - out_sample['kernel:terms[0]:log_f']
     return out_sample
