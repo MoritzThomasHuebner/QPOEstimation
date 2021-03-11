@@ -43,8 +43,6 @@ if len(sys.argv) > 1:
     amplitude_max = args.amplitude_max
     offset_min = args.offset_min
     offset_max = args.offset_max
-    skewness_min = args.skewness_min
-    skewness_max = args.skewness_max
     sigma_min = args.sigma_min
     sigma_max = args.sigma_max
     t_0_min = args.t_0_min
