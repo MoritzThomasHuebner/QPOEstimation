@@ -10,7 +10,7 @@ def parse_args():
     parser.add_argument("--sampling_frequency", default=None, type=int)
     parser.add_argument("--data_mode", choices=data_modes, default='normal', type=str)
     parser.add_argument("--alpha", default=0.02, type=float)
-    parser.add_argument("--variance_stabilisation", default='True', type=str)
+    parser.add_argument("--variance_stabilisation", default='False', type=str)
 
     parser.add_argument("--solar_flare_id", default='120704187', type=str)
     parser.add_argument("--grb_id", default='090709A', type=str)
