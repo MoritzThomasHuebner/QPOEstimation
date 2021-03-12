@@ -277,7 +277,6 @@ if try_load:
         result = QPOEstimation.result.GPResult.from_json(outdir=f"{outdir}/results", label=label)
     except IOError:
         bilby.utils.logger.info("No result file found. Starting from scratch")
-outdir += '_4000_nlive'
 if result is None:
     Path(f"{outdir}/results").mkdir(parents=True, exist_ok=True)
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
