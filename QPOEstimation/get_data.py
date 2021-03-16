@@ -2,6 +2,26 @@ import json
 import numpy as np
 
 
+def get_all_tte_magnetar_flare_data(magnetar_label, tag, bin_size=0.001, subtract_t0=True,
+                                    unbarycentred_time=False, **kwargs):
+    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{tag}_data.txt')
+    column = 1 if unbarycentred_time else 0
+    ttes = data[:, column]
+
+    counts, bin_edges = np.histogram(ttes, np.arange(ttes[0], ttes[-1], bin_size))
+    times = np.array([bin_edges[i] + (bin_edges[i + 1] - bin_edges[i]) / 2 for i in range(len(bin_edges) - 1)])
+    if subtract_t0:
+        times -= times[0]
+    return times, counts
+
+
+def get_tte_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, tag, bin_size=0.001,
+                                             subtract_t0=True, unbarycentred_time=False, **kwargs):
+    times, counts = get_all_tte_magnetar_flare_data(magnetar_label=magnetar_label, tag=tag, bin_size=bin_size, subtract_t0=subtract_t0,
+                                                    unbarycentred_time=unbarycentred_time, **kwargs)
+    return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
+
+
 def get_giant_flare_data(run_mode, **kwargs):
     """ Catch all function """
     return _GIANT_FLARE_RUN_MODES[run_mode](**kwargs)
@@ -55,6 +75,7 @@ def truncate_data(times, counts, start, stop, yerr=None):
     else:
         return times[indices], counts[indices], yerr[indices]
 
+
 def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo', recovery_mode='qpo',
                        likelihood_model='gaussian_process', injection_id=0, **kwargs):
     data = np.loadtxt(f'{injection_file_dir}/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_data.txt')
@@ -80,9 +101,16 @@ def get_all_grb_data(grb_id, grb_binning, **kwargs):
     yerr = data[:, 10]
     return times, y, yerr
 
+
 def get_grb_data(run_mode, **kwargs):
     """ Catch all function """
     return _GRB_RUN_MODES[run_mode](**kwargs)
+
+
+def get_tte_magnetar_flare_data(run_mode, **kwargs):
+    """ Catch all function """
+    return _MAGNETAR_FLARE_RUN_MODES[run_mode](**kwargs)
+
 
 def get_solar_flare_data(run_mode, **kwargs):
     """ Catch all function """
@@ -102,6 +130,8 @@ def get_solar_flare_data_from_segment(solar_flare_id="120704187", start_time=Non
 _GRB_RUN_MODES = dict(select_time=get_grb_data_from_segment,
                       entire_segment=get_all_grb_data)
 
+_MAGNETAR_FLARE_RUN_MODES = dict(select_time=get_tte_magnetar_flare_data_from_segment,
+                                 entire_segment=get_all_tte_magnetar_flare_data)
 
 _SOLAR_FLARE_RUN_MODES = dict(select_time=get_solar_flare_data_from_segment,
                               entire_segment=get_all_solar_flare_data)

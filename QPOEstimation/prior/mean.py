@@ -8,7 +8,7 @@ import QPOEstimation
 def get_mean_prior(model_type, **kwargs):
 
     if kwargs['amplitude_min'] is None:
-        kwargs['amplitude_min'] = min(kwargs['y']) / 10
+        kwargs['amplitude_min'] = min(kwargs['y']) / 10 + 1e-6
     if kwargs['amplitude_max'] is None:
         kwargs['amplitude_max'] = max(kwargs['y']) * 2
 

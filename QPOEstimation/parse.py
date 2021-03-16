@@ -16,6 +16,12 @@ def parse_args():
     parser.add_argument("--grb_id", default='090709A', type=str)
     parser.add_argument("--grb_binning", default='1s', type=str)
 
+    parser.add_argument("magnetar_label", default='SGR_1806_20', type=str)
+    parser.add_argument("magnetar_tag", default='10223-01-03-010_90907122.0225', type=str)
+    parser.add_argument("magnetar_bin_size", default=0.001, type=str)
+    parser.add_argument("magnetar_subtract_t0", default="True", type=str)
+    parser.add_argument("magnetar_unbarycentred_time", default="False", type=str)
+
     parser.add_argument("--start_time", default=0., type=float)
     parser.add_argument("--end_time", default=1., type=float)
 

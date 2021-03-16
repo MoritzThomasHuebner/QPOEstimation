@@ -29,6 +29,11 @@ if len(sys.argv) > 1:
     solar_flare_id = args.solar_flare_id
     grb_id = args.grb_id
     grb_binning = args.grb_binning
+    magnetar_label = args.magnetar_label
+    magnetar_tag = args.magnetar_tag
+    magnetar_bin_size = args.magnetar_bin_size
+    magnetar_subtract_t0 = boolean_string(args.magnetar_subtract_t0)
+    magnetar_unbarycentred_time = boolean_string(args.magnetar_unbarycentred_time)
 
     start_time = args.start_time
     end_time = args.end_time
@@ -82,8 +87,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'grb'
-    run_mode = 'select_time'
+    data_source = 'magnetar_flare'
+    run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -92,9 +97,14 @@ else:
     solar_flare_id = "121022782"
     grb_id = "090709A"
     grb_binning = "1s"
+    magnetar_label = 'SGR_1806_20'
+    magnetar_tag = '10223-01-03-010_90908036.8701'
+    magnetar_bin_size = 0.001
+    magnetar_subtract_t0 = True
+    magnetar_unbarycentred_time = False
 
-    start_time = -4
-    end_time = 103
+    start_time = 0.1
+    end_time = 0.2
 
     period_number = 14
     run_id = 6
@@ -103,7 +113,7 @@ else:
 
     injection_id = 0
 
-    offset = True
+    offset = False
     polynomial_max = 1000000
     amplitude_min = None
     amplitude_max = None
@@ -111,7 +121,8 @@ else:
     offset_max = None
     sigma_min = 0.1
     sigma_max = 10000
-    t_0_min = start_time - 20
+    # t_0_min = start_time - 20
+    t_0_min = None
     # t_0_min = None
     t_0_max = None
     tau_min = -10
@@ -126,19 +137,19 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "general_qpo"
+    recovery_mode = "qpo"
     likelihood_model = "gaussian_process"
     background_model = "fred"
     n_components = 2
 
-    band_minimum = 1/200
-    band_maximum = 1/2
+    band_minimum = None
+    band_maximum = None
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 300
+    nlive = 400
     use_ratio = False
 
     try_load = False
@@ -177,13 +188,25 @@ if data_source == 'giant_flare':
         run_mode, band=band, data_mode=data_mode, segment_length=segment_length, sampling_frequency=sampling_frequency,
         alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id, period_number=period_number,
         run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time)
-    outdir = f"SGR_1806_20/{run_mode}/{band}/{data_mode}/{recovery_mode}/{likelihood_model}/"
+    outdir = f"SGR_1806_20/{run_mode}/{band}/{recovery_mode}/{likelihood_model}/"
     if run_mode == 'candidates':
         label = f"{candidate_id}"
     elif run_mode == 'sliding_window':
         outdir += f'period_{period_number}/'
         label = f'{run_id}'
     elif run_mode == 'select_time':
+        label = f'{start_time}_{end_time}'
+    elif run_mode == 'entire_segment':
+        label = 'entire_segment'
+    else:
+        raise ValueError
+elif data_source == 'magnetar_flare':
+    times, counts = get_tte_magnetar_flare_data(
+        run_mode=run_mode, magnetar_label=magnetar_label, tag=magnetar_tag, bin_size=magnetar_bin_size,
+        subtract_t0=magnetar_subtract_t0, unbarycentred_time=magnetar_unbarycentred_time, start_time=start_time,
+        end_time=end_time)
+    outdir = f"magnetar_flares/{magnetar_label}/{magnetar_tag}/{run_mode}/{recovery_mode}/{likelihood_model}/"
+    if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     elif run_mode == 'entire_segment':
         label = 'entire_segment'
@@ -286,7 +309,7 @@ if result is None:
 
 if plot:
     result.plot_all()
-    result.plot_lightcurve(end_time=times[-1] + 50)
+    result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',

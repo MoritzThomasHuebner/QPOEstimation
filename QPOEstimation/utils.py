@@ -1,6 +1,6 @@
 likelihood_models = ["gaussian_process", "gaussian_process_windowed"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo"]
-data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb']
+data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flare']
 run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment']
 background_models = ["polynomial", "exponential", "fred", "gaussian", "log_normal", "lorentzian", "mean"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual']

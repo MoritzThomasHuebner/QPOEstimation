@@ -22,10 +22,16 @@ def get_priors(**kwargs):
             kwargs['max_log_c'] = np.log(kwargs['band_maximum'])
 
     if kwargs['t_0_min'] is None:
-        kwargs['t_0_min'] = kwargs['times'][0] - 1
+        kwargs['t_0_min'] = kwargs['times'][0] - 0.1 * segment_length
 
     if kwargs['t_0_max'] is None:
-        kwargs['t_0_max'] = kwargs['times'][-1] + 1
+        kwargs['t_0_max'] = kwargs['times'][-1] + 0.1 * segment_length
+
+    if kwargs['band_minimum'] is None:
+        kwargs['band_minimum'] = 2/segment_length
+
+    if kwargs['band_maximum'] is None:
+        kwargs['band_maximum'] = sampling_frequency/2
 
     priors = bilby.core.prior.ConditionalPriorDict()
     mean_priors = mean.get_mean_prior(**kwargs)
