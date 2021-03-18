@@ -29,6 +29,7 @@ if len(sys.argv) > 1:
     solar_flare_id = args.solar_flare_id
     grb_id = args.grb_id
     grb_binning = args.grb_binning
+    grb_detector = args.grb_detector
     magnetar_label = args.magnetar_label
     magnetar_tag = args.magnetar_tag
     magnetar_bin_size = args.magnetar_bin_size
@@ -85,9 +86,9 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    matplotlib.use('Qt5Agg')
+    # matplotlib.use('Qt5Agg')
 
-    data_source = 'magnetar_flare'
+    data_source = 'grb'
     run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -96,7 +97,9 @@ else:
 
     solar_flare_id = "121022782"
     grb_id = "090709A"
-    grb_binning = "1s"
+    grb_binning = "1024ms"
+    grb_detector = 'konus'
+
     magnetar_label = 'SGR_1806_20'
     magnetar_tag = '10223-01-03-010_90908036.8701'
     magnetar_bin_size = 0.001
@@ -113,7 +116,7 @@ else:
 
     injection_id = 0
 
-    offset = False
+    offset = True
     polynomial_max = 1000000
     amplitude_min = None
     amplitude_max = None
@@ -129,18 +132,18 @@ else:
     tau_max = 10
 
     min_log_a = -10
-    max_log_a = 5
-    min_log_c = -10
-    # min_log_c = -30
-    # max_log_c = np.nan
-    max_log_c = 30
+    max_log_a = 15
+    # min_log_c = -10
+    min_log_c = None
+    max_log_c = None
+    # max_log_c = 30
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "qpo"
+    recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process"
     background_model = "fred"
-    n_components = 2
+    n_components = 1
 
     band_minimum = None
     band_maximum = None
@@ -225,8 +228,8 @@ elif data_source == 'solar_flare':
 elif data_source == 'grb':
     times, y, yerr = get_grb_data(
         run_mode, grb_id=grb_id, grb_binning=grb_binning,
-        start_time=start_time, end_time=end_time)
-    outdir = f"GRB{grb_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
+        start_time=start_time, end_time=end_time, grb_detector=grb_detector)
+    outdir = f"GRB{grb_id}_{grb_detector}/{run_mode}/{recovery_mode}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     elif run_mode == 'entire_segment':

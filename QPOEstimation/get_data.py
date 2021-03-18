@@ -89,17 +89,22 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
 
 
 def get_grb_data_from_segment(
-        grb_id, grb_binning, start_time, end_time, **kwargs):
-    times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id)
+        grb_id, grb_binning, start_time, end_time, grb_detector=None, **kwargs):
+    times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id, grb_detector=grb_detector)
     return truncate_data(times=times, counts=y, start=start_time, stop=end_time, yerr=yerr)
 
 
-def get_all_grb_data(grb_id, grb_binning, **kwargs):
-    data = np.loadtxt(f'data/GRB{grb_id}/{grb_binning}_lc_ascii.dat.txt')
+def get_all_grb_data(grb_id, grb_binning, grb_detector=None, **kwargs):
+    data_file = f'data/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt'
+    data = np.loadtxt(data_file)
     times = data[:, 0]
-    y = data[:, 9]
-    yerr = data[:, 10]
-    return times, y, yerr
+    if grb_detector == 'swift':
+        y = data[:, 9]
+        yerr = data[:, 10]
+        return times, y, yerr
+    elif grb_detector == 'konus':
+        y = data[:, 1]
+        return times, y, np.sqrt(y)
 
 
 def get_grb_data(run_mode, **kwargs):

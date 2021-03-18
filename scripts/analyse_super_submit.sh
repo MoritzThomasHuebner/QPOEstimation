@@ -21,11 +21,22 @@
 #  sbatch analyse_submit.sh giant_flare ${period} 27 general_qpo  gaussian_process_windowed 1 1.2
 #done
 
+# GRB
+#for n_components in {0..4}
+#do
+#   for model in red_noise qpo pure_qpo general_qpo
+#   do
+#     sbatch analyse_submit.sh ${model} ${n_components}
+#   done
+#done
+
+# Magnetar flares
 for n_components in {0..4}
 do
    for model in red_noise qpo pure_qpo general_qpo
    do
-     sbatch analyse_submit.sh ${model} ${n_components}
+     sbatch analyse_submit.sh gaussian_process ${model} ${n_components}
+     sbatch analyse_submit.sh gaussian_process_windowed ${model} ${n_components}
    done
 done
 

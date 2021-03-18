@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument("--solar_flare_id", default='120704187', type=str)
     parser.add_argument("--grb_id", default='090709A', type=str)
     parser.add_argument("--grb_binning", default='1s', type=str)
+    parser.add_argument("--grb_detector", default='swift', type=str)
 
     parser.add_argument("magnetar_label", default='SGR_1806_20', type=str)
     parser.add_argument("magnetar_tag", default='10223-01-03-010_90907122.0225', type=str)
