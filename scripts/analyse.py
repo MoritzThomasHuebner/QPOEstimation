@@ -308,7 +308,7 @@ if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
-                               meta_data=meta_data, save='pickle')
+                               meta_data=meta_data, save=True, gzip=True)
 
 if plot:
     result.plot_all()
