@@ -33,7 +33,7 @@
 # Magnetar flares
 for n_components in {0..4}
 do
-   for model in red_noise qpo pure_qpo general_qpo white_noise
+   for model in red_noise qpo pure_qpo general_qpo
    do
      sbatch analyse_submit.sh gaussian_process ${model} ${n_components}
      sbatch analyse_submit.sh gaussian_process_windowed ${model} ${n_components}
