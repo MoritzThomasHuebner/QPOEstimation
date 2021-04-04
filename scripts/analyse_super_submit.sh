@@ -31,7 +31,7 @@
 #done
 
 # Magnetar flares
-for n_components in {0..4}
+for n_components in {4..5}
 do
    for model in red_noise qpo pure_qpo general_qpo
    do

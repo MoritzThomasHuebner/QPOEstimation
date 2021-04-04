@@ -86,10 +86,10 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    # matplotlib.use('Qt5Agg')
+    matplotlib.use('Qt5Agg')
 
-    data_source = 'grb'
-    run_mode = 'entire_segment'
+    data_source = 'magnetar_flare'
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -97,17 +97,17 @@ else:
 
     solar_flare_id = "121022782"
     grb_id = "090709A"
-    grb_binning = "1024ms"
-    grb_detector = 'konus'
+    grb_binning = "1s"
+    grb_detector = 'swift'
 
     magnetar_label = 'SGR_1806_20'
-    magnetar_tag = '10223-01-03-010_90908036.8701'
+    magnetar_tag = '10223-01-03-01_90931418.874'
     magnetar_bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
 
-    start_time = 0.1
-    end_time = 0.2
+    start_time = 0.116
+    end_time = 0.37
 
     period_number = 14
     run_id = 6
@@ -116,14 +116,16 @@ else:
 
     injection_id = 0
 
-    offset = True
+    offset = False
     polynomial_max = 1000000
     amplitude_min = None
     amplitude_max = None
     offset_min = None
     offset_max = None
-    sigma_min = 0.1
-    sigma_max = 10000
+    # sigma_min = 0.1
+    # sigma_max = 10000
+    sigma_min = None
+    sigma_max = None
     # t_0_min = start_time - 20
     t_0_min = None
     # t_0_min = None
@@ -131,8 +133,8 @@ else:
     tau_min = -10
     tau_max = 10
 
-    min_log_a = -10
-    max_log_a = 15
+    min_log_a = -5
+    max_log_a = 30
     # min_log_c = -10
     min_log_c = None
     max_log_c = None
@@ -140,10 +142,10 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "general_qpo"
+    recovery_mode = "red_noise"
     likelihood_model = "gaussian_process"
     background_model = "fred"
-    n_components = 1
+    n_components = 4
 
     band_minimum = None
     band_maximum = None
@@ -152,7 +154,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 400
+    nlive = 1000
     use_ratio = False
 
     try_load = False
@@ -247,7 +249,6 @@ elif data_source == 'injection':
 else:
     raise ValueError
 
-
 # from scipy.signal import periodogram
 # freqs, powers = periodogram(counts, fs=1)
 # # plt.xlim(1, 128)
@@ -275,6 +276,7 @@ else:
 
 if plot:
     plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
+    # plt.plot(times, y, label='flux')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
     plt.show()
@@ -291,6 +293,7 @@ priors = get_priors(times=times, y=y, likelihood_model=likelihood_model, kernel_
 kernel = get_kernel(kernel_type=recovery_mode)
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
                                      y=y, yerr=yerr, likelihood_model=likelihood_model)
+# likelihood = bilby.likelihood.ZeroLikelihood(likelihood)
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components,
                  offset=offset)

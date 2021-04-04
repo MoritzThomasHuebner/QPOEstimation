@@ -146,7 +146,7 @@ class GPResult(bilby.result.Result):
         plt.clf()
 
     def plot_corner(self, **kwargs):
-        super().plot_corner(outdir=self.corner_outdir, truths=self.truths)
+        super().plot_corner(outdir=self.corner_outdir, truths=self.truths, **kwargs)
 
     def plot_frequency_posterior(self):
         if self.kernel_type in OSCILLATORY_MODELS:

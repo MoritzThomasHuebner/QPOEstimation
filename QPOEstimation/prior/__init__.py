@@ -36,6 +36,12 @@ def get_priors(**kwargs):
     if kwargs['t_0_max'] is None:
         kwargs['t_0_max'] = kwargs['times'][-1] + 0.1 * segment_length
 
+    if kwargs['sigma_min'] is None:
+        kwargs['sigma_min'] = 1/sampling_frequency
+
+    if kwargs['sigma_max'] is None:
+        kwargs['sigma_max'] = 2 * segment_length
+
 
     priors = bilby.core.prior.ConditionalPriorDict()
     mean_priors = mean.get_mean_prior(**kwargs)
