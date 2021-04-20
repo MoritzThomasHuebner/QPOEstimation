@@ -144,8 +144,8 @@ else:
     injection_mode = "qpo"
     recovery_mode = "red_noise"
     likelihood_model = "gaussian_process"
-    background_model = "gaussian"
-    n_components = 2
+    background_model = "skew_gaussian"
+    n_components = 1
 
     band_minimum = None
     band_maximum = None
