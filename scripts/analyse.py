@@ -126,9 +126,9 @@ else:
     # sigma_max = 10000
     sigma_min = None
     sigma_max = None
-    # t_0_min = start_time - 20
+    # t_0_min = 1e-3
+    # t_0_max = 1000
     t_0_min = None
-    # t_0_min = None
     t_0_max = None
     tau_min = -10
     tau_max = 10
@@ -144,8 +144,8 @@ else:
     injection_mode = "qpo"
     recovery_mode = "red_noise"
     likelihood_model = "gaussian_process"
-    background_model = "fred"
-    n_components = 4
+    background_model = "gaussian"
+    n_components = 2
 
     band_minimum = None
     band_maximum = None
