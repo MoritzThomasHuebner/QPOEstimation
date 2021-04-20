@@ -78,6 +78,27 @@ def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
+def get_skew_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
+    priors = ConditionalPriorDict()
+    for ii in range(n_components):
+        if n_components == 1:
+            priors[f'mean:t_0_{ii}'] = Uniform(kwargs['t_0_min'], kwargs['t_0_max'], name=f"mean:t_0_{ii}")
+        elif ii == 0:
+            priors[f"mean:t_0_{ii}"] = Beta(minimum=kwargs['t_0_min'], maximum=kwargs['t_0_max'], alpha=1,
+                                            beta=n_components, name=f"mean:t_0_{ii}")
+        else:
+            priors[f"mean:t_0_{ii}"] = QPOEstimation.prior.minimum.MinimumPrior(
+                order=n_components - ii, minimum_spacing=minimum_spacing, minimum=kwargs['t_0_min'],
+                maximum=kwargs['t_0_max'], name=f"mean:t_0_{ii}")
+        priors[f'mean:amplitude_{ii}'] = bilby.core.prior.LogUniform(
+            minimum=kwargs['amplitude_min'], maximum=kwargs['amplitude_max'], name=f'A_{ii}')
+        priors[f'mean:sigma_rise_{ii}'] = bilby.core.prior.LogUniform(
+            minimum=kwargs['sigma_min'], maximum=kwargs['sigma_max'], name=f'sigma_rise_{ii}')
+        priors[f'mean:sigma_fall_{ii}'] = bilby.core.prior.LogUniform(
+            minimum=kwargs['sigma_min'], maximum=kwargs['sigma_max'], name=f'sigma_fall_{ii}')
+    return priors
+
+
 def get_log_normal_priors(n_components=1, minimum_spacing=0, **kwargs):
     return get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
 
@@ -106,4 +127,4 @@ def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
 
 _N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
                            log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,
-                           fred=get_fred_priors)
+                           fred=get_fred_priors, skew_gaussian=get_skew_gaussian_priors)

@@ -27,6 +27,15 @@ def gaussian(t, amplitude, t_0, sigma):
     return amplitude * np.exp(-(t - t_0) ** 2 / (2 * sigma ** 2))
 
 
+def skew_gaussian(times, amplitude, t_0, sigma_rise, sigma_fall):
+    before_burst_indices = np.where(times <= t_0)
+    after_burst_indices = np.where(times > t_0)
+    envelope = np.zeros(len(times))
+    envelope[before_burst_indices] = gaussian(t=times, amplitude=amplitude, t_0=t_0, sigma=sigma_rise)
+    envelope[after_burst_indices] = gaussian(t=times, amplitude=amplitude, t_0=t_0, sigma=sigma_fall)
+    return envelope
+
+
 def log_normal(t, amplitude, t_0, sigma):
     return amplitude / t * np.exp(-(np.log(t) - t_0)**2 / (2 * sigma**2))
 
