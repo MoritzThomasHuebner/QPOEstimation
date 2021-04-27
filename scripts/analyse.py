@@ -88,14 +88,14 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'magnetar_flare'
+    data_source = 'solar_flare'
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
     variance_stabilisation = False
 
-    solar_flare_id = "121022782"
+    solar_flare_id = "go1520110128"
     grb_id = "090709A"
     grb_binning = "1s"
     grb_detector = 'swift'
@@ -106,8 +106,8 @@ else:
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
 
-    start_time = 0.116
-    end_time = 0.37
+    start_time = 36000
+    end_time = 39000
 
     period_number = 14
     run_id = 6
@@ -116,7 +116,7 @@ else:
 
     injection_id = 0
 
-    offset = False
+    offset = True
     polynomial_max = 1000000
     amplitude_min = None
     amplitude_max = None
@@ -218,8 +218,8 @@ elif data_source == 'magnetar_flare':
     else:
         raise ValueError
 elif data_source == 'solar_flare':
-    times, counts = get_solar_flare_data(run_mode, solar_flare_id=solar_flare_id,
-                                         start_time=start_time, end_time=end_time)
+    times, y, yerr = get_solar_flare_data(run_mode, solar_flare_id=solar_flare_id,
+                                          start_time=start_time, end_time=end_time)
     outdir = f"solar_flare_{solar_flare_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
@@ -257,7 +257,7 @@ else:
 # plt.ylabel('Power [AU]')
 # plt.show()
 
-if data_source == 'grb':
+if data_source in ['grb', 'solar_flare']:
     pass
 elif data_source == 'injection':
     y = counts

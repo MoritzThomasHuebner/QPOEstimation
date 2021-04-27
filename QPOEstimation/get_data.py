@@ -122,14 +122,20 @@ def get_solar_flare_data(run_mode, **kwargs):
     return _SOLAR_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
-def get_all_solar_flare_data(solar_flare_id="120704187", **kwargs):
-    data = np.loadtxt(f'data/SolarFlare/{solar_flare_id}_ctime_lc.txt')
-    return data[:, 0], data[:, 1]
+def get_all_solar_flare_data(solar_flare_id="go1520110128", **kwargs):
+    from astropy.io import fits
+    data = fits.open(f'data/SolarFlare/{solar_flare_id}.fits')
+
+    times = data[2].data[0][0]
+    flux = data[2].data[0][1][:, 0]
+    flux_err = data[2].data[0][1][:, 1]
+    return times, flux, flux_err
 
 
-def get_solar_flare_data_from_segment(solar_flare_id="120704187", start_time=None, end_time=None, **kwargs):
-    times, counts = get_all_solar_flare_data(solar_flare_id=solar_flare_id)
-    return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
+
+def get_solar_flare_data_from_segment(solar_flare_id="go1520110128", start_time=None, end_time=None, **kwargs):
+    times, flux, flux_err = get_all_solar_flare_data(solar_flare_id=solar_flare_id)
+    return truncate_data(times=times, counts=flux, start=start_time, stop=end_time, yerr=flux_err)
 
 
 _GRB_RUN_MODES = dict(select_time=get_grb_data_from_segment,
