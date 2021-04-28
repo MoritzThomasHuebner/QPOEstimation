@@ -5,6 +5,7 @@ from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
 import QPOEstimation
 from QPOEstimation.get_data import *
@@ -25,6 +26,9 @@ if len(sys.argv) > 1:
     data_mode = args.data_mode
     alpha = args.alpha
     variance_stabilisation = boolean_string(args.variance_stabilisation)
+
+    hares_and_hounds_id = args.hares_and_hounds_id
+    hares_and_hounds_round = args.hares_and_hounds_round
 
     solar_flare_id = args.solar_flare_id
     grb_id = args.grb_id
@@ -70,6 +74,7 @@ if len(sys.argv) > 1:
     likelihood_model = args.likelihood_model
     background_model = args.background_model
     n_components = args.n_components
+    jitter_term = boolean_string(args.jitter_term)
 
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
@@ -88,12 +93,15 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'solar_flare'
-    run_mode = 'select_time'
+    data_source = 'hares_and_hounds'
+    run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
     variance_stabilisation = False
+
+    hares_and_hounds_id = "37274"
+    hares_and_hounds_round = 'HH2'
 
     solar_flare_id = "go1520110128"
     grb_id = "090709A"
@@ -142,10 +150,11 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "red_noise"
+    recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process"
-    background_model = "skew_gaussian"
+    background_model = "fred"
     n_components = 1
+    jitter_term = True
 
     band_minimum = None
     band_maximum = None
@@ -154,7 +163,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 1000
+    nlive = 300
     use_ratio = False
 
     try_load = False
@@ -246,9 +255,19 @@ elif data_source == 'injection':
     outdir = get_injection_outdir(injection_mode=injection_mode, recovery_mode=recovery_mode,
                                   likelihood_model=likelihood_model)
     label = f"{str(injection_id).zfill(2)}"
+elif data_source == 'hares_and_hounds':
+    times, y = get_hares_and_hounds_data(run_mode, hares_and_hounds_id=hares_and_hounds_id,
+                                         hares_and_hounds_round=hares_and_hounds_round,
+                                         start_time=start_time, end_time=end_time)
+    outdir = f"hares_and_hounds_{hares_and_hounds_round}_{hares_and_hounds_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
+    if run_mode == 'select_time':
+        label = f'{start_time}_{end_time}'
+    elif run_mode == 'entire_segment':
+        label = 'entire_segment'
+    else:
+        raise ValueError
 else:
     raise ValueError
-
 # from scipy.signal import periodogram
 # freqs, powers = periodogram(counts, fs=1)
 # # plt.xlim(1, 128)
@@ -259,6 +278,8 @@ else:
 
 if data_source in ['grb', 'solar_flare']:
     pass
+elif data_source == 'hares_and_hounds':
+    yerr = np.zeros(len(y))
 elif data_source == 'injection':
     y = counts
     yerr = np.ones(len(counts))
@@ -288,9 +309,9 @@ priors = get_priors(times=times, y=y, likelihood_model=likelihood_model, kernel_
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
-                    n_components=n_components, offset=offset, **mean_prior_bound_dict)
+                    n_components=n_components, offset=offset, jitter_term=jitter_term, **mean_prior_bound_dict)
 
-kernel = get_kernel(kernel_type=recovery_mode)
+kernel = get_kernel(kernel_type=recovery_mode, jitter_term=jitter_term)
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
                                      y=y, yerr=yerr, likelihood_model=likelihood_model)
 # likelihood = bilby.likelihood.ZeroLikelihood(likelihood)
@@ -311,7 +332,7 @@ if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
-                               meta_data=meta_data, save=True, gzip=True)
+                               meta_data=meta_data, save=True, gzip=False)
 
 if plot:
     result.plot_all()

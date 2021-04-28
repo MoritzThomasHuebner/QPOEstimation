@@ -132,10 +132,28 @@ def get_all_solar_flare_data(solar_flare_id="go1520110128", **kwargs):
     return times, flux, flux_err
 
 
-
 def get_solar_flare_data_from_segment(solar_flare_id="go1520110128", start_time=None, end_time=None, **kwargs):
     times, flux, flux_err = get_all_solar_flare_data(solar_flare_id=solar_flare_id)
     return truncate_data(times=times, counts=flux, start=start_time, stop=end_time, yerr=flux_err)
+
+
+def get_hares_and_hounds_data(run_mode, **kwargs):
+    """ Catch all function """
+    return _HARES_AND_HOUNDS_RUN_MODES[run_mode](**kwargs)
+
+
+def get_all_hares_and_hounds_data(hares_and_hounds_id="5700", hares_and_hounds_round='HH2', **kwargs):
+    from astropy.io import fits
+    data = fits.open(f'data/hares_and_hounds/{hares_and_hounds_round}/flare{hares_and_hounds_id}.fits')
+    lc = data[1].data
+    times = np.array([lc[i][0] for i in range(len(lc))])
+    flux = np.array([lc[i][1] for i in range(len(lc))])
+    return times, flux
+
+
+def get_hares_and_hounds_data_from_segment(hares_and_hounds_id="5700", hares_and_hounds_round='HH2', start_time=None, end_time=None, **kwargs):
+    times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id, hares_and_hounds_round=hares_and_hounds_round)
+    return truncate_data(times=times, counts=flux, start=start_time, stop=end_time)
 
 
 _GRB_RUN_MODES = dict(select_time=get_grb_data_from_segment,
@@ -151,3 +169,6 @@ _GIANT_FLARE_RUN_MODES = dict(candidates=get_candidates_data,
                               sliding_window=get_giant_flare_data_from_period,
                               select_time=get_giant_flare_data_from_segment,
                               entire_segment=get_all_giant_flare_data)
+
+_HARES_AND_HOUNDS_RUN_MODES = dict(select_time=get_hares_and_hounds_data_from_segment,
+                                   entire_segment=get_all_hares_and_hounds_data)

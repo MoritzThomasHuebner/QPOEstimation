@@ -115,13 +115,18 @@ def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
     for ii in range(n_components):
         duration = kwargs['times'][-1] - kwargs['times'][0]
         dt = kwargs['times'][1] - kwargs['times'][0]
-
+        sigma_min = kwargs.get("sigma_min")
+        sigma_max = kwargs.get("sigma_max")
+        if sigma_min is None:
+            sigma_min = dt
+        if sigma_max is None:
+            sigma_max = duration
         # priors[f'mean:skewness_{ii}'] = bilby.core.prior.LogUniform(
         #     minimum=kwargs['skewness_min'], maximum=kwargs['skewness_max'], name=f'skewness_{ii}')
         priors[f'mean:sigma_rise_{ii}'] = bilby.core.prior.LogUniform(
-            minimum=dt, maximum=duration, name=f'sigma_rise_{ii}')
+            minimum=sigma_min, maximum=sigma_max, name=f'sigma_rise_{ii}')
         priors[f'mean:sigma_fall_{ii}'] = bilby.core.prior.LogUniform(
-            minimum=dt, maximum=duration, name=f'sigma_fall_{ii}')
+            minimum=sigma_min, maximum=sigma_max, name=f'sigma_fall_{ii}')
     return priors
 
 

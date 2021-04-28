@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 
 import bilby
 
@@ -6,7 +7,7 @@ from QPOEstimation.prior.minimum import MinimumPrior
 
 
 def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
-                     band_maximum, max_log_c=np.nan, **kwargs):
+                     band_maximum, max_log_c=np.nan, jitter_term=False, **kwargs):
     if np.isnan(max_log_c):
         max_log_c = np.log(band_maximum)
 
@@ -22,7 +23,27 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
         priors = get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     else:
         raise ValueError('Recovery mode not defined')
+    if jitter_term:
+        priors = _add_jitter_term(priors)
     return priors
+
+
+def _add_jitter_term(priors):
+    new_priors = deepcopy(priors)
+    for k, v in priors.items():
+        if ':' in k:
+            if '[' not in k:
+                new_key = k.replace(':', ':terms[0]:')
+                new_priors[new_key] = new_priors[k]
+                new_priors[new_key].name = f"terms[0]:{new_priors[new_key].name}"
+                del new_priors[k]
+    n_terms = 0
+    for k in new_priors.keys():
+        for i in range(5):
+            if f"{i}" in k and n_terms < i + 1:
+                n_terms = i + 1
+    new_priors[f'kernel:terms[{n_terms}]:log_sigma'] = bilby.core.prior.Uniform(minimum=-5, maximum=5, name=f'terms[{n_terms}]:log_sigma')
+    return new_priors
 
 
 def get_white_noise_prior():

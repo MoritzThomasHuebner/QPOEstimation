@@ -343,19 +343,23 @@ class PureQPOTerm(terms.Term):
         return a, 0.0, c, 2 * np.pi * f,
 
 
-def get_kernel(kernel_type):
+def get_kernel(kernel_type, jitter_term=False):
     if kernel_type == "white_noise":
-        return celerite.terms.JitterTerm(log_sigma=-20)
+        res = celerite.terms.JitterTerm(log_sigma=-20)
     elif kernel_type == "qpo":
-        return QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
+        res = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
     elif kernel_type == "pure_qpo":
-        return PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
+        res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
     elif kernel_type == "red_noise":
-        return ExponentialTerm(log_a=0.1, log_c=-0.01)
+        res = ExponentialTerm(log_a=0.1, log_c=-0.01)
     elif kernel_type == "general_qpo":
-        return PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+        res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
     else:
         raise ValueError('Recovery mode not defined')
+
+    if jitter_term:
+        res += celerite.terms.JitterTerm(log_sigma=-20)
+    return res
 
 
 def get_mean_model(model_type, n_components=1, y=None, offset=False):
