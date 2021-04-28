@@ -259,7 +259,7 @@ elif data_source == 'hares_and_hounds':
     times, y = get_hares_and_hounds_data(run_mode, hares_and_hounds_id=hares_and_hounds_id,
                                          hares_and_hounds_round=hares_and_hounds_round,
                                          start_time=start_time, end_time=end_time)
-    outdir = f"hares_and_hounds_{hares_and_hounds_round}_{hares_and_hounds_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
+    outdir = f"hares_and_hounds_{hares_and_hounds_round}/{hares_and_hounds_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     elif run_mode == 'entire_segment':
