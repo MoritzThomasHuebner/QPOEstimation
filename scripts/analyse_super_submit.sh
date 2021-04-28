@@ -31,16 +31,16 @@
 #done
 
 # Magnetar flares
-for n_components in {0..2}
-do
-   for model in red_noise qpo pure_qpo general_qpo
-   do
-     sbatch analyse_submit.sh gaussian_process ${model} ${n_components} gaussian
-     sbatch analyse_submit.sh gaussian_process ${model} ${n_components} skew_gaussian
-     sbatch analyse_submit.sh gaussian_process_windowed ${model} ${n_components} gaussian
-     sbatch analyse_submit.sh gaussian_process_windowed ${model} ${n_components} skew_gaussian
-   done
-done
+#for n_components in {0..2}
+#do
+#   for model in red_noise qpo pure_qpo general_qpo
+#   do
+#     sbatch analyse_submit.sh gaussian_process ${model} ${n_components} gaussian
+#     sbatch analyse_submit.sh gaussian_process ${model} ${n_components} skew_gaussian
+#     sbatch analyse_submit.sh gaussian_process_windowed ${model} ${n_components} gaussian
+#     sbatch analyse_submit.sh gaussian_process_windowed ${model} ${n_components} skew_gaussian
+#   done
+#done
 
 #for injection_id in {0..99}
 #do
