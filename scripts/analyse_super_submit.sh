@@ -71,6 +71,7 @@ do
    do
       for model in red_noise qpo general_qpo
       do
+        echo $filename
         sbatch analyse_submit.sh ${filename} gaussian_process ${model} ${n_components} fred
 #        sbatch analyse_submit.sh ${filename} gaussian_process_windowed ${model} ${n_components} fred
       done
