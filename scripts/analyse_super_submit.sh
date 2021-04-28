@@ -69,9 +69,8 @@ for filename in 10788 122522 129113 159804 161404 165101 166659 172202 173913 18
 do
    for n_components in {0..2}
    do
-      for model in red_noise qpo general_qpo
+      for model in general_qpo
       do
-        echo $filename
         sbatch analyse_submit.sh ${filename} gaussian_process ${model} ${n_components} fred
 #        sbatch analyse_submit.sh ${filename} gaussian_process_windowed ${model} ${n_components} fred
       done
