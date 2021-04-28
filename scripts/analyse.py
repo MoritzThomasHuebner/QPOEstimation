@@ -100,7 +100,7 @@ else:
     alpha = 0.02
     variance_stabilisation = False
 
-    hares_and_hounds_id = "37274"
+    hares_and_hounds_id = "5700"
     hares_and_hounds_round = 'HH2'
 
     solar_flare_id = "go1520110128"
@@ -317,7 +317,7 @@ likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_m
 # likelihood = bilby.likelihood.ZeroLikelihood(likelihood)
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components,
-                 offset=offset)
+                 offset=offset, jitter_term=jitter_term)
 
 
 label += suffix
