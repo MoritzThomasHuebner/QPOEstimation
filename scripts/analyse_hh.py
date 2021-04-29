@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 # matplotlib.use("Qt5Agg")
 
 import os
-flares = np.array(os.listdir('hares_and_hounds_HH2'))
-
+flares = np.array(os.listdir('hares_and_hounds_HH2_just_figures'))
+print(len(flares))
 evidence_qpo_1_fred_list = []
 evidence_qpo_2_fred_list = []
 evidence_qpo_1_gaussian_list = []
