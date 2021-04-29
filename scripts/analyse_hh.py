@@ -4,7 +4,7 @@ import bilby
 
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use("Qt5Agg")
+# matplotlib.use("Qt5Agg")
 
 import os
 flares = np.array(os.listdir('hares_and_hounds_HH2'))

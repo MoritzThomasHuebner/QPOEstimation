@@ -100,7 +100,7 @@ else:
     alpha = 0.02
     variance_stabilisation = False
 
-    hares_and_hounds_id = "5700"
+    hares_and_hounds_id = "265704"
     hares_and_hounds_round = 'HH2'
 
     solar_flare_id = "go1520110128"
