@@ -86,6 +86,7 @@ plt.xlabel('Event ID')
 plt.ylabel('QPO ln BF')
 plt.legend()
 plt.savefig('hh_qpo_bayes_factors.png')
+plt.clf()
 
 plt.plot(evidence_qpo_1_fred_list-evidence_qpo_1_fred_list, label='1_freds')
 plt.plot(evidence_qpo_2_fred_list-evidence_qpo_1_fred_list, label='2_freds')
@@ -94,6 +95,7 @@ plt.xlabel('Event ID')
 plt.ylabel('Mean model ln BF')
 plt.legend()
 plt.savefig('hh_mean_model_qpo_bayes_factors.png')
+plt.clf()
 
 plt.plot(evidence_red_noise_1_fred_list-evidence_red_noise_1_fred_list, label='1_freds')
 plt.plot(evidence_red_noise_2_fred_list-evidence_red_noise_1_fred_list, label='2_freds')
@@ -102,7 +104,7 @@ plt.xlabel('Event ID')
 plt.ylabel('Mean model ln BF')
 plt.legend()
 plt.savefig('hh_mean_model_red_noise_bayes_factors.png')
-
+plt.clf()
 
 qpo_evidence_list_list = [evidence_qpo_1_fred_list, evidence_qpo_2_fred_list, evidence_qpo_1_gaussian_list]
 red_noise_evidence_list_list = [evidence_red_noise_1_fred_list, evidence_red_noise_2_fred_list, evidence_red_noise_1_gaussian_list]
@@ -134,3 +136,4 @@ print(qpo_max_evidence_tags[qpo_candidates])
 print(red_noise_max_evidence_tags[qpo_candidates])
 
 plt.savefig('hh_qpo_bayes_factors_optimal_mean.png')
+plt.clf()
