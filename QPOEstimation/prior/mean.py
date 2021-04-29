@@ -8,9 +8,9 @@ import QPOEstimation
 def get_mean_prior(model_type, **kwargs):
 
     if kwargs['amplitude_min'] is None:
-        kwargs['amplitude_min'] = min(kwargs['y']) / 10 + 1e-6
+        kwargs['amplitude_min'] = (np.median(kwargs['y']) - min(kwargs['y'])) / 10 + 1e-6
     if kwargs['amplitude_max'] is None:
-        kwargs['amplitude_max'] = max(kwargs['y']) * 2
+        kwargs['amplitude_max'] = (np.median(kwargs['y']) - min(kwargs['y'])) * 2
 
     if model_type == 'polynomial':
         priors = get_polynomial_prior(**kwargs)
