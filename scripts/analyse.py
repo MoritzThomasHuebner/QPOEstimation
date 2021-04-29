@@ -94,7 +94,7 @@ else:
     matplotlib.use('Qt5Agg')
 
     data_source = 'hares_and_hounds'
-    run_mode = 'entire_segment'
+    run_mode = 'from_maximum'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -222,20 +222,16 @@ elif data_source == 'magnetar_flare':
     outdir = f"magnetar_flares/{magnetar_label}/{magnetar_tag}/{run_mode}/{recovery_mode}/{likelihood_model}/"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
-    elif run_mode == 'entire_segment':
-        label = 'entire_segment'
     else:
-        raise ValueError
+        label = run_mode
 elif data_source == 'solar_flare':
     times, y, yerr = get_solar_flare_data(run_mode, solar_flare_id=solar_flare_id,
                                           start_time=start_time, end_time=end_time)
     outdir = f"solar_flare_{solar_flare_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
-    elif run_mode == 'entire_segment':
-        label = 'entire_segment'
     else:
-        raise ValueError
+        label = run_mode
 elif data_source == 'grb':
     times, y, yerr = get_grb_data(
         run_mode, grb_id=grb_id, grb_binning=grb_binning,
@@ -243,10 +239,8 @@ elif data_source == 'grb':
     outdir = f"GRB{grb_id}_{grb_detector}/{run_mode}/{recovery_mode}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
-    elif run_mode == 'entire_segment':
-        label = 'entire_segment'
     else:
-        raise ValueError
+        label = run_mode
 
 elif data_source == 'injection':
     times, counts, truths = get_injection_data(
@@ -262,10 +256,8 @@ elif data_source == 'hares_and_hounds':
     outdir = f"hares_and_hounds_{hares_and_hounds_round}/{hares_and_hounds_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
-    elif run_mode == 'entire_segment':
-        label = 'entire_segment'
     else:
-        raise ValueError
+        label = run_mode
 else:
     raise ValueError
 # from scipy.signal import periodogram

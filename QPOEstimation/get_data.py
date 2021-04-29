@@ -156,6 +156,12 @@ def get_hares_and_hounds_data_from_segment(hares_and_hounds_id="5700", hares_and
     return truncate_data(times=times, counts=flux, start=start_time, stop=end_time)
 
 
+def get_hares_and_hounds_data_from_maximum(hares_and_hounds_id="5700", hares_and_hounds_round='HH2', **kwargs):
+    times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id, hares_and_hounds_round=hares_and_hounds_round)
+    max_index = np.argmax(flux)
+    return truncate_data(times=times, counts=flux, start=times[max_index], stop=times[-1])
+
+
 _GRB_RUN_MODES = dict(select_time=get_grb_data_from_segment,
                       entire_segment=get_all_grb_data)
 
@@ -171,4 +177,5 @@ _GIANT_FLARE_RUN_MODES = dict(candidates=get_candidates_data,
                               entire_segment=get_all_giant_flare_data)
 
 _HARES_AND_HOUNDS_RUN_MODES = dict(select_time=get_hares_and_hounds_data_from_segment,
-                                   entire_segment=get_all_hares_and_hounds_data)
+                                   entire_segment=get_all_hares_and_hounds_data,
+                                   from_maximum=get_hares_and_hounds_data_from_maximum)
