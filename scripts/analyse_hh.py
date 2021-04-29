@@ -71,26 +71,37 @@ except Exception:
     np.savetxt('hh_evidence_red_noise_1_gaussian', evidence_red_noise_1_gaussian_list)
 
 
-for red_noise_evidences, qpo_evidences in zip([evidence_red_noise_1_fred_list, evidence_red_noise_2_fred_list, evidence_red_noise_1_gaussian_list],
-                                              [evidence_qpo_1_fred_list, evidence_qpo_2_fred_list, evidence_qpo_1_gaussian_list]):
+for red_noise_evidences, qpo_evidences, label in zip([evidence_red_noise_1_fred_list, evidence_red_noise_2_fred_list, evidence_red_noise_1_gaussian_list],
+                                                     [evidence_qpo_1_fred_list, evidence_qpo_2_fred_list, evidence_qpo_1_gaussian_list],
+                                                     ['1_freds', '2_freds', '1_gaussians']):
 
+    plt.plot(qpo_evidences - red_noise_evidences, label=label)
     qpo_candidates = np.where(qpo_evidences - red_noise_evidences > 1)[0]
-    plt.plot(qpo_evidences - red_noise_evidences)
     print(qpo_candidates)
     print(qpo_evidences[qpo_candidates] - red_noise_evidences[qpo_candidates])
     print(flares[qpo_candidates])
     print()
-plt.show()
+# plt.show()
+plt.xlabel('Event ID')
+plt.ylabel('QPO ln BF')
+plt.legend()
+plt.savefig('hh_qpo_bayes_factors.png')
 
-plt.plot(evidence_qpo_1_fred_list-evidence_qpo_1_fred_list)
-plt.plot(evidence_qpo_2_fred_list-evidence_qpo_1_fred_list)
-plt.plot(evidence_qpo_1_gaussian_list-evidence_qpo_1_fred_list)
-plt.show()
+plt.plot(evidence_qpo_1_fred_list-evidence_qpo_1_fred_list, label='1_freds')
+plt.plot(evidence_qpo_2_fred_list-evidence_qpo_1_fred_list, label='2_freds')
+plt.plot(evidence_qpo_1_gaussian_list-evidence_qpo_1_fred_list, label='1_gaussians')
+plt.xlabel('Event ID')
+plt.ylabel('Mean model ln BF')
+plt.legend()
+plt.savefig('hh_mean_model_qpo_bayes_factors.png')
 
-plt.plot(evidence_red_noise_1_fred_list-evidence_red_noise_1_fred_list)
-plt.plot(evidence_red_noise_2_fred_list-evidence_red_noise_1_fred_list)
-plt.plot(evidence_red_noise_1_gaussian_list-evidence_red_noise_1_fred_list)
-plt.show()
+plt.plot(evidence_red_noise_1_fred_list-evidence_red_noise_1_fred_list, label='1_freds')
+plt.plot(evidence_red_noise_2_fred_list-evidence_red_noise_1_fred_list, label='2_freds')
+plt.plot(evidence_red_noise_1_gaussian_list-evidence_red_noise_1_fred_list, label='1_gaussians')
+plt.xlabel('Event ID')
+plt.ylabel('Mean model ln BF')
+plt.legend()
+plt.savefig('hh_mean_model_red_noise_bayes_factors.png')
 
 
 qpo_evidence_list_list = [evidence_qpo_1_fred_list, evidence_qpo_2_fred_list, evidence_qpo_1_gaussian_list]
@@ -101,6 +112,8 @@ for i in range(len(evidence_qpo_1_fred_list)):
     qpo_max_evidence_tags.append(np.argmax([evidence_qpo_1_fred_list[i], evidence_qpo_2_fred_list[i], evidence_qpo_1_gaussian_list[i]]))
     red_noise_max_evidence_tags.append(np.argmax([evidence_red_noise_1_fred_list[i], evidence_red_noise_2_fred_list[i], evidence_red_noise_1_gaussian_list[i]]))
 
+qpo_max_evidence_tags = np.array(qpo_max_evidence_tags)
+red_noise_max_evidence_tags = np.array(red_noise_max_evidence_tags)
 
 qpo_evidences = []
 red_noise_evidences = []
@@ -113,4 +126,11 @@ qpo_evidences = np.array(qpo_evidences)
 red_noise_evidences = np.array(red_noise_evidences)
 
 plt.plot(qpo_evidences - red_noise_evidences)
-plt.show()
+qpo_candidates = np.where(qpo_evidences - red_noise_evidences > 1)[0]
+print(qpo_candidates)
+print(qpo_evidences[qpo_candidates] - red_noise_evidences[qpo_candidates])
+print(flares[qpo_candidates])
+print(qpo_max_evidence_tags[qpo_candidates])
+print(red_noise_max_evidence_tags[qpo_candidates])
+
+plt.savefig('hh_qpo_bayes_factors_optimal_mean.png')
