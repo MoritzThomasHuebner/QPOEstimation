@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # matplotlib.use("Qt5Agg")
 
 import os
-flares = np.array(os.listdir('hares_and_hounds_HH2_just_figures'))
+flares = np.array(sorted(os.listdir('hares_and_hounds_HH2_just_figures')))
 print(len(flares))
 evidence_qpo_1_fred_list = []
 evidence_qpo_2_fred_list = []
@@ -16,6 +16,8 @@ evidence_red_noise_1_fred_list = []
 evidence_red_noise_2_fred_list = []
 evidence_red_noise_1_gaussian_list = []
 run_mode = 'from_maximum'
+
+threshold_ln_bf = .0
 
 try:
     evidence_qpo_1_fred_list = np.loadtxt('hh_evidence_qpo_1_fred')
@@ -76,7 +78,7 @@ for red_noise_evidences, qpo_evidences, label in zip([evidence_red_noise_1_fred_
                                                      ['1_freds', '2_freds', '1_gaussians']):
 
     plt.plot(qpo_evidences - red_noise_evidences, label=label)
-    qpo_candidates = np.where(qpo_evidences - red_noise_evidences > 1)[0]
+    qpo_candidates = np.where(qpo_evidences - red_noise_evidences > threshold_ln_bf)[0]
     print(qpo_candidates)
     print(qpo_evidences[qpo_candidates] - red_noise_evidences[qpo_candidates])
     print(flares[qpo_candidates])
@@ -128,7 +130,7 @@ qpo_evidences = np.array(qpo_evidences)
 red_noise_evidences = np.array(red_noise_evidences)
 
 plt.plot(qpo_evidences - red_noise_evidences)
-qpo_candidates = np.where(qpo_evidences - red_noise_evidences > 1)[0]
+qpo_candidates = np.where(qpo_evidences - red_noise_evidences > threshold_ln_bf)[0]
 print(qpo_candidates)
 print(qpo_evidences[qpo_candidates] - red_noise_evidences[qpo_candidates])
 print(flares[qpo_candidates])
