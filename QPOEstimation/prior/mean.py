@@ -1,6 +1,6 @@
 import bilby
 import numpy as np
-from bilby.core.prior import ConditionalPriorDict, Uniform, Beta
+from bilby.core.prior import ConditionalPriorDict, Uniform, Beta, DeltaFunction
 
 import QPOEstimation
 
@@ -62,7 +62,9 @@ def get_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
 def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = ConditionalPriorDict()
     for ii in range(n_components):
-        if n_components == 1:
+        if kwargs['t_0_min'] == kwargs['t_0_max']:
+            priors[f'mean:t_0_{ii}'] = DeltaFunction(kwargs['t_0_min'], name=f"mean:t_0_{ii}")
+        elif n_components == 1:
             priors[f'mean:t_0_{ii}'] = Uniform(kwargs['t_0_min'], kwargs['t_0_max'], name=f"mean:t_0_{ii}")
         elif ii == 0:
             priors[f"mean:t_0_{ii}"] = Beta(minimum=kwargs['t_0_min'], maximum=kwargs['t_0_max'], alpha=1,
@@ -81,7 +83,9 @@ def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
 def get_skew_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = ConditionalPriorDict()
     for ii in range(n_components):
-        if n_components == 1:
+        if kwargs['t_0_min'] == kwargs['t_0_max']:
+            priors[f'mean:t_0_{ii}'] = DeltaFunction(kwargs['t_0_min'], name=f"mean:t_0_{ii}")
+        elif n_components == 1:
             priors[f'mean:t_0_{ii}'] = Uniform(kwargs['t_0_min'], kwargs['t_0_max'], name=f"mean:t_0_{ii}")
         elif ii == 0:
             priors[f"mean:t_0_{ii}"] = Beta(minimum=kwargs['t_0_min'], maximum=kwargs['t_0_max'], alpha=1,
