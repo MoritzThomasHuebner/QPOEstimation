@@ -1,6 +1,5 @@
 import QPOEstimation
 import numpy as np
-import bilby
 
 import matplotlib
 import matplotlib.pyplot as plt
