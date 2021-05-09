@@ -9,18 +9,6 @@ import matplotlib.pyplot as plt
 import os
 flares = np.array(sorted(os.listdir('hares_and_hounds_HH2_just_figures')))
 print(len(flares))
-evidence_qpo_1_fred_list = []
-evidence_qpo_2_fred_list = []
-evidence_qpo_3_fred_list = []
-evidence_qpo_1_gaussian_list = []
-evidence_qpo_2_gaussian_list = []
-evidence_qpo_3_gaussian_list = []
-evidence_red_noise_1_fred_list = []
-evidence_red_noise_2_fred_list = []
-evidence_red_noise_3_fred_list = []
-evidence_red_noise_1_gaussian_list = []
-evidence_red_noise_2_gaussian_list = []
-evidence_red_noise_3_gaussian_list = []
 run_mode = 'from_maximum'
 
 threshold_ln_bf = 0.0
@@ -39,6 +27,18 @@ try:
     evidence_red_noise_2_gaussian_list = np.loadtxt('hh_evidence_red_noise_2_gaussian')
     evidence_red_noise_3_gaussian_list = np.loadtxt('hh_evidence_red_noise_3_gaussian')
 except Exception:
+    evidence_qpo_1_fred_list = []
+    evidence_qpo_2_fred_list = []
+    evidence_qpo_3_fred_list = []
+    evidence_qpo_1_gaussian_list = []
+    evidence_qpo_2_gaussian_list = []
+    evidence_qpo_3_gaussian_list = []
+    evidence_red_noise_1_fred_list = []
+    evidence_red_noise_2_fred_list = []
+    evidence_red_noise_3_fred_list = []
+    evidence_red_noise_1_gaussian_list = []
+    evidence_red_noise_2_gaussian_list = []
+    evidence_red_noise_3_gaussian_list = []
     for flare in flares:
         print(flare)
         try:
