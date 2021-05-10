@@ -198,8 +198,7 @@ plt.savefig('hh_qpo_bayes_factors_optimal_mean.png')
 plt.clf()
 
 qpo_candidates = np.where(qpo_evidences - red_noise_evidences > threshold_ln_bf)[0]
-print(qpo_candidates)
-print(qpo_evidences[qpo_candidates] - red_noise_evidences[qpo_candidates])
-print(flares[qpo_candidates])
-print(qpo_max_evidence_tags[qpo_candidates])
-print(red_noise_max_evidence_tags[qpo_candidates])
+
+for qpo_candidate, qpo_evidence, red_noise_evidence, flare, qpo_max_evidence_tag, red_noise_max_evidence_tag in zip(qpo_candidates, qpo_evidences[qpo_candidates], red_noise_evidences[qpo_candidates], flares[qpo_candidates], qpo_max_evidence_tags[qpo_candidates], red_noise_max_evidence_tags[qpo_candidates]):
+    ln_bf = "{:.3f}".format(qpo_evidence - red_noise_evidence)
+    print(f"{flare}\t{ln_bf}\t{qpo_max_evidence_tag}\t{red_noise_max_evidence_tag}")

@@ -38,6 +38,9 @@ class GPResult(bilby.result.Result):
     def max_likelihood_parameters(self):
         return self.posterior.iloc[-1]
 
+    def get_random_posterior_samples(self, n_samples=10):
+        return [self.posterior.iloc[np.random.randint(len(self.posterior))] for _ in range(n_samples)]
+
     def get_likelihood(self):
         if self.likelihood_model == "gaussian_process_windowed":
             likelihood = WindowedCeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
@@ -47,7 +50,11 @@ class GPResult(bilby.result.Result):
                                             t=self.times, y=self.y, yerr=self.yerr)
         else:
             raise ValueError
-        for name, value in self.max_likelihood_parameters.items():
+        return self._set_likelihood_parameters(likelihood=likelihood, parameters=self.max_likelihood_parameters)
+
+    @staticmethod
+    def _set_likelihood_parameters(likelihood, parameters):
+        for name, value in parameters.items():
             try:
                 likelihood.gp.set_parameter(name=name, value=value)
             except ValueError:
@@ -100,7 +107,12 @@ class GPResult(bilby.result.Result):
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
-        plt.plot(taus, likelihood.gp.kernel.get_value(taus))
+        plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue")
+
+        samples = self.get_random_posterior_samples(20)
+        for sample in samples:
+            likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
+            plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue", alpha=0.3)
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
         plt.tight_layout()
@@ -143,7 +155,12 @@ class GPResult(bilby.result.Result):
         if self.mean_model != "mean":
             x = np.linspace(start_time, end_time, 5000)
             trend = likelihood.mean_model.get_value(x)
-            plt.plot(x, trend, color='green', label='Trend')
+            plt.plot(x, trend, color='green', label='Mean')
+            samples = self.get_random_posterior_samples(10)
+            for sample in samples:
+                likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
+                trend = likelihood.mean_model.get_value(x)
+                plt.plot(x, trend, color='green', alpha=0.3)
 
         plt.xlabel("time [s]")
         plt.ylabel("y")

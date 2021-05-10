@@ -6,11 +6,13 @@ import QPOEstimation
 
 
 def get_mean_prior(model_type, **kwargs):
-    mean = np.median(kwargs['y']) if not kwargs.get('offset', False) else 0
+    minimum = np.min(kwargs['y']) if kwargs.get('offset', False) else 0
+    maximum = np.max(kwargs['y'])
+    span = maximum - minimum
     if kwargs['amplitude_min'] is None:
-        kwargs['amplitude_min'] = max(mean + np.var(kwargs['y']) / 20, 1e-6)
+        kwargs['amplitude_min'] = 0.1 * span
     if kwargs['amplitude_max'] is None:
-        kwargs['amplitude_max'] = max(mean + np.var(kwargs['y']) * 20, 1e-6)
+        kwargs['amplitude_max'] = 1.2 * span
 
     if model_type == 'polynomial':
         priors = get_polynomial_prior(**kwargs)
@@ -19,13 +21,15 @@ def get_mean_prior(model_type, **kwargs):
     else:
         priors = dict()
 
-    if kwargs['offset_min'] is None:
-        kwargs['offset_min'] = min(kwargs['y']) / 10
-    if kwargs['offset_max'] is None:
-        kwargs['offset_max'] = max(kwargs['y']) * 2
+    offset_min = kwargs.get('offset_min')
+    offset_max = kwargs.get('offset_max')
+    if offset_min is None:
+        offset_min = minimum
+    if offset_max is None:
+        offset_max = maximum
 
     if kwargs.get('offset', False):
-        priors['mean:offset'] = bilby.prior.Uniform(minimum=kwargs['offset_min'], maximum=kwargs['offset_max'], name="offset")
+        priors['mean:offset'] = bilby.prior.Uniform(minimum=offset_min, maximum=offset_max, name="offset")
     return priors
 
 
@@ -135,19 +139,20 @@ def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
 
 
 def get_fred_norris_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
-    for ii in range(n_components):
-        duration = kwargs['times'][-1] - kwargs['times'][0]
-        dt = kwargs['times'][1] - kwargs['times'][0]
-        sigma_min = kwargs.get("sigma_min")
-        sigma_max = kwargs.get("sigma_max")
-        if sigma_min is None:
-            sigma_min = dt
-        if sigma_max is None:
-            sigma_max = duration
-        priors[f"mean:tau_{ii}"] = bilby.core.prior.LogUniform(
-            minimum=sigma_min, maximum=sigma_max, name=f'tau_{ii}')
-    return priors
+    raise ValueError
+#     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+#     for ii in range(n_components):
+#         duration = kwargs['times'][-1] - kwargs['times'][0]
+#         dt = kwargs['times'][1] - kwargs['times'][0]
+#         sigma_min = kwargs.get("sigma_min")
+#         sigma_max = kwargs.get("sigma_max")
+#         if sigma_min is None:
+#             sigma_min = dt
+#         if sigma_max is None:
+#             sigma_max = duration
+#         priors[f"mean:tau_{ii}"] = bilby.core.prior.LogUniform(
+#             minimum=sigma_min, maximum=sigma_max, name=f'tau_{ii}')
+#     return priors
 
 _N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
                            log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,

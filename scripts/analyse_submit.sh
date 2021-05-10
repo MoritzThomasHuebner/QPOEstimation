@@ -3,7 +3,7 @@
 #SBATCH --job-name=qpo
 #
 #SBATCH --ntasks=1
-#SBATCH --time=24:00:00
+#SBATCH --time=36:00:00
 #SBATCH --mem-per-cpu=4G
 
 #srun python analyse.py --data_source ${1} --injection_id ${2} --injection_mode pure_qpo --recovery_mode pure_qpo --amplitude_min 10 --amplitude_max 100 --skewness_min 0.1 --skewness_max 10 --sigma_min 0.1 --sigma_max 1 --t_0_min 0 --t_0_max 3 --min_log_a -1 --max_log_a 1 --min_log_c -1 --max_log_c 1 --likelihood_model ${3} --background_model fred --n_components 1 --segment_length 3 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True --nlive 500 --sample rwalk
@@ -20,4 +20,4 @@
 #srun python analyse.py --data_source magnetar_flare --magnetar_label SGR_1806_20 --magnetar_tag 10223-01-03-01_90931418.874 --magnetar_bin_size 0.001 --run_mode select_time --start_time 0.116 --end_time 0.37 --likelihood_model ${1} --recovery_mode ${2} --variance_stabilisation False --background_model skew_gaussian --n_components ${3} --plot True --nlive 2000 --sample rslice --min_log_a -10 --max_log_a 15 --resume True --try_load True
 
 #srun python analyse.py --data_source hares_and_hounds --run_mode entire_segment  --hares_and_hounds_id ${1} --hares_and_hounds_round HH2  --likelihood_model ${2} --recovery_mode ${3} --n_components ${4} --background_model ${5} --sample rwalk --nlive 1000 --use_ratio False --try_load False --resume False --plot True --offset True --jitter_term True --sampling_frequency 1
-srun python analyse.py --data_source hares_and_hounds --run_mode from_maximum  --hares_and_hounds_id ${1} --hares_and_hounds_round HH2  --likelihood_model ${2} --recovery_mode ${3} --n_components ${4} --background_model ${5} --sample rwalk --nlive 1500 --use_ratio False --try_load False --resume False --plot True --offset True --jitter_term True --sampling_frequency 1
+srun python analyse.py --data_source hares_and_hounds --run_mode from_maximum  --hares_and_hounds_id ${1} --hares_and_hounds_round HH2  --likelihood_model ${2} --recovery_mode ${3} --n_components ${4} --background_model ${5} --sample rwalk --nlive 2500 --use_ratio False --try_load False --resume False --plot True --offset True --jitter_term True --sampling_frequency 1
