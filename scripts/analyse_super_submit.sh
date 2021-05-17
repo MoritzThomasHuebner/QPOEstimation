@@ -24,7 +24,7 @@
 # GRB
 for n_components in {0..4}
 do
-   for model in red_noise general_qpo # qpo pure_qpo
+   for model in red_noise general_qpo
    do
      sbatch analyse_submit.sh ${model} ${n_components}
    done
