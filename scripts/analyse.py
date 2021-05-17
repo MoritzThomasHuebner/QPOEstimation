@@ -100,7 +100,7 @@ else:
     alpha = 0.02
     variance_stabilisation = False
 
-    hares_and_hounds_id = "265704"
+    hares_and_hounds_id = "912965"
     hares_and_hounds_round = 'HH2'
 
     solar_flare_id = "go1520110128"
@@ -114,8 +114,8 @@ else:
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
 
-    start_time = 36000
-    end_time = 39000
+    start_time = -4
+    end_time = 103
 
     period_number = 14
     run_id = 6
@@ -138,8 +138,8 @@ else:
     # t_0_max = 1000
     t_0_min = None
     t_0_max = None
-    tau_min = -10
-    tau_max = 10
+    tau_min = None
+    tau_max = None
 
     min_log_a = -5
     max_log_a = 30
@@ -150,9 +150,9 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "general_qpo"
-    likelihood_model = "gaussian_process"
-    background_model = "fred"
+    recovery_mode = "red_noise"
+    likelihood_model = "gaussian_process_windowed"
+    background_model = "gaussian"
     n_components = 1
     jitter_term = True
 
@@ -163,7 +163,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 300
+    nlive = 500
     use_ratio = False
 
     try_load = False
