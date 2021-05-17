@@ -26,8 +26,8 @@ for n_components in {0..4}
 do
    for model in red_noise general_qpo
    do
-#     sbatch analyse_submit.sh ${model} ${n_components} fred
-#     sbatch analyse_submit.sh ${model} ${n_components} skew_gaussian
+     sbatch analyse_submit.sh ${model} ${n_components} fred
+     sbatch analyse_submit.sh ${model} ${n_components} skew_gaussian
      sbatch analyse_submit.sh ${model} ${n_components} fred_norris
    done
 done
