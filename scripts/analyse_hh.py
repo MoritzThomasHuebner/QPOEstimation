@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # matplotlib.use("Qt5Agg")
 
 import os
-flares = np.array(sorted(os.listdir('hares_and_hounds_HH2_just_figures')))
+flares = np.array(sorted(os.listdir('hares_and_hounds_HH2')))
 print(len(flares))
 run_mode = 'from_maximum'
 
