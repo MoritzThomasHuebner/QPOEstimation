@@ -8,7 +8,7 @@ from QPOEstimation.prior.minimum import MinimumPrior
 
 def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
                      band_maximum, max_log_c=np.nan, jitter_term=False, **kwargs):
-    if np.isnan(max_log_c):
+    if max_log_c is None or np.isnan(max_log_c):
         max_log_c = np.log(band_maximum)
 
     if kernel_type == "white_noise":

@@ -241,6 +241,7 @@ elif data_source == 'grb':
         label = f'{start_time}_{end_time}'
     else:
         label = run_mode
+    times -= times[0]
 
 elif data_source == 'injection':
     times, counts, truths = get_injection_data(

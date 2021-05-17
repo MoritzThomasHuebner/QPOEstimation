@@ -129,8 +129,6 @@ def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
             sigma_min = dt
         if sigma_max is None:
             sigma_max = duration
-        # priors[f'mean:skewness_{ii}'] = bilby.core.prior.LogUniform(
-        #     minimum=kwargs['skewness_min'], maximum=kwargs['skewness_max'], name=f'skewness_{ii}')
         priors[f'mean:sigma_rise_{ii}'] = bilby.core.prior.LogUniform(
             minimum=sigma_min, maximum=sigma_max, name=f'sigma_rise_{ii}')
         priors[f'mean:sigma_fall_{ii}'] = bilby.core.prior.LogUniform(
@@ -139,20 +137,11 @@ def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
 
 
 def get_fred_norris_priors(n_components=1, minimum_spacing=0, **kwargs):
-    raise ValueError
-#     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
-#     for ii in range(n_components):
-#         duration = kwargs['times'][-1] - kwargs['times'][0]
-#         dt = kwargs['times'][1] - kwargs['times'][0]
-#         sigma_min = kwargs.get("sigma_min")
-#         sigma_max = kwargs.get("sigma_max")
-#         if sigma_min is None:
-#             sigma_min = dt
-#         if sigma_max is None:
-#             sigma_max = duration
-#         priors[f"mean:tau_{ii}"] = bilby.core.prior.LogUniform(
-#             minimum=sigma_min, maximum=sigma_max, name=f'tau_{ii}')
-#     return priors
+    priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+    for ii in range(n_components):
+        del priors[f'mean:sigma_{ii}']
+        priors[f'mean:psi_{ii}'] = bilby.core.prior.LogUniform(minimum=1e-2, maximum=1e2, name=f'psi_{ii}')
+    return priors
 
 _N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
                            log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,

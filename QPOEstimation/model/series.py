@@ -19,9 +19,10 @@ def fred(times, amplitude, t_0, sigma_rise, sigma_fall):
     return envelope
 
 
-def fred_norris(times, amplitude, sigma, t_0, tau):
-    frac = (times-t_0)/tau
-    return amplitude * np.exp(-sigma*(frac + 1/frac))
+def fred_norris(times, amplitude, psi, t_0):
+    frac = times / t_0
+    with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
+        return amplitude * np.exp(-psi * (frac + 1 / frac)) * np.exp(2 * psi)
 
 
 def fred_norris_extended(times, amplitude, sigma, t_0, tau, gamma, nu):
