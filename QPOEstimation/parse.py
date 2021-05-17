@@ -50,8 +50,8 @@ def parse_args():
     parser.add_argument("--t_0_min", default=None, type=float)
     parser.add_argument("--t_0_max", default=None, type=float)
 
-    parser.add_argument("--min_log_a", default=-15, type=float)
-    parser.add_argument("--max_log_a", default=10, type=float)
+    parser.add_argument("--min_log_a", default=-10, type=float)
+    parser.add_argument("--max_log_a", default=5, type=float)
     parser.add_argument("--min_log_c", default=None, type=float)
     parser.add_argument("--max_log_c", default=None, type=float)
     parser.add_argument("--minimum_window_spacing", default=0, type=float)

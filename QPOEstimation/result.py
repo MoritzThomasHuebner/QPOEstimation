@@ -211,6 +211,22 @@ class GPResult(bilby.result.Result):
         plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.png")
         plt.clf()
 
+    def plot_amplitude_ratio(self):
+        if self.kernel_type == "general_qpo":
+            qpo_log_amplitude_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
+            red_noise_log_amplitude_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
+            amplitude_ratio_samples = np.exp(qpo_log_amplitude_samples - red_noise_log_amplitude_samples)
+            plt.hist(amplitude_ratio_samples, bins="fd", density=True)
+            plt.xlabel('$a_{\mathrm{qpo}}/a_{\mathrm{rn}}$')
+            plt.ylabel('normalised PDF')
+            median = np.median(amplitude_ratio_samples)
+            percentiles = np.percentile(amplitude_ratio_samples, [16, 84])
+            plt.title(
+                f"{np.mean(amplitude_ratio_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+            plt.tight_layout()
+            plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.png")
+            plt.clf()
+
     def plot_all(self):
         self.plot_corner()
         self.plot_max_likelihood_psd()
@@ -218,3 +234,4 @@ class GPResult(bilby.result.Result):
         self.plot_frequency_posterior()
         self.plot_lightcurve()
         self.plot_qpo_log_amplitude()
+        self.plot_amplitude_ratio()
