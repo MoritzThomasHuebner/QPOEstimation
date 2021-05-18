@@ -140,10 +140,23 @@ def get_fred_norris_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
         del priors[f'mean:sigma_{ii}']
-        priors[f'mean:psi_{ii}'] = bilby.core.prior.LogUniform(minimum=1e-2, maximum=1e2, name=f'psi_{ii}')
+        priors[f'mean:log_psi_{ii}'] = bilby.core.prior.Uniform(minimum=np.log(2e-2), maximum=np.log(2e2), name=f'psi_{ii}')
+        priors[f'mean:delta_{ii}'] = bilby.core.prior.Uniform(minimum=0, maximum=kwargs['times'][-1], name=f'delta_{ii}')
     return priors
+
+
+def get_fred_norris_extended_priors(n_components=1, minimum_spacing=0, **kwargs):
+    priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+    for ii in range(n_components):
+        del priors[f'mean:sigma_{ii}']
+        priors[f'mean:log_psi_{ii}'] = bilby.core.prior.Uniform(minimum=np.log(2e-2), maximum=np.log(2e2), name=f'log_psi_{ii}')
+        priors[f'mean:delta_{ii}'] = bilby.core.prior.Uniform(minimum=0, maximum=kwargs['times'][-1], name=f'delta_{ii}')
+        priors[f'mean:log_gamma_{ii}'] = bilby.core.prior.Uniform(minimum=np.log(1e-3), maximum=np.log(1e3), name=f'log_gamma_{ii}')
+        priors[f'mean:log_nu_{ii}'] = bilby.core.prior.Uniform(minimum=np.log(1e-3), maximum=np.log(1e3), name=f'log_nu_{ii}')
+    return priors
+
 
 _N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
                            log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,
                            fred=get_fred_priors, skew_gaussian=get_skew_gaussian_priors,
-                           fred_norris=get_fred_norris_priors)
+                           fred_norris=get_fred_norris_priors, fred_norris_extended=get_fred_norris_extended_priors)

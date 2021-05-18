@@ -19,15 +19,21 @@ def fred(times, amplitude, t_0, sigma_rise, sigma_fall):
     return envelope
 
 
-def fred_norris(times, amplitude, psi, t_0):
-    frac = times / t_0
+def fred_norris(times, amplitude, log_psi, t_0, delta):
+    psi = np.exp(log_psi)
+    frac = (times + delta) / t_0
     with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
         return amplitude * np.exp(-psi * (frac + 1 / frac)) * np.exp(2 * psi)
 
 
-def fred_norris_extended(times, amplitude, sigma, t_0, tau, gamma, nu):
-    frac = (times-t_0)/tau
-    return amplitude * np.exp(-sigma**gamma * frac**nu -sigma**gamma * 1/frac**nu)
+def fred_norris_extended(times, amplitude, log_psi, t_0, delta, log_gamma, log_nu):
+    nu = np.exp(log_nu)
+    gamma = np.exp(log_gamma)
+    psi = np.exp(log_psi)
+    frac = (times + delta) / t_0
+    with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
+        return amplitude * np.exp(-psi**gamma * frac**gamma - psi**nu /frac**nu) * np.exp(2 * psi)
+
 
 
 def exponential_background(times, amplitude, tau, offset, **kwargs):
