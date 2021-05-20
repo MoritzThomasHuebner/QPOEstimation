@@ -47,18 +47,18 @@ for k, t in zip(flare_keys, flare_types):
         res_1_power_qpo = np.array(power_qpo(res_1_a_qpo, res_1_c_qpo, res_1_f_qpo))
         res_1_power_red_noise = np.array(power_red_noise(res_1_a_red_noise, res_1_c_red_noise))
 
-        plt.hist(np.log(res_1_power_qpo), bins='fd', histtype='step')
-        plt.savefig(f'temp_plots/{k}_qpo_power.png')
-        plt.clf()
+        # plt.hist(np.log(res_1_power_qpo), bins='fd', histtype='step')
+        # plt.savefig(f'temp_plots/{k}_qpo_power.png')
+        # plt.clf()
 
-        plt.hist(np.log(res_1_power_red_noise), bins='fd', histtype='step')
-        plt.savefig(f'temp_plots/{k}_red_noise_power.png')
-        plt.clf()
+        # plt.hist(np.log(res_1_power_red_noise), bins='fd', histtype='step')
+        # plt.savefig(f'temp_plots/{k}_red_noise_power.png')
+        # plt.clf()
 
-        log_power = np.log(res_1_power_qpo/res_1_power_red_noise)
-        plt.hist(log_power, bins='fd', histtype='step')
-        plt.savefig(f'temp_plots/{k}_power_ratio.png')
-        plt.clf()
+        # log_power = np.log(res_1_power_qpo/res_1_power_red_noise)
+        # plt.hist(log_power, bins='fd', histtype='step')
+        # plt.savefig(f'temp_plots/{k}_power_ratio.png')
+        # plt.clf()
         means = [np.mean(np.log(res_1_power_qpo))]
         # res_2_a_qpo = np.exp(res2.posterior['kernel:terms[0]:log_a'])
         # res_2_c_qpo = np.exp(res2.posterior['kernel:terms[0]:log_c'])
