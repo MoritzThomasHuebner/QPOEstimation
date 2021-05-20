@@ -3,7 +3,7 @@ import numpy as np
 
 import matplotlib
 import matplotlib.pyplot as plt
-# matplotlib.use("Qt5Agg")
+matplotlib.use("Qt5Agg")
 import pandas as pd
 
 import os
@@ -22,14 +22,58 @@ flare_keys = [int(k) for k in flare_keys]
 flare_types = [int(k) for k in flare_types]
 
 mean_qpo_log_amplitudes = []
+
+def power_qpo(a, c, f):
+    return a**2 * (2*c**2 + 4 * np.pi**2 * f**2)/(4 * c * (c**2 + 4 * np.pi**2 * f**2))
+
+def power_red_noise(a, c):
+    return a**2 / 2 / c
+
 for k, t in zip(flare_keys, flare_types):
     try:
-        res1 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_gaussians_result.json")
-        res2 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_freds_result.json")
+        res1 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_freds_result.json")
+        # res2 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_gaussians_result.json")
+        res1.plot_qpo_log_amplitude()
+        res1.plot_amplitude_ratio()
+        # res2.plot_qpo_log_amplitude()
+        # res2.plot_amplitude_ratio()
+
+        res_1_a_qpo = np.exp(res1.posterior['kernel:terms[0]:log_a'])
+        res_1_c_qpo = np.exp(res1.posterior['kernel:terms[0]:log_c'])
+        res_1_f_qpo = np.exp(res1.posterior['kernel:terms[0]:log_f'])
+
+        res_1_a_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_a'])
+        res_1_c_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_c'])
+
+        res_1_power_qpo = np.array(power_qpo(res_1_a_qpo, res_1_c_qpo, res_1_f_qpo))
+        res_1_power_red_noise = np.array(power_red_noise(res_1_a_red_noise, res_1_c_red_noise))
+
+        plt.hist(np.log(res_1_power_qpo), bins='fd', histtype='step')
+        plt.savefig(f'temp_plots/{k}_qpo_power.png')
+        plt.show()
+
+        plt.hist(np.log(res_1_power_red_noise), bins='fd', histtype='step')
+        plt.savefig(f'temp_plots/{k}_red_noise_power.png')
+        plt.show()
+
+        log_power = np.log(res_1_power_qpo/res_1_power_red_noise)
+        plt.hist(log_power, bins='fd', histtype='step')
+        plt.savefig(f'temp_plots/{k}_power_ratio.png')
+        plt.show()
+        means = [np.mean(log_power)]
+        # res_2_a_qpo = np.exp(res2.posterior['kernel:terms[0]:log_a'])
+        # res_2_c_qpo = np.exp(res2.posterior['kernel:terms[0]:log_c'])
+        # res_2_f_qpo = np.exp(res2.posterior['kernel:terms[0]:log_f'])
+        # res_2_a_red_noise = np.exp(res2.posterior['kernel:terms[1]:log_a'])
+        # res_2_c_red_noise = np.exp(res2.posterior['kernel:terms[1]:log_c'])
+        # res_2_power_qpo = power_qpo(res_2_a_qpo, res_2_c_qpo, res_2_f_qpo)
+        # res_2_power_red_noise = power_red_noise(res_2_a_red_noise, res_2_c_red_noise)
+
         # res3 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_freds_result.json")
         # res4 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_2_freds_result.json")
-        means = [np.mean(res1.posterior['kernel:terms[0]:log_a']-res1.posterior['kernel:terms[1]:log_a']),
-                 np.mean(res2.posterior['kernel:terms[0]:log_a']-res2.posterior['kernel:terms[1]:log_a']),]
+
+        # means = [np.mean(res1.posterior['kernel:terms[0]:log_a']-res1.posterior['kernel:terms[1]:log_a']),
+        #          np.mean(res2.posterior['kernel:terms[0]:log_a']-res2.posterior['kernel:terms[1]:log_a']),]
                  # np.mean(res3.posterior['kernel:terms[0]:log_a']), np.mean(res4.posterior['kernel:terms[0]:log_a'])]
         mean_qpo_log_amplitudes.append(np.mean(means))
     except Exception as e:
