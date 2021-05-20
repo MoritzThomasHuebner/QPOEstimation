@@ -59,7 +59,8 @@ for k, t in zip(flare_keys, flare_types):
         # plt.hist(log_power, bins='fd', histtype='step')
         # plt.savefig(f'temp_plots/{k}_power_ratio.png')
         # plt.clf()
-        means = [np.var(res1.posterior['kernel:terms[0]:log_f'])]
+        prior_range = res1.priors['kernel:terms[0]:log_f'].maximum - res1.priors['kernel:terms[0]:log_f'].minimum
+        means = [np.std(res1.posterior['kernel:terms[0]:log_f'])/prior_range]
         # res_2_a_qpo = np.exp(res2.posterior['kernel:terms[0]:log_a'])
         # res_2_c_qpo = np.exp(res2.posterior['kernel:terms[0]:log_c'])
         # res_2_f_qpo = np.exp(res2.posterior['kernel:terms[0]:log_f'])
