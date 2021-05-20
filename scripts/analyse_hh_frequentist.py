@@ -3,8 +3,8 @@ import numpy as np
 
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use("Qt5Agg")
-import pandas as pd
+# matplotlib.use("Qt5Agg")
+# import pandas as pd
 
 import os
 
@@ -59,7 +59,7 @@ for k, t in zip(flare_keys, flare_types):
         log_power = np.log(res_1_power_qpo/res_1_power_red_noise)
         plt.hist(log_power, bins='fd', histtype='step')
         plt.savefig(f'temp_plots/{k}_power_ratio.png')
-        plt.show()
+        plt.clf()
         means = [np.mean(log_power)]
         # res_2_a_qpo = np.exp(res2.posterior['kernel:terms[0]:log_a'])
         # res_2_c_qpo = np.exp(res2.posterior['kernel:terms[0]:log_c'])
