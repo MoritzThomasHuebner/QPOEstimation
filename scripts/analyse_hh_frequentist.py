@@ -15,9 +15,12 @@ except Exception:
 print(len(flares))
 run_mode = 'from_maximum'
 
-results = np.loadtxt("data/hares_and_hounds/qpp_type_hh2.txt", dtype=int)
+results = np.loadtxt("data/hares_and_hounds/qpp_type_hh2.txt")
 flare_keys = results[:, 0]
 flare_types = results[:, 1]
+flare_keys = [int(k) for k in flare_keys]
+flare_types = [int(k) for k in flare_types]
+
 print(flare_keys)
 print(flare_types)
 
