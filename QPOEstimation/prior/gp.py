@@ -42,7 +42,7 @@ def _add_jitter_term(priors):
         for i in range(5):
             if f"{i}" in k and n_terms < i + 1:
                 n_terms = i + 1
-    new_priors[f'kernel:terms[{n_terms}]:log_sigma'] = bilby.core.prior.Uniform(minimum=-5, maximum=5, name=f'terms[{n_terms}]:log_sigma')
+    new_priors[f'kernel:terms[{n_terms}]:log_sigma'] = bilby.core.prior.Uniform(minimum=-10, maximum=5, name=f'terms[{n_terms}]:log_sigma')
     return new_priors
 
 
