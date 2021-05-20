@@ -37,15 +37,15 @@ for k, t in zip(flare_keys, flare_types):
         # res1.plot_amplitude_ratio()
         # res2.plot_qpo_log_amplitude()
         # res2.plot_amplitude_ratio()
-        res_1_a_qpo = np.exp(res1.posterior['kernel:terms[0]:log_a'])
-        res_1_c_qpo = np.exp(res1.posterior['kernel:terms[0]:log_c'])
-        res_1_f_qpo = np.exp(res1.posterior['kernel:terms[0]:log_f'])
-
-        res_1_a_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_a'])
-        res_1_c_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_c'])
-
-        res_1_power_qpo = np.array(power_qpo(res_1_a_qpo, res_1_c_qpo, res_1_f_qpo))
-        res_1_power_red_noise = np.array(power_red_noise(res_1_a_red_noise, res_1_c_red_noise))
+        # res_1_a_qpo = np.exp(res1.posterior['kernel:terms[0]:log_a'])
+        # res_1_c_qpo = np.exp(res1.posterior['kernel:terms[0]:log_c'])
+        # res_1_f_qpo = np.exp(res1.posterior['kernel:terms[0]:log_f'])
+        #
+        # res_1_a_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_a'])
+        # res_1_c_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_c'])
+        #
+        # res_1_power_qpo = np.array(power_qpo(res_1_a_qpo, res_1_c_qpo, res_1_f_qpo))
+        # res_1_power_red_noise = np.array(power_red_noise(res_1_a_red_noise, res_1_c_red_noise))
 
         # plt.hist(np.log(res_1_power_qpo), bins='fd', histtype='step')
         # plt.savefig(f'temp_plots/{k}_qpo_power.png')
@@ -59,7 +59,7 @@ for k, t in zip(flare_keys, flare_types):
         # plt.hist(log_power, bins='fd', histtype='step')
         # plt.savefig(f'temp_plots/{k}_power_ratio.png')
         # plt.clf()
-        means = [np.mean(np.log(res_1_power_qpo))]
+        means = [np.var(res1.posterior['kernel:terms[0]:log_f'])]
         # res_2_a_qpo = np.exp(res2.posterior['kernel:terms[0]:log_a'])
         # res_2_c_qpo = np.exp(res2.posterior['kernel:terms[0]:log_c'])
         # res_2_f_qpo = np.exp(res2.posterior['kernel:terms[0]:log_f'])
