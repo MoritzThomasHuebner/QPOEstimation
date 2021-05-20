@@ -33,17 +33,19 @@ for k, t in zip(flare_keys, flare_types):
     try:
         res1 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_freds_result.json")
         # res2 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_gaussians_result.json")
-        res1.plot_qpo_log_amplitude()
-        res1.plot_amplitude_ratio()
+        # res1.plot_qpo_log_amplitude()
+        # res1.plot_amplitude_ratio()
         # res2.plot_qpo_log_amplitude()
         # res2.plot_amplitude_ratio()
-
+        print('1')
         res_1_a_qpo = np.exp(res1.posterior['kernel:terms[0]:log_a'])
         res_1_c_qpo = np.exp(res1.posterior['kernel:terms[0]:log_c'])
         res_1_f_qpo = np.exp(res1.posterior['kernel:terms[0]:log_f'])
 
+        print('2')
         res_1_a_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_a'])
         res_1_c_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_c'])
+        print('3')
 
         res_1_power_qpo = np.array(power_qpo(res_1_a_qpo, res_1_c_qpo, res_1_f_qpo))
         res_1_power_red_noise = np.array(power_red_noise(res_1_a_red_noise, res_1_c_red_noise))
