@@ -31,7 +31,7 @@ def power_red_noise(a, c):
 
 for k, t in zip(flare_keys, flare_types):
     try:
-        res1 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_freds_result.json")
+        res1 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_gaussians_result.json")
         # res2 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_gaussians_result.json")
         # res1.plot_qpo_log_amplitude()
         # res1.plot_amplitude_ratio()
