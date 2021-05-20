@@ -15,7 +15,7 @@ except Exception:
 print(len(flares))
 run_mode = 'from_maximum'
 
-results = np.genfromtxt("data/hares_and_hounds/qpp_type_hh2.csv", delimiter=',', dtype=int)
+results = np.loadtxt("data/hares_and_hounds/qpp_type_hh2.txt", dtype=int)
 flare_keys = results[:, 0]
 flare_types = results[:, 1]
 print(flare_keys)
