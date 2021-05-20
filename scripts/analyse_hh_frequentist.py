@@ -28,7 +28,8 @@ for k, t in zip(flare_keys, flare_types):
         res2 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_freds_result.json")
         # res3 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_freds_result.json")
         # res4 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_2_freds_result.json")
-        means = [np.mean(res1.posterior['kernel:terms[0]:log_a']), np.mean(res2.posterior['kernel:terms[0]:log_a']),]
+        means = [np.mean(res1.posterior['kernel:terms[0]:log_a']/res1.posterior['kernel:terms[1]:log_a']),
+                 np.mean(res2.posterior['kernel:terms[0]:log_a']/res2.posterior['kernel:terms[1]:log_a']),]
                  # np.mean(res3.posterior['kernel:terms[0]:log_a']), np.mean(res4.posterior['kernel:terms[0]:log_a'])]
         mean_qpo_log_amplitudes.append(np.mean(means))
     except Exception as e:

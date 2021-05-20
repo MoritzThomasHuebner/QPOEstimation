@@ -93,8 +93,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'hares_and_hounds'
-    run_mode = 'from_maximum'
+    data_source = 'grb'
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -141,8 +141,8 @@ else:
     tau_min = None
     tau_max = None
 
-    min_log_a = -5
-    max_log_a = 30
+    min_log_a = -10
+    max_log_a = 10
     # min_log_c = -10
     min_log_c = None
     max_log_c = None
@@ -150,9 +150,9 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "red_noise"
-    likelihood_model = "gaussian_process_windowed"
-    background_model = "gaussian"
+    recovery_mode = "general_qpo"
+    likelihood_model = "gaussian_process"
+    background_model = "fred_norris_extended"
     n_components = 1
     jitter_term = True
 
