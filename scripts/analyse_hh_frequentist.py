@@ -18,6 +18,8 @@ run_mode = 'from_maximum'
 results = np.genfromtxt("data/hares_and_hounds/qpp_type_hh2.csv", delimiter=',', dtype=int)
 flare_keys = results[:, 0]
 flare_types = results[:, 1]
+print(flare_keys)
+print(flare_types)
 
 mean_qpo_log_amplitudes = []
 for k, t in zip(flare_keys, flare_types):
