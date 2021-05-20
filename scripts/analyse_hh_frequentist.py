@@ -21,7 +21,7 @@ mean_qpo_log_amplitudes = []
 for k, t in zip(flare_keys, flare_types):
     try:
         res = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_1_gaussians_result.json")
-        mean_qpo_log_amplitudes.append(res.posterior['kernel:terms[0]:log_a'])
+        mean_qpo_log_amplitudes.append(np.mean(res.posterior['kernel:terms[0]:log_a']))
     except Exception as e:
         print(e)
         mean_qpo_log_amplitudes.append(np.nan)
