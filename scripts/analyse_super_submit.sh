@@ -79,6 +79,6 @@ do
 #      for n_components in {1..3}
 #      do
 #        sbatch analyse_submit.sh ${filename} gaussian_process ${model} ${n_components} gaussian
-      done
+#      done
    done
 done
