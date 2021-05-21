@@ -93,14 +93,14 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'grb'
-    run_mode = 'select_time'
+    data_source = 'hares_and_hounds'
+    run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
     variance_stabilisation = False
 
-    hares_and_hounds_id = "912965"
+    hares_and_hounds_id = "612579"
     hares_and_hounds_round = 'HH2'
 
     solar_flare_id = "go1520110128"
