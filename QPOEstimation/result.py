@@ -228,11 +228,11 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.png")
             plt.clf()
 
-    def plot_red_noise_power(self):
+    def plot_log_red_noise_power(self):
         if self.kernel_type == "general_qpo":
             log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
-            power_samples = power_red_noise(a=np.exp(log_a_samples), c=np.exp(log_c_samples))
+            power_samples = np.log(power_red_noise(a=np.exp(log_a_samples), c=np.exp(log_c_samples)))
             plt.hist(power_samples, bins="fd", density=True)
             plt.xlabel('$P_{\mathrm{rn}}$')
             plt.ylabel('normalised PDF')
@@ -244,12 +244,12 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.png")
             plt.clf()
 
-    def plot_qpo_power(self):
+    def plot_log_qpo_power(self):
         if self.kernel_type == "general_qpo":
             log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
             log_f_samples = np.array(self.posterior['kernel:terms[1]:log_f'])
-            power_samples = power_qpo(a=np.exp(log_a_samples), c=np.exp(log_c_samples), f=np.exp(log_f_samples))
+            power_samples = np.log(power_qpo(a=np.exp(log_a_samples), c=np.exp(log_c_samples), f=np.exp(log_f_samples)))
             plt.hist(power_samples, bins="fd", density=True)
             plt.xlabel('$P_{\mathrm{qpo}}$')
             plt.ylabel('normalised PDF')
@@ -263,12 +263,12 @@ class GPResult(bilby.result.Result):
 
 
     def plot_all(self):
-        self.plot_corner()
         self.plot_max_likelihood_psd()
         self.plot_kernel()
         self.plot_frequency_posterior()
         self.plot_lightcurve()
         self.plot_qpo_log_amplitude()
-        self.plot_red_noise_power()
-        self.plot_qpo_power()
+        self.plot_log_red_noise_power()
+        self.plot_log_qpo_power()
+        self.plot_corner()
         # self.plot_amplitude_ratio()
