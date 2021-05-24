@@ -197,12 +197,16 @@ if sampling_frequency is None:
 
 truths = None
 
+recovery_mode_str = recovery_mode
+if jitter_term:
+    recovery_mode_str + "_jitter"
+
 if data_source == 'giant_flare':
     times, counts = get_giant_flare_data(
         run_mode, band=band, data_mode=data_mode, segment_length=segment_length, sampling_frequency=sampling_frequency,
         alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id, period_number=period_number,
         run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time)
-    outdir = f"SGR_1806_20/{run_mode}/{band}/{recovery_mode}/{likelihood_model}/"
+    outdir = f"SGR_1806_20/{run_mode}/{band}/{recovery_mode_str}/{likelihood_model}/"
     if run_mode == 'candidates':
         label = f"{candidate_id}"
     elif run_mode == 'sliding_window':
@@ -219,7 +223,7 @@ elif data_source == 'magnetar_flare':
         run_mode=run_mode, magnetar_label=magnetar_label, tag=magnetar_tag, bin_size=magnetar_bin_size,
         subtract_t0=magnetar_subtract_t0, unbarycentred_time=magnetar_unbarycentred_time, start_time=start_time,
         end_time=end_time)
-    outdir = f"magnetar_flares/{magnetar_label}/{magnetar_tag}/{run_mode}/{recovery_mode}/{likelihood_model}/"
+    outdir = f"magnetar_flares/{magnetar_label}/{magnetar_tag}/{run_mode}/{recovery_mode_str}/{likelihood_model}/"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     else:
@@ -227,7 +231,7 @@ elif data_source == 'magnetar_flare':
 elif data_source == 'solar_flare':
     times, y, yerr = get_solar_flare_data(run_mode, solar_flare_id=solar_flare_id,
                                           start_time=start_time, end_time=end_time)
-    outdir = f"solar_flare_{solar_flare_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
+    outdir = f"solar_flare_{solar_flare_id}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     else:
@@ -236,7 +240,7 @@ elif data_source == 'grb':
     times, y, yerr = get_grb_data(
         run_mode, grb_id=grb_id, grb_binning=grb_binning,
         start_time=start_time, end_time=end_time, grb_detector=grb_detector)
-    outdir = f"GRB{grb_id}_{grb_detector}/{run_mode}/{recovery_mode}/{likelihood_model}"
+    outdir = f"GRB{grb_id}_{grb_detector}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     else:
