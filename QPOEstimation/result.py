@@ -246,9 +246,9 @@ class GPResult(bilby.result.Result):
 
     def plot_log_qpo_power(self):
         if self.kernel_type == "general_qpo":
-            log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
-            log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
-            log_f_samples = np.array(self.posterior['kernel:terms[1]:log_f'])
+            log_a_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
+            log_c_samples = np.array(self.posterior['kernel:terms[0]:log_c'])
+            log_f_samples = np.array(self.posterior['kernel:terms[0]:log_f'])
             power_samples = np.log(power_qpo(a=np.exp(log_a_samples), c=np.exp(log_c_samples), f=np.exp(log_f_samples)))
             plt.hist(power_samples, bins="fd", density=True)
             plt.xlabel('$P_{\mathrm{qpo}}$')
