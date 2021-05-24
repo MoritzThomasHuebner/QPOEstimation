@@ -22,7 +22,7 @@
 #done
 
 # GRB
-for n_components in {0..4}
+for n_components in 1
 do
    for model in red_noise general_qpo
    do

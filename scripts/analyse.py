@@ -93,8 +93,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'hares_and_hounds'
-    run_mode = 'entire_segment'
+    data_source = 'grb'
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -114,7 +114,7 @@ else:
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
 
-    start_time = -4
+    start_time = 25
     end_time = 103
 
     period_number = 14
