@@ -199,7 +199,7 @@ truths = None
 
 recovery_mode_str = recovery_mode
 if jitter_term:
-    recovery_mode_str + "_jitter"
+    recovery_mode_str += "_jitter"
 
 if data_source == 'giant_flare':
     times, counts = get_giant_flare_data(
