@@ -65,3 +65,11 @@ def get_n_component_fred_model(n_freds=1):
     return get_n_component_mean_model(model=fred, n_models=n_freds)
 
 
+def power_qpo(a, c, f):
+    return a * np.sqrt((c**2 + 2 * np.pi**2 * f**2)/(c * (c**2 + 4 * np.pi**2 * f**2)))
+
+
+def power_red_noise(a, c):
+    return a / c**0.5
+
+

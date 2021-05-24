@@ -6,6 +6,7 @@ import bilby
 
 from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model
+from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
 OSCILLATORY_MODELS = ["qpo", "pure_qpo", "general_qpo"]
 
@@ -227,6 +228,40 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.png")
             plt.clf()
 
+    def plot_red_noise_power(self):
+        if self.kernel_type == "general_qpo":
+            log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
+            log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
+            power_samples = power_red_noise(a=np.exp(log_a_samples), c=np.exp(log_c_samples))
+            plt.hist(power_samples, bins="fd", density=True)
+            plt.xlabel('$P_{\mathrm{rn}}$')
+            plt.ylabel('normalised PDF')
+            median = np.median(power_samples)
+            percentiles = np.percentile(power_samples, [16, 84])
+            plt.title(
+                f"{np.mean(power_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+            plt.tight_layout()
+            plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.png")
+            plt.clf()
+
+    def plot_qpo_power(self):
+        if self.kernel_type == "general_qpo":
+            log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
+            log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
+            log_f_samples = np.array(self.posterior['kernel:terms[1]:log_f'])
+            power_samples = power_qpo(a=np.exp(log_a_samples), c=np.exp(log_c_samples), f=np.exp(log_f_samples))
+            plt.hist(power_samples, bins="fd", density=True)
+            plt.xlabel('$P_{\mathrm{qpo}}$')
+            plt.ylabel('normalised PDF')
+            median = np.median(power_samples)
+            percentiles = np.percentile(power_samples, [16, 84])
+            plt.title(
+                f"{np.mean(power_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+            plt.tight_layout()
+            plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.png")
+            plt.clf()
+
+
     def plot_all(self):
         self.plot_corner()
         self.plot_max_likelihood_psd()
@@ -234,4 +269,6 @@ class GPResult(bilby.result.Result):
         self.plot_frequency_posterior()
         self.plot_lightcurve()
         self.plot_qpo_log_amplitude()
-        self.plot_amplitude_ratio()
+        self.plot_red_noise_power()
+        self.plot_qpo_power()
+        # self.plot_amplitude_ratio()

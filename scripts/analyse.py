@@ -330,7 +330,8 @@ if result is None:
 
 if plot:
     result.plot_all()
-    result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
+    if len(sys.argv) < 1:
+        result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',
