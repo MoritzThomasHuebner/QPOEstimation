@@ -6,6 +6,8 @@ import bilby
 
 from QPOEstimation.result import GPResult
 from QPOEstimation.utils import get_injection_outdir, modes, likelihood_models
+import matplotlib.pyplot as plt
+plt.style.use("paper.mplstyle")
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
