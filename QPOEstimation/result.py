@@ -8,7 +8,7 @@ from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model
 from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
-style_file = f"{Path(__file__).parent.absolute()}\paper.mplstyle"
+style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
 matplotlib.rcParams.update(matplotlib.rcParamsDefault)
 plt.style.use(style_file)
 
