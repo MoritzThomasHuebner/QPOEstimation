@@ -28,7 +28,7 @@ setup(name='QPOEstimation',
       version=VERSION,
       packages=['QPOEstimation', 'QPOEstimation.prior', 'QPOEstimation.model'],
       package_dir={'QPOEstimation': 'QPOEstimation'},
-      package_data={},
+      package_data={'QPOEstimation': ['paper.mplstyle']},
       python_requires='>=3.5',
       install_requires=[
           'bilby',
