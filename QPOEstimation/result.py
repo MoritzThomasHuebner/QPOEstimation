@@ -176,6 +176,7 @@ class GPResult(bilby.result.Result):
 
     def plot_frequency_posterior(self):
         if self.kernel_type in OSCILLATORY_MODELS:
+            Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             if 'kernel:log_f' in self.posterior:
                 frequency_samples = np.exp(np.array(self.posterior['kernel:log_f']))
             elif 'kernel:terms[0]:log_f' in self.posterior:
@@ -195,25 +196,23 @@ class GPResult(bilby.result.Result):
 
     def plot_qpo_log_amplitude(self):
         if self.kernel_type == "general_qpo":
+            Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             label = 'kernel:terms[0]:log_a'
-        elif self.kernel_type == "pure_qpo":
-            label = 'kernel:log_a'
-        else:
-            return
-        log_amplitude_samples = np.array(self.posterior[label])
-        plt.hist(log_amplitude_samples, bins="fd", density=True)
-        plt.xlabel('$\ln \,a$')
-        plt.ylabel('normalised PDF')
-        median = np.median(log_amplitude_samples)
-        percentiles = np.percentile(log_amplitude_samples, [16, 84])
-        plt.title(
-            f"{np.mean(log_amplitude_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-        plt.tight_layout()
-        plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.png")
-        plt.clf()
+            log_amplitude_samples = np.array(self.posterior[label])
+            plt.hist(log_amplitude_samples, bins="fd", density=True)
+            plt.xlabel('$\ln \,a$')
+            plt.ylabel('normalised PDF')
+            median = np.median(log_amplitude_samples)
+            percentiles = np.percentile(log_amplitude_samples, [16, 84])
+            plt.title(
+                f"{np.mean(log_amplitude_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+            plt.tight_layout()
+            plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.png")
+            plt.clf()
 
     def plot_amplitude_ratio(self):
         if self.kernel_type == "general_qpo":
+            Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             qpo_log_amplitude_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
             red_noise_log_amplitude_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
             amplitude_ratio_samples = np.exp(qpo_log_amplitude_samples - red_noise_log_amplitude_samples)
@@ -230,6 +229,7 @@ class GPResult(bilby.result.Result):
 
     def plot_log_red_noise_power(self):
         if self.kernel_type == "general_qpo":
+            Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
             power_samples = np.log(power_red_noise(a=np.exp(log_a_samples), c=np.exp(log_c_samples)))
@@ -246,6 +246,7 @@ class GPResult(bilby.result.Result):
 
     def plot_log_qpo_power(self):
         if self.kernel_type == "general_qpo":
+            Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             log_a_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[0]:log_c'])
             log_f_samples = np.array(self.posterior['kernel:terms[0]:log_f'])
@@ -260,7 +261,6 @@ class GPResult(bilby.result.Result):
             plt.tight_layout()
             plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.png")
             plt.clf()
-
 
     def plot_all(self):
         self.plot_max_likelihood_psd()
