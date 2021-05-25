@@ -354,6 +354,17 @@ def get_kernel(kernel_type, jitter_term=False):
         res = ExponentialTerm(log_a=0.1, log_c=-0.01)
     elif kernel_type == "general_qpo":
         res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+    elif kernel_type == "double_red_noise":
+        res = ExponentialTerm(log_a=0.1, log_c=-0.01) + ExponentialTerm(log_a=0.1, log_c=-0.01)
+    elif kernel_type == "double_qpo":
+        res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
+    elif kernel_type == "fourier_series":
+        res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
+              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
+              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
+              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
+              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
+              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
     else:
         raise ValueError('Recovery mode not defined')
 

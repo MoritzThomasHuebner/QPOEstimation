@@ -1,6 +1,8 @@
 import QPOEstimation
 import numpy as np
 
+from QPOEstimation.model.celerite import power_qpo, power_red_noise
+
 import matplotlib
 import matplotlib.pyplot as plt
 # matplotlib.use("Qt5Agg")
@@ -22,12 +24,6 @@ flare_keys = [int(k) for k in flare_keys]
 flare_types = [int(k) for k in flare_types]
 
 mean_qpo_log_amplitudes = []
-
-def power_qpo(a, c, f):
-    return a**2 * (2*c**2 + 4 * np.pi**2 * f**2)/(4 * c * (c**2 + 4 * np.pi**2 * f**2))
-
-def power_red_noise(a, c):
-    return a**2 / 2 / c
 
 for k, t in zip(flare_keys, flare_types):
     try:

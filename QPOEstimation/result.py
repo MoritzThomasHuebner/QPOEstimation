@@ -1,14 +1,18 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
-
 import bilby
 
 from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model
 from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
-OSCILLATORY_MODELS = ["qpo", "pure_qpo", "general_qpo"]
+style_file = f"{Path(__file__).parent.absolute()}\paper.mplstyle"
+matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+plt.style.use(style_file)
+
+OSCILLATORY_MODELS = ["qpo", "pure_qpo", "general_qpo", "fourier_series"]
 
 
 class GPResult(bilby.result.Result):
@@ -109,13 +113,15 @@ class GPResult(bilby.result.Result):
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
         plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue")
-
-        samples = self.get_random_posterior_samples(20)
+        max_plot = likelihood.gp.kernel.get_value(0) * 1.5
+        min_plot = min(likelihood.gp.kernel.get_value(taus)) * 1.5
+        samples = self.get_random_posterior_samples(10)
         for sample in samples:
             likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
             plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue", alpha=0.3)
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
+        plt.ylim(0, max_plot)
         plt.tight_layout()
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.png")
         plt.clf()

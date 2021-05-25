@@ -35,7 +35,6 @@ def fred_norris_extended(times, amplitude, log_psi, t_0, delta, log_gamma, log_n
         return amplitude * np.exp(-psi**gamma * frac**gamma - psi**nu /frac**nu) * np.exp(2 * psi)
 
 
-
 def exponential_background(times, amplitude, tau, offset, **kwargs):
     return amplitude * np.exp(times/tau) + offset
 
