@@ -121,7 +121,7 @@ class GPResult(bilby.result.Result):
             plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue", alpha=0.3)
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
-        plt.ylim(0, max_plot)
+        plt.ylim(min_plot, max_plot)
         plt.tight_layout()
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.png")
         plt.clf()
