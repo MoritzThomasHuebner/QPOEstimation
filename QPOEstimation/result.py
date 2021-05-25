@@ -9,8 +9,6 @@ from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelih
 from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
 style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
-matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-plt.style.use(style_file)
 
 OSCILLATORY_MODELS = ["qpo", "pure_qpo", "general_qpo", "fourier_series"]
 
@@ -91,6 +89,8 @@ class GPResult(bilby.result.Result):
         return self.times[-1] - self.times[0]
 
     def plot_max_likelihood_psd(self):
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        plt.style.use(style_file)
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         psd_freqs = np.linspace(1/self.segment_length, self.sampling_frequency, 5000)
@@ -109,6 +109,8 @@ class GPResult(bilby.result.Result):
         plt.clf()
 
     def plot_kernel(self):
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        plt.style.use(style_file)
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
@@ -127,6 +129,8 @@ class GPResult(bilby.result.Result):
         plt.clf()
 
     def plot_lightcurve(self, start_time=None, end_time=None):
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        plt.style.use(style_file)
         if start_time is None:
             start_time = self.times[0]
         if end_time is None:
@@ -182,6 +186,8 @@ class GPResult(bilby.result.Result):
 
     def plot_frequency_posterior(self):
         if self.kernel_type in OSCILLATORY_MODELS:
+            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+            plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             if 'kernel:log_f' in self.posterior:
                 frequency_samples = np.exp(np.array(self.posterior['kernel:log_f']))
@@ -202,6 +208,8 @@ class GPResult(bilby.result.Result):
 
     def plot_qpo_log_amplitude(self):
         if self.kernel_type == "general_qpo":
+            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+            plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             label = 'kernel:terms[0]:log_a'
             log_amplitude_samples = np.array(self.posterior[label])
@@ -218,6 +226,8 @@ class GPResult(bilby.result.Result):
 
     def plot_amplitude_ratio(self):
         if self.kernel_type == "general_qpo":
+            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+            plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             qpo_log_amplitude_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
             red_noise_log_amplitude_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
@@ -235,6 +245,8 @@ class GPResult(bilby.result.Result):
 
     def plot_log_red_noise_power(self):
         if self.kernel_type == "general_qpo":
+            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+            plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
@@ -252,6 +264,8 @@ class GPResult(bilby.result.Result):
 
     def plot_log_qpo_power(self):
         if self.kernel_type == "general_qpo":
+            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+            plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             log_a_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[0]:log_c'])
