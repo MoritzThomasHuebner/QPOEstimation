@@ -15,7 +15,7 @@
 #srun python analyse.py --data_source grb --run_mode select_time --grb_id 090709A --grb_binning 1s --start_time -4 --end_time 103 --recovery_mode ${1} --likelihood_model gaussian_process --background_model ${3} --n_components ${2} --sample rslice --nlive 1000 --use_ratio False --resume False --try_load True --plot True --offset True --sampling_frequency 1 --jitter_term False
 
 # Magnetar flare
-srun python analyse.py --data_source magnetar_flare_binned --run_mode entire_segment --magnetar_label SGR_0501 --magnetar_tag 080823478_lcobs --rebin_factor 16 --recovery_mode ${1} --likelihood_model gaussian_process --n_components ${2} --background_model ${3} --sample rslice --nlive 1000 --use_ratio False --resume False --try_load False --plot True --offset True --sampling_frequency 1 --jitter_term False --max_log_a 15 --min_log_a 0
+srun python analyse.py --data_source magnetar_flare_binned --run_mode entire_segment --magnetar_label SGR_0501 --magnetar_tag 080823478_lcobs --rebin_factor 16 --recovery_mode ${1} --likelihood_model gaussian_process --n_components ${2} --background_model ${3} --sample rslice --nlive 1000 --use_ratio False --resume False --try_load False --plot True --offset True --sampling_frequency 1 --jitter_term False --max_log_a 15 --min_log_a -15
 
 
 #srun python analyse.py --data_source magnetar_flare --magnetar_label SGR_1806_20 --magnetar_tag 10223-01-03-010_90908036.8701 --magnetar_bin_size 0.001 --run_mode select_time --start_time 0.035 --end_time 0.3 --likelihood_model ${1} --recovery_mode ${2} --variance_stabilisation False --background_model fred --n_components ${3} --plot True --nlive 4000 --sample rwalk --min_log_a -10 --max_log_a 15 --resume True --try_load True
