@@ -135,9 +135,9 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
         self.kernel = kernel
         self.mean_model = mean_model
         self.fit_mean = fit_mean
-        self.t = t
-        self.y = y
-        self.y_err = yerr
+        self.t = np.array(t)
+        self.y = np.array(y)
+        self.y_err = np.array(yerr)
 
         if conversion_func is None:
             self.conversion_func = lambda x: x
