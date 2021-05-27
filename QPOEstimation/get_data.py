@@ -22,6 +22,36 @@ def get_tte_magnetar_flare_data_from_segment(start_time, end_time, magnetar_labe
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
+def get_all_binned_magnetar_flare_data(magnetar_label, tag, subtract_t0=True, rebin_factor=1, **kwargs):
+    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{tag}_data.txt')
+    ts = data[:, 0]
+    cs = data[:, 1]
+
+    times = []
+    counts = []
+    for i in range(0, len(ts), rebin_factor):
+        if len(ts) - i < rebin_factor:
+            break
+        times.append(ts[i])
+        c = 0
+        for j in range(rebin_factor):
+            c += cs[i + j]
+        counts.append(c)
+
+    if subtract_t0:
+        times -= times[0]
+    return times, counts
+
+
+def get_all_binned_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, tag,
+                                                    subtract_t0=True, rebin_factor=1, **kwargs):
+    times, counts = get_all_binned_magnetar_flare_data(
+        magnetar_label=magnetar_label, tag=tag, subtract_t0=False, rebin_factor=rebin_factor, **kwargs)
+    if subtract_t0:
+        times -= times[0]
+    return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
+
+
 def get_giant_flare_data(run_mode, **kwargs):
     """ Catch all function """
     return _GIANT_FLARE_RUN_MODES[run_mode](**kwargs)
@@ -114,7 +144,12 @@ def get_grb_data(run_mode, **kwargs):
 
 def get_tte_magnetar_flare_data(run_mode, **kwargs):
     """ Catch all function """
-    return _MAGNETAR_FLARE_RUN_MODES[run_mode](**kwargs)
+    return _MAGNETAR_TTE_FLARE_RUN_MODES[run_mode](**kwargs)
+
+
+def get_binned_magnetar_flare_data(run_mode, **kwargs):
+    """ Catch all function """
+    return _MAGNETAR_BINNED_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
 def get_solar_flare_data(run_mode, **kwargs):
@@ -165,8 +200,11 @@ def get_hares_and_hounds_data_from_maximum(hares_and_hounds_id="5700", hares_and
 _GRB_RUN_MODES = dict(select_time=get_grb_data_from_segment,
                       entire_segment=get_all_grb_data)
 
-_MAGNETAR_FLARE_RUN_MODES = dict(select_time=get_tte_magnetar_flare_data_from_segment,
-                                 entire_segment=get_all_tte_magnetar_flare_data)
+_MAGNETAR_TTE_FLARE_RUN_MODES = dict(select_time=get_tte_magnetar_flare_data_from_segment,
+                                     entire_segment=get_all_tte_magnetar_flare_data)
+
+_MAGNETAR_BINNED_FLARE_RUN_MODES = dict(select_time=get_all_binned_magnetar_flare_data_from_segment,
+                                        entire_segment=get_all_binned_magnetar_flare_data)
 
 _SOLAR_FLARE_RUN_MODES = dict(select_time=get_solar_flare_data_from_segment,
                               entire_segment=get_all_solar_flare_data)

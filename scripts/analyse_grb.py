@@ -5,6 +5,7 @@ from QPOEstimation.model.celerite import power_qpo
 import matplotlib.pyplot as plt
 import matplotlib
 # matplotlib.use('Qt5Agg')
+plt.style.use("paper.mplstyle")
 
 evidence_dict = dict()
 evidence_err_dict = dict()
@@ -15,7 +16,8 @@ linestyle_dict = dict(fred='solid', skew_gaussian='dotted', fred_norris='dashed'
 label_dict_mean = dict(fred='skew exp.', fred_norris='FRED', fred_norris_extended='FRED-x', skew_gaussian='skew gaus.')
 label_dict_kernel = dict(general_qpo='qpo+rn', red_noise='rn')
 
-plt.figure(figsize=(6.4, 6.4))
+plt.figure(figsize=(9.2, 7.2))
+# plt.figure(dpi=150)
 for mean_model in ['fred', 'fred_norris', 'fred_norris_extended', 'skew_gaussian']:
     print(mean_model)
     for recovery_mode in ['general_qpo', 'red_noise']:
@@ -51,8 +53,9 @@ for mean_model in ['fred', 'fred_norris', 'fred_norris_extended', 'skew_gaussian
 plt.xlabel('Number of flare components')
 plt.ylabel(f'ln Z')
 plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
-plt.ylim(88, 103)
+plt.ylim(88, 104)
 plt.legend(ncol=2)
+plt.tight_layout()
 plt.savefig(f'GRB_Ln_Z_plot.png')
 plt.show()
 

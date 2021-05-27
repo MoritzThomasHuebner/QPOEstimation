@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument("--magnetar_bin_size", default=0.001, type=float)
     parser.add_argument("--magnetar_subtract_t0", default="True", type=str)
     parser.add_argument("--magnetar_unbarycentred_time", default="False", type=str)
+    parser.add_argument("--rebin_factor", default=1, type=int)
 
     parser.add_argument("--start_time", default=0., type=float)
     parser.add_argument("--end_time", default=1., type=float)

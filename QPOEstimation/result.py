@@ -104,7 +104,10 @@ class GPResult(bilby.result.Result):
         plt.xlabel("f[Hz]")
         plt.ylabel("$S(f)$")
         plt.legend()
-        plt.tight_layout()
+        try:
+            plt.tight_layout()
+        except Exception:
+            pass
         plt.savefig(f"{self.fits_outdir}/{self.label}_psd.png")
         plt.clf()
 
@@ -115,16 +118,19 @@ class GPResult(bilby.result.Result):
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
         plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue")
-        max_plot = likelihood.gp.kernel.get_value(0) * 1.5
-        min_plot = min(likelihood.gp.kernel.get_value(taus)) * 1.5
-        samples = self.get_random_posterior_samples(10)
-        for sample in samples:
-            likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
-            plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue", alpha=0.3)
+        # max_plot = max(likelihood.gp.kernel.get_value(taus))
+        # min_plot = min(likelihood.gp.kernel.get_value(taus))
+        # samples = self.get_random_posterior_samples(10)
+        # for sample in samples:
+        #     likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
+        #     plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue", alpha=0.3)
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
-        plt.ylim(min_plot, max_plot)
-        plt.tight_layout()
+        # plt.ylim(min_plot, max_plot)
+        try:
+            plt.tight_layout()
+        except Exception:
+            pass
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.png")
         plt.clf()
 
@@ -176,7 +182,10 @@ class GPResult(bilby.result.Result):
         plt.xlabel("time [s]")
         plt.ylabel("y")
         plt.legend()
-        plt.tight_layout()
+        try:
+            plt.tight_layout()
+        except Exception:
+            pass
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.png")
         plt.show()
         plt.clf()
@@ -202,7 +211,10 @@ class GPResult(bilby.result.Result):
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
                 f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.tight_layout()
+            try:
+                plt.tight_layout()
+            except Exception:
+                pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior.png")
             plt.clf()
 
@@ -220,7 +232,10 @@ class GPResult(bilby.result.Result):
             percentiles = np.percentile(log_amplitude_samples, [16, 84])
             plt.title(
                 f"{np.mean(log_amplitude_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.tight_layout()
+            try:
+                plt.tight_layout()
+            except Exception:
+                pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.png")
             plt.clf()
 
@@ -239,7 +254,10 @@ class GPResult(bilby.result.Result):
             percentiles = np.percentile(amplitude_ratio_samples, [16, 84])
             plt.title(
                 f"{np.mean(amplitude_ratio_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.tight_layout()
+            try:
+                plt.tight_layout()
+            except Exception:
+                pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.png")
             plt.clf()
 
@@ -258,7 +276,10 @@ class GPResult(bilby.result.Result):
             percentiles = np.percentile(power_samples, [16, 84])
             plt.title(
                 f"{np.mean(power_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.tight_layout()
+            try:
+                plt.tight_layout()
+            except Exception:
+                pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.png")
             plt.clf()
 
@@ -278,17 +299,20 @@ class GPResult(bilby.result.Result):
             percentiles = np.percentile(power_samples, [16, 84])
             plt.title(
                 f"{np.mean(power_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
-            plt.tight_layout()
+            try:
+                plt.tight_layout()
+            except Exception:
+                pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.png")
             plt.clf()
 
     def plot_all(self):
+        self.plot_corner()
         self.plot_max_likelihood_psd()
         self.plot_kernel()
-        self.plot_frequency_posterior()
         self.plot_lightcurve()
         self.plot_qpo_log_amplitude()
         self.plot_log_red_noise_power()
         self.plot_log_qpo_power()
-        self.plot_corner()
+        self.plot_frequency_posterior()
         # self.plot_amplitude_ratio()

@@ -40,6 +40,8 @@ if len(sys.argv) > 1:
     magnetar_subtract_t0 = boolean_string(args.magnetar_subtract_t0)
     magnetar_unbarycentred_time = boolean_string(args.magnetar_unbarycentred_time)
 
+    rebin_factor = args.rebin_factor
+
     start_time = args.start_time
     end_time = args.end_time
 
@@ -93,7 +95,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = 'grb'
+    data_source = "grb"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -108,14 +110,15 @@ else:
     grb_binning = "1s"
     grb_detector = 'swift'
 
-    magnetar_label = 'SGR_1806_20'
-    magnetar_tag = '10223-01-03-01_90931418.874'
+    magnetar_label = 'SGR_0501'
+    magnetar_tag = '080823478_lcobs'
     magnetar_bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
+    rebin_factor = 16
 
-    start_time = 25
-    end_time = 103
+    start_time = -20
+    end_time = 123
 
     period_number = 14
     run_id = 6
@@ -151,10 +154,10 @@ else:
 
     injection_mode = "qpo"
     recovery_mode = "general_qpo"
-    likelihood_model = "gaussian_process"
+    likelihood_model = "gaussian_process_windowed"
     background_model = "fred_norris_extended"
     n_components = 1
-    jitter_term = True
+    jitter_term = False
 
     band_minimum = None
     band_maximum = None
@@ -163,7 +166,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 500
+    nlive = 1000
     use_ratio = False
 
     try_load = False
@@ -223,6 +226,15 @@ elif data_source == 'magnetar_flare':
         run_mode=run_mode, magnetar_label=magnetar_label, tag=magnetar_tag, bin_size=magnetar_bin_size,
         subtract_t0=magnetar_subtract_t0, unbarycentred_time=magnetar_unbarycentred_time, start_time=start_time,
         end_time=end_time)
+    outdir = f"magnetar_flares/{magnetar_label}/{magnetar_tag}/{run_mode}/{recovery_mode_str}/{likelihood_model}/"
+    if run_mode == 'select_time':
+        label = f'{start_time}_{end_time}'
+    else:
+        label = run_mode
+elif data_source == 'magnetar_flare_binned':
+    times, counts = get_binned_magnetar_flare_data(
+        run_mode=run_mode, magnetar_label=magnetar_label, tag=magnetar_tag, bin_size=magnetar_bin_size,
+        subtract_t0=magnetar_subtract_t0, start_time=start_time, end_time=end_time, rebin_factor=rebin_factor)
     outdir = f"magnetar_flares/{magnetar_label}/{magnetar_tag}/{run_mode}/{recovery_mode_str}/{likelihood_model}/"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'

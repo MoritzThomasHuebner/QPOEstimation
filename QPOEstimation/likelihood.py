@@ -155,7 +155,10 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
     def log_likelihood(self):
         celerite_params = self.conversion_func(self.parameters)
         for name, value in celerite_params.items():
-            self.gp.set_parameter(name=name, value=value)
+            try:
+                self.gp.set_parameter(name=name, value=value)
+            except ValueError:
+                raise ValueError(f"Parameter {name} not a valid parameter for the GP.")
         try:
             return self.gp.log_likelihood(self.y)
         except Exception:
@@ -362,9 +365,13 @@ def get_kernel(kernel_type, jitter_term=False):
         res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
               PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
               PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
-              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
-              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
-              PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
+              ExponentialTerm(log_a=0.1, log_c=-0.01)
+
+    elif kernel_type == 'sho':
+        res = celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0)
+    elif kernel_type == 'double_sho':
+        res = celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0) + \
+              celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0)
     else:
         raise ValueError('Recovery mode not defined')
 
