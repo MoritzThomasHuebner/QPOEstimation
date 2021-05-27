@@ -93,7 +93,7 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    matplotlib.use('Qt5Agg')
+    # matplotlib.use('Qt5Agg')
 
     data_source = "grb"  # "magnetar_flare_binned"
     run_mode = 'select_time'
@@ -117,8 +117,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 16
 
-    start_time = -20
-    end_time = 123
+    start_time = 105
+    end_time = 500
 
     period_number = 14
     run_id = 6
@@ -155,7 +155,7 @@ else:
     injection_mode = "qpo"
     recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process_windowed"
-    background_model = "fred_norris_extended"
+    background_model = "fred"
     n_components = 1
     jitter_term = False
 
@@ -169,7 +169,7 @@ else:
     nlive = 1000
     use_ratio = False
 
-    try_load = False
+    try_load = True
     resume = False
     plot = True
 
@@ -203,6 +203,8 @@ truths = None
 recovery_mode_str = recovery_mode
 if jitter_term:
     recovery_mode_str += "_jitter"
+
+time_orig = 0
 
 if data_source == 'giant_flare':
     times, counts = get_giant_flare_data(
@@ -257,6 +259,7 @@ elif data_source == 'grb':
         label = f'{start_time}_{end_time}'
     else:
         label = run_mode
+    time_orig = times[0]
     times -= times[0]
 
 elif data_source == 'injection':
@@ -271,6 +274,7 @@ elif data_source == 'hares_and_hounds':
                                          hares_and_hounds_round=hares_and_hounds_round,
                                          start_time=start_time, end_time=end_time)
     times -= times[0]
+    time_orig = times[0]
     outdir = f"hares_and_hounds_{hares_and_hounds_round}/{hares_and_hounds_id}/{run_mode}/{recovery_mode}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
@@ -306,7 +310,7 @@ else:
 
 
 if plot:
-    plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
+    plt.errorbar(times + time_orig, y, yerr=yerr, fmt=".k", capsize=0, label='data')
     # plt.plot(times, y, label='flux')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
