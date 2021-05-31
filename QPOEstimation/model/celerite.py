@@ -1,6 +1,7 @@
 import numpy as np
 
-from celerite.modeling import Model
+from celerite.modeling import Model as CeleriterModel
+from george.modeling import Model as GeorgeModel
 
 from QPOEstimation.model.series import exponential_background, fred, polynomial, gaussian, log_normal, \
     lorentzian
@@ -8,7 +9,13 @@ import bilby
 
 
 def function_to_celerite_mean_model(func):
-    class CeleriteMeanModel(Model):
+    return function_to_model(func, CeleriterModel)
+
+def function_to_george_mean_model(func):
+    return function_to_model(func, GeorgeModel)
+
+def function_to_model(func, cls):
+    class MeanModel(cls):
         parameter_names = tuple(bilby.core.utils.infer_args_from_function_except_n_args(func=func, n=1))
 
         def get_value(self, t):
@@ -18,7 +25,7 @@ def function_to_celerite_mean_model(func):
         def compute_gradient(self, *args, **kwargs):
             pass
 
-    return CeleriteMeanModel
+    return MeanModel
 
 
 PolynomialMeanModel = function_to_celerite_mean_model(polynomial)
@@ -28,8 +35,15 @@ LogNormalMeanModel = function_to_celerite_mean_model(log_normal)
 LorentzianMeanModel = function_to_celerite_mean_model(lorentzian)
 FREDMeanModel = function_to_celerite_mean_model(fred)
 
+# PolynomialMeanModelGeorge = function_to_george_mean_model(polynomial)
+# ExponentialMeanModelGeorge = function_to_george_mean_model(exponential_background)
+# GaussianMeanModelGeorge = function_to_george_mean_model(gaussian)
+# LogNormalMeanModelGeorge = function_to_george_mean_model(log_normal)
+# LorentzianMeanModelGeorge = function_to_george_mean_model(lorentzian)
+# FREDMeanModelGeorge = function_to_george_mean_model(fred)
 
-def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False):
+
+def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, likelihood_model='gaussian_process'):
     base_names = bilby.core.utils.infer_args_from_function_except_n_args(func=model, n=1)
     names = []
     for i in range(n_models):
@@ -44,7 +58,12 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False):
         for name in names:
             defaults[name] = 0.1
 
-    class MultipleMeanModel(Model):
+    if likelihood_model == 'george_likelihood':
+        M = GeorgeModel
+    else:
+        M = CeleriterModel
+
+    class MultipleMeanModel(M):
         parameter_names = names
 
         def get_value(self, t):

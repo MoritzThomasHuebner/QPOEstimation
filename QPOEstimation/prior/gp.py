@@ -31,6 +31,8 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
         priors = get_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "double_sho":
         priors = get_double_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
+    elif kernel_type == "matern32":
+        priors = get_matern_32_prior()
     else:
         raise ValueError('Recovery mode not defined')
     if jitter_term:
@@ -239,6 +241,12 @@ def get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, m
     _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='log_f')
     priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     priors.conversion_function = decay_constrain_conversion_function
+    return priors
+
+
+def get_matern_32_prior():
+    priors = bilby.prior.PriorDict()
+    priors['kernel:metric:log_M_0_0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_M_0_0')
     return priors
 
 

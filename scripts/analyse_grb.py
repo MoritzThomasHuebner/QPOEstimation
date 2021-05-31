@@ -59,7 +59,7 @@ plt.tight_layout()
 plt.savefig(f'GRB_Ln_Z_plot.png')
 plt.show()
 
-
+plt.figure(figsize=(9.2, 7.2))
 for mean_model, res_list in res_dict.items():
     for i, res in enumerate(res_list):
         n_component = 1 + i
@@ -70,7 +70,7 @@ for mean_model, res_list in res_dict.items():
             power_qpo(a=np.exp(log_a_samples), c=np.exp(log_c_samples), f=np.exp(log_f_samples)))
         plt.hist(power_samples, bins="fd", density=True, histtype='step',
                  label=f"{n_component} {label_dict_mean[mean_model]} flares")
-plt.xlabel()
+plt.xlabel("$\ln P_{\mathrm{QPO}}$")
 plt.ylabel("Normalised PDF")
 plt.legend()
 plt.savefig(f"GRB_qpo_power_hist.png")

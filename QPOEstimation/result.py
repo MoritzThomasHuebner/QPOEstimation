@@ -5,7 +5,7 @@ from pathlib import Path
 import bilby
 
 from QPOEstimation.utils import MetaDataAccessor
-from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, get_kernel, get_mean_model
+from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, GeorgeLikelihood, get_kernel, get_mean_model
 from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
 style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
@@ -51,6 +51,9 @@ class GPResult(bilby.result.Result):
         elif self.likelihood_model == 'gaussian_process':
             likelihood = CeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(), fit_mean=True,
                                             t=self.times, y=self.y, yerr=self.yerr)
+        elif self.likelihood_model == 'george_likelihood':
+            likelihood = GeorgeLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(), fit_mean=True,
+                                          t=self.times, y=self.y, yerr=self.yerr)
         else:
             raise ValueError
         return self._set_likelihood_parameters(likelihood=likelihood, parameters=self.max_likelihood_parameters)
@@ -308,8 +311,14 @@ class GPResult(bilby.result.Result):
 
     def plot_all(self):
         self.plot_corner()
-        self.plot_max_likelihood_psd()
-        self.plot_kernel()
+        try:
+            self.plot_max_likelihood_psd()
+        except Exception:
+            pass
+        try:
+            self.plot_kernel()
+        except Exception:
+            pass
         self.plot_lightcurve()
         self.plot_qpo_log_amplitude()
         self.plot_log_red_noise_power()

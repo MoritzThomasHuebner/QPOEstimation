@@ -3,6 +3,7 @@ import numpy as np
 from bilby.core.likelihood import Likelihood
 import celerite
 from celerite import terms
+import george
 from scipy.special import gamma
 
 
@@ -166,6 +167,40 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
 
     def noise_log_likelihood(self):
         return self.white_noise_log_likelihood
+
+
+class GeorgeLikelihood(bilby.likelihood.Likelihood):
+
+    def __init__(self, kernel, mean_model, fit_mean, t, y, yerr, conversion_func=None):
+        """ Celerite to bilby likelihood interface """
+
+        self.kernel = kernel
+        self.mean_model = mean_model
+        self.fit_mean = fit_mean
+        self.t = np.array(t)
+        self.y = np.array(y)
+        self.y_err = np.array(yerr)
+
+        if conversion_func is None:
+            self.conversion_func = lambda x: x
+        else:
+            self.conversion_func = conversion_func
+
+        self.gp = george.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean, fit_white_noise=False)
+        self.gp.compute(x=t, yerr=yerr)
+        super().__init__(parameters=self.gp.get_parameter_dict())
+
+    def log_likelihood(self):
+        celerite_params = self.conversion_func(self.parameters)
+        for name, value in celerite_params.items():
+            try:
+                self.gp.set_parameter(name=name, value=value)
+            except ValueError:
+                raise ValueError(f"Parameter {name} not a valid parameter for the GP.")
+        try:
+            return self.gp.log_likelihood(self.y)
+        except Exception:
+            return -np.inf
 
 
 class WindowedCeleriteLikelihood(CeleriteLikelihood):
@@ -372,6 +407,8 @@ def get_kernel(kernel_type, jitter_term=False):
     elif kernel_type == 'double_sho':
         res = celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0) + \
               celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0)
+    elif kernel_type == 'matern32':
+        res = george.kernels.Matern32Kernel(metric=1.0)
     else:
         raise ValueError('Recovery mode not defined')
 
@@ -380,16 +417,18 @@ def get_kernel(kernel_type, jitter_term=False):
     return res
 
 
-def get_mean_model(model_type, n_components=1, y=None, offset=False):
+def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model='gaussian_process'):
     if model_type == 'polynomial':
         return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0), True
     elif model_type == 'mean':
         return np.mean(y), False
     elif model_type in mean_model_dict:
-        return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components, offset=offset), True
+        return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components, offset=offset,
+                                          likelihood_model=likelihood_model), True
     else:
         raise ValueError
 
 
-LIKELIHOOD_MODELS = dict(gaussian_process=CeleriteLikelihood, gaussian_process_windowed=WindowedCeleriteLikelihood)
+LIKELIHOOD_MODELS = dict(gaussian_process=CeleriteLikelihood, gaussian_process_windowed=WindowedCeleriteLikelihood,
+                         george_likelihood=GeorgeLikelihood)
 

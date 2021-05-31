@@ -34,6 +34,7 @@ if len(sys.argv) > 1:
     grb_id = args.grb_id
     grb_binning = args.grb_binning
     grb_detector = args.grb_detector
+    grb_energy_band = args.grb_energy_band
     magnetar_label = args.magnetar_label
     magnetar_tag = args.magnetar_tag
     magnetar_bin_size = args.magnetar_bin_size
@@ -109,16 +110,17 @@ else:
     grb_id = "090709A"
     grb_binning = "1s"
     grb_detector = 'swift'
+    grb_energy_band = 'all'
 
     magnetar_label = 'SGR_0501'
     magnetar_tag = '080823478_lcobs'
     magnetar_bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
-    rebin_factor = 16
+    rebin_factor = 64
 
-    start_time = 105
-    end_time = 500
+    start_time = -4
+    end_time = 103
 
     period_number = 14
     run_id = 6
@@ -145,7 +147,7 @@ else:
     tau_max = None
 
     min_log_a = -10
-    max_log_a = 10
+    max_log_a = 15
     # min_log_c = -10
     min_log_c = None
     max_log_c = None
@@ -153,9 +155,9 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "general_qpo"
-    likelihood_model = "gaussian_process_windowed"
-    background_model = "fred"
+    recovery_mode = "matern32"
+    likelihood_model = "george_likelihood"
+    background_model = "skew_gaussian"
     n_components = 1
     jitter_term = False
 
@@ -253,12 +255,14 @@ elif data_source == 'solar_flare':
 elif data_source == 'grb':
     times, y, yerr = get_grb_data(
         run_mode, grb_id=grb_id, grb_binning=grb_binning,
-        start_time=start_time, end_time=end_time, grb_detector=grb_detector)
+        start_time=start_time, end_time=end_time, grb_detector=grb_detector, grb_energy_band=grb_energy_band)
     outdir = f"GRB{grb_id}_{grb_detector}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
     if run_mode == 'select_time':
         label = f'{start_time}_{end_time}'
     else:
         label = run_mode
+    if grb_energy_band != 'all':
+        label += f'_{grb_energy_band}keV'
     time_orig = times[0]
     times -= times[0]
 
@@ -317,7 +321,8 @@ if plot:
     plt.show()
     plt.clf()
 
-mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset)
+mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset,
+                                      likelihood_model=likelihood_model)
 
 priors = get_priors(times=times, y=y, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,

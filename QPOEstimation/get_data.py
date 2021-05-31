@@ -119,18 +119,33 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
 
 
 def get_grb_data_from_segment(
-        grb_id, grb_binning, start_time, end_time, grb_detector=None, **kwargs):
-    times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id, grb_detector=grb_detector)
+        grb_id, grb_binning, start_time, end_time, grb_detector=None, grb_energy_band='all', **kwargs):
+    times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id, grb_detector=grb_detector, grb_energy_band=grb_energy_band)
     return truncate_data(times=times, counts=y, start=start_time, stop=end_time, yerr=yerr)
 
 
-def get_all_grb_data(grb_id, grb_binning, grb_detector=None, **kwargs):
+def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band='all', **kwargs):
     data_file = f'data/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt'
     data = np.loadtxt(data_file)
     times = data[:, 0]
     if grb_detector == 'swift':
-        y = data[:, 9]
-        yerr = data[:, 10]
+        if grb_energy_band == '15-25':
+            y = data[:, 1]
+            yerr = data[:, 2]
+        elif grb_energy_band == '25-50':
+            y = data[:, 3]
+            yerr = data[:, 4]
+        elif grb_energy_band == '50-100':
+            y = data[:, 5]
+            yerr = data[:, 6]
+        elif grb_energy_band == '100-350':
+            y = data[:, 7]
+            yerr = data[:, 8]
+        elif grb_energy_band in ['all', '15-350']:
+            y = data[:, 9]
+            yerr = data[:, 10]
+        else:
+            raise ValueError(f'Energy band {grb_energy_band} not understood')
         return times, y, yerr
     elif grb_detector == 'konus':
         y = data[:, 1]
