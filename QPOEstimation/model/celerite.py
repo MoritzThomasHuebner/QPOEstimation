@@ -85,5 +85,3 @@ def power_qpo(a, c, f):
 
 def power_red_noise(a, c):
     return a / c**0.5
-
-
