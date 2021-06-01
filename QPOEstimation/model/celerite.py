@@ -11,8 +11,10 @@ import bilby
 def function_to_celerite_mean_model(func):
     return function_to_model(func, CeleriterModel)
 
+
 def function_to_george_mean_model(func):
     return function_to_model(func, GeorgeModel)
+
 
 def function_to_model(func, cls):
     class MeanModel(cls):
@@ -34,13 +36,6 @@ GaussianMeanModel = function_to_celerite_mean_model(gaussian)
 LogNormalMeanModel = function_to_celerite_mean_model(log_normal)
 LorentzianMeanModel = function_to_celerite_mean_model(lorentzian)
 FREDMeanModel = function_to_celerite_mean_model(fred)
-
-# PolynomialMeanModelGeorge = function_to_george_mean_model(polynomial)
-# ExponentialMeanModelGeorge = function_to_george_mean_model(exponential_background)
-# GaussianMeanModelGeorge = function_to_george_mean_model(gaussian)
-# LogNormalMeanModelGeorge = function_to_george_mean_model(log_normal)
-# LorentzianMeanModelGeorge = function_to_george_mean_model(lorentzian)
-# FREDMeanModelGeorge = function_to_george_mean_model(fred)
 
 
 def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, likelihood_model='gaussian_process'):

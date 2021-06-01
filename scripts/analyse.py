@@ -158,7 +158,7 @@ else:
     recovery_mode = "matern32"
     likelihood_model = "george_likelihood"
     background_model = "skew_gaussian"
-    n_components = 1
+    n_components = 0
     jitter_term = False
 
     band_minimum = None
