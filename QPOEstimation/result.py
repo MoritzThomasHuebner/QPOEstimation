@@ -5,7 +5,8 @@ from pathlib import Path
 import bilby
 
 from QPOEstimation.utils import MetaDataAccessor
-from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, GeorgeLikelihood, get_kernel, get_mean_model
+from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, \
+    GeorgeLikelihood, get_kernel, get_mean_model
 from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
 style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
@@ -153,9 +154,11 @@ class GPResult(bilby.result.Result):
                 jitter = np.exp(self.max_likelihood_parameters[k])
 
         if self.likelihood_model == 'gaussian_process_windowed':
-            plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan', label='start/end stochastic process')
+            plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan',
+                        label='start/end stochastic process')
             plt.axvline(self.max_likelihood_parameters['window_maximum'], color='cyan')
-            x = np.linspace(self.max_likelihood_parameters['window_minimum'], self.max_likelihood_parameters['window_maximum'], 5000)
+            x = np.linspace(self.max_likelihood_parameters['window_minimum'],
+                            self.max_likelihood_parameters['window_maximum'], 5000)
             windowed_indices = np.where(
                 np.logical_and(self.max_likelihood_parameters['window_minimum'] < self.times,
                                self.times < self.max_likelihood_parameters['window_maximum']))
@@ -234,7 +237,8 @@ class GPResult(bilby.result.Result):
             median = np.median(log_amplitude_samples)
             percentiles = np.percentile(log_amplitude_samples, [16, 84])
             plt.title(
-                f"{np.mean(log_amplitude_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+                f"{np.mean(log_amplitude_samples):.2f} + "
+                f"{percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
             try:
                 plt.tight_layout()
             except Exception:

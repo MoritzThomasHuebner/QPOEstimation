@@ -17,8 +17,9 @@ def get_all_tte_magnetar_flare_data(magnetar_label, tag, bin_size=0.001, subtrac
 
 def get_tte_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, tag, bin_size=0.001,
                                              subtract_t0=True, unbarycentred_time=False, **kwargs):
-    times, counts = get_all_tte_magnetar_flare_data(magnetar_label=magnetar_label, tag=tag, bin_size=bin_size, subtract_t0=subtract_t0,
-                                                    unbarycentred_time=unbarycentred_time, **kwargs)
+    times, counts = get_all_tte_magnetar_flare_data(
+        magnetar_label=magnetar_label, tag=tag, bin_size=bin_size,
+        subtract_t0=subtract_t0, unbarycentred_time=unbarycentred_time, **kwargs)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
@@ -120,7 +121,8 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
 
 def get_grb_data_from_segment(
         grb_id, grb_binning, start_time, end_time, grb_detector=None, grb_energy_band='all', **kwargs):
-    times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id, grb_detector=grb_detector, grb_energy_band=grb_energy_band)
+    times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id, grb_detector=grb_detector,
+                                      grb_energy_band=grb_energy_band)
     return truncate_data(times=times, counts=y, start=start_time, stop=end_time, yerr=yerr)
 
 
@@ -201,13 +203,16 @@ def get_all_hares_and_hounds_data(hares_and_hounds_id="5700", hares_and_hounds_r
     return times, flux
 
 
-def get_hares_and_hounds_data_from_segment(hares_and_hounds_id="5700", hares_and_hounds_round='HH2', start_time=None, end_time=None, **kwargs):
-    times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id, hares_and_hounds_round=hares_and_hounds_round)
+def get_hares_and_hounds_data_from_segment(hares_and_hounds_id="5700", hares_and_hounds_round='HH2',
+                                           start_time=None, end_time=None, **kwargs):
+    times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id,
+                                                hares_and_hounds_round=hares_and_hounds_round)
     return truncate_data(times=times, counts=flux, start=start_time, stop=end_time)
 
 
 def get_hares_and_hounds_data_from_maximum(hares_and_hounds_id="5700", hares_and_hounds_round='HH2', **kwargs):
-    times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id, hares_and_hounds_round=hares_and_hounds_round)
+    times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id,
+                                                hares_and_hounds_round=hares_and_hounds_round)
     max_index = np.argmax(flux)
     return truncate_data(times=times, counts=flux, start=times[max_index], stop=times[-1])
 

@@ -6,3 +6,4 @@ scipy~=1.5.2
 astropy~=3.2.3
 setuptools~=45.2.0
 stingray~=0.1
+george

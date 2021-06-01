@@ -7,7 +7,6 @@ import celerite
 import matplotlib.pyplot as plt
 
 from QPOEstimation.likelihood import get_kernel, get_mean_model
-from QPOEstimation.utils import get_injection_outdir
 
 
 class InjectionCreator(object):

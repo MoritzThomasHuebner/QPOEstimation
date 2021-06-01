@@ -25,8 +25,6 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
         priors = get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "double_qpo":
         priors = get_double_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
-    elif kernel_type == "fourier_series":
-        priors = get_fourier_series_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "sho":
         priors = get_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "double_sho":
@@ -54,7 +52,8 @@ def _add_jitter_term(priors):
         for i in range(10):
             if f"[{i}]" in k and n_terms < i + 1:
                 n_terms = i + 1
-    new_priors[f'kernel:terms[{n_terms}]:log_sigma'] = bilby.core.prior.Uniform(minimum=-10, maximum=5, name=f'terms[{n_terms}]:log_sigma')
+    new_priors[f'kernel:terms[{n_terms}]:log_sigma'] = bilby.core.prior.Uniform(
+        minimum=-10, maximum=5, name=f'terms[{n_terms}]:log_sigma')
     return new_priors
 
 
@@ -86,7 +85,7 @@ def get_red_noise_prior(max_log_a, max_log_c, min_log_a, min_log_c):
     return priors
 
 
-def get_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
+def get_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c): # noqa
     priors = bilby.prior.PriorDict()
     priors["kernel:log_S0"] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_S0')
     priors["kernel:log_Q"] = bilby.core.prior.Uniform(minimum=-10, maximum=10, name='log_Q')
@@ -95,7 +94,7 @@ def get_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, m
     return priors
 
 
-def get_double_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
+def get_double_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c): # noqa
     priors = bilby.prior.PriorDict()
     priors["kernel:terms[0]:log_S0"] = bilby.core.prior.Uniform(minimum=min_log_a, maximum=max_log_a, name='log_S0')
     priors["kernel:terms[0]:log_Q"] = bilby.core.prior.Uniform(minimum=-10, maximum=np.log(0.5), name='log_Q')
@@ -148,75 +147,6 @@ def get_double_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_l
     return priors
 
 
-def c_condition_func(reference_params, **kwargs):
-    return dict(peak=kwargs["kernel:terms[0]:log_c"])
-
-def f_condition_func_1(reference_params, **kwargs):
-    return dict(peak=kwargs["kernel:terms[0]:log_f"] + np.log(2))
-
-def f_condition_func_2(reference_params, **kwargs):
-    return dict(peak=kwargs["kernel:terms[0]:log_f"] + np.log(3))
-
-def f_condition_func_3(reference_params, **kwargs):
-    return dict(peak=kwargs["kernel:terms[0]:log_f"] + np.log(4))
-
-def f_condition_func_4(reference_params, **kwargs):
-    return dict(peak=kwargs["kernel:terms[0]:log_f"] + np.log(5))
-
-def f_condition_func_5(reference_params, **kwargs):
-    return dict(peak=kwargs["kernel:terms[0]:log_f"] + np.log(6))
-
-def get_fourier_series_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
-    min_log_f = np.log(band_minimum)
-    max_log_f = np.log(band_maximum)
-
-    priors = bilby.prior.ConditionalPriorDict()
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[0]:log_a')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[1]:log_a')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[2]:log_a')
-    # _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[3]:log_a')
-    # _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[4]:log_a')
-    # _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[5]:log_a')
-
-    # Red noise component
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[3]:log_a')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[3]:log_c')
-
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='terms[0]:log_c')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='terms[0]:log_f')
-
-
-
-    priors['kernel:terms[1]:log_c'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=c_condition_func, name="terms[1]:log_c")
-    priors['kernel:terms[2]:log_c'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=c_condition_func, name="terms[2]:log_c")
-    # priors['kernel:terms[3]:log_c'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=c_condition_func, name="terms[3]:log_c")
-    # priors['kernel:terms[4]:log_c'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=c_condition_func, name="terms[4]:log_c")
-    # priors['kernel:terms[5]:log_c'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=c_condition_func, name="terms[5]:log_c")
-
-    # priors['kernel:terms[1]:log_c']._required_variables = ['kernel:terms[0]:log_c']
-    # priors['kernel:terms[2]:log_c']._required_variables = ['kernel:terms[0]:log_c']
-    # priors['kernel:terms[3]:log_c']._required_variables = ['kernel:terms[0]:log_c']
-    # priors['kernel:terms[4]:log_c']._required_variables = ['kernel:terms[0]:log_c']
-    # priors['kernel:terms[5]:log_c']._required_variables = ['kernel:terms[0]:log_c']
-
-    priors['kernel:terms[1]:log_f'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=f_condition_func_1, name="terms[1]:log_f")
-    priors['kernel:terms[2]:log_f'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=f_condition_func_2, name="terms[2]:log_f")
-    # priors['kernel:terms[3]:log_f'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=f_condition_func_3, name="terms[3]:log_f")
-    # priors['kernel:terms[4]:log_f'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=f_condition_func_4, name="terms[4]:log_f")
-    # priors['kernel:terms[5]:log_f'] = bilby.core.prior.ConditionalDeltaFunction(peak=-3, condition_func=f_condition_func_5, name="terms[5]:log_f")
-
-    priors['kernel:terms[1]:log_f']._required_variables = ['kernel:terms[0]:log_f']
-    priors['kernel:terms[2]:log_f']._required_variables = ['kernel:terms[0]:log_f']
-    # priors['kernel:terms[3]:log_f']._required_variables = ['kernel:terms[0]:log_f']
-    # priors['kernel:terms[4]:log_f']._required_variables = ['kernel:terms[0]:log_f']
-    # priors['kernel:terms[5]:log_f']._required_variables = ['kernel:terms[0]:log_f']
-
-    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-    priors.conversion_function = decay_constrain_conversion_function
-    priors._resolve_conditions()
-    return priors
-
-
 def get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
     min_log_f = np.log(band_minimum)
     max_log_f = np.log(band_maximum)
@@ -231,16 +161,10 @@ def get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log
 
 
 def get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
-    min_log_f = np.log(band_minimum)
-    max_log_f = np.log(band_maximum)
-
     priors = bilby.prior.PriorDict()
     priors['kernel:log_b'] = bilby.core.prior.DeltaFunction(peak=-10, name='log_b')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='log_a')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='log_c')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='log_f')
-    priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
-    priors.conversion_function = decay_constrain_conversion_function
+    priors.update(get_pure_qpo_prior(band_maximum=band_maximum, band_minimum=band_minimum, max_log_a=max_log_a,
+                                     max_log_c=max_log_c, min_log_a=min_log_a, min_log_c=min_log_c))
     return priors
 
 

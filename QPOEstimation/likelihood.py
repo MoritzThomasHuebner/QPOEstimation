@@ -431,4 +431,3 @@ def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_
 
 LIKELIHOOD_MODELS = dict(gaussian_process=CeleriteLikelihood, gaussian_process_windowed=WindowedCeleriteLikelihood,
                          george_likelihood=GeorgeLikelihood)
-

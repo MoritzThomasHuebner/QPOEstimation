@@ -30,7 +30,7 @@ class MinimumPrior(ConditionalBeta):
         self.__class__.__name__ = 'MinimumPrior'
         self.__class__.__qualname__ = 'MinimumPrior'
 
-    def minimum_condition(self, reference_params, **kwargs):
+    def minimum_condition(self, reference_params, **kwargs):  # noqa
         return dict(minimum=kwargs[self.reference_name] + self.minimum_spacing)
 
     def __repr__(self):

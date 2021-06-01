@@ -12,10 +12,10 @@ def get_priors(**kwargs):
     sampling_frequency = 1 / (kwargs['times'][1] - kwargs['times'][0])
 
     if kwargs['band_minimum'] is None:
-        kwargs['band_minimum'] = 2/segment_length
+        kwargs['band_minimum'] = 2 / segment_length
 
     if kwargs['band_maximum'] is None:
-        kwargs['band_maximum'] = sampling_frequency/2
+        kwargs['band_maximum'] = sampling_frequency / 2
 
     if kwargs['min_log_c'] is None:
         kwargs['min_log_c'] = np.log(1 / 10 / segment_length)
@@ -32,11 +32,10 @@ def get_priors(**kwargs):
         kwargs['t_0_max'] = kwargs['times'][-1] + 0.1 * segment_length
 
     if kwargs['sigma_min'] is None:
-        kwargs['sigma_min'] = 0.5 * 1/sampling_frequency
+        kwargs['sigma_min'] = 0.5 * 1 / sampling_frequency
 
     if kwargs['sigma_max'] is None:
         kwargs['sigma_max'] = 2 * segment_length
-
 
     priors = bilby.core.prior.ConditionalPriorDict()
     mean_priors = mean.get_mean_prior(**kwargs)
@@ -48,4 +47,3 @@ def get_priors(**kwargs):
     priors._resolve_conditions()
     priors.conversion_function = gp.decay_constrain_conversion_function
     return priors
-

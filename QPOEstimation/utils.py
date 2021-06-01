@@ -1,6 +1,6 @@
 likelihood_models = ["gaussian_process", "gaussian_process_windowed", "george_likelihood"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo",
-         "double_red_noise", "double_qpo", "fourier_series", 'matern32']
+         "double_red_noise", "double_qpo", 'matern32']
 data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flare',
                 'magnetar_flare_binned', 'hares_and_hounds']
 run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment', 'from_maximum']

@@ -155,10 +155,10 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "matern32"
-    likelihood_model = "george_likelihood"
+    recovery_mode = "general_qpo"
+    likelihood_model = "gaussian_process"
     background_model = "skew_gaussian"
-    n_components = 0
+    n_components = 1
     jitter_term = False
 
     band_minimum = None

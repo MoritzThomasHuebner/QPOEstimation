@@ -1,15 +1,15 @@
 import numpy as np
 
-from celerite.modeling import Model as CeleriterModel
+from celerite.modeling import Model as CeleriteModel
 from george.modeling import Model as GeorgeModel
 
-from QPOEstimation.model.series import exponential_background, fred, polynomial, gaussian, log_normal, \
+from QPOEstimation.model.mean import fred, polynomial, gaussian, log_normal, \
     lorentzian
 import bilby
 
 
 def function_to_celerite_mean_model(func):
-    return function_to_model(func, CeleriterModel)
+    return function_to_model(func, CeleriteModel)
 
 
 def function_to_george_mean_model(func):
@@ -31,7 +31,6 @@ def function_to_model(func, cls):
 
 
 PolynomialMeanModel = function_to_celerite_mean_model(polynomial)
-ExponentialMeanModel = function_to_celerite_mean_model(exponential_background)
 GaussianMeanModel = function_to_celerite_mean_model(gaussian)
 LogNormalMeanModel = function_to_celerite_mean_model(log_normal)
 LorentzianMeanModel = function_to_celerite_mean_model(lorentzian)
@@ -45,7 +44,7 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
         for base in base_names:
             names.extend([f"{base}_{i}"])
     if offset:
-        names.extend(['offset'])
+        names.extend(['log_offset'])
 
     names = tuple(names)
     if defaults is None:
@@ -54,19 +53,19 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
             defaults[name] = 0.1
 
     if likelihood_model == 'george_likelihood':
-        M = GeorgeModel
+        m = GeorgeModel
     else:
-        M = CeleriterModel
+        m = CeleriteModel
 
-    class MultipleMeanModel(M):
+    class MultipleMeanModel(m):
         parameter_names = names
 
         def get_value(self, t):
             res = np.zeros(len(t))
-            for i in range(n_models):
-                res += model(t, **{f"{base}": getattr(self, f"{base}_{i}") for base in base_names})
+            for j in range(n_models):
+                res += model(t, **{f"{b}": getattr(self, f"{b}_{j}") for b in base_names})
             if offset:
-                res += getattr(self, "offset")
+                res += np.exp(getattr(self, "log_offset"))
             return res
 
         def compute_gradient(self, *args, **kwargs):
