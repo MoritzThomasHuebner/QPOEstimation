@@ -9,7 +9,7 @@ from QPOEstimation.prior.gp import *
 
 import sys
 
-matplotlib.use('Qt5Agg')
+# matplotlib.use('Qt5Agg')
 
 data_source = 'grb'
 run_mode = 'entire_segment'
