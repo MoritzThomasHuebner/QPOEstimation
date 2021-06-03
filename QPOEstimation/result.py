@@ -122,15 +122,8 @@ class GPResult(bilby.result.Result):
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
         plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue")
-        # max_plot = max(likelihood.gp.kernel.get_value(taus))
-        # min_plot = min(likelihood.gp.kernel.get_value(taus))
-        # samples = self.get_random_posterior_samples(10)
-        # for sample in samples:
-        #     likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
-        #     plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue", alpha=0.3)
         plt.xlabel('tau [s]')
         plt.ylabel('kernel')
-        # plt.ylim(min_plot, max_plot)
         try:
             plt.tight_layout()
         except Exception:

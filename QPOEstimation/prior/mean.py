@@ -29,8 +29,8 @@ def get_mean_prior(model_type, **kwargs):
         offset_max = maximum
 
     if kwargs.get('offset', False):
-        priors['mean:log_offset'] = bilby.prior.Uniform(minimum=np.log(offset_min), maximum=np.log(offset_max),
-                                                        name="log offset")
+        priors['mean:offset'] = bilby.prior.Uniform(minimum=offset_min, maximum=offset_max,
+                                                    name="log offset")
     return priors
 
 

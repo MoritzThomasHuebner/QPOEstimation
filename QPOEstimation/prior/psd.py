@@ -5,8 +5,8 @@ import numpy as np
 def get_red_noise_prior():
     prior = bilby.core.prior.PriorDict()
     prior['alpha'] = bilby.core.prior.Uniform(0, 10, name='alpha')
-    prior['beta'] = bilby.core.prior.LogUniform(1e-6, 10, name='beta')
-    prior['sigma'] = bilby.core.prior.LogUniform(1e-5, 1, name='sigma')
+    prior['log_beta'] = bilby.core.prior.Uniform(np.log(1e-6), np.log(1e6), name='log_beta')
+    prior['log_sigma'] = bilby.core.prior.Uniform(np.log(1e-5), np.log(1e5), name='log_sigma')
     return prior
 
 
@@ -18,11 +18,9 @@ def get_qpo_prior(frequencies=None):
         df = frequencies[1] - frequencies[0]
         max_frequency = frequencies[-1]
     prior = bilby.core.prior.PriorDict()
-    prior['amplitude'] = bilby.core.prior.LogUniform(1e-4, 100, name='amplitude')
-    prior['width'] = bilby.core.prior.LogUniform(df/np.pi, 100, name='width')
-    prior['central_frequency'] = bilby.core.prior.Uniform(df, max_frequency, name='central_frequency')
-    # prior['offset'] = bilby.core.prior.Uniform(0, 1, name='offset')
-    prior['offset'] = bilby.core.prior.DeltaFunction(0, name='offset')
+    prior['log_amplitude'] = bilby.core.prior.Uniform(np.log(1e-6), np.log(1e6), name='log_amplitude')
+    prior['log_width'] = bilby.core.prior.Uniform(np.log(df/np.pi), np.log(max_frequency), name='log_width')
+    prior['log_frequency'] = bilby.core.prior.Uniform(np.log(2*df), np.log(max_frequency), name='log_frequency')
     return prior
 
 
@@ -30,10 +28,10 @@ def get_broken_power_law_prior():
     prior = bilby.core.prior.PriorDict()
     prior['alpha_1'] = bilby.core.prior.Uniform(0, 10, name='alpha_1')
     prior['alpha_2'] = bilby.core.prior.Uniform(0, 10, name='alpha_2')
-    prior['delta'] = bilby.core.prior.LogUniform(1e-4, 100, name='delta')
+    prior['log_delta'] = bilby.core.prior.Uniform(np.log(1e-6), np.log(1e6), name='log_delta')
     prior['rho'] = bilby.core.prior.DeltaFunction(peak=-1)
-    prior['beta'] = bilby.core.prior.LogUniform(0.01, 10, name='beta')
-    prior['sigma'] = bilby.core.prior.LogUniform(1e-4, 1, name='sigma')
+    prior['log_beta'] = bilby.core.prior.Uniform(np.log(1e-6), np.log(1e6), name='log_beta')
+    prior['log_sigma'] = bilby.core.prior.Uniform(np.log(1e-5), np.log(1e5), name='log_sigma')
     return prior
 
 

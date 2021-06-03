@@ -33,23 +33,46 @@ class WhittleLikelihood(Likelihood):
     alpha = ParameterAccessor('alpha')
     alpha_1 = ParameterAccessor('alpha_1')
     alpha_2 = ParameterAccessor('alpha_2')
-    beta = ParameterAccessor('beta')
-    sigma = ParameterAccessor('sigma')
+    log_beta = ParameterAccessor('log_beta')
+    log_sigma = ParameterAccessor('log_sigma')
     rho = ParameterAccessor('rho')
-    delta = ParameterAccessor('delta')
-    amplitude = ParameterAccessor('amplitude')
-    width = ParameterAccessor('width')
-    central_frequency = ParameterAccessor('central_frequency')
-    offset = ParameterAccessor('offset')
+    log_delta = ParameterAccessor('log_delta')
+    log_amplitude = ParameterAccessor('log_amplitude')
+    log_width = ParameterAccessor('log_width')
+    log_frequency = ParameterAccessor('log_frequency')
 
     def __init__(self, frequencies, periodogram, frequency_mask, noise_model='red_noise'):
         super(WhittleLikelihood, self).__init__(
-            parameters=dict(alpha=0, alpha_1=0, alpha_2=0, beta=0, sigma=0, delta=0, rho=0,
-                            amplitude=0, width=1, central_frequency=127, offset=0))
+            parameters=dict(alpha=0, alpha_1=0, alpha_2=0, log_beta=0, log_sigma=0, log_delta=0, rho=0,
+                            log_amplitude=0, log_width=1, log_frequency=127))
         self.frequencies = frequencies
         self._periodogram = periodogram
         self.frequency_mask = frequency_mask
         self.noise_model = noise_model
+
+    @property
+    def beta(self):
+        return np.exp(self.log_beta)
+
+    @property
+    def sigma(self):
+        return np.exp(self.log_sigma)
+
+    @property
+    def delta(self):
+        return np.exp(self.log_delta)
+
+    @property
+    def amplitude(self):
+        return np.exp(self.log_amplitude)
+
+    @property
+    def width(self):
+        return np.exp(self.log_width)
+
+    @property
+    def frequency(self):
+        return np.exp(self.log_frequency)
 
     @property
     def frequencies(self):
@@ -76,7 +99,7 @@ class WhittleLikelihood(Likelihood):
 
     @property
     def lorentzian(self):
-        return lorentzian(self.frequencies, self.amplitude, self.central_frequency, self.width, self.offset)
+        return lorentzian(self.frequencies, self.amplitude, self.frequency, self.width)
 
     @property
     def noise_model(self):

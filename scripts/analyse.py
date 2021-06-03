@@ -94,7 +94,7 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    # matplotlib.use('Qt5Agg')
+    matplotlib.use('Qt5Agg')
 
     data_source = "grb"  # "magnetar_flare_binned"
     run_mode = 'select_time'
@@ -107,8 +107,8 @@ else:
     hares_and_hounds_round = 'HH2'
 
     solar_flare_id = "go1520110128"
-    grb_id = "090709A"
-    grb_binning = "1s"
+    grb_id = "050128"
+    grb_binning = "64ms"
     grb_detector = 'swift'
     grb_energy_band = 'all'
 
@@ -117,10 +117,10 @@ else:
     magnetar_bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
-    rebin_factor = 64
+    rebin_factor = 1
 
-    start_time = -4
-    end_time = 103
+    start_time = -5
+    end_time = 9
 
     period_number = 14
     run_id = 6
@@ -129,7 +129,7 @@ else:
 
     injection_id = 0
 
-    offset = True
+    offset = False
     polynomial_max = 1000000
     amplitude_min = None
     amplitude_max = None
@@ -155,7 +155,7 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "qpo"
-    recovery_mode = "general_qpo"
+    recovery_mode = "red_noise"
     likelihood_model = "gaussian_process"
     background_model = "skew_gaussian"
     n_components = 1
@@ -171,7 +171,7 @@ else:
     nlive = 1000
     use_ratio = False
 
-    try_load = True
+    try_load = False
     resume = False
     plot = True
 

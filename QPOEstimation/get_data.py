@@ -23,22 +23,23 @@ def get_tte_magnetar_flare_data_from_segment(start_time, end_time, magnetar_labe
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
-def get_all_binned_magnetar_flare_data(magnetar_label, tag, subtract_t0=True, rebin_factor=1, **kwargs):
-    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{tag}_data.txt')
-    ts = data[:, 0]
-    cs = data[:, 1]
-
-    times = []
-    counts = []
-    for i in range(0, len(ts), rebin_factor):
-        if len(ts) - i < rebin_factor:
+def rebin(times, counts, rebin_factor):
+    new_times = []
+    new_counts = []
+    for i in range(0, len(times), rebin_factor):
+        if len(times) - i < rebin_factor:
             break
-        times.append(ts[i])
         c = 0
         for j in range(rebin_factor):
-            c += cs[i + j]
-        counts.append(c)
+            c += counts[i + j]
+        new_times.append(times[i])
+        new_counts.append(c)
+    return np.array(new_times), np.array(new_counts)
 
+
+def get_all_binned_magnetar_flare_data(magnetar_label, tag, subtract_t0=True, rebin_factor=1, **kwargs):
+    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{tag}_data.txt')
+    times, counts = rebin(times=data[:, 0], counts=data[:, 1], rebin_factor=rebin_factor)
     if subtract_t0:
         times -= times[0]
     return times, counts
@@ -47,9 +48,7 @@ def get_all_binned_magnetar_flare_data(magnetar_label, tag, subtract_t0=True, re
 def get_all_binned_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, tag,
                                                     subtract_t0=True, rebin_factor=1, **kwargs):
     times, counts = get_all_binned_magnetar_flare_data(
-        magnetar_label=magnetar_label, tag=tag, subtract_t0=False, rebin_factor=rebin_factor, **kwargs)
-    if subtract_t0:
-        times -= times[0]
+        magnetar_label=magnetar_label, tag=tag, subtract_t0=subtract_t0, rebin_factor=rebin_factor, **kwargs)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
@@ -127,7 +126,7 @@ def get_grb_data_from_segment(
 
 
 def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band='all', **kwargs):
-    data_file = f'data/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt'
+    data_file = f'data/GRBs/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt'
     data = np.loadtxt(data_file)
     times = data[:, 0]
     if grb_detector == 'swift':

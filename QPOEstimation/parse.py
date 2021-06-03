@@ -1,6 +1,15 @@
-from QPOEstimation.utils import *
-
 import argparse
+
+likelihood_models = ["gaussian_process", "gaussian_process_windowed", "george_likelihood"]
+modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo",
+         "double_red_noise", "double_qpo", 'matern32']
+data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flare',
+                'magnetar_flare_binned', 'hares_and_hounds']
+run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment', 'from_maximum']
+background_models = ["polynomial", "exponential", "fred", "gaussian", "log_normal", "lorentzian", "mean",
+                     "skew_gaussian", "fred_norris", "fred_norris_extended"]
+data_modes = ['normal', 'smoothed', 'smoothed_residual']
+grb_energy_bands = ['15-25', '25-50', '50-100', '100-350', '15-350', 'all']
 
 
 def parse_args():

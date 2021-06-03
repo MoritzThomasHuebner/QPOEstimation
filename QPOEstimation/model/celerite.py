@@ -44,7 +44,7 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
         for base in base_names:
             names.extend([f"{base}_{i}"])
     if offset:
-        names.extend(['log_offset'])
+        names.extend(['offset'])
 
     names = tuple(names)
     if defaults is None:
@@ -65,7 +65,7 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
             for j in range(n_models):
                 res += model(t, **{f"{b}": getattr(self, f"{b}_{j}") for b in base_names})
             if offset:
-                res += np.exp(getattr(self, "log_offset"))
+                res += getattr(self, "offset")
             return res
 
         def compute_gradient(self, *args, **kwargs):
