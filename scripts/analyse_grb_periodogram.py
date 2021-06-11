@@ -3,93 +3,92 @@ from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
 import QPOEstimation
 from QPOEstimation.prior.gp import *
 
 import sys
 
-# matplotlib.use('Qt5Agg')
+matplotlib.use('Qt5Agg')
 
 data_source = 'grb'
 run_mode = 'entire_segment'
 
-start_time = int(sys.argv[1])
-end_time = int(sys.argv[2])
+start_time = -100
+end_time = 100
+# start_time = int(sys.argv[1])
+# end_time = int(sys.argv[2])
 
-offset = False
-polynomial_max = 1000000
-amplitude_min = 1e-3
-amplitude_max = 1e6
-offset_min = 0
-offset_max = 10000
-skewness_min = 0.1
-skewness_max = 10000
-sigma_min = 0.1
-sigma_max = 10000
-t_0_min = start_time - 200
-# t_0_min = None
-t_0_max = None
-tau_min = -10
-tau_max = 10
-
-min_log_a = -30
-max_log_a = 30
-min_log_c = None
-# min_log_c = -30
-# max_log_c = np.nan
-max_log_c = 30
-minimum_window_spacing = 0
-
-# recovery_mode = "qpo"
-recovery_mode = sys.argv[3]
+recovery_mode = "qpo"
+# recovery_mode = sys.argv[3]
 noise_model = "red_noise"
 
 
-sample = 'rwalk'
+sample = 'rslice'
 nlive = 400
 use_ratio = False
 
-try_load = True
+try_load = False
 resume = False
 plot = True
 
 suffix = ""
 
-mean_prior_bound_dict = dict(
-    amplitude_min=amplitude_min,
-    amplitude_max=amplitude_max,
-    offset_min=offset_min,
-    offset_max=offset_max,
-    skewness_min=skewness_min,
-    skewness_max=skewness_max,
-    sigma_min=sigma_min,
-    sigma_max=sigma_max,
-    t_0_min=t_0_min,
-    t_0_max=t_0_max,
-    tau_min=tau_min,
-    tau_max=tau_max
-)
 
-
-sampling_frequency = 1/0.064
+# sampling_frequency = 1/0.064
 
 truths = None
 
-grb_id = sys.argv[4]
+# grb_id = sys.argv[4]
+# grb_id = "GRB050128"
+data_select = "all"
 
-data = np.loadtxt(f'data/GRBs/{grb_id}/64ms_lc_ascii_swift.txt')
+# data = np.loadtxt(f'data/GRBs/{grb_id}/64ms_lc_ascii_swift.txt')
+# times = data[:, 0]
+# y = data[:, 9]
+# yerr = data[:, 10]
+data = np.loadtxt(f'data/test_goes_20130512_{data_select}.txt')
 times = data[:, 0]
-y = data[:, 9]
-yerr = data[:, 10]
+y = data[:, 1]
 
-indices = np.where(np.logical_and(times > start_time, times < end_time))[0]
-times = times[indices]
-y = y[indices]
-yerr = yerr[indices]
-plt.errorbar(times, y, yerr=yerr, fmt='.k', capsize=0)
+# y = data[:, 9]
+# yerr = data[:, 10]
+
+# data_label = "ultra_padded"
+# data = np.loadtxt(f'data/test_data_{data_label}.txt')
+# y = data
+# if data_label == 'normal':
+#     length = 10
+# elif data_label == 'padded':
+#     length = 50
+# elif data_label == "super_padded":
+#     length = 250
+# elif data_label == "ultra_padded":
+#     length = 1000
+# times = np.linspace(-length, length, len(y))
+# yerr = np.zeros(len(times))
+
+# indices = np.where(np.logical_and(times > start_time, times < end_time))[0]
+# times = times[indices]
+# y = y[indices]
+# yerr = yerr[indices]
+sampling_frequency = 1/(times[1] - times[0])
+
+
+# indices_narrow = np.where(np.logical_and(times > -10, times < 10))[0]
+# y_narrow = y[indices_narrow]
+
+# y[np.where(times < -5)] = 0
+# y[np.where(times > 5)] = 0
+
+
+# plt.errorbar(times, y, yerr=yerr, fmt='.k', capsize=0)
+plt.plot(times, y)
+plt.xlabel("time [s]")
+plt.ylabel("Counts/sec/det")
 plt.show()
-# assert False
+
 window = 'hann'
 from scipy.signal import periodogram
 
@@ -99,26 +98,34 @@ from scipy.signal import periodogram
 # freqs = p.freq
 # powers = p.power
 
-# freqs, powers = periodogram(y, fs=1/.064, window=(window, 0.95))
+# freqs, powers = periodogram(y, fs=1/.064, window=("tukey", 0.5))
+# plt.step(freqs[1:], powers[1:], label="tukey")
 # print(sampling_frequency)
 freqs, powers = periodogram(y, fs=sampling_frequency, window=window)
-# plt.xlim(1, 128)
-plt.loglog(freqs[1:], powers[1:])
+# freqs_narrow, powers_narrow = periodogram(y_narrow, fs=sampling_frequency, window=window)
+# plt.xlim(0.02, 10)
+plt.loglog()
+# plt.step(freqs[1:], powers[1:], label="100s duration")
+plt.step(freqs[1:], powers[1:])
+# plt.step(freqs_narrow[1:], powers_narrow[1:], label="20s duration")
+plt.axvline(1/12.6, color='black', label="Possible QPO frequency")
 plt.xlabel('frequency [Hz]')
 plt.ylabel('Power [AU]')
+plt.legend()
 plt.show()
 
-outdir = f'grb_periodogram/{grb_id}/{recovery_mode}_{noise_model}_{start_time}_{end_time}/'
+outdir = f'goes_20130512/{data_select}/{recovery_mode}_{noise_model}/'
+# outdir = f'grb_periodogram/{grb_id}/{recovery_mode}_{noise_model}_{start_time}_{end_time}/'
+# outdir = f'grb_periodogram/{grb_id}/{recovery_mode}_{noise_model}_{data_label}/'
 label = f'{window}_window'
 
 
-
-
-
 frequency_mask = [True] * len(freqs)
+frequency_mask = np.array(frequency_mask)
 frequency_mask[0] = False
-likelihood = QPOEstimation.likelihood.WhittleLikelihood(frequencies=freqs, periodogram=powers,
-                                                        frequency_mask=frequency_mask, noise_model=noise_model)
+
+likelihood = QPOEstimation.likelihood.WhittleLikelihood(
+    frequencies=freqs, periodogram=powers, frequency_mask=frequency_mask, noise_model=noise_model)
 priors = bilby.core.prior.PriorDict()
 if noise_model == 'red_noise':
     red_noise_priors = QPOEstimation.prior.psd.get_red_noise_prior()
@@ -131,6 +138,9 @@ if recovery_mode == 'qpo':
     label += '_qpo'
     qpo_priors = QPOEstimation.prior.psd.get_qpo_prior(frequencies=freqs)
     priors.update(qpo_priors)
+
+# if data_label == 'normal' and recovery_mode == "qpo":
+#     priors['log_width'].minimum = -8
 
 result = None
 if try_load:
@@ -161,12 +171,11 @@ if noise_model == 'broken_power_law':
     del max_l_bpl_params['log_beta']
 
 if recovery_mode == 'qpo' and noise_model == 'red_noise':
-    max_l_psd = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'], beta=np.exp(max_like_params['log_beta'])) + \
+    max_l_psd_no_qpo = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'], beta=np.exp(max_like_params['log_beta'])) + np.exp(max_like_params['log_sigma'])
+    max_l_psd = max_l_psd_no_qpo + \
                 QPOEstimation.model.psd.lorentzian(freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
                                                    central_frequency=np.exp(max_like_params['log_frequency']),
-                                                   width=np.exp(max_like_params['log_width'])) + \
-                np.exp(max_like_params['log_sigma'])
-
+                                                   width=np.exp(max_like_params['log_width']))
 elif recovery_mode == 'qpo' and noise_model == 'broken_power_law':
 
     max_l_psd = QPOEstimation.model.psd.broken_power_law_noise(freqs[1:], **max_l_bpl_params) + \
@@ -176,16 +185,25 @@ elif recovery_mode == 'qpo' and noise_model == 'broken_power_law':
 elif noise_model == 'red_noise':
     max_l_psd = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'],
                                                   beta=np.exp(max_like_params['log_beta'])) + np.exp(max_like_params['log_sigma'])
+    max_l_psd_no_qpo = max_l_psd
 elif noise_model == 'broken_power_law':
     max_l_psd = QPOEstimation.model.psd.broken_power_law_noise(freqs[1:], **max_l_bpl_params) + np.exp(max_like_params['log_sigma'])
 
-plt.loglog(freqs[1:], max_l_psd)
+plt.loglog(freqs[1:], max_l_psd, label="Max Like fit")
+threshold = -max_l_psd_no_qpo * np.log((1 - 0.9973)/len(freqs))   # Bonferroni correction
+plt.loglog(freqs[1:], threshold, label="3 sigma threshold")
+threshold = -max_l_psd_no_qpo * np.log((1 - 0.954)/len(freqs))   # Bonferroni correction
+plt.loglog(freqs[1:], threshold, label="2 sigma threshold")
 
 if recovery_mode == 'qpo':
-    max_like_lorentz = QPOEstimation.model.psd.lorentzian(freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
-                                                          central_frequency=np.exp(max_like_params['log_frequency']),
-                                                          width=np.exp(max_like_params['log_width']))
-    plt.loglog(freqs[1:], max_like_lorentz)
+    max_like_lorentz = QPOEstimation.model.psd.lorentzian(
+        freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
+        central_frequency=np.exp(max_like_params['log_frequency']),
+        width=np.exp(max_like_params['log_width']))
+    plt.loglog(freqs[1:], max_like_lorentz, label="Max like QPO")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [AU]")
+plt.legend()
 plt.savefig(f'{outdir}/{label}_max_like_fit.png')
 plt.show()
 

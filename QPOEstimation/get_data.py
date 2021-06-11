@@ -107,7 +107,8 @@ def truncate_data(times, counts, start, stop, yerr=None):
 
 
 def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo', recovery_mode='qpo',
-                       likelihood_model='gaussian_process', injection_id=0, **kwargs):
+                       likelihood_model='gaussian_process', injection_id=0, start=None, stop=None,
+                       run_mode='entire_segment', **kwargs):
     data = np.loadtxt(f'{injection_file_dir}/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_data.txt')
     if injection_mode == recovery_mode:
         with open(f'{injection_file_dir}/{injection_mode}/{likelihood_model}/'
@@ -115,7 +116,11 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
             truths = json.load(f)
     else:
         truths = {}
-    return data[:, 0], data[:, 1], truths
+    times = data[:, 0]
+    counts = data[:, 1]
+    if run_mode == 'select_time':
+        times, counts = truncate_data(times, counts, start=start, stop=stop)
+    return times, counts, truths
 
 
 def get_grb_data_from_segment(

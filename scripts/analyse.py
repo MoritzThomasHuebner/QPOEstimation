@@ -96,8 +96,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "grb"  # "magnetar_flare_binned"
-    run_mode = 'select_time'
+    data_source = "test"  # "magnetar_flare_binned"
+    run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -119,8 +119,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -5
-    end_time = 9
+    start_time = 0
+    end_time = 60000000000000
 
     period_number = 14
     run_id = 6
@@ -146,7 +146,7 @@ else:
     tau_min = None
     tau_max = None
 
-    min_log_a = -10
+    min_log_a = -20
     max_log_a = 15
     # min_log_c = -10
     min_log_c = None
@@ -154,24 +154,24 @@ else:
     # max_log_c = 30
     minimum_window_spacing = 0
 
-    injection_mode = "qpo"
-    recovery_mode = "red_noise"
-    likelihood_model = "gaussian_process"
-    background_model = "skew_gaussian"
-    n_components = 1
+    injection_mode = "general_qpo"
+    recovery_mode = "general_qpo"
+    likelihood_model = "gaussian_process_windowed"
+    background_model = 0
+    n_components = 5
     jitter_term = False
 
-    band_minimum = None
+    band_minimum = 1/40
     band_maximum = None
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 1000
+    nlive = 300
     use_ratio = False
 
-    try_load = False
+    try_load = True
     resume = False
     plot = True
 
@@ -269,10 +269,13 @@ elif data_source == 'grb':
 elif data_source == 'injection':
     times, counts, truths = get_injection_data(
         injection_file_dir='injection_files', injection_mode=injection_mode, recovery_mode=recovery_mode,
-        likelihood_model=likelihood_model, injection_id=injection_id)
+        likelihood_model=likelihood_model, injection_id=injection_id, start=start_time, stop=end_time,
+        run_mode=run_mode)
     outdir = get_injection_outdir(injection_mode=injection_mode, recovery_mode=recovery_mode,
                                   likelihood_model=likelihood_model)
     label = f"{str(injection_id).zfill(2)}"
+    if run_mode == 'entire_segment':
+        label += f'_entire_segment'
 elif data_source == 'hares_and_hounds':
     times, y = get_hares_and_hounds_data(run_mode, hares_and_hounds_id=hares_and_hounds_id,
                                          hares_and_hounds_round=hares_and_hounds_round,
@@ -284,6 +287,17 @@ elif data_source == 'hares_and_hounds':
         label = f'{start_time}_{end_time}'
     else:
         label = run_mode
+elif data_source == "test":
+    data = np.loadtxt("data/test_goes_20130512_more.txt")
+    times = data[:, 0]
+    y = data[:, 1]
+    yerr = data[:, 2]
+    times, y, yerr = QPOEstimation.get_data.truncate_data(times=times, counts=y, yerr=yerr, start=start_time, stop=end_time)
+    times -= times[0]
+    time_orig = times[0]
+
+    outdir = f"goes_gp/{run_mode}/{recovery_mode}/{likelihood_model}"
+    label = f'{start_time}_{end_time}'
 else:
     raise ValueError
 # from scipy.signal import periodogram
@@ -296,7 +310,7 @@ else:
 
 if data_source in ['grb', 'solar_flare']:
     pass
-elif data_source == 'hares_and_hounds':
+elif data_source in ['hares_and_hounds']:
     yerr = np.zeros(len(y))
 elif data_source == 'injection':
     y = counts
@@ -304,6 +318,8 @@ elif data_source == 'injection':
 elif variance_stabilisation:
     y = bar_lev(counts)
     yerr = np.ones(len(counts))
+elif data_source == 'test':
+    pass
 else:
     y = counts
     yerr = np.sqrt(counts)
@@ -327,13 +343,13 @@ mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=
 priors = get_priors(times=times, y=y, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
-                    model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
+                    model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=minimum_window_spacing,
                     n_components=n_components, offset=offset, jitter_term=jitter_term, **mean_prior_bound_dict)
 
 kernel = get_kernel(kernel_type=recovery_mode, jitter_term=jitter_term)
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
                                      y=y, yerr=yerr, likelihood_model=likelihood_model)
-# likelihood = bilby.likelihood.ZeroLikelihood(likelihood)
+
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components,
                  offset=offset, jitter_term=jitter_term)
@@ -351,12 +367,17 @@ if result is None:
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
                                label=label, sampler='dynesty', nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
-                               meta_data=meta_data, save=True, gzip=False)
+                               meta_data=meta_data, save=True, gzip=False, nact=5)
+    # result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
+    #                            label=label, sampler='bilby_mcmc', nsamples=nlive,
+    #                            resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
+    #                            meta_data=meta_data, save=True, gzip=False)
 
 if plot:
     result.plot_all()
     if len(sys.argv) < 1:
         result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
+        result.plot_residual(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',

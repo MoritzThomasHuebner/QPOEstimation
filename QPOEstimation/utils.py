@@ -1,3 +1,5 @@
+import numpy as np
+
 class MetaDataAccessor(object):
 
     """
@@ -28,3 +30,7 @@ def boolean_string(s):
     if s not in {'False', 'True'}:
         raise ValueError('Not a valid boolean string')
     return s == 'True'
+
+
+def get_indices_by_time(times, minimum_time, maximum_time):
+    return np.where(np.logical_and(times > minimum_time, times < maximum_time))[0]

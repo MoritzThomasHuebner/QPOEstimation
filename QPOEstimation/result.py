@@ -170,12 +170,18 @@ class GPResult(bilby.result.Result):
                          edgecolor="none")
         if self.mean_model != "mean":
             x = np.linspace(start_time, end_time, 5000)
-            trend = likelihood.mean_model.get_value(x)
+            if isinstance(likelihood.mean_model, (float, int)):
+                trend = np.ones(len(x)) * likelihood.mean_model
+            else:
+                trend = likelihood.mean_model.get_value(x)
             plt.plot(x, trend, color='green', label='Mean')
             samples = self.get_random_posterior_samples(10)
             for sample in samples:
                 likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
-                trend = likelihood.mean_model.get_value(x)
+                if isinstance(likelihood.mean_model, (float, int)):
+                    trend = np.ones(len(x)) * likelihood.mean_model
+                else:
+                    trend = likelihood.mean_model.get_value(x)
                 plt.plot(x, trend, color='green', alpha=0.3)
 
         plt.xlabel("time [s]")
@@ -189,8 +195,73 @@ class GPResult(bilby.result.Result):
         plt.show()
         plt.clf()
 
+    def plot_residual(self, start_time=None, end_time=None):
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        # plt.style.use(style_file)
+        if start_time is None:
+            start_time = self.times[0]
+        if end_time is None:
+            end_time = self.times[-1]
+        Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
+        likelihood = self.get_likelihood()
+
+        jitter = 0
+        for k in list(self.max_likelihood_parameters.keys()):
+            if 'log_sigma' in k and self.jitter_term:
+                jitter = np.exp(self.max_likelihood_parameters[k])
+
+        if self.likelihood_model == 'gaussian_process_windowed':
+            plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan',
+                        label='start/end stochastic process')
+            plt.axvline(self.max_likelihood_parameters['window_maximum'], color='cyan')
+            x = np.linspace(self.max_likelihood_parameters['window_minimum'],
+                            self.max_likelihood_parameters['window_maximum'], 5000)
+            windowed_indices = np.where(
+                np.logical_and(self.max_likelihood_parameters['window_minimum'] < self.times,
+                               self.times < self.max_likelihood_parameters['window_maximum']))
+            likelihood.gp.compute(self.times[windowed_indices], self.yerr[windowed_indices] + jitter)
+            pred_mean, pred_var = likelihood.gp.predict(self.y[windowed_indices], x, return_var=True)
+        else:
+            likelihood.gp.compute(self.times, self.yerr + jitter)
+            x = np.linspace(start_time, end_time, 5000)
+            pred_mean, pred_var = likelihood.gp.predict(self.y, x, return_var=True)
+        pred_std = np.sqrt(pred_var)
+
+        if self.mean_model != "mean":
+            x = np.linspace(start_time, end_time, 5000)
+            if isinstance(likelihood.mean_model, (float, int)):
+                trend = np.ones(len(self.times)) * likelihood.mean_model
+                trend_fine = np.ones(len(x)) * likelihood.mean_model
+            else:
+                trend = likelihood.mean_model.get_value(self.times)
+                trend_fine = likelihood.mean_model.get_value(x)
+        else:
+            trend = 0
+            trend_fine = 0
+
+        color = "#ff7f0e"
+        plt.errorbar(self.times, self.y - trend, yerr=self.yerr + jitter, fmt=".k", capsize=0, label='data', color='black')
+        plt.plot(x, pred_mean - trend_fine, color=color, label='Prediction')
+        plt.fill_between(x, pred_mean + pred_std - trend_fine, pred_mean - pred_std - trend_fine, color=color,
+                         alpha=0.3, edgecolor="none")
+
+
+        plt.xlabel("time [s]")
+        plt.ylabel("y")
+        plt.legend()
+        try:
+            plt.tight_layout()
+        except Exception:
+            pass
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_residual_fit.png")
+        plt.show()
+        plt.clf()
+
     def plot_corner(self, **kwargs):
-        super().plot_corner(outdir=self.corner_outdir, truths=self.truths, **kwargs)
+        try:
+            super().plot_corner(outdir=self.corner_outdir, truths=self.truths, **kwargs)
+        except Exception:
+            super().plot_corner(outdir=self.corner_outdir, **kwargs)
 
     def plot_frequency_posterior(self):
         if self.kernel_type in OSCILLATORY_MODELS:
@@ -317,6 +388,7 @@ class GPResult(bilby.result.Result):
         except Exception:
             pass
         self.plot_lightcurve()
+        self.plot_residual()
         self.plot_qpo_log_amplitude()
         self.plot_log_red_noise_power()
         self.plot_log_qpo_power()

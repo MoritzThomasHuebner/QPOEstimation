@@ -9,7 +9,8 @@ from scipy.special import gamma
 
 from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
-from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model
+from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model, \
+    get_n_component_piecewise
 
 
 def get_celerite_likelihood(mean_model, kernel, fit_mean, times, y, yerr, likelihood_model='gaussian_process'):
@@ -178,11 +179,12 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
 
     def log_likelihood(self):
         celerite_params = self.conversion_func(self.parameters)
-        for name, value in celerite_params.items():
-            try:
-                self.gp.set_parameter(name=name, value=value)
-            except ValueError:
-                raise ValueError(f"Parameter {name} not a valid parameter for the GP.")
+        self.gp.set_parameter_vector(vector=np.array(list(celerite_params.values())))
+        # for name, value in celerite_params.items():
+        #     try:
+                # self.gp.set_parameter(name=name, value=value)
+            # except ValueError:
+            #     raise ValueError(f"Parameter {name} not a valid parameter for the GP.")
         try:
             return self.gp.log_likelihood(self.y)
         except Exception:
@@ -406,7 +408,7 @@ class PureQPOTerm(terms.Term):
 
 def get_kernel(kernel_type, jitter_term=False):
     if kernel_type == "white_noise":
-        res = celerite.terms.JitterTerm(log_sigma=-20)
+        return celerite.terms.JitterTerm(log_sigma=-20)
     elif kernel_type == "qpo":
         res = QPOTerm(log_a=0.1, log_b=-10, log_c=-0.01, log_f=3)
     elif kernel_type == "pure_qpo":
@@ -445,6 +447,12 @@ def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_
         return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0), True
     elif model_type == 'mean':
         return np.mean(y), False
+    elif isinstance(model_type, (int, float)):
+        return model_type, False
+    elif model_type == 'piecewise_linear':
+        return get_n_component_piecewise(n_components=n_components, likelihood_model=likelihood_model, mode="linear"), True
+    elif model_type == 'piecewise_cubic':
+        return get_n_component_piecewise(n_components=n_components, likelihood_model=likelihood_model, mode="cubic"), True
     elif model_type in mean_model_dict:
         return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components, offset=offset,
                                           likelihood_model=likelihood_model), True

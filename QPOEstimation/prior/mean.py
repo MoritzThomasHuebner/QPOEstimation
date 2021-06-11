@@ -18,6 +18,8 @@ def get_mean_prior(model_type, **kwargs):
         priors = get_polynomial_prior(**kwargs)
     elif model_type in _N_COMPONENT_PRIORS:
         priors = _N_COMPONENT_PRIORS[model_type](**kwargs)
+    elif model_type in _PIECEWISE_PRIORS:
+        return _PIECEWISE_PRIORS[model_type](**kwargs)
     else:
         priors = dict()
 
@@ -145,7 +147,53 @@ def get_fred_norris_extended_priors(n_components=1, minimum_spacing=0, **kwargs)
     return priors
 
 
+def get_piecewise_linear_priors(n_components, minimum_spacing, **kwargs):
+    priors = bilby.core.prior.ConditionalPriorDict()
+    for i in range(n_components):
+        priors[f"mean:beta_{i}"] = bilby.core.prior.Uniform(minimum=-1000, maximum=1000, name=f"beta_{i}")
+
+    for i in range(2, n_components):
+        if i == 2:
+            priors[f"mean:k_{i}"] = Beta(minimum=kwargs['t_0_min'], maximum=kwargs['t_0_max'],
+                                         alpha=1, beta=n_components-2, name=f"mean:k_{i}")
+        else:
+            priors[f"mean:k_{i}"] = QPOEstimation.prior.minimum.MinimumPrior(
+                order=n_components - i, minimum_spacing=minimum_spacing, minimum=kwargs['t_0_min'],
+                maximum=kwargs['t_0_max'], name=f"mean:k_{i}")
+    priors._resolve_conditions()
+    return priors
+
+
+def get_piecewise_cubic_priors(n_components, minimum_spacing, **kwargs):
+    priors = bilby.core.prior.ConditionalPriorDict()
+    priors[f"mean:alpha_0"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"alpha_0")
+    priors[f"mean:beta_0"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"beta_0")
+    priors[f"mean:gamma_0"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"gamma_0")
+    for i in range(n_components):
+        priors[f"mean:delta_{i}"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"delta_{i}")
+
+    t_0_min = kwargs["times"][0]
+    t_0_max = kwargs["times"][-1]
+    for i in range(1, n_components):
+        loc = (t_0_max - t_0_min) * i / n_components + t_0_min
+        priors[f"mean:k_{i}"] = DeltaFunction(peak=loc, name=f"mean:k_{i}")
+
+        # if n_components == 2:
+        #     priors[f"mean:k_{i}"] = Uniform(minimum=t_0_min, maximum=t_0_max, name=f"mean:k_{i}")
+        #     break
+        # elif i == 1:
+        #     priors[f"mean:k_{i}"] = Beta(minimum=t_0_min, maximum=t_0_max,
+        #                                  alpha=1, beta=n_components, name=f"mean:k_{i}")
+        # else:
+        #     priors[f"mean:k_{i}"] = QPOEstimation.prior.minimum.MinimumPrior(
+        #         order=n_components, minimum_spacing=minimum_spacing, minimum=t_0_min,
+        #         maximum=t_0_max, name=f"mean:k_{i}")
+    priors._resolve_conditions()
+    return priors
+
 _N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
                            log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,
                            fred=get_fred_priors, skew_gaussian=get_skew_gaussian_priors,
                            fred_norris=get_fred_norris_priors, fred_norris_extended=get_fred_norris_extended_priors)
+
+_PIECEWISE_PRIORS = dict(piecewise_linear=get_piecewise_linear_priors, piecewise_cubic=get_piecewise_cubic_priors)

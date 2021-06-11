@@ -12,7 +12,7 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
         max_log_c = np.log(band_maximum)
 
     if kernel_type == "white_noise":
-        priors = get_white_noise_prior()
+        return get_white_noise_prior(jitter_term=jitter_term)
     elif kernel_type == "qpo":
         priors = get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "pure_qpo":
@@ -52,15 +52,22 @@ def _add_jitter_term(priors):
         for i in range(10):
             if f"[{i}]" in k and n_terms < i + 1:
                 n_terms = i + 1
-    new_priors[f'kernel:terms[{n_terms}]:log_sigma'] = bilby.core.prior.Uniform(
-        minimum=-10, maximum=5, name=f'terms[{n_terms}]:log_sigma')
+    if n_terms == 0:
+        new_priors[f'kernel:log_sigma'] = bilby.core.prior.Uniform(
+            minimum=-25, maximum=5, name=f'log_sigma')
+    else:
+        new_priors[f'kernel:terms[{n_terms}]:log_sigma'] = bilby.core.prior.Uniform(
+            minimum=-25, maximum=5, name=f'terms[{n_terms}]:log_sigma')
     return new_priors
 
 
-def get_white_noise_prior():
+def get_white_noise_prior(jitter_term=False):
     priors = bilby.prior.PriorDict()
-    priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
-    return priors
+    if jitter_term:
+        return _add_jitter_term(priors)
+    else:
+        priors['kernel:log_sigma'] = bilby.core.prior.DeltaFunction(peak=-20, name='log_sigma')
+        return priors
 
 
 def get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
