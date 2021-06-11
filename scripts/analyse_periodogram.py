@@ -172,9 +172,6 @@ else:
 
 band = f'{band_minimum}_{band_maximum}Hz'
 
-if sampling_frequency is None:
-    sampling_frequency = 4 * int(np.round(2 ** np.ceil(np.log2(band_maximum))))
-
 truths = None
 
 recovery_mode_str = recovery_mode
