@@ -19,7 +19,7 @@ def get_qpo_prior(frequencies=None):
         max_frequency = frequencies[-1]
     prior = bilby.core.prior.PriorDict()
     prior['log_amplitude'] = bilby.core.prior.Uniform(-30, 30, name='log_amplitude')
-    prior['log_width'] = bilby.core.prior.Uniform(np.log(df/np.pi), np.log(max_frequency), name='log_width')
+    prior['log_width'] = bilby.core.prior.Uniform(np.log(df/np.pi), np.log(0.25*max_frequency), name='log_width')
     prior['log_frequency'] = bilby.core.prior.Uniform(np.log(2*df), np.log(max_frequency), name='log_frequency')
     return prior
 

@@ -110,6 +110,8 @@ class WhittleLikelihood(Likelihood):
     def noise_model(self, noise_model):
         if noise_model in self.VALID_NOISE_MODELS:
             self._noise_model = noise_model
+        elif noise_model == 'general_qpo':
+            self._noise_model = 'red_noise'
         else:
             raise ValueError('Unknown noise model')
 

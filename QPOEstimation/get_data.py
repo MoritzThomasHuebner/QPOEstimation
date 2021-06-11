@@ -1,5 +1,6 @@
 import json
 import numpy as np
+from .utils import get_injection_outdir
 
 
 def get_all_tte_magnetar_flare_data(magnetar_label, tag, bin_size=0.001, subtract_t0=True,
@@ -107,11 +108,11 @@ def truncate_data(times, counts, start, stop, yerr=None):
 
 
 def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo', recovery_mode='qpo',
-                       likelihood_model='gaussian_process', injection_id=0, start=None, stop=None,
+                       injection_likelihood_model='gaussian_process', injection_id=0, start_time=None, end_time=None,
                        run_mode='entire_segment', **kwargs):
-    data = np.loadtxt(f'{injection_file_dir}/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_data.txt')
+    data = np.loadtxt(f'{injection_file_dir}/{injection_mode}/{injection_likelihood_model}/{str(injection_id).zfill(2)}_data.txt')
     if injection_mode == recovery_mode:
-        with open(f'{injection_file_dir}/{injection_mode}/{likelihood_model}/'
+        with open(f'{injection_file_dir}/{injection_mode}/{injection_likelihood_model}/'
                   f'{str(injection_id).zfill(2)}_params.json', 'r') as f:
             truths = json.load(f)
     else:
@@ -119,7 +120,7 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
     times = data[:, 0]
     counts = data[:, 1]
     if run_mode == 'select_time':
-        times, counts = truncate_data(times, counts, start=start, stop=stop)
+        times, counts = truncate_data(times, counts, start=start_time, stop=end_time)
     return times, counts, truths
 
 
@@ -241,3 +242,92 @@ _GIANT_FLARE_RUN_MODES = dict(candidates=get_candidates_data,
 _HARES_AND_HOUNDS_RUN_MODES = dict(select_time=get_hares_and_hounds_data_from_segment,
                                    entire_segment=get_all_hares_and_hounds_data,
                                    from_maximum=get_hares_and_hounds_data_from_maximum)
+
+
+def get_data(data_source, **kwargs):
+    run_mode = kwargs["run_mode"]
+    start_time = kwargs["start_time"]
+    end_time = kwargs["end_time"]
+    likelihood_model = kwargs["likelihood_model"]
+    recovery_mode_str = kwargs["recovery_mode_str"]
+    recovery_mode = kwargs["recovery_mode"]
+    yerr = None
+    if data_source == 'giant_flare':
+        times, y = get_giant_flare_data(**kwargs)
+        outdir = f"SGR_1806_20/{run_mode}/{kwargs['band']}/{recovery_mode_str}/{likelihood_model}/"
+        if run_mode == 'candidates':
+            label = f"{kwargs['candidate_id']}"
+        elif run_mode == 'sliding_window':
+            outdir += f"period_{kwargs['period_number']}/"
+            label = f"{kwargs['run_id']}"
+        elif run_mode == 'select_time':
+            label = f"{start_time}_{end_time}"
+        elif run_mode == 'entire_segment':
+            label = "entire_segment"
+        else:
+            raise ValueError
+    elif data_source == 'magnetar_flare':
+        times, y = get_tte_magnetar_flare_data(**kwargs)
+        outdir = f"magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
+                 f"{recovery_mode_str}/{likelihood_model}/"
+        if run_mode == 'select_time':
+            label = f'{start_time}_{end_time}'
+        else:
+            label = run_mode
+    elif data_source == 'magnetar_flare_binned':
+        times, y = get_binned_magnetar_flare_data(**kwargs)
+        outdir = f"magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
+                 f"{recovery_mode_str}/{likelihood_model}/"
+        if run_mode == 'select_time':
+            label = f'{start_time}_{end_time}'
+        else:
+            label = run_mode
+    elif data_source == 'solar_flare':
+        times, y, yerr = get_solar_flare_data(**kwargs)
+        outdir = f"solar_flare_{kwargs['solar_flare_id']}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
+        if run_mode == 'select_time':
+            label = f'{start_time}_{end_time}'
+        else:
+            label = run_mode
+    elif data_source == 'grb':
+        times, y, yerr = get_grb_data(**kwargs)
+        outdir = f"GRB{kwargs['grb_id']}_{kwargs['grb_detector']}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
+        if run_mode == 'select_time':
+            label = f'{start_time}_{end_time}'
+        else:
+            label = run_mode
+        if kwargs['grb_energy_band'] != 'all':
+            label += f"_{kwargs['grb_energy_band']}keV"
+        times -= times[0]
+
+    elif data_source == 'injection':
+        times, y, truths = get_injection_data(**kwargs)
+        outdir = get_injection_outdir(injection_mode=kwargs['injection_mode'], recovery_mode=recovery_mode,
+                                      likelihood_model=kwargs["likelihood_model"])
+        label = f"{str(kwargs['injection_id']).zfill(2)}"
+        if run_mode == 'entire_segment':
+            label += f'_entire_segment'
+        elif run_mode == 'select_time':
+            label = f'{start_time}_{end_time}'
+    elif data_source == 'hares_and_hounds':
+        times, y = get_hares_and_hounds_data(**kwargs)
+        times -= times[0]
+        outdir = f"hares_and_hounds_{kwargs['hares_and_hounds_round']}/{kwargs['hares_and_hounds_id']}/{run_mode}/" \
+                 f"{recovery_mode}/{likelihood_model}"
+        if run_mode == 'select_time':
+            label = f'{start_time}_{end_time}'
+        else:
+            label = run_mode
+    elif data_source == "test":
+        data = np.loadtxt("data/test_goes_20130512_more.txt")
+        times = data[:, 0]
+        y = data[:, 1]
+        yerr = data[:, 2]
+        times, y, yerr = truncate_data(times=times, counts=y, yerr=yerr, start=start_time, stop=end_time)
+        times -= times[0]
+
+        outdir = f"goes_gp/{run_mode}/{recovery_mode}/{likelihood_model}"
+        label = f'{start_time}_{end_time}'
+    else:
+        raise ValueError
+    return times, y, yerr, outdir, label

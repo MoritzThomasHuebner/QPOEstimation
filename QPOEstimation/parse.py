@@ -1,8 +1,8 @@
 import argparse
 
-likelihood_models = ["gaussian_process", "gaussian_process_windowed", "george_likelihood"]
+likelihood_models = ["gaussian_process", "gaussian_process_windowed", "george_likelihood", "whittle"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo",
-         "double_red_noise", "double_qpo", 'matern32']
+         "double_red_noise", "double_qpo", 'matern32', "broken_power_law"]
 data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flare',
                 'magnetar_flare_binned', 'hares_and_hounds']
 run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment', 'from_maximum']
@@ -46,7 +46,9 @@ def parse_args():
     parser.add_argument("--candidate_id", default=0, type=int)
 
     parser.add_argument("--injection_id", default=0, type=int)
+    parser.add_argument("--injection_file_dir", default="injection_files", type=str)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
+    parser.add_argument("--injection_likelihood_model", default="general_qpo", choices=likelihood_models, type=str)
 
     parser.add_argument("--offset", default='False', type=str)
     parser.add_argument("--polynomial_max", default=1000, type=float)
