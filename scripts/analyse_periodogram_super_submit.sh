@@ -9,6 +9,7 @@ for recovery_mode in general_qpo red_noise
 do
   for i in {0..70}
   do
-    sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode}
+    sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0
+    sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 1
   done
 done
