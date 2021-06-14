@@ -308,7 +308,7 @@ def get_data(data_source, **kwargs):
         if run_mode == 'entire_segment':
             label += f'_entire_segment'
         elif run_mode == 'select_time':
-            label = f'{start_time}_{end_time}'
+            label += f'_{start_time}_{end_time}'
     elif data_source == 'hares_and_hounds':
         times, y = get_hares_and_hounds_data(**kwargs)
         times -= times[0]
