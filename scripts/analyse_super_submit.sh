@@ -34,16 +34,16 @@
 #done
 
 # Magnetar flare
-for n_components in {1..3}
-do
-   for model in red_noise general_qpo
-   do
-     sbatch analyse_submit.sh ${model} ${n_components} fred
-     sbatch analyse_submit.sh ${model} ${n_components} skew_gaussian
-     sbatch analyse_submit.sh ${model} ${n_components} fred_norris
-     sbatch analyse_submit.sh ${model} ${n_components} fred_norris_extended
-   done
-done
+#for n_components in {1..3}
+#do
+#   for model in red_noise general_qpo
+#   do
+#     sbatch analyse_submit.sh ${model} ${n_components} fred
+#     sbatch analyse_submit.sh ${model} ${n_components} skew_gaussian
+#     sbatch analyse_submit.sh ${model} ${n_components} fred_norris
+#     sbatch analyse_submit.sh ${model} ${n_components} fred_norris_extended
+#   done
+#done
 
 # Magnetar flares
 #for n_components in {0..2}
@@ -94,3 +94,16 @@ done
 #      done
 #   done
 #done
+
+start_times=(4900 4920 4940 4960 4980)
+end_times=(5100 5080 5060 5040 5020)
+
+
+for recovery_mode in general_qpo red_noise
+do
+  for i in {0..5}
+  do
+    sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process
+    sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process_windowed
+  done
+done
