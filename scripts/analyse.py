@@ -98,8 +98,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "test"  # "magnetar_flare_binned"
-    run_mode = 'entire_segment'
+    data_source = "injection"  # "magnetar_flare_binned"
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -121,8 +121,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = 0
-    end_time = 60000000000000
+    start_time = 4960
+    end_time = 5040
 
     period_number = 14
     run_id = 6
@@ -157,12 +157,12 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "general_qpo"
-    injection_file_dir = "injection_files"
+    injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "gaussian_process_windowed"
     recovery_mode = "general_qpo"
-    likelihood_model = "gaussian_process_windowed"
+    likelihood_model = "gaussian_process"
     background_model = 0
-    n_components = 5
+    n_components = 0
     jitter_term = False
 
     band_minimum = 1/40
