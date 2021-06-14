@@ -449,8 +449,8 @@ def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_
         return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0), True
     elif model_type == 'mean':
         return np.mean(y), False
-    elif isinstance(model_type, (int, float)):
-        return model_type, False
+    elif model_type.isnumeric():
+        return float(model_type), False
     elif model_type == 'piecewise_linear':
         return get_n_component_piecewise(n_components=n_components, likelihood_model=likelihood_model, mode="linear"), True
     elif model_type == 'piecewise_cubic':
