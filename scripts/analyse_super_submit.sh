@@ -103,7 +103,7 @@ for recovery_mode in general_qpo red_noise
 do
   for i in {0..5}
   do
-    sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process
-    sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process_windowed
+    sbatch analyse_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process
+    sbatch analyse_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process_windowed
   done
 done

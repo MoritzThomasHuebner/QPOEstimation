@@ -159,7 +159,7 @@ else:
     injection_mode = "general_qpo"
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "gaussian_process_windowed"
-    recovery_mode = "general_qpo"
+    recovery_mode = "red_noise"
     likelihood_model = "gaussian_process"
     background_model = 0
     n_components = 0
