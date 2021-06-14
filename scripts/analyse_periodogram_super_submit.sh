@@ -7,7 +7,7 @@ end_times=(10000 8000 7900 7800 7700 7600 7500 7400 7300 7200 7100 7000 6900 680
 
 for recovery_mode in general_qpo red_noise
 do
-  for i in {0..70}
+  for i in {0..40}
   do
     sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0
     sbatch analyse_periodogram_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 1
