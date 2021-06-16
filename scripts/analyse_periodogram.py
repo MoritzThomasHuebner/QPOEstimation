@@ -113,8 +113,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -20
-    end_time = 20
+    start_time = -20.0
+    end_time = 20.0
 
     period_number = 14
     run_id = 6
@@ -149,7 +149,7 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
 
-    recovery_mode = "general_qpo"
+    recovery_mode = "red_noise"
     likelihood_model = "whittle"
 
     band_minimum = None
@@ -159,7 +159,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 500
+    nlive = 300
     use_ratio = False
 
     try_load = False
@@ -232,7 +232,7 @@ if recovery_mode == "red_noise":
     priors = get_red_noise_prior()
 elif recovery_mode == "general_qpo":
     priors = get_red_noise_prior()
-    priors.update(get_qpo_prior(frequencies=freqs, max_log_width=np.log(0.25)))
+    priors.update(get_qpo_prior(frequencies=freqs, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
 elif recovery_mode == "broken_power_law":
     priors = get_broken_power_law_prior()
 else:

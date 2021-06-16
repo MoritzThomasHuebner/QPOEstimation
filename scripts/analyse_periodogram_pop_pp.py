@@ -17,7 +17,7 @@ import json
 matplotlib.use('Qt5Agg')
 
 modes = ['zeros', 'white_noise']
-mode = 1
+mode = 0
 
 
 end_times = np.arange(20, 200, 20)
@@ -40,7 +40,7 @@ with open(f'injection_files_pop/general_qpo/whittle/{injection_id}_params.json',
 
 frequencies = np.linspace(1/100000, 20, 1000000)
 alpha = params['alpha']
-beta = np.exp(params['beta'])
+beta = params['beta']
 white_noise = params['sigma']
 amplitude = params['amplitude']
 width = params['width']
@@ -76,7 +76,7 @@ for start_time, end_time, duration in zip(start_times, end_times, durations):
     extension_factor = duration/durations[0]
     duration_white_noise = duration - durations[0]
     series = bilby.core.series.CoupledTimeAndFrequencySeries(duration=duration, sampling_frequency=sampling_frequency, start_time=start_time)
-    idxs = QPOEstimation.utils.get_indices_by_time(times=series.time_array, minimum_time=start_time, maximum_time=end_time)
+    idxs = QPOEstimation.utils.get_indices_by_time(times=times, minimum_time=start_time, maximum_time=end_time)
     y_selected = y[idxs]
 
     label_red_noise = f'{injection_id}_{float(start_time)}_{float(end_time)}'
@@ -86,8 +86,8 @@ for start_time, end_time, duration in zip(start_times, end_times, durations):
         res_qpo_periodogram = bilby.result.read_in_result(outdir=outdir_qpo_periodogram, label=label_qpo)
         ln_bfs.append(res_qpo_periodogram.log_evidence - res_red_noise_periodogram.log_evidence)
         log_frequency_spreads.append(np.std(res_qpo_periodogram.posterior['log_frequency']))
-        plt.hist(np.exp(res_qpo_periodogram.posterior['log_frequency']), histtype='step', label=f"{duration}s",
-                 density=True, bins='fd')
+        # plt.hist(np.exp(res_qpo_periodogram.posterior['log_frequency']), histtype='step', label=f"{duration}s",
+        #          density=True, bins='fd')
         durations_reduced.append(duration)
         extension_factors.append(extension_factor)
     except Exception as e:
@@ -100,25 +100,28 @@ for start_time, end_time, duration in zip(start_times, end_times, durations):
                                                  sampling_frequency=sampling_frequency)
     else:
         td_data_white_noise = np.array([])
-    ### Optimal SNR calculation
 
+    ### Optimal SNR calculation
     freqs_combined_periodogram, powers_combined_periodogram = \
         periodogram(y_selected, fs=sampling_frequency, window='hann')
     psd_array_noise_diluted = QPOEstimation.model.psd.red_noise(
         frequencies=frequencies, alpha=alpha,
         beta=beta) / extension_factor + white_noise
     psd_array_qpo_diluted = psd_array_qpo / extension_factor
+    psd_array_signal_diluted = psd_array_noise_diluted + psd_array_qpo_diluted
     psd_noise_diluted = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
         frequency_array=frequencies, psd_array=psd_array_noise_diluted)
     psd_qpo_diluted = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
         frequency_array=frequencies, psd_array=psd_array_qpo_diluted)
+    psd_signal_diluted = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
+        frequency_array=frequencies, psd_array=psd_array_signal_diluted)
     snr_qpo_optimal = np.sqrt(np.sum(
         np.nan_to_num((psd_qpo_diluted.power_spectral_density_interpolated(freqs_combined_periodogram) /
                        psd_noise_diluted.power_spectral_density_interpolated(freqs_combined_periodogram)) ** 2, nan=0)))
     print(snr_qpo_optimal)
     snr_optimals.append(snr_qpo_optimal)
 
-    ### Matched filter SNR calculation
+    ### Matched filter SNR calculation, doesnt make sense yet
     max_like_params = res_qpo_periodogram.posterior.iloc[-1]
     alpha_max_like = max_like_params['alpha']
     beta_max_like = np.exp(max_like_params['log_beta'])
@@ -126,14 +129,40 @@ for start_time, end_time, duration in zip(start_times, end_times, durations):
     amplitude_max_like = np.exp(max_like_params['log_amplitude'])
     width_max_like = np.exp(max_like_params['log_width'])
     central_frequency_max_like = np.exp(max_like_params['log_frequency'])
-    psd_array_noise_max_like = QPOEstimation.model.psd.red_noise(frequencies=freqs_combined_periodogram, alpha=alpha_max_like, beta=beta_max_like) + white_noise_max_like
-    psd_array_qpo_max_like = QPOEstimation.model.psd.lorentzian(frequencies=freqs_combined_periodogram, amplitude=amplitude_max_like, width=width_max_like,
-                                                       central_frequency=central_frequency_max_like)
-    powers_combined_periodogram_qpo_subtracted = powers_combined_periodogram - psd_array_qpo_max_like
-    snr_qpo_matched_filter = np.sqrt(np.sum(
-        np.nan_to_num((psd_array_qpo_max_like / powers_combined_periodogram_qpo_subtracted) ** 2, nan=0)))
-    print(snr_qpo_matched_filter)
-    snr_matched_filters.append(snr_qpo_matched_filter)
+    # psd_array_noise_max_like = QPOEstimation.model.psd.red_noise(frequencies=freqs_combined_periodogram, alpha=alpha_max_like, beta=beta_max_like) + white_noise_max_like
+    # psd_array_qpo_max_like = QPOEstimation.model.psd.lorentzian(
+    #     frequencies=freqs_combined_periodogram, amplitude=amplitude_max_like, width=width_max_like,
+    #     central_frequency=central_frequency_max_like)
+    # powers_combined_periodogram_qpo_divided = powers_combined_periodogram / psd_array_qpo_max_like
+    # snr_qpo_matched_filter = np.sqrt(np.sum(
+    #     np.nan_to_num((psd_array_qpo_max_like / powers_combined_periodogram_qpo_divided) ** 2, nan=0)))
+    # print(snr_qpo_matched_filter)
+    # snr_matched_filters.append(snr_qpo_matched_filter)
+
+    # plt.loglog(freqs_combined_periodogram, powers_combined_periodogram)
+    # plt.loglog(freqs_combined_periodogram, powers_combined_periodogram_qpo_divided)
+    # plt.loglog(frequencies, psd_signal_diluted.psd_array)
+    # plt.loglog(freqs_combined_periodogram, psd_array_qpo_max_like)
+    # plt.loglog(freqs_combined_periodogram, psd_array_noise_max_like)
+    # plt.show()
+
+    ### Chi-squared tests
+    chi_square = QPOEstimation.model.psd.periodogram_chi_square_test(
+        frequencies=freqs_combined_periodogram, powers=powers_combined_periodogram,
+        psd=psd_signal_diluted, degrees_of_freedom=6)
+    print(chi_square)
+
+    idxs = QPOEstimation.utils.get_indices_by_time(freqs_combined_periodogram,
+                                                   minimum_time=central_frequency_max_like-width_max_like,
+                                                   maximum_time=central_frequency_max_like+width_max_like)
+    chi_square = QPOEstimation.model.psd.periodogram_chi_square_test(
+        frequencies=freqs_combined_periodogram[idxs], powers=powers_combined_periodogram[idxs],
+        psd=psd_signal_diluted, degrees_of_freedom=6)
+    print(chi_square)
+    assert False
+
+
+
 
 np.savetxt('periodogram_pop/temp_ln_bfs', ln_bfs)
 np.savetxt('periodogram_pop/temp_log_frequency_spreads', log_frequency_spreads)
