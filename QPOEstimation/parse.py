@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument("--hares_and_hounds_id", default='5700', type=str)
     parser.add_argument("--hares_and_hounds_round", default='HH2', type=str)
 
+    parser.add_argument("--solar_flare_folder", default='goes', type=str)
     parser.add_argument("--solar_flare_id", default='120704187', type=str)
     parser.add_argument("--grb_id", default='090709A', type=str)
     parser.add_argument("--grb_binning", default='1s', type=str)

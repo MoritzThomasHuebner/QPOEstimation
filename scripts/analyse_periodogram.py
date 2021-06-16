@@ -30,6 +30,7 @@ if len(sys.argv) > 1:
     hares_and_hounds_id = args.hares_and_hounds_id
     hares_and_hounds_round = args.hares_and_hounds_round
 
+    solar_flare_folder = args.solar_flare_folder
     solar_flare_id = args.solar_flare_id
     grb_id = args.grb_id
     grb_binning = args.grb_binning
@@ -102,6 +103,7 @@ else:
     hares_and_hounds_id = "612579"
     hares_and_hounds_round = 'HH2'
 
+    solar_flare_folder = 'goes'
     solar_flare_id = "go1520110128"
     grb_id = "050128"
     grb_binning = "64ms"
@@ -180,14 +182,16 @@ times, y, yerr, outdir, label = get_data(
     data_source=data_source, band=band, data_mode=data_mode, segment_length=segment_length,
     sampling_frequency=sampling_frequency, alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id,
     period_number=period_number, run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time,
-    run_mode=run_mode, recovery_mode=recovery_mode,  recovery_mode_str=recovery_mode_str, likelihood_model=likelihood_model,
+    run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str, likelihood_model=likelihood_model,
     magnetar_label=magnetar_label,  magnetar_tag=magnetar_tag, magnetar_bin_size=magnetar_bin_size,
     magnetar_subtract_t0=magnetar_subtract_t0, magnetar_unbarycentred_time=magnetar_unbarycentred_time,
-    rebin_factor=rebin_factor, solar_flare_id=solar_flare_id, grb_id=grb_id, grb_binning=grb_binning,
-    grb_detector=grb_detector, grb_energy_band=grb_energy_band, injection_file_dir=injection_file_dir,
-    injection_mode=injection_mode, injection_id=injection_id, injection_likelihood_model=injection_likelihood_model,
-    hares_and_hounds_id=hares_and_hounds_id, hares_and_hounds_round=hares_and_hounds_round
+    rebin_factor=rebin_factor, solar_flare_folder=solar_flare_folder, solar_flare_id=solar_flare_id,
+    grb_id=grb_id, grb_binning=grb_binning, grb_detector=grb_detector, grb_energy_band=grb_energy_band,
+    injection_file_dir=injection_file_dir, injection_mode=injection_mode, injection_id=injection_id,
+    injection_likelihood_model=injection_likelihood_model, hares_and_hounds_id=hares_and_hounds_id,
+    hares_and_hounds_round=hares_and_hounds_round
     )
+
 
 
 if data_source in ['grb', 'solar_flare']:

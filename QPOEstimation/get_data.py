@@ -179,18 +179,19 @@ def get_solar_flare_data(run_mode, **kwargs):
     return _SOLAR_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
-def get_all_solar_flare_data(solar_flare_id="go1520110128", **kwargs):
+def get_all_solar_flare_data(solar_flare_id="go1520110128", solar_flare_folder="goes", **kwargs):
     from astropy.io import fits
-    data = fits.open(f'data/SolarFlare/{solar_flare_id}.fits')
+    data = fits.open(f'data/SolarFlare/{solar_flare_folder}/{solar_flare_id}.fits')
 
     times = data[2].data[0][0]
     flux = data[2].data[0][1][:, 0]
-    flux_err = data[2].data[0][1][:, 1]
+    # flux_err = data[2].data[0][1][:, 1]
+    flux_err = np.zeros(len(times))
     return times, flux, flux_err
 
 
-def get_solar_flare_data_from_segment(solar_flare_id="go1520110128", start_time=None, end_time=None, **kwargs):
-    times, flux, flux_err = get_all_solar_flare_data(solar_flare_id=solar_flare_id)
+def get_solar_flare_data_from_segment(solar_flare_id="go1520110128", solar_flare_folder="goes", start_time=None, end_time=None, **kwargs):
+    times, flux, flux_err = get_all_solar_flare_data(solar_flare_id=solar_flare_id, solar_flare_folder=solar_flare_folder)
     return truncate_data(times=times, counts=flux, start=start_time, stop=end_time, yerr=flux_err)
 
 

@@ -30,6 +30,7 @@ if len(sys.argv) > 1:
     hares_and_hounds_id = args.hares_and_hounds_id
     hares_and_hounds_round = args.hares_and_hounds_round
 
+    solar_flare_folder = args.solar_flare_folder
     solar_flare_id = args.solar_flare_id
     grb_id = args.grb_id
     grb_binning = args.grb_binning
@@ -98,7 +99,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "injection"  # "magnetar_flare_binned"
+    data_source = "test"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -108,7 +109,8 @@ else:
     hares_and_hounds_id = "612579"
     hares_and_hounds_round = 'HH2'
 
-    solar_flare_id = "go1520110128"
+    solar_flare_folder = 'goes'
+    solar_flare_id = "go1520130512"
     grb_id = "050128"
     grb_binning = "64ms"
     grb_detector = 'swift'
@@ -121,8 +123,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = 4960
-    end_time = 5040
+    start_time = 74500
+    end_time = 75000
 
     period_number = 14
     run_id = 6
@@ -131,7 +133,7 @@ else:
 
     injection_id = 0
 
-    offset = False
+    offset = True
     polynomial_max = 1000000
     amplitude_min = None
     amplitude_max = None
@@ -148,7 +150,7 @@ else:
     tau_min = None
     tau_max = None
 
-    min_log_a = -20
+    min_log_a = -35
     max_log_a = 15
     # min_log_c = -10
     min_log_c = None
@@ -159,23 +161,23 @@ else:
     injection_mode = "general_qpo"
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "gaussian_process_windowed"
-    recovery_mode = "red_noise"
+    recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process"
-    background_model = 0
-    n_components = 0
-    jitter_term = False
+    background_model = "piecewise_cubic"
+    n_components = 6
+    jitter_term = True
 
-    band_minimum = 1/40
+    band_minimum = None
     band_maximum = None
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 300
+    nlive = 600
     use_ratio = False
 
-    try_load = True
+    try_load = False
     resume = False
     plot = True
 
@@ -207,7 +209,6 @@ recovery_mode_str = recovery_mode
 if jitter_term:
     recovery_mode_str += "_jitter"
 
-
 times, y, yerr, outdir, label = get_data(
     data_source=data_source, band=band, data_mode=data_mode, segment_length=segment_length,
     sampling_frequency=sampling_frequency, alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id,
@@ -215,13 +216,12 @@ times, y, yerr, outdir, label = get_data(
     run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str, likelihood_model=likelihood_model,
     magnetar_label=magnetar_label,  magnetar_tag=magnetar_tag, magnetar_bin_size=magnetar_bin_size,
     magnetar_subtract_t0=magnetar_subtract_t0, magnetar_unbarycentred_time=magnetar_unbarycentred_time,
-    rebin_factor=rebin_factor, solar_flare_id=solar_flare_id, grb_id=grb_id, grb_binning=grb_binning,
-    grb_detector=grb_detector, grb_energy_band=grb_energy_band, injection_file_dir=injection_file_dir,
-    injection_mode=injection_mode, injection_id=injection_id, injection_likelihood_model=injection_likelihood_model,
-    hares_and_hounds_id=hares_and_hounds_id, hares_and_hounds_round=hares_and_hounds_round
+    rebin_factor=rebin_factor, solar_flare_folder=solar_flare_folder, solar_flare_id=solar_flare_id,
+    grb_id=grb_id, grb_binning=grb_binning, grb_detector=grb_detector, grb_energy_band=grb_energy_band,
+    injection_file_dir=injection_file_dir, injection_mode=injection_mode, injection_id=injection_id,
+    injection_likelihood_model=injection_likelihood_model, hares_and_hounds_id=hares_and_hounds_id,
+    hares_and_hounds_round=hares_and_hounds_round
     )
-
-
 
 
 if data_source in ['grb', 'solar_flare']:
