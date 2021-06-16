@@ -1,19 +1,15 @@
-import argparse
 import os
 import sys
 from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 from scipy.signal import periodogram
 
 import QPOEstimation
 from QPOEstimation.get_data import *
-from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_likelihood
 from QPOEstimation.parse import parse_args
 from QPOEstimation.prior.psd import *
-from QPOEstimation.stabilisation import bar_lev
 from QPOEstimation.utils import *
 
 if len(sys.argv) > 1:
@@ -117,8 +113,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = 4900
-    end_time = 5100
+    start_time = -20
+    end_time = 20
 
     period_number = 14
     run_id = 6
@@ -151,7 +147,7 @@ else:
 
     injection_mode = "general_qpo"
     injection_file_dir = "injection_files_pop"
-    injection_likelihood_model = "gaussian_process_windowed"
+    injection_likelihood_model = "whittle"
 
     recovery_mode = "general_qpo"
     likelihood_model = "whittle"
@@ -163,7 +159,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 150
+    nlive = 500
     use_ratio = False
 
     try_load = False
@@ -178,7 +174,7 @@ truths = None
 
 recovery_mode_str = recovery_mode
 
-times, y, yerr, outdir, label = get_data(
+times, y, _, outdir, label = get_data(
     data_source=data_source, band=band, data_mode=data_mode, segment_length=segment_length,
     sampling_frequency=sampling_frequency, alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id,
     period_number=period_number, run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time,
@@ -194,25 +190,25 @@ times, y, yerr, outdir, label = get_data(
 
 
 
-if data_source in ['grb', 'solar_flare']:
-    pass
-elif data_source in ['hares_and_hounds']:
-    yerr = np.zeros(len(y))
-elif data_source == 'injection':
-    yerr = np.ones(len(y))
-elif variance_stabilisation:
-    y = bar_lev(y)
-    yerr = np.ones(len(y))
-elif data_source == 'test':
-    pass
-else:
-    yerr = np.sqrt(y)
-    yerr[np.where(yerr == 0)[0]] = 1
+# if data_source in ['grb', 'solar_flare']:
+#     pass
+# elif data_source in ['hares_and_hounds']:
+#     yerr = np.zeros(len(y))
+# elif data_source == 'injection':
+#     yerr = np.ones(len(y))
+# elif variance_stabilisation:
+#     y = bar_lev(y)
+#     yerr = np.ones(len(y))
+# elif data_source == 'test':
+#     pass
+# else:
+#     yerr = np.sqrt(y)
+#     yerr[np.where(yerr == 0)[0]] = 1
 
 # Normalization
-if yerr is not None:
-    yerr /= np.mean(y)
-y = (y - np.mean(y))/np.mean(y)
+# if yerr is not None:
+#     yerr /= np.mean(y)
+# y = (y - np.mean(y))/np.mean(y)
 
 sampling_frequency = 1/(times[1] - times[0])
 
@@ -220,7 +216,7 @@ freqs, powers = periodogram(y, fs=sampling_frequency, window="hann")
 
 
 if plot:
-    plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
+    plt.plot(times, y, label='data')
     # plt.plot(times, y, label='flux')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
@@ -236,7 +232,7 @@ if recovery_mode == "red_noise":
     priors = get_red_noise_prior()
 elif recovery_mode == "general_qpo":
     priors = get_red_noise_prior()
-    priors.update(get_qpo_prior(frequencies=freqs))
+    priors.update(get_qpo_prior(frequencies=freqs, max_log_width=np.log(0.25)))
 elif recovery_mode == "broken_power_law":
     priors = get_broken_power_law_prior()
 else:
@@ -255,7 +251,7 @@ else:
 likelihood = QPOEstimation.likelihood.WhittleLikelihood(
     frequencies=freqs, periodogram=powers, frequency_mask=frequency_mask, noise_model=recovery_mode)
 meta_data = dict(kernel_type=recovery_mode, times=times,
-                 y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths)
+                 y=y, likelihood_model=likelihood_model, truths=truths)
 
 
 result = None
