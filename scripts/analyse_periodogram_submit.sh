@@ -12,4 +12,4 @@
 
 #GRB
 
-srun python analyse_periodogram.py --start_time ${1} --end_time ${2} --data_source grb --grb_id 090709A --grb_detector swift --recovery_mode ${3} --run_mode select_time --likelihood_model whittle --sample rslice --nlive 1000 --try_load False --resume False
+srun python analyse_periodogram.py --start_time ${1} --end_time ${2} --data_source grb --grb_id 050128 --grb_detector swift --recovery_mode ${3} --run_mode select_time --likelihood_model whittle --sample rslice --nlive 1000 --try_load False --resume False

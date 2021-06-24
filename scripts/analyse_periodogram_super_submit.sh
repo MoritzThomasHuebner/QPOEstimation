@@ -16,9 +16,9 @@
 #done
 
 
-extensions=($(seq 0 10 1000))
-start_time=-4
-end_time=103
+extensions=($(seq 0 2 200))
+start_time=5
+end_time=20
 
 for i in {0..100}
 do
