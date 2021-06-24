@@ -20,3 +20,7 @@ def lorentzian(frequencies, amplitude, central_frequency, width):
 def periodogram_chi_square_test(frequencies, powers, psd, degrees_of_freedom):
     # Nita et al 2014
     return np.sum((1 - powers/psd.power_spectral_density_interpolated(frequencies))**2)/degrees_of_freedom
+
+def periodogram_weighted_chi_square_test(frequencies, powers, psd, degrees_of_freedom):
+    # Nita et al 2014
+    return np.sum((1 - powers[1:]/psd.power_spectral_density_interpolated(frequencies)[1:]/frequencies[1:])**2)/degrees_of_freedom
