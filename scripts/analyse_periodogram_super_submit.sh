@@ -22,8 +22,8 @@ end_time=103
 
 for i in {0..100}
 do
-  echo $((start_time - extensions[$i]))
-  echo $((end_time + extensions[$i]))
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) red_noise
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) general_qpo
+#  echo $((start_time - extensions[$i]))
+#  echo $((end_time + extensions[$i]))
+  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) red_noise
+  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) general_qpo
 done
