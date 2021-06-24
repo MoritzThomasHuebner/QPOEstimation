@@ -89,7 +89,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "injection"  # "magnetar_flare_binned"
+    data_source = "grb"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -100,9 +100,9 @@ else:
     hares_and_hounds_round = 'HH2'
 
     solar_flare_folder = 'goes'
-    solar_flare_id = "go1520110128"
-    grb_id = "050128"
-    grb_binning = "64ms"
+    solar_flare_id = "go1520130512"
+    grb_id = "090709A"
+    grb_binning = "1s"
     grb_detector = 'swift'
     grb_energy_band = 'all'
 
@@ -113,15 +113,15 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -20.0
-    end_time = 20.0
+    start_time = 0
+    end_time = 100
 
     period_number = 14
     run_id = 6
 
     candidate_id = 5
 
-    injection_id = 0
+    injection_id = 1
 
     polynomial_max = 1000000
     amplitude_min = None
@@ -149,7 +149,7 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
 
-    recovery_mode = "red_noise"
+    recovery_mode = "general_qpo"
     likelihood_model = "whittle"
 
     band_minimum = None
@@ -178,8 +178,9 @@ times, y, _, outdir, label = get_data(
     data_source=data_source, band=band, data_mode=data_mode, segment_length=segment_length,
     sampling_frequency=sampling_frequency, alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id,
     period_number=period_number, run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time,
-    run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str, likelihood_model=likelihood_model,
-    magnetar_label=magnetar_label,  magnetar_tag=magnetar_tag, magnetar_bin_size=magnetar_bin_size,
+    run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str,
+    likelihood_model=likelihood_model,
+    magnetar_label=magnetar_label, magnetar_tag=magnetar_tag, magnetar_bin_size=magnetar_bin_size,
     magnetar_subtract_t0=magnetar_subtract_t0, magnetar_unbarycentred_time=magnetar_unbarycentred_time,
     rebin_factor=rebin_factor, solar_flare_folder=solar_flare_folder, solar_flare_id=solar_flare_id,
     grb_id=grb_id, grb_binning=grb_binning, grb_detector=grb_detector, grb_energy_band=grb_energy_band,
@@ -210,7 +211,7 @@ times, y, _, outdir, label = get_data(
 #     yerr /= np.mean(y)
 # y = (y - np.mean(y))/np.mean(y)
 
-sampling_frequency = 1/(times[1] - times[0])
+sampling_frequency = 1 / (times[1] - times[0])
 
 freqs, powers = periodogram(y, fs=sampling_frequency, window="hann")
 
@@ -232,7 +233,8 @@ if recovery_mode == "red_noise":
     priors = get_red_noise_prior()
 elif recovery_mode == "general_qpo":
     priors = get_red_noise_prior()
-    priors.update(get_qpo_prior(frequencies=freqs, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
+    priors.update(get_qpo_prior(frequencies=freqs))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
+    priors._resolve_conditions()
 elif recovery_mode == "broken_power_law":
     priors = get_broken_power_law_prior()
 else:
@@ -280,24 +282,28 @@ if noise_model == 'broken_power_law':
     del max_l_bpl_params['log_beta']
 
 if recovery_mode == 'general_qpo':
-    max_l_psd_no_qpo = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'], beta=np.exp(max_like_params['log_beta'])) + np.exp(max_like_params['log_sigma'])
+    max_l_psd_no_qpo = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'],
+                                                         beta=np.exp(max_like_params['log_beta'])) + np.exp(
+        max_like_params['log_sigma'])
     max_l_psd = max_l_psd_no_qpo + \
                 QPOEstimation.model.psd.lorentzian(freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
                                                    central_frequency=np.exp(max_like_params['log_frequency']),
                                                    width=np.exp(max_like_params['log_width']))
 elif noise_model == 'red_noise':
     max_l_psd = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'],
-                                                  beta=np.exp(max_like_params['log_beta'])) + np.exp(max_like_params['log_sigma'])
+                                                  beta=np.exp(max_like_params['log_beta'])) + np.exp(
+        max_like_params['log_sigma'])
     max_l_psd_no_qpo = max_l_psd
 elif noise_model == 'broken_power_law':
-    max_l_psd = QPOEstimation.model.psd.broken_power_law_noise(freqs[1:], **max_l_bpl_params) + np.exp(max_like_params['log_sigma'])
+    max_l_psd = QPOEstimation.model.psd.broken_power_law_noise(freqs[1:], **max_l_bpl_params) + np.exp(
+        max_like_params['log_sigma'])
     max_l_psd_no_qpo = max_l_psd
 else:
     raise ValueError
 plt.loglog(freqs[1:], max_l_psd, label="Max Like fit")
-threshold = -max_l_psd_no_qpo * np.log((1 - 0.9973)/len(freqs[1:]))   # Bonferroni correction
+threshold = -max_l_psd_no_qpo * np.log((1 - 0.9973) / len(freqs[1:]))  # Bonferroni correction
 plt.loglog(freqs[1:], threshold, label="3 sigma threshold")
-threshold = -max_l_psd_no_qpo * np.log((1 - 0.954)/len(freqs[1:]))   # Bonferroni correction
+threshold = -max_l_psd_no_qpo * np.log((1 - 0.954) / len(freqs[1:]))  # Bonferroni correction
 plt.loglog(freqs[1:], threshold, label="2 sigma threshold")
 
 if recovery_mode == 'general_qpo':

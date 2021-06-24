@@ -247,11 +247,11 @@ _HARES_AND_HOUNDS_RUN_MODES = dict(select_time=get_hares_and_hounds_data_from_se
 
 def get_data(data_source, **kwargs):
     run_mode = kwargs["run_mode"]
-    start_time = kwargs["start_time"]
-    end_time = kwargs["end_time"]
-    likelihood_model = kwargs["likelihood_model"]
-    recovery_mode_str = kwargs["recovery_mode_str"]
-    recovery_mode = kwargs["recovery_mode"]
+    start_time = kwargs.get("start_time", 0)
+    end_time = kwargs.get("end_time", 0)
+    likelihood_model = kwargs.get("likelihood_model", None)
+    recovery_mode_str = kwargs.get("recovery_mode_str", None)
+    recovery_mode = kwargs.get("recovery_mode", None)
     yerr = None
     if data_source == 'giant_flare':
         times, y = get_giant_flare_data(**kwargs)
