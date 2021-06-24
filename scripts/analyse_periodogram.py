@@ -233,7 +233,7 @@ if recovery_mode == "red_noise":
     priors = get_red_noise_prior()
 elif recovery_mode == "general_qpo":
     priors = get_red_noise_prior()
-    priors.update(get_qpo_prior(frequencies=freqs))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
+    priors.update(get_qpo_prior(frequencies=freqs, min_log_f=np.log(band_minimum), max_log_f=np.log(band_maximum)))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
     priors._resolve_conditions()
 elif recovery_mode == "broken_power_law":
     priors = get_broken_power_law_prior()

@@ -30,7 +30,7 @@ def get_qpo_prior(frequencies=None, **kwargs):
     prior['log_width'] = bilby.core.prior.ConditionalUniform(condition_func=log_width_condition_func,
         minimum=np.log(df/np.pi), maximum=kwargs.get('max_log_width', np.log(0.25*max_frequency)), name='log_width')
     # prior['log_frequency'] = bilby.core.prior.Uniform(np.log(2*df), np.log(max_frequency), name='log_frequency')
-    prior['log_frequency'] = bilby.core.prior.Uniform(kwargs.get('min_log_f', np.log(2*df)), np.log(max_frequency), name='log_frequency')
+    prior['log_frequency'] = bilby.core.prior.Uniform(kwargs.get('min_log_f', np.log(2*df)), kwargs.get('max_log_f', np.log(max_frequency)), name='log_frequency')
     prior._resolve_conditions()
     return prior
 

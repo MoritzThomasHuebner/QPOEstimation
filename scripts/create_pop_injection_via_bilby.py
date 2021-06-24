@@ -14,12 +14,12 @@ alpha = 2
 beta = 50
 # white_noise = 0.0000001
 white_noise = 4 #good parameter
-amplitude = 50
+amplitude = 150
 width = 0.1
 central_frequency = 1
 sampling_frequency = 40
 duration_signal = 40
-duration_white_noise = 40
+duration_white_noise = 9960
 x_break = beta/white_noise * central_frequency**(-alpha)
 print(x_break)
 
@@ -71,10 +71,6 @@ plt.plot(series_signal.time_array, td_data_signal)
 plt.plot(series_white_noise.time_array, td_data_white_noise)
 plt.show()
 
-
-# freqs_test, powers_test = periodogram(td_data_signal, fs=sampling_frequency, window='hann')
-# plt.loglog()
-
 combined_series = bilby.core.series.CoupledTimeAndFrequencySeries(duration=duration_signal + duration_white_noise, sampling_frequency=sampling_frequency)
 combined_signal = np.append(np.split(td_data_white_noise, 2)[0], np.append(td_data_signal, np.split(td_data_white_noise, 2)[1]))
 plt.plot(combined_series.time_array, combined_signal)
@@ -85,23 +81,23 @@ freqs_combined_periodogram, powers_combined_periodogram = periodogram(combined_s
 plt.loglog(freqs_signal_periodogram, powers_signal_periodogram)
 plt.loglog(freqs_combined_periodogram, powers_combined_periodogram)
 plt.show()
-assert False
-# times_save = combined_series.time_array - 5000
+# assert False
+times_save = combined_series.time_array - 5000
 # idx_1 = QPOEstimation.utils.get_indices_by_time(times_save, minimum_time=-6000, maximum_time=-20)
 # idx_2 = QPOEstimation.utils.get_indices_by_time(times_save, minimum_time=20, maximum_time=6000)
 # combined_signal[idx_1] = 0
 # combined_signal[idx_2] = 0
-#
-# plt.plot(times_save, combined_signal)
-# plt.show()
-# res = np.array([times_save, combined_signal]).T
-# np.savetxt('injection_files_pop/general_qpo/whittle/00_data.txt', res)
-#
-# import json
-# params = dict(amplitude=amplitude, alpha=alpha, beta=beta, central_frequency=central_frequency, width=width, sigma=white_noise)
-#
-# with open('injection_files_pop/general_qpo/whittle/00_params.json', 'w') as f:
-#     json.dump(params, f)
+
+plt.plot(times_save, combined_signal)
+plt.show()
+res = np.array([times_save, combined_signal]).T
+np.savetxt('injection_files_pop/general_qpo/whittle/03_data.txt', res)
+
+import json
+params = dict(amplitude=amplitude, alpha=alpha, beta=beta, central_frequency=central_frequency, width=width, sigma=white_noise)
+
+with open('injection_files_pop/general_qpo/whittle/03_params.json', 'w') as f:
+    json.dump(params, f)
 
 
 snr_qpo_optimals = []
@@ -142,5 +138,5 @@ plt.plot(extension_factors, snr_qpo_optimals)
 plt.xlabel(r'Extension factor $x$')
 plt.ylabel(r'SNR')
 plt.legend()
-plt.savefig('periodogram_pop/snr_vs_extension_zeros.pdf')
+# plt.savefig('periodogram_pop/snr_vs_extension_zeros.pdf')
 plt.show()
