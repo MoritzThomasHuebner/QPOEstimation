@@ -16,14 +16,12 @@
 #done
 
 
-extensions=($(seq 0 20 2000))
+extensions=($(seq 0 10 200))
 start_time=-4
 end_time=103
 
 for i in {0..100}
 do
-#  echo $((start_time - extensions[$i]))
-#  echo $((end_time + extensions[$i]))
   sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) red_noise
   sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) general_qpo
 done
