@@ -72,7 +72,7 @@ def parse_args():
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
     parser.add_argument("--likelihood_model", default="gaussian_process", choices=likelihood_models)
-    parser.add_argument("--normalisation", default="True", type=str)
+    parser.add_argument("--normalisation", default="False", type=str)
     parser.add_argument("--background_model", default="polynomial", choices=background_models)
     parser.add_argument("--n_components", default=1, type=int)
     parser.add_argument("--jitter_term", default="False", type=str)
