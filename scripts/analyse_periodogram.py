@@ -209,6 +209,11 @@ if window == "tukey":
     window = ("tukey", 0.05)
 freqs, powers = periodogram(y, fs=sampling_frequency, window=window)
 
+if band_minimum is None:
+    band_minimum = 1e-12
+if band_maximum is None:
+    band_maximum = freqs[-1] + 1
+
 
 if plot:
     plt.plot(times, y, label='data')
