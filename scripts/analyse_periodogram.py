@@ -71,6 +71,11 @@ if len(sys.argv) > 1:
 
     recovery_mode = args.recovery_mode
     likelihood_model = args.likelihood_model
+    normalisation = boolean_string(args.normalisation)
+
+    window = args.window
+    frequency_mask_minimum = args.frequency_mask_minimum
+    frequency_mask_maximum = args.frequency_mask_maximum
 
     band_minimum = args.band_minimum
     band_maximum = args.band_maximum
@@ -89,7 +94,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "grb"  # "magnetar_flare_binned"
+    data_source = "injection"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -113,15 +118,15 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = 0
-    end_time = 100
+    start_time = -20
+    end_time = 20
 
     period_number = 14
     run_id = 6
 
     candidate_id = 5
 
-    injection_id = 1
+    injection_id = 6
 
     polynomial_max = 1000000
     amplitude_min = None
@@ -149,11 +154,16 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
 
-    recovery_mode = "general_qpo"
+    recovery_mode = "red_noise"
     likelihood_model = "whittle"
+    normalisation = False
 
-    band_minimum = None
-    band_maximum = None
+    window = "boxcar"
+    frequency_mask_minimum = 1/40
+    frequency_mask_maximum = None
+
+    band_minimum = 1/40
+    band_maximum = 20
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
@@ -190,30 +200,14 @@ times, y, _, outdir, label = get_data(
     )
 
 
-
-# if data_source in ['grb', 'solar_flare']:
-#     pass
-# elif data_source in ['hares_and_hounds']:
-#     yerr = np.zeros(len(y))
-# elif data_source == 'injection':
-#     yerr = np.ones(len(y))
-# elif variance_stabilisation:
-#     y = bar_lev(y)
-#     yerr = np.ones(len(y))
-# elif data_source == 'test':
-#     pass
-# else:
-#     yerr = np.sqrt(y)
-#     yerr[np.where(yerr == 0)[0]] = 1
-
-# Normalization
-# if yerr is not None:
-#     yerr /= np.mean(y)
-# y = (y - np.mean(y))/np.mean(y)
+if normalisation:
+    y = (y - np.mean(y))/np.mean(y)
 
 sampling_frequency = 1 / (times[1] - times[0])
 
-freqs, powers = periodogram(y, fs=sampling_frequency, window="hann")
+if window == "tukey":
+    window = ("tukey", 0.05)
+freqs, powers = periodogram(y, fs=sampling_frequency, window=window)
 
 
 if plot:
@@ -240,10 +234,16 @@ elif recovery_mode == "broken_power_law":
 else:
     raise ValueError
 
-frequency_mask = [True] * len(freqs)
+if frequency_mask_minimum is None:
+    frequency_mask_minimum = 1e-12
+if frequency_mask_maximum is None:
+    frequency_mask_maximum = freqs[-1] + 1
+
+frequency_mask = [False] * len(freqs)
 frequency_mask = np.array(frequency_mask)
-frequency_mask[0] = False
-frequency_mask[np.where(freqs < 0.1)] = False
+idxs = QPOEstimation.utils.get_indices_by_time(minimum_time=frequency_mask_minimum,
+                                               maximum_time=frequency_mask_maximum, times=freqs)
+frequency_mask[idxs] = True
 
 if recovery_mode == "general_qpo":
     noise_model = "red_noise"
