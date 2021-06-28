@@ -19,9 +19,12 @@ matplotlib.use('Qt5Agg')
 
 modes = ['zeros', 'white_noise']
 mode = 0
+injection_id = str(mode + 6).zfill(2)
+outdir = "periodogram_pop"
+Path(outdir).mkdir(parents=True, exist_ok=True)
 
 
-end_times = np.arange(20, 2020, 20)
+end_times = np.arange(20, 125, 5)
 start_times = -end_times
 durations = 2 * end_times
 
@@ -29,12 +32,6 @@ durations = 2 * end_times
 outdir_qpo_periodogram = f'injection/general_qpo_injection/general_qpo_recovery/whittle/results/'
 outdir_red_noise_periodogram = f'injection/general_qpo_injection/red_noise_recovery/whittle/results/'
 
-log_frequency_spreads_zero_padded = []
-# injection_id = str(mode).zfill(2)
-# outdir = "periodogram_pop"
-injection_id = str(mode + 2).zfill(2)
-outdir = "periodogram_pop_new"
-Path(outdir).mkdir(parents=True, exist_ok=True)
 
 data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/{injection_id}_data.txt')
 times = data[:, 0]
@@ -146,35 +143,36 @@ for start_time, end_time, duration in zip(start_times, end_times, durations):
 
 
     snrs = []
-    for i in range(20):
-        params = res_qpo.posterior.iloc[np.random.randint(0, len(res_qpo.posterior))]
-        alpha_max_like = params['alpha']
-        beta_max_like = np.exp(params['log_beta'])
-        white_noise_max_like = np.exp(params['log_sigma'])
-        amplitude_max_like = np.exp(params['log_amplitude'])
-        width_max_like = np.exp(params['log_width'])
-        central_frequency_max_like = np.exp(params['log_frequency'])
-
-        psd_array_noise_max_like = QPOEstimation.model.psd.red_noise(
-            frequencies=frequencies, alpha=alpha_max_like,
-            beta=beta_max_like) + white_noise_max_like
-        psd_array_qpo_max_like = QPOEstimation.model.psd.lorentzian(
-            frequencies=frequencies, amplitude=amplitude_max_like, width=width_max_like,
-            central_frequency=central_frequency_max_like)
-        psd_array_signal_max_like = psd_array_noise_max_like + psd_array_qpo_max_like
-        psd_noise_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
-            frequency_array=frequencies, psd_array=psd_array_noise_max_like)
-        psd_qpo_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
-            frequency_array=frequencies, psd_array=psd_array_qpo_max_like)
-        psd_signal_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
-            frequency_array=frequencies, psd_array=psd_array_signal_max_like)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            snr = np.sqrt(np.sum(
-                np.nan_to_num((psd_qpo_max_like.power_spectral_density_interpolated(freqs_combined_periodogram) /
-                               psd_noise_max_like.power_spectral_density_interpolated(freqs_combined_periodogram)) ** 2, nan=0)))
-        snrs.append(snr)
-    snrs_max_like_sigma.append(np.std(snrs))
+    # for i in range(20):
+    #     params = res_qpo.posterior.iloc[np.random.randint(0, len(res_qpo.posterior))]
+    #     alpha_max_like = params['alpha']
+    #     beta_max_like = np.exp(params['log_beta'])
+    #     white_noise_max_like = np.exp(params['log_sigma'])
+    #     amplitude_max_like = np.exp(params['log_amplitude'])
+    #     width_max_like = np.exp(params['log_width'])
+    #     central_frequency_max_like = np.exp(params['log_frequency'])
+    #
+    #     psd_array_noise_max_like = QPOEstimation.model.psd.red_noise(
+    #         frequencies=frequencies, alpha=alpha_max_like,
+    #         beta=beta_max_like) + white_noise_max_like
+    #     psd_array_qpo_max_like = QPOEstimation.model.psd.lorentzian(
+    #         frequencies=frequencies, amplitude=amplitude_max_like, width=width_max_like,
+    #         central_frequency=central_frequency_max_like)
+    #     psd_array_signal_max_like = psd_array_noise_max_like + psd_array_qpo_max_like
+    #     psd_noise_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
+    #         frequency_array=frequencies, psd_array=psd_array_noise_max_like)
+    #     psd_qpo_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
+    #         frequency_array=frequencies, psd_array=psd_array_qpo_max_like)
+    #     psd_signal_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
+    #         frequency_array=frequencies, psd_array=psd_array_signal_max_like)
+    #     with warnings.catch_warnings():
+    #         warnings.simplefilter("ignore")
+    #         snr = np.sqrt(np.sum(
+    #             np.nan_to_num((psd_qpo_max_like.power_spectral_density_interpolated(freqs_combined_periodogram) /
+    #                            psd_noise_max_like.power_spectral_density_interpolated(freqs_combined_periodogram)) ** 2, nan=0)))
+    #     snrs.append(snr)
+    # snrs_max_like_sigma.append(np.std(snrs))
+    snrs_max_like_sigma.append(0.1)
 
     alpha_max_like = res_qpo.maximum_likelihood_parameters['alpha']
     beta_max_like = np.exp(res_qpo.maximum_likelihood_parameters['log_beta'])
