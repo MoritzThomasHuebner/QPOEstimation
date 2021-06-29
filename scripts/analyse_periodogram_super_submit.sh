@@ -25,8 +25,8 @@
 #  sbatch analyse_periodogram_submit.sh -$((end_time + extensions[$i])) $((end_time + extensions[$i])) 7 general_qpo hann
 #done
 
-start_times=73000 74700 74900
-end_times=74700 74900 75800
+start_times=(73000 74700 74900)
+end_times=(74700 74900 75800)
 
 for i in {0..2}
 do
