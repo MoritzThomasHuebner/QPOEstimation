@@ -94,7 +94,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "injection"  # "magnetar_flare_binned"
+    data_source = "solar_flare"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -118,8 +118,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -20
-    end_time = 20
+    start_time = 74900
+    end_time = 75800
 
     period_number = 14
     run_id = 6
@@ -156,14 +156,14 @@ else:
 
     recovery_mode = "red_noise"
     likelihood_model = "whittle"
-    normalisation = False
+    normalisation = True
 
-    window = "boxcar"
-    frequency_mask_minimum = 1/40
+    window = "hann"
+    frequency_mask_minimum = None
     frequency_mask_maximum = None
 
-    band_minimum = 1/40
-    band_maximum = 20
+    band_minimum = None
+    band_maximum = None
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
@@ -209,11 +209,11 @@ if window == "tukey":
     window = ("tukey", 0.05)
 freqs, powers = periodogram(y, fs=sampling_frequency, window=window)
 
-if band_minimum is None:
-    band_minimum = 1e-12
 if band_maximum is None:
     band_maximum = freqs[-1] + 1
 
+if band_minimum is None:
+    band_minimum = freqs[1]
 
 if plot:
     plt.plot(times, y, label='data')
