@@ -154,7 +154,7 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
 
-    recovery_mode = "red_noise"
+    recovery_mode = "broken_power_law"
     likelihood_model = "whittle"
     normalisation = True
 

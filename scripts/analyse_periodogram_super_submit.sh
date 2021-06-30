@@ -32,6 +32,7 @@ for i in {0..3}
 do
   sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) red_noise
   sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) general_qpo
+  sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) broken_power_law
 done
 
 #
