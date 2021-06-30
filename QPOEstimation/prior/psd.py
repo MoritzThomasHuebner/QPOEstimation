@@ -40,14 +40,14 @@ def broken_power_law_conversion_function(params, **kwargs):
     new_params['alpha_diffs'] = new_params['alpha_1'] - new_params['alpha_2']
     return new_params
 
-def get_broken_power_law_prior(freqs=None):
+def get_broken_power_law_prior(frequencies=None):
     prior = bilby.core.prior.PriorDict()
     prior['alpha_1'] = bilby.core.prior.Uniform(0, 10, name='alpha_1')
     prior['alpha_2'] = bilby.core.prior.Uniform(0, 10, name='alpha_2')
-    if freqs is None:
+    if frequencies is None:
         prior['log_delta'] = bilby.core.prior.Uniform(-30, 30, name='log_delta')
     else:
-        prior['log_delta'] = bilby.core.prior.Uniform(np.log(freqs[0]), np.log(freqs[-1]), name='log_delta')
+        prior['log_delta'] = bilby.core.prior.Uniform(np.log(frequencies[0]), np.log(frequencies[-1]), name='log_delta')
     prior['rho'] = bilby.core.prior.DeltaFunction(peak=-1)
     prior['log_beta'] = bilby.core.prior.Uniform(-60, 60, name='log_beta')
     prior['log_sigma'] = bilby.core.prior.Uniform(-30, 30, name='log_sigma')
