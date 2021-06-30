@@ -35,6 +35,11 @@ def get_qpo_prior(frequencies=None, **kwargs):
     return prior
 
 
+def broken_power_law_conversion_function(params, **kwargs):
+    new_params = params.copy()
+    new_params['alpha_diffs'] = new_params['alpha_1'] - new_params['alpha_2']
+    return new_params
+
 def get_broken_power_law_prior():
     prior = bilby.core.prior.PriorDict()
     prior['alpha_1'] = bilby.core.prior.Uniform(0, 10, name='alpha_1')
@@ -43,6 +48,8 @@ def get_broken_power_law_prior():
     prior['rho'] = bilby.core.prior.DeltaFunction(peak=-1)
     prior['log_beta'] = bilby.core.prior.Uniform(-60, 60, name='log_beta')
     prior['log_sigma'] = bilby.core.prior.Uniform(-30, 30, name='log_sigma')
+    prior['alpha_diffs'] = bilby.core.prior.Constraint(0, 1000, name='alpha_diffs')
+    prior.conversion_function = broken_power_law_conversion_function
     return prior
 
 
