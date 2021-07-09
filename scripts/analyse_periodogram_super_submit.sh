@@ -25,23 +25,23 @@
 #  sbatch analyse_periodogram_submit.sh -$((end_time + extensions[$i])) $((end_time + extensions[$i])) 7 general_qpo hann
 #done
 
-start_times=(73000 74700 74900 73000)
-end_times=(74700 74900 75800 75800)
-
-for i in {0..3}
-do
-#  sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) red_noise
-#  sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) general_qpo
-  sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) broken_power_law
-done
-
+#start_times=(73000 74700 74900 73000)
+#end_times=(74700 74900 75800 75800)
 #
-#extensions=($(seq 0 10 200))
-#start_time=-4
-#end_time=103
-#
-#for i in {1..100}
+#for i in {0..3}
 #do
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) red_noise hann
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) general_qpo hann
+##  sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) red_noise
+##  sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) general_qpo
+#  sbatch analyse_periodogram_submit.sh $((start_times[$i])) $((end_times[$i])) broken_power_law
 #done
+
+
+extensions=($(seq 0 10 90))
+start_time=-10
+end_time=10
+
+for i in {0..9}
+do
+  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 08 red_noise hann
+  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 08 general_qpo hann
+done
