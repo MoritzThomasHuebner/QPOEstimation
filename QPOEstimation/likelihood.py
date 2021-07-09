@@ -30,7 +30,7 @@ class ParameterAccessor(object):
 
 
 class WhittleLikelihood(Likelihood):
-    VALID_NOISE_MODELS = ['red_noise', 'broken_power_law']
+    VALID_NOISE_MODELS = ['red_noise', 'broken_power_law', 'pure_qpo', 'white_noise']
     alpha = ParameterAccessor('alpha')
     alpha_1 = ParameterAccessor('alpha_1')
     alpha_2 = ParameterAccessor('alpha_2')
@@ -94,8 +94,8 @@ class WhittleLikelihood(Likelihood):
     def log_likelihood(self):
         psd = self.psd + self.model
         log_l = -np.sum(np.log(psd) + self.periodogram / psd)
-        if np.isnan(log_l):
-            print(log_l)
+        # if np.isnan(log_l):
+        #     print(log_l)
         return log_l
 
     @property
@@ -113,13 +113,15 @@ class WhittleLikelihood(Likelihood):
         elif noise_model == 'general_qpo':
             self._noise_model = 'red_noise'
         else:
-            raise ValueError('Unknown noise model')
+            raise ValueError(f'Unknown noise model {noise_model}')
 
     @property
     def psd(self):
         if self.noise_model == 'red_noise':
             return red_noise(frequencies=self.frequencies, alpha=self.alpha, beta=self.beta) \
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
+        elif self.noise_model in ['pure_qpo', 'white_noise']:
+            return white_noise(frequencies=self.frequencies, sigma=self.sigma)
         elif self.noise_model == 'broken_power_law':
             return broken_power_law_noise(frequencies=self.frequencies, alpha_1=self.alpha_1,
                                           alpha_2=self.alpha_2, beta=self.beta, delta=self.delta, rho=self.rho) \

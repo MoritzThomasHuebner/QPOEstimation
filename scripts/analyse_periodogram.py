@@ -94,7 +94,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "solar_flare"  # "magnetar_flare_binned"
+    data_source = "injection"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -118,15 +118,15 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = 74900
-    end_time = 75800
+    start_time = -100
+    end_time = 100
 
     period_number = 14
     run_id = 6
 
     candidate_id = 5
 
-    injection_id = 6
+    injection_id = 9
 
     polynomial_max = 1000000
     amplitude_min = None
@@ -154,7 +154,7 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
 
-    recovery_mode = "broken_power_law"
+    recovery_mode = "white_noise"
     likelihood_model = "whittle"
     normalisation = True
 
@@ -236,6 +236,16 @@ elif recovery_mode == "general_qpo":
     priors._resolve_conditions()
 elif recovery_mode == "broken_power_law":
     priors = get_broken_power_law_prior(frequencies=freqs)
+elif recovery_mode == "pure_qpo":
+    priors = get_red_noise_prior()
+    priors.update(get_qpo_prior(frequencies=freqs, min_log_f=np.log(band_minimum), max_log_f=np.log(band_maximum)))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
+    priors._resolve_conditions()
+    del priors['alpha']
+    del priors['log_beta']
+elif recovery_mode == 'white_noise':
+    priors = get_red_noise_prior()
+    del priors['alpha']
+    del priors['log_beta']
 else:
     raise ValueError
 
@@ -302,6 +312,14 @@ elif noise_model == 'red_noise':
 elif noise_model == 'broken_power_law':
     max_l_psd = QPOEstimation.model.psd.broken_power_law_noise(freqs[1:], **max_l_bpl_params) + np.exp(
         max_like_params['log_sigma'])
+    max_l_psd_no_qpo = max_l_psd
+elif noise_model == "pure_qpo":
+    max_l_psd_no_qpo = np.exp(max_like_params['log_sigma']) * np.ones(len(freqs[1:]))
+    max_l_psd = max_l_psd_no_qpo + QPOEstimation.model.psd.lorentzian(
+        freqs[1:],  amplitude=np.exp(max_like_params['log_amplitude']),
+        central_frequency=np.exp(max_like_params['log_frequency']), width=np.exp(max_like_params['log_width']))
+elif noise_model == 'white_noise':
+    max_l_psd = np.exp(max_like_params['log_sigma']) * np.ones(len(freqs[1:]))
     max_l_psd_no_qpo = max_l_psd
 else:
     raise ValueError
