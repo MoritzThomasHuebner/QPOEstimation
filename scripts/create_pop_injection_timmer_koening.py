@@ -8,25 +8,43 @@ from scipy.signal import periodogram
 
 import matplotlib.pyplot as plt
 import matplotlib
+from scipy.interpolate import interp1d
 
 matplotlib.use("Qt5Agg")
 
 
+# 06: Red noise + white noise + 40s QPO Zeros extended, no trend
+# 07: Red noise + white noise + 40s QPO White noise extended, no trend
+# 08: White noise + non-stationary 20s QPO + Exponential pulse profile
+# 09: QPO, zeros extended, no trend
+# 10: QPO, white noise extended, no trend
+# 11: Poissonian, 20s QPO, white noise extended. Gaussian trend.
+
 frequencies = np.linspace(1/100000, 20, 1000000)
 alpha = 2
-beta = 50
-white_noise = 4
-amplitude = 320
+beta = 0
+white_noise = 0
+amplitude = 3000
 width = 0.1
-central_frequency = 1
+central_frequency = 5
 sampling_frequency = 40
-duration_signal = 40
-duration_white_noise = 10000
-x_break = beta/white_noise * central_frequency**(-alpha)
-print(x_break)
+duration_signal = 20
+duration_white_noise = 400
+# x_break = beta/white_noise * central_frequency**(-alpha)
+# print(x_break)
 extension_modes = ['zeros', 'white_noise']
 extension_mode = extension_modes[0]
-injection_id = "06"
+injection_id = "11"
+if injection_id == "11":
+    profile_amplitude = 1000
+    profile_t_0 = 200
+    sigma = 20
+    background_rate = 10
+elif injection_id == "08":
+    profile_amplitude = 5000
+    profile_t_0 = 70
+    sigma_fall = 20
+    sigma_rise = 10
 
 # Only add white noise when we extend with zeros
 if extension_mode == extension_modes[0]:
@@ -89,9 +107,23 @@ plt.show()
 
 
 signal_indices = QPOEstimation.utils.get_indices_by_time(
-    minimum_time=4979.999, maximum_time=5020, times=series_combined.time_array)
+    minimum_time=duration_white_noise/2 - duration_signal/2 - 0.001,
+    maximum_time=duration_white_noise/2 + duration_signal/2, times=series_combined.time_array)
 combined_signal = td_data_extension
 combined_signal[signal_indices] += td_data_signal_windowed
+
+if injection_id == "08":
+    combined_signal += QPOEstimation.model.mean.fred(
+        times=series_combined.time_array, log_amplitude=np.log(profile_amplitude), t_0=profile_t_0,
+        log_sigma_fall=np.log(sigma_fall), log_sigma_rise=np.log(sigma_rise))
+
+if injection_id == "11":
+    combined_signal += QPOEstimation.model.mean.gaussian(
+        times=series_combined.time_array, log_amplitude=np.log(profile_amplitude), t_0=profile_t_0,
+        log_sigma=np.log(sigma)) + background_rate
+    interp_func = interp1d(x=series_combined.time_array, y=combined_signal)
+    combined_signal = QPOEstimation.poisson.poisson_process(times=series_combined.time_array, func=interp_func)
+
 plt.plot(series_combined.time_array, combined_signal)
 plt.show()
 
@@ -103,7 +135,7 @@ plt.xlim(1/sampling_frequency, sampling_frequency/2)
 plt.show()
 
 
-times_save = series_combined.time_array - 5000
+times_save = series_combined.time_array - duration_white_noise/2
 plt.plot(times_save, combined_signal)
 plt.show()
 
