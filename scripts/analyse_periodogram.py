@@ -94,9 +94,9 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "injection"  # "magnetar_flare_binned"
+    data_source = "injection"
     run_mode = 'select_time'
-    sampling_frequency = 256
+    sampling_frequency = 4096
     data_mode = 'normal'
     alpha = 0.02
     variance_stabilisation = False
@@ -118,15 +118,17 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -100
-    end_time = 100
+    start_time = -40
+    end_time = 40
+    # start_time = 210.735 + 20.378 + 0.5
+    # end_time = 210.735 + 20.378 + 1
 
     period_number = 14
     run_id = 6
 
     candidate_id = 5
 
-    injection_id = 9
+    injection_id = 0
 
     polynomial_max = 1000000
     amplitude_min = None
@@ -142,8 +144,8 @@ else:
     tau_min = None
     tau_max = None
 
-    min_log_a = -20
-    max_log_a = 15
+    min_log_a = -10
+    max_log_a = 5
     # min_log_c = -10
     min_log_c = None
     max_log_c = None
@@ -154,7 +156,7 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
 
-    recovery_mode = "white_noise"
+    recovery_mode = "general_qpo"
     likelihood_model = "whittle"
     normalisation = True
 
@@ -216,14 +218,15 @@ if band_minimum is None:
     band_minimum = freqs[1]
 
 if plot:
-    plt.plot(times, y, label='data')
+    plt.step(times, y, label='data')
     # plt.plot(times, y, label='flux')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
     plt.show()
     plt.clf()
 
-    plt.loglog(freqs[1:], powers[1:])
+    plt.loglog()
+    plt.step(freqs[1:], powers[1:])
     plt.xlabel('frequency [Hz]')
     plt.ylabel('Power [AU]')
     plt.show()
