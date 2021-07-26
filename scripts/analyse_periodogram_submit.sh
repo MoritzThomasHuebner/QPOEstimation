@@ -8,7 +8,7 @@
 
 
 # Injection
-srun python analyse_periodogram.py --start_time ${1} --end_time ${2} --data_source injection --injection_id ${3} --injection_mode general_qpo --recovery_mode ${4} --window ${5} --frequency_mask_minimum 0.025 --run_mode select_time --injection_file_dir injection_files_pop --injection_likelihood_model whittle --likelihood_model whittle --frequency_mask_minimum ${6} --band_minimum ${6} --normalisation False --band_maximum 20 --sample rslice --nlive 500 --try_load False --resume False
+srun python analyse_periodogram.py --start_time ${1} --end_time ${2} --data_source injection --injection_id ${3} --injection_mode general_qpo --recovery_mode ${4} --window ${5} --run_mode select_time --injection_file_dir injection_files_pop --injection_likelihood_model whittle --likelihood_model whittle --frequency_mask_minimum ${6} --band_minimum ${6} --normalisation False --sample rslice --nlive 1000 --try_load False --resume False
 
 # Solar Flare
 #srun python analyse_periodogram.py --start_time ${1} --end_time ${2} --data_source solar_flare --solar_flare_folder goes --solar_flare_id go1520130512 --recovery_mode ${3} --window hann --run_mode select_time --likelihood_model whittle --normalisation True --sample rwalk --nlive 1000 --try_load False --resume False
