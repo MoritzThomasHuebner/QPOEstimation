@@ -118,8 +118,8 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -40
-    end_time = 40
+    start_time = -10
+    end_time = 10
     # start_time = 210.735 + 20.378 + 0.5
     # end_time = 210.735 + 20.378 + 1
 
@@ -128,7 +128,7 @@ else:
 
     candidate_id = 5
 
-    injection_id = 0
+    injection_id = 1
 
     polynomial_max = 1000000
     amplitude_min = None
@@ -160,18 +160,18 @@ else:
     likelihood_model = "whittle"
     normalisation = True
 
-    window = "hann"
+    window = "tukey"
     frequency_mask_minimum = None
     frequency_mask_maximum = None
 
-    band_minimum = None
+    band_minimum = 0.05
     band_maximum = None
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 300
+    nlive = 600
     use_ratio = False
 
     try_load = False
