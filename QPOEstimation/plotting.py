@@ -19,7 +19,7 @@ def plot_chi_squares(outdir, label, extension_factors, chi_squares=None, chi_squ
         np.array([chi_squares, chi_squares_qpo, chi_squares_red_noise, chi_squares_high_freqs]), nan=0))
     top = min(1.5, top) + 0.1
     print(top)
-    plt.ylim(top=top)
+    plt.ylim(0, top=top)
     plt.legend(ncol=2)
     plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1.05),
                fancybox=True, shadow=False, ncol=2)
@@ -65,21 +65,23 @@ def plot_ln_bfs(outdir, label, extension_factors, ln_bfs, x_break=None, show=Fal
 
 def plot_snrs_and_ln_bfs(outdir, label, extension_factors, ln_bfs, snrs_optimal=None, snrs_max_like=None,
                          snrs_max_like_quantiles=None, x_break=None, show=False):
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     fig, ax = plt.subplots()
     lines = []
-    if len(snrs_optimal) != 0:
-        lines.append(ax.plot(extension_factors, snrs_optimal, label='Optimal SNR'))
-    if snrs_max_like is not None:
-        lines.append(ax.plot(extension_factors, snrs_max_like, label='Maximum likelihood SNR'))
+    # if len(snrs_optimal) != 0:
+    #     lines.append(ax.plot(extension_factors, snrs_optimal, label='Optimal SNR'))
+    # if snrs_max_like is not None:
+    max_like_line = ax.plot(extension_factors, snrs_max_like, color=colors[0], label='Maximum likelihood SNR')
+    lines.append(max_like_line)
     if len(snrs_max_like_quantiles) != 0:
-        ax.fill_between(extension_factors, snrs_max_like_quantiles[:, 0], snrs_max_like_quantiles[:, 1], color='#ff7f0e', alpha=0.3)
+        ax.fill_between(extension_factors, snrs_max_like_quantiles[:, 0], snrs_max_like_quantiles[:, 1], color=colors[0], alpha=0.3)
     if x_break is not None:
         ax.axvline(x_break, color='black', linestyle='-.', label='$x_{\mathrm{break}}$')
     ax.set_xlabel('$x$')
-    ax.set_ylabel('SNR')
+    ax.set_ylabel('SNR', color=colors[0])
     ax2 = ax.twinx()
-    ax2.set_ylabel("ln BF")
-    lines.append(ax2.plot(extension_factors, ln_bfs, color='#2ca02c', label='$\ln BF$'))
+    ax2.set_ylabel("$\ln BF$", color=colors[1])
+    lines.append(ax2.plot(extension_factors, ln_bfs, color=colors[1], label='$\ln BF$'))
 
     combined_lines = lines[0]
     for i, line in enumerate(lines):
@@ -87,7 +89,7 @@ def plot_snrs_and_ln_bfs(outdir, label, extension_factors, ln_bfs, snrs_optimal=
             continue
         combined_lines += line
 
-    ax.legend(combined_lines, [line.get_label() for line in combined_lines])
+    # ax.legend(combined_lines, [line.get_label() for line in combined_lines])
     fig.tight_layout()
     fig.savefig(f'{outdir}/{label}_snrs_and_ln_bf_vs_extension.pdf')
     if show:
