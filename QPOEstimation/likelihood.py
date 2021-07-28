@@ -184,11 +184,6 @@ class CeleriteLikelihood(bilby.likelihood.Likelihood):
     def log_likelihood(self):
         celerite_params = self.conversion_func(self.parameters)
         self.gp.set_parameter_vector(vector=np.array(list(celerite_params.values())))
-        # for name, value in celerite_params.items():
-        #     try:
-                # self.gp.set_parameter(name=name, value=value)
-            # except ValueError:
-            #     raise ValueError(f"Parameter {name} not a valid parameter for the GP.")
         try:
             return self.gp.log_likelihood(self.y)
         except Exception:

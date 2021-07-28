@@ -55,7 +55,7 @@ def plot_ln_bfs(outdir, label, extension_factors, ln_bfs, x_break=None, show=Fal
     if x_break is not None:
         plt.axvline(x_break, color='red', linestyle='-.', label='$x_{\mathrm{break}}$')
     plt.xlabel("$x$")
-    plt.ylabel("ln BF")
+    plt.ylabel("$\ln BF$")
     plt.tight_layout()
     plt.savefig(f'{outdir}/{label}_ln_bf_vs_extension.pdf')
     if show:
@@ -111,12 +111,11 @@ def plot_delta_bics(outdir, label, extension_factors, delta_bics, x_break=None, 
 
 
 def plot_log_frequency_spreads(outdir, label, extension_factors, log_frequency_spreads, x_break=None, show=False):
-    plt.plot(extension_factors, log_frequency_spreads, color='red')
+    plt.plot(extension_factors, log_frequency_spreads)
     plt.xlabel("$x$")
     plt.ylabel("$\Delta (\ln f)$")
     if x_break is not None:
         plt.axvline(x_break, color='black', linestyle='-.', label='$x_{\mathrm{break}}$')
-    plt.legend()
     plt.tight_layout()
     plt.savefig(f'{outdir}/{label}_ln_f_spread_vs_extension_factor.pdf')
     if show:

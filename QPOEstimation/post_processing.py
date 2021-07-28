@@ -46,6 +46,7 @@ class InjectionStudyPostProcessor(object):
         self.injection_psds = injection_psds
         self.extension_mode = extension_mode
         self.x_break = None
+        self.x_break_max_like = None
         try:
             self._calculate_x_break()
         except KeyError:
@@ -56,6 +57,12 @@ class InjectionStudyPostProcessor(object):
             self.x_break = \
                 self.injection_parameters['beta'] / self.injection_parameters['white_noise'] * \
                 self.injection_parameters['central_frequency'] ** (-self.injection_parameters['alpha'])
+
+    def _calculate_max_like_x_break(self):
+        if self.extension_mode == 'white_noise':
+            self.x_break_max_like = \
+                self._beta_max_like / self._white_noise_max_like * \
+                self._central_frequency_max_like ** (-self._alpha_max_like)
 
     def plot_chi_squares(self, show=False):
         plot_chi_squares(outdir=self.outdir, label=self.label, extension_factors=self.extension_factors,
@@ -116,7 +123,10 @@ class InjectionStudyPostProcessor(object):
             self._calculate_chi_squares()
 
             self._calculate_optimal_snr(end_time=end_time)
-
+            if duration == self.durations[0]:
+                self._calculate_max_like_x_break()
+                print(self.x_break_max_like)
+                print(self.x_break)
             print(self.extension_factors[-1])
         self.snrs_max_like_quantiles = np.array(self.snrs_max_like_quantiles)
 
@@ -182,8 +192,9 @@ class InjectionStudyPostProcessor(object):
         except ZeroDivisionError:
             self.chi_squares_red_noise = np.append(self.chi_squares_red_noise, np.nan)
             return
+        minimum_frequency = 1/(self.durations[0]/2)
         idxs = QPOEstimation.utils.get_indices_by_time(self._freqs_combined_periodogram,
-                                                       minimum_time=1 / self.sampling_frequency,
+                                                       minimum_time=minimum_frequency,
                                                        maximum_time=frequency_break_max_like)
         self.chi_squares_red_noise = np.append(
             self.chi_squares_red_noise, QPOEstimation.model.psd.periodogram_chi_square_test(
