@@ -1,45 +1,78 @@
-from pathlib import Path
+import json
+import sys
 
 import numpy as np
+from pathlib import Path
 
+import bilby
+
+import QPOEstimation
 from QPOEstimation.post_processing import InjectionStudyPostProcessor
 
 import matplotlib.pyplot as plt
 plt.style.use('paper.mplstyle')
-# import matplotlib
 # matplotlib.use('Qt5Agg')
 
-injection_id = "09"
+
+modes = ['zeros', 'white_noise']
+mode = int(sys.argv[1])
+# injection_id = str(mode + 6).zfill(2)
+injection_id = str(mode + 0).zfill(2)
 outdir = "periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 
+load = False
+n_snrs = 100
 
-end_times = np.arange(20, 200, 10)
+
+# end_times = np.append(np.arange(20, 500, 10), np.arange(500, 5000, 100))
+end_times = np.arange(10, 200, 10)
+
 start_times = -end_times
 durations = 2 * end_times
 
-outdir_qpo_periodogram = f'injection/general_qpo_injection/pure_qpo_recovery/whittle/results/'
-outdir_noise_periodogram = f'injection/general_qpo_injection/white_noise_recovery/whittle/results/'
+
+outdir_qpo_periodogram = f'injection/general_qpo_injection/general_qpo_recovery/whittle/results/'
+outdir_noise_periodogram = f'injection/general_qpo_injection/red_noise_recovery/whittle/results/'
+
 
 data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/{injection_id}_data.txt')
 times = data[:, 0]
 y = data[:, 1]
+sampling_frequency = int(round(1/(times[1] - times[0])))
+with open(f'injection_files_pop/general_qpo/whittle/{injection_id}_params.json', 'r') as f:
+    injection_parameters = json.load(f)
 
 frequencies = np.linspace(1/100000, 20, 1000000)
+alpha = injection_parameters['alpha']
+beta = injection_parameters['beta']
+white_noise = injection_parameters['sigma']
+amplitude = injection_parameters['amplitude']
+width = injection_parameters['width']
+central_frequency = injection_parameters['central_frequency']
+
+psd_array_noise = QPOEstimation.model.psd.red_noise(frequencies=frequencies, alpha=alpha, beta=beta) + white_noise
+psd_array_white_noise = white_noise * np.ones(len(frequencies))
+
+psd_noise = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
+    frequency_array=frequencies, psd_array=psd_array_noise)
+psd_white_noise = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
+    frequency_array=frequencies, psd_array=psd_array_white_noise)
+psd_array_qpo = QPOEstimation.model.psd.lorentzian(frequencies=frequencies, amplitude=amplitude, width=width,
+                                                   central_frequency=central_frequency)
+psd_qpo = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
+    frequency_array=frequencies, psd_array=psd_array_qpo)
 
 
-duration_signal = 20
-duration_white_noise = 380
-
-load = False
-n_snrs = 0
+injection_psds = dict(red_noise=psd_noise, qpo=psd_qpo)
+extension_mode = modes[mode]
 
 props = InjectionStudyPostProcessor(
     start_times=start_times, end_times=end_times, durations=durations, outdir=outdir,
-    label=injection_id, times=times, frequencies=frequencies,
-    normalisation=normalisation, y=y, outdir_noise_periodogram=outdir_noise_periodogram,
-    outdir_qpo_periodogram=outdir_qpo_periodogram)
+    label=injection_id, times=times, frequencies=frequencies, normalisation=normalisation, y=y,
+    outdir_noise_periodogram=outdir_noise_periodogram, outdir_qpo_periodogram=outdir_qpo_periodogram,
+    injection_parameters=injection_parameters, injection_psds=injection_psds, extension_mode=extension_mode)
 
 if load:
     props.ln_bfs = np.loadtxt(f"{outdir}/cached_results/{injection_id}_ln_bfs.txt")
@@ -55,7 +88,7 @@ if load:
     props.chi_squares_red_noise = np.loadtxt(f"{outdir}/cached_results/{injection_id}_chi_squares_red_noise.txt")
     props.chi_squares_high_freqs = np.loadtxt(f"{outdir}/cached_results/{injection_id}_chi_squares_high_freqs.txt")
 else:
-    props.fill(n_snrs=0)
+    props.fill(n_snrs=n_snrs)
     np.savetxt(f"{outdir}/cached_results/{injection_id}_ln_bfs.txt", props.ln_bfs)
     np.savetxt(f"{outdir}/cached_results/{injection_id}_log_frequency_spreads.txt", props.log_frequency_spreads)
     np.savetxt(f"{outdir}/cached_results/{injection_id}_durations_reduced.txt", props.durations_reduced)

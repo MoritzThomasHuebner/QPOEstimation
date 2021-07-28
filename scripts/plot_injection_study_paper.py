@@ -13,7 +13,7 @@ plt.style.use('paper.mplstyle')
 # matplotlib.use('Qt5Agg')
 
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/07_data.txt')
+data = np.loadtxt('injection_files_pop/general_qpo/whittle/01_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -27,12 +27,12 @@ ax1.plot(times, y)
 ax1.set_xlabel(r'times [s]')
 ax1.set_ylabel(r'Flux [Arb. units]')
 plt.tight_layout()
-plt.savefig('paper_figures/07_injection_time_series.pdf')
+plt.savefig('paper_figures/01_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/07_data.txt')
+data = np.loadtxt('injection_files_pop/general_qpo/whittle/01_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -52,13 +52,13 @@ plt.xlabel('frequency [Hz]')
 plt.ylabel('Power [arb. units]')
 plt.axvline(1, label='QPO frequency', ls='--', color='black')
 plt.legend()
-plt.savefig('paper_figures/07_injection_periodogram.pdf')
+plt.savefig('paper_figures/01_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
-### Flare injection 08
+### Flare injection 02
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/08_data.txt')
+data = np.loadtxt('injection_files_pop/general_qpo/whittle/02_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -87,10 +87,26 @@ ax2.plot(inset_times, inset_y)
 mark_inset(ax1, ax2, loc1=2, loc2=4, fc='none', ec='0.5', zorder=4)
 
 plt.tight_layout()
-plt.savefig('paper_figures/08_injection_time_series.pdf')
+plt.savefig('paper_figures/02_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
+
+lc = Lightcurve(time=inset_times, counts=inset_y * hann(len(inset_y)), err=np.ones(len(inset_times)))
+ps = Powerspectrum(lc=lc, norm='leahy')
+freqs = ps.freq
+powers = ps.power
+
+plt.loglog()
+plt.step(freqs[1:], powers[1:], where='mid')
+plt.xlabel('frequency [Hz]')
+plt.ylabel('Power [arb. units]')
+plt.axvline(1, label='QPO frequency', ls='--', color='black')
+plt.legend()
+plt.tight_layout()
+plt.savefig('paper_figures/02_injection_periodogram.pdf')
+plt.show()
+plt.clf()
 
 lc = Lightcurve(time=times, counts=y * hann(len(y)), err=np.ones(len(times)))
 ps = Powerspectrum(lc=lc, norm='leahy')
@@ -104,18 +120,9 @@ plt.ylabel('Power [arb. units]')
 plt.axvline(1, label='QPO frequency', ls='--', color='black')
 plt.legend()
 plt.tight_layout()
-plt.savefig('paper_figures/08_injection_periodogram.pdf')
+plt.savefig('paper_figures/02_injection_periodogram_total.pdf')
 plt.show()
 plt.clf()
-
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/08_data.txt')
-times = data[:, 0]
-y = data[:, 1]
-
-
-
-
-
 
 
 data = np.loadtxt('injection_files_pop/general_qpo/whittle/09_data.txt')

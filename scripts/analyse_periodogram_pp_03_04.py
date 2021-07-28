@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 import numpy as np
 
@@ -9,13 +10,18 @@ plt.style.use('paper.mplstyle')
 # import matplotlib
 # matplotlib.use('Qt5Agg')
 
-injection_id = "11"
+modes = ['zeros', 'white_noise']
+mode = int(sys.argv[1])
+injection_id = str(mode + 3).zfill(2)
 outdir = "periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 
+load = False
+n_snrs = 100
 
-end_times = np.arange(50, 200, 10)
+
+end_times = np.arange(10, 200, 10)
 start_times = -end_times
 durations = 2 * end_times
 
@@ -27,14 +33,6 @@ times = data[:, 0]
 y = data[:, 1]
 
 frequencies = np.linspace(1/100000, 20, 1000000)
-
-
-duration_signal = 20
-duration_white_noise = 380
-
-
-load = True
-n_snrs = 0
 
 props = InjectionStudyPostProcessor(
     start_times=start_times, end_times=end_times, durations=durations, outdir=outdir,
@@ -56,7 +54,7 @@ if load:
     props.chi_squares_red_noise = np.loadtxt(f"{outdir}/cached_results/{injection_id}_chi_squares_red_noise.txt")
     props.chi_squares_high_freqs = np.loadtxt(f"{outdir}/cached_results/{injection_id}_chi_squares_high_freqs.txt")
 else:
-    props.fill(n_snrs=0)
+    props.fill(n_snrs=n_snrs)
     np.savetxt(f"{outdir}/cached_results/{injection_id}_ln_bfs.txt", props.ln_bfs)
     np.savetxt(f"{outdir}/cached_results/{injection_id}_log_frequency_spreads.txt", props.log_frequency_spreads)
     np.savetxt(f"{outdir}/cached_results/{injection_id}_durations_reduced.txt", props.durations_reduced)
