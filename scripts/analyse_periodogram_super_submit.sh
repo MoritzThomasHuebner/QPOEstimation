@@ -40,24 +40,24 @@
 
 
 
-extensions=($(seq 0 10 190))
-start_time=-10
-end_time=10
-
-
-sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 00 general_qpo tukey 0.1
-sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 00 red_noise tukey 0.1
+#extensions=($(seq 0 10 190))
+#start_time=-10
+#end_time=10
+#
+#
+#sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 00 general_qpo tukey 0.1
+#sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 00 red_noise tukey 0.1
 #sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 01 general_qpo tukey 0.1
 #sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 01 red_noise tukey 0.1
 
 
-for i in {1..19}
-do
-  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 00 general_qpo hann 0.1
-  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 00 red_noise hann 0.1
+#for i in {1..19}
+#do
+#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 00 general_qpo hann 0.1
+#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 00 red_noise hann 0.1
 #  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 01 general_qpo hann 0.1
 #  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 01 red_noise hann 0.1
-done
+#done
 
 #extensions=($(seq 0 5 90))
 #start_time=-10
@@ -87,6 +87,14 @@ done
 #  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 04 white_noise hann 0.1
 #done
 
+extensions=($(seq 0 10 190))
+start_time=-10
+end_time=10
 
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 11 white_noise tukey 0.5
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 11 pure_qpo tukey 0.5
+for i in {0..19}
+do
+  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 05 white_noise hann 0.5
+  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 05 pure_qpo hann 0.5
+done
+
+
