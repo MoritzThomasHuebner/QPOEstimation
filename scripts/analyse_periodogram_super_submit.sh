@@ -73,8 +73,8 @@ extensions=($(seq 0 10 190))
 start_time=-10
 end_time=10
 
-sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 03 pure_qpo boxcar 0.1 0.1
-sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 03 white_noise boxcar 0.1 0.1
+sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 03 pure_qpo tukey 0.1 0.1
+sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 03 white_noise tukey 0.1 0.1
 #sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 04 pure_qpo hann 0.1 0.1
 #sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 04 white_noise hann 0.1 0.1
 #
