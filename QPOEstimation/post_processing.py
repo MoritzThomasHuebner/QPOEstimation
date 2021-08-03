@@ -49,13 +49,13 @@ class InjectionStudyPostProcessor(object):
         self.x_break_max_like = None
         try:
             self._calculate_x_break()
-        except KeyError:
-            pass
+        except KeyError as e:
+            print(e)
 
     def _calculate_x_break(self):
         if self.injection_parameters is not None and self.extension_mode == 'white_noise':
             self.x_break = \
-                self.injection_parameters['beta'] / self.injection_parameters['white_noise'] * \
+                self.injection_parameters['beta'] / self.injection_parameters['sigma'] * \
                 self.injection_parameters['central_frequency'] ** (-self.injection_parameters['alpha'])
 
     def _calculate_max_like_x_break(self):
@@ -122,16 +122,14 @@ class InjectionStudyPostProcessor(object):
             self._calculate_snr_quantiles(n_snrs=n_snrs)
             self._calculate_chi_squares()
 
-            self._calculate_optimal_snr(end_time=end_time)
+            self._calculate_optimal_snr()
             if duration == self.durations[0]:
                 self._calculate_max_like_x_break()
-                print(self.x_break_max_like)
-                print(self.x_break)
             print(self.extension_factors[-1])
         self.snrs_max_like_quantiles = np.array(self.snrs_max_like_quantiles)
 
     def _calculate_periodogram(self):
-        if self.extension_factors[-1] == 1:
+        if self.extension_factors[-1] == 1 and self.extension_mode == 'zeros':
             window = ("tukey", 0.05)
         else:
             window = "hann"
@@ -264,11 +262,11 @@ class InjectionStudyPostProcessor(object):
         self._psd_array_noise_max_like = QPOEstimation.model.psd.red_noise(
             frequencies=self.frequencies, alpha=self._alpha_max_like,
             beta=self._beta_max_like) + self._white_noise_max_like
-
         self._psd_array_qpo_max_like = QPOEstimation.model.psd.lorentzian(
             frequencies=self.frequencies, amplitude=self._amplitude_max_like, width=self._width_max_like,
             central_frequency=self._central_frequency_max_like)
         self._psd_array_signal_max_like = self._psd_array_noise_max_like + self._psd_array_qpo_max_like
+
         self._psd_noise_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
             frequency_array=self.frequencies, psd_array=self._psd_array_noise_max_like)
         self._psd_qpo_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
@@ -276,25 +274,15 @@ class InjectionStudyPostProcessor(object):
         self._psd_signal_max_like = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
             frequency_array=self.frequencies, psd_array=self._psd_array_signal_max_like)
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            snrs_squared = \
-                (self._psd_qpo_max_like.power_spectral_density_interpolated(self._freqs_combined_periodogram) /
-                 self._psd_noise_max_like.power_spectral_density_interpolated(self._freqs_combined_periodogram)) ** 2
-            snr_max_like = np.sqrt(np.sum(np.nan_to_num(snrs_squared, nan=0)))
+        snr_max_like = self._calculate_snr(freqs=self._freqs_combined_periodogram, psd_signal=self._psd_qpo_max_like,
+                                           psd_noise=self._psd_noise_max_like)
         self.snrs_max_like = np.append(self.snrs_max_like, snr_max_like)
 
-    def _calculate_optimal_snr(self, end_time):
+    def _calculate_optimal_snr(self):
         if None in [self.injection_parameters, self.injection_psds, self.extension_mode]:
             return
-        if end_time == self.end_times[0] and self.extension_mode == "zeros":
-            window = 'boxcar'
-        elif end_time == self.end_times[0] and self.extension_mode == "white_noise":
-            window = ("tukey", 0.05)
-        else:
-            window = "hann"
-        freqs_combined_periodogram, powers_combined_periodogram = \
-            periodogram(self._y_selected, fs=self.sampling_frequency, window=window)
+        # freqs_combined_periodogram, powers_combined_periodogram = \
+        #     periodogram(self._y_selected, fs=self.sampling_frequency, window='hann')
 
         if self.extension_mode == 'zeros':
             psd_array_noise_diluted = \
@@ -310,10 +298,15 @@ class InjectionStudyPostProcessor(object):
             frequency_array=self.frequencies, psd_array=psd_array_noise_diluted)
         psd_qpo_diluted = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
             frequency_array=self.frequencies, psd_array=psd_array_qpo_diluted)
+        snr_optimal = self._calculate_snr(freqs=self._freqs_combined_periodogram,
+                                          psd_signal=psd_qpo_diluted, psd_noise=psd_noise_diluted)
+        self.snrs_optimal = np.append(self.snrs_optimal, snr_optimal)
+
+    @staticmethod
+    def _calculate_snr(freqs, psd_signal, psd_noise):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            optimal_snrs_squared = \
-                (psd_qpo_diluted.power_spectral_density_interpolated(freqs_combined_periodogram) /
-                 psd_noise_diluted.power_spectral_density_interpolated(freqs_combined_periodogram)) ** 2
-            self.snrs_optimal = np.append(
-                self.snrs_optimal, np.sqrt(np.sum(np.nan_to_num(optimal_snrs_squared, nan=0))))
+            signal = psd_signal.power_spectral_density_interpolated(freqs)
+            noise = psd_noise.power_spectral_density_interpolated(freqs)
+            snr_squared = (signal / noise) ** 2
+            return np.sqrt(np.sum(np.nan_to_num(snr_squared, nan=0)))

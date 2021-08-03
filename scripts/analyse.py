@@ -99,7 +99,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "test"  # "magnetar_flare_binned"
+    data_source = "injection"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -111,7 +111,7 @@ else:
 
     solar_flare_folder = 'goes'
     solar_flare_id = "go1520130512"
-    grb_id = "050128"
+    grb_id = "090709A"
     grb_binning = "64ms"
     grb_detector = 'swift'
     grb_energy_band = 'all'
@@ -123,17 +123,17 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = 74500
-    end_time = 75000
+    start_time = -10
+    end_time = 10
 
     period_number = 14
     run_id = 6
 
     candidate_id = 5
 
-    injection_id = 0
+    injection_id = 1
 
-    offset = True
+    offset = False
     polynomial_max = 1000000
     amplitude_min = None
     amplitude_max = None
@@ -160,11 +160,11 @@ else:
 
     injection_mode = "general_qpo"
     injection_file_dir = "injection_files_pop"
-    injection_likelihood_model = "gaussian_process_windowed"
-    recovery_mode = "general_qpo"
+    injection_likelihood_model = "whittle"
+    recovery_mode = "red_noise"
     likelihood_model = "gaussian_process"
-    background_model = "piecewise_cubic"
-    n_components = 6
+    background_model = 0
+    n_components = 0
     jitter_term = True
 
     band_minimum = None
@@ -174,7 +174,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 600
+    nlive = 400
     use_ratio = False
 
     try_load = False
@@ -229,7 +229,8 @@ if data_source in ['grb', 'solar_flare']:
 elif data_source in ['hares_and_hounds']:
     yerr = np.zeros(len(y))
 elif data_source == 'injection':
-    yerr = np.ones(len(y))
+    # yerr = np.ones(len(y))
+    yerr = np.zeros(len(y))
 elif variance_stabilisation:
     y = bar_lev(y)
     yerr = np.ones(len(y))
@@ -241,12 +242,26 @@ else:
 
 
 if plot:
-    plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
-    # plt.plot(times, y, label='flux')
-    plt.xlabel("time [s]")
-    plt.ylabel("counts")
+    # plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
+    # plt.errorbar(times, y, yerr=yerr, capsize=0, label='data')
+    plt.plot(times, y, label='flux')
+    # plt.xlabel("time [s]")
+    # plt.ylabel("counts/sec/det")
+    # plt.title("GRB 090709A Swift-BAT 15-350 keV")
     plt.show()
     plt.clf()
+
+    fs = 1/(times[1] - times[0])
+
+    from scipy.signal import periodogram
+    freqs, powers = periodogram(y, fs=fs, window='hann')
+    plt.loglog()
+    plt.step(freqs[1:], powers[1:])
+    # plt.axvline(1/8.1, color='black', linestyle='--', label="QPO?")
+    plt.xlabel("frequency [Hz]")
+    plt.ylabel("Power [arb. units]")
+    plt.legend()
+    plt.show()
 
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset,
                                       likelihood_model=likelihood_model)
@@ -279,10 +294,7 @@ if result is None:
                                label=label, sampler='dynesty', nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
                                meta_data=meta_data, save=True, gzip=False, nact=5)
-    # result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-    #                            label=label, sampler='bilby_mcmc', nsamples=nlive,
-    #                            resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
-    #                            meta_data=meta_data, save=True, gzip=False)
+
 
 if plot:
     result.plot_all()

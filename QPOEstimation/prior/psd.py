@@ -47,7 +47,7 @@ def get_broken_power_law_prior(frequencies=None):
     if frequencies is None:
         prior['log_delta'] = bilby.core.prior.Uniform(-30, 30, name='log_delta')
     else:
-        prior['log_delta'] = bilby.core.prior.Uniform(np.log(frequencies[0]), np.log(frequencies[-1]), name='log_delta')
+        prior['log_delta'] = bilby.core.prior.Uniform(np.log(frequencies[1]), np.log(frequencies[-1]), name='log_delta')
     prior['rho'] = bilby.core.prior.DeltaFunction(peak=-1)
     prior['log_beta'] = bilby.core.prior.Uniform(-60, 60, name='log_beta')
     prior['log_sigma'] = bilby.core.prior.Uniform(-30, 30, name='log_sigma')
