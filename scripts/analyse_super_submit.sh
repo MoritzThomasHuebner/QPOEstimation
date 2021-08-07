@@ -117,8 +117,8 @@ end_time=10
 
 for i in {0..19}
 do
-  sbatch analyse_periodogram_submit.sh 01 red_noise gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-  sbatch analyse_periodogram_submit.sh 01 red_noise gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-  sbatch analyse_periodogram_submit.sh 01 general_qpo gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-  sbatch analyse_periodogram_submit.sh 01 general_qpo gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+  sbatch analyse_submit.sh 01 red_noise gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+  sbatch analyse_submit.sh 01 red_noise gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+  sbatch analyse_submit.sh 01 general_qpo gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+  sbatch analyse_submit.sh 01 general_qpo gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
 done
