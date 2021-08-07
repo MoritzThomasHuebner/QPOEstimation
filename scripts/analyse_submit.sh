@@ -28,4 +28,4 @@
 
 #srun python analyse.py --start_time ${1} --end_time ${2} --data_source injection --injection_id ${4} --injection_mode general_qpo --recovery_mode ${3} --run_mode select_time --injection_file_dir injection_files_pop --injection_likelihood_model gaussian_process_windowed --likelihood_model ${5} --sample rwalk --nlive 500 --try_load True --resume True --background_model 0
 
-srun python analyse.py --data_source injection --run_mode select_time --injection_id ${1} --injection_mode general_qpo --injection_file_dir injection_files_qpo --injection_likelihood_model whittle --recovery_mode ${2} --likelihood_model ${3} --background_model 0 --plot True --nlive 500 --sample rslice --start_time ${4} --end_time ${5} --offset False --jitter_term True --min_log_a -5 --max_log_a 10
+srun python analyse.py --data_source injection --run_mode select_time --injection_id ${1} --injection_mode general_qpo --injection_file_dir injection_files_pop --injection_likelihood_model whittle --recovery_mode ${2} --likelihood_model ${3} --background_model 0 --plot True --nlive 500 --sample rslice --start_time ${4} --end_time ${5} --offset False --jitter_term True --min_log_a -5 --max_log_a 10
