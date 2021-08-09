@@ -240,8 +240,13 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
         if len(self.windowed_indices) == 0 or len(self.edge_indices) == 0:
             return -np.inf
 
+        jitter = 0
+        for k in self.parameters.keys():
+            if "log_sigma" in k:
+                jitter = np.exp(self.parameters[k])
+
         self.gp.compute(self.t[self.windowed_indices], self.y_err[self.windowed_indices])
-        self.white_noise_gp.compute(self.t[self.edge_indices], self.y_err[self.edge_indices])
+        self.white_noise_gp.compute(self.t[self.edge_indices], self.y_err[self.edge_indices] + jitter)
         celerite_params = self.conversion_func(self.parameters)
         for name, value in celerite_params.items():
             if 'window' in name:
