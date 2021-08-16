@@ -12,7 +12,7 @@ def get_mean_prior(model_type, **kwargs):
     if kwargs['amplitude_min'] is None:
         kwargs['amplitude_min'] = 0.1 * span
     if kwargs['amplitude_max'] is None:
-        kwargs['amplitude_max'] = 1.2 * span
+        kwargs['amplitude_max'] = 2 * span
 
     if model_type == 'polynomial':
         priors = get_polynomial_prior(**kwargs)
@@ -166,11 +166,12 @@ def get_piecewise_linear_priors(n_components, minimum_spacing, **kwargs):
 
 def get_piecewise_cubic_priors(n_components, minimum_spacing, **kwargs):
     priors = bilby.core.prior.ConditionalPriorDict()
-    priors[f"mean:alpha_0"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"alpha_0")
-    priors[f"mean:beta_0"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"beta_0")
-    priors[f"mean:gamma_0"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"gamma_0")
+    maximum = 1
+    priors[f"mean:alpha_0"] = bilby.core.prior.Uniform(minimum=-maximum, maximum=maximum, name=f"alpha_0")
+    priors[f"mean:beta_0"] = bilby.core.prior.Uniform(minimum=-maximum, maximum=maximum, name=f"beta_0")
+    priors[f"mean:gamma_0"] = bilby.core.prior.Uniform(minimum=-maximum, maximum=maximum, name=f"gamma_0")
     for i in range(n_components):
-        priors[f"mean:delta_{i}"] = bilby.core.prior.Uniform(minimum=-10000, maximum=10000, name=f"delta_{i}")
+        priors[f"mean:delta_{i}"] = bilby.core.prior.Uniform(minimum=-maximum, maximum=maximum, name=f"delta_{i}")
 
     t_0_min = kwargs["times"][0]
     t_0_max = kwargs["times"][-1]
