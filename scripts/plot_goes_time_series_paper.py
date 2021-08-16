@@ -8,22 +8,30 @@ from QPOEstimation.get_data import get_data
 plt.style.use('paper.mplstyle')
 # matplotlib.use('wxAgg')
 
+start_time = 73020
+end_time = 75780
 
 times, y, _, outdir, label = get_data(
-    data_source='solar_flare', run_mode='select_time', start_time=73000,
-    end_time=75800,
+    data_source='solar_flare', run_mode='select_time', start_time=start_time,
+    end_time=end_time,
     likelihood_model='whittle', solar_flare_folder='goes', solar_flare_id="go1520130512")
 y = (y - np.mean(y)) / np.mean(y)
+
 
 inset_indices = QPOEstimation.utils.get_indices_by_time(minimum_time=74700, maximum_time=74900, times=times)
 inset_times = times[inset_indices]
 inset_y = y[inset_indices]
+times -= start_time
+times /= 60
+inset_times -= start_time
+inset_times /= 60
 
 
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)  # , label="Normalised flux [AU]")#'x', c='b', mew=2, alpha=0.8, label='Experiment')
-ax1.set_xlabel(r'times [s]')
-ax1.set_ylabel(r'Normalised flux [AU]')
+ax1.set_xlabel(r'Minutes after 17:01 UTC')
+ax1.set_ylabel(r'Normalised flux [arb. units]')
+ax1.set_xlim(0, times[-1])
 ax1.set_title(r'GOES 1-8 $\mathrm{\AA}$')
 # Create a set of inset Axes: these should fill the bounding box allocated to
 # them.
@@ -39,9 +47,9 @@ ax2.set_xticks([])
 ax2.set_yticks([])
 # Mark the region corresponding to the inset axes on ax1 and draw lines
 # in grey linking the two axes.
+ax2.plot(inset_times, inset_y)#, 'x', c='b', mew=2, alpha=0.8, label='Experiment')
 mark_inset(ax1, ax2, loc1=1, loc2=2, fc='none', ec='0.5', zorder=4)
 
-ax2.plot(inset_times, inset_y)#, 'x', c='b', mew=2, alpha=0.8, label='Experiment')
 
 # ax1.set_ylim(0, 26)
 # ax2.set_yticks(np.arange(0, 2, 0.4))
