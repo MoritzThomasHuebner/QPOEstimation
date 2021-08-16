@@ -14,11 +14,11 @@ outdir = "periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 
-load = False
-n_snrs = 100
+load = True
+n_snrs = 2000
 
 
-end_times = np.arange(10, 100, 5)
+end_times = np.arange(10, 105, 5)
 print(end_times)
 start_times = -end_times
 durations = 2 * end_times
@@ -30,7 +30,7 @@ data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/{injection_id}_data.
 times = data[:, 0]
 y = data[:, 1]
 
-frequencies = np.linspace(1/100000, 20, 1000000)
+frequencies = np.linspace(1/100000, 20, 1000)
 
 props = InjectionStudyPostProcessor(
     start_times=start_times, end_times=end_times, durations=durations, outdir=outdir,

@@ -16,18 +16,18 @@ plt.style.use('paper.mplstyle')
 
 modes = ['zeros', 'white_noise']
 mode = int(sys.argv[1])
+# mode = 1
 # injection_id = str(mode + 6).zfill(2)
 injection_id = str(mode + 0).zfill(2)
 outdir = "periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 
-load = False
-n_snrs = 100
+load = True
+n_snrs = 2000
 
-
-# end_times = np.append(np.arange(20, 500, 10), np.arange(500, 5000, 100))
-end_times = np.arange(10, 200, 10)
+end_times = np.arange(10, 210, 10)
+print(end_times)
 
 start_times = -end_times
 durations = 2 * end_times
@@ -44,7 +44,7 @@ sampling_frequency = int(round(1/(times[1] - times[0])))
 with open(f'injection_files_pop/general_qpo/whittle/{injection_id}_params.json', 'r') as f:
     injection_parameters = json.load(f)
 
-frequencies = np.linspace(1/100000, 20, 1000000)
+frequencies = np.linspace(1/100000, 20, 1000)
 alpha = injection_parameters['alpha']
 beta = injection_parameters['beta']
 white_noise = injection_parameters['sigma']

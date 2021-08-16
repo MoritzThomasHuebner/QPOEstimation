@@ -18,10 +18,10 @@ Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 
 load = False
-n_snrs = 100
+n_snrs = 2000
 
 
-end_times = np.arange(10, 200, 10)
+end_times = np.arange(10, 210, 10)
 start_times = -end_times
 durations = 2 * end_times
 
@@ -32,7 +32,7 @@ data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/{injection_id}_data.
 times = data[:, 0]
 y = data[:, 1]
 
-frequencies = np.linspace(1/100000, 20, 1000000)
+frequencies = np.linspace(1/100000, 20, 1000)
 
 props = InjectionStudyPostProcessor(
     start_times=start_times, end_times=end_times, durations=durations, outdir=outdir,
