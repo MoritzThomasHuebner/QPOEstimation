@@ -12,54 +12,32 @@ from scipy.interpolate import interp1d
 
 matplotlib.use("Qt5Agg")
 
-# 00: Red noise + white noise + 40s QPO Zeros extended, no trend
-# 01: Red noise + white noise + 40s QPO White noise extended, no trend
+# 00: Red noise + white noise + 20s QPO Zeros extended, no trend
+# 01: Red noise + white noise + 20s QPO White noise extended, no trend
 # 02: White noise + non-stationary 20s QPO + Exponential pulse profile
 # 03: QPO, zeros extended, no trend
 # 04: QPO, white noise extended, no trend
 # 05: Poissonian, 20s QPO, white noise extended. Gaussian trend.
+# 06: stationary QPO in white noise, no trend
 
-
-# 06: Red noise + white noise + 40s QPO Zeros extended to 400s, no trend
-# 07: Red noise + white noise + 40s QPO White noise extended to 400s, no trend
-# 08: White noise + non-stationary 20s QPO + Exponential pulse profile 200s
-# 09: QPO, zeros extended, no trend
-# 10: QPO, white noise extended, no trend
-# 11: Poissonian, 20s QPO, white noise extended. Gaussian trend.
-
-# {"amplitude": 10, "alpha": 2, "beta": 0, "central_frequency": 1, "width": 0.1, "sigma": 2}
-# frequencies = np.linspace(1/100000, 20, 1000000)
-# alpha = 2
-# beta = 0
-# white_noise = 2
-# amplitude = 2
-# width = 0.02
-# central_frequency = 1
-# sampling_frequency = 40
-# duration_signal = 20
-# duration_white_noise = 200
-# x_break = beta/white_noise * central_frequency**(-alpha)
-# print(x_break)
-# {"amplitude": 20, "alpha": 2, "beta": 0, "central_frequency": 1, "width": 0.1, "sigma": 4}
-# {"amplitude": 8, "alpha": 2, "beta": 4, "central_frequency": 1, "width": 0.02, "sigma": 2}
-#{"amplitude": 3000, "alpha": 2, "beta": 0, "central_frequency": 5, "width": 0.1, "sigma": 0}
+# {"amplitude": 15, "alpha": 2, "beta": 0, "central_frequency": 5, "width": 0.1, "sigma": 2}
 frequencies = np.linspace(1/100000, 20, 1000000)
 alpha = 2
 beta = 0
 white_noise = 2
-amplitude = 100
+amplitude = 50
 width = 0.1
-central_frequency = 5
+central_frequency = 1
 
 sampling_frequency = 40
-duration_signal = 20
-duration_white_noise = 400
+duration_signal = 50
+duration_white_noise = 50
 x_break = beta/white_noise * central_frequency**(-alpha)
 print(x_break)
 
-extension_modes = ['zeros', 'white_noise']
-injection_id = "05"
-extension_mode_dict = {"00": 0, "01": 1, "02": 1, "03": 0, "04": 1, "05": 0}
+extension_modes = ['zeros', 'white_noise', 'None']
+injection_id = "06"
+extension_mode_dict = {"00": 0, "01": 1, "02": 1, "03": 0, "04": 1, "05": 0, "06": 0, "07": 0}
 extension_mode = extension_modes[extension_mode_dict[injection_id]]
 
 if injection_id == "05":
@@ -94,9 +72,10 @@ elif extension_mode == extension_modes[1]:
 
     psd_noise = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
         frequency_array=frequencies, psd_array=psd_array_noise + psd_array_white_noise)
+elif extension_mode == extension_modes[2]:
+    pass
 else:
     raise ValueError
-
 
 psd_array_qpo = QPOEstimation.model.psd.lorentzian(
     frequencies=frequencies, amplitude=amplitude, width=width, central_frequency=central_frequency)
@@ -126,7 +105,10 @@ plt.loglog(series_signal.frequency_array, np.abs(fd_data_signal) / np.sqrt(serie
 plt.loglog(freqs_signal_periodogram, powers_signal_periodogram)
 plt.show()
 
-td_data_signal_windowed = td_data_signal * scipy.signal.windows.hann(len(td_data_signal))
+if duration_white_noise == duration_signal:
+    td_data_signal_windowed = td_data_signal
+else:
+    td_data_signal_windowed = td_data_signal * scipy.signal.windows.hann(len(td_data_signal))
 
 plt.plot(series_signal.time_array, td_data_signal)
 plt.plot(series_signal.time_array, td_data_signal_windowed)
