@@ -303,8 +303,9 @@ def get_data(data_source, **kwargs):
 
     elif data_source == 'injection':
         times, y, truths = get_injection_data(**kwargs)
-        outdir = get_injection_outdir(injection_mode=kwargs['injection_mode'], recovery_mode=recovery_mode,
-                                      likelihood_model=kwargs["likelihood_model"])
+        outdir = get_injection_outdir(
+            injection_mode=kwargs['injection_mode'], recovery_mode=recovery_mode,
+            likelihood_model=kwargs["likelihood_model"], base_injection_outdir=kwargs['base_injection_outdir'])
         label = f"{str(kwargs['injection_id']).zfill(2)}"
         if run_mode == 'entire_segment':
             label += f'_entire_segment'

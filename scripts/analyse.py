@@ -75,6 +75,7 @@ if len(sys.argv) > 1:
     injection_mode = args.injection_mode
     injection_file_dir = args.injection_file_dir
     injection_likelihood_model = args.injection_likelihood_model
+    base_injection_outdir = args.base_injection_outdir
     normalisation = boolean_string(args.normalisation)
 
     recovery_mode = args.recovery_mode
@@ -135,6 +136,7 @@ else:
     candidate_id = 5
 
     injection_id = 1
+    base_injection_outdir = 'injection'
 
     offset = True
     polynomial_max = 1
@@ -224,7 +226,7 @@ times, y, yerr, outdir, label = get_data(
     grb_id=grb_id, grb_binning=grb_binning, grb_detector=grb_detector, grb_energy_band=grb_energy_band,
     injection_file_dir=injection_file_dir, injection_mode=injection_mode, injection_id=injection_id,
     injection_likelihood_model=injection_likelihood_model, hares_and_hounds_id=hares_and_hounds_id,
-    hares_and_hounds_round=hares_and_hounds_round
+    hares_and_hounds_round=hares_and_hounds_round, base_injection_outdir=base_injection_outdir
     )
 
 
