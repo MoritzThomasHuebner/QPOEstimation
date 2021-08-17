@@ -119,9 +119,13 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
         truths = {}
     times = data[:, 0]
     counts = data[:, 1]
+    try:
+        yerr = data[:, 2]
+    except Exception:
+        yerr = None
     if run_mode == 'select_time':
-        times, counts = truncate_data(times, counts, start=start_time, stop=end_time)
-    return times, counts, truths
+        times, counts, yerr = truncate_data(times, counts, start=start_time, stop=end_time, yerr=yerr)
+    return times, counts, yerr, truths
 
 
 def get_grb_data_from_segment(
@@ -302,7 +306,7 @@ def get_data(data_source, **kwargs):
         times -= times[0]
 
     elif data_source == 'injection':
-        times, y, truths = get_injection_data(**kwargs)
+        times, y, yerr, truths = get_injection_data(**kwargs)
         outdir = get_injection_outdir(
             injection_mode=kwargs['injection_mode'], recovery_mode=recovery_mode,
             likelihood_model=kwargs["likelihood_model"], base_injection_outdir=kwargs['base_injection_outdir'])

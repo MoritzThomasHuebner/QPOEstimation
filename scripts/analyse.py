@@ -101,8 +101,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "giant_flare"  # "magnetar_flare_binned"
-    run_mode = 'select_time'
+    data_source = "injection"  # "magnetar_flare_binned"
+    run_mode = 'entire_segment'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -135,19 +135,19 @@ else:
 
     candidate_id = 5
 
-    injection_id = 1
-    base_injection_outdir = 'injection'
+    injection_id = 0
+    base_injection_outdir = 'injection_pp'
 
-    offset = True
+    offset = False
     polynomial_max = 1
-    amplitude_min = None
-    amplitude_max = None
+    amplitude_min = 10
+    amplitude_max = 100
     offset_min = None
     offset_max = None
     # sigma_min = 0.1
     # sigma_max = 10000
-    sigma_min = None
-    sigma_max = None
+    sigma_min = 0.1
+    sigma_max = 1
     # t_0_min = 1e-3
     # t_0_max = 1000
     t_0_min = None
@@ -155,26 +155,26 @@ else:
     tau_min = None
     tau_max = None
 
-    min_log_a = -35
-    max_log_a = 15
+    min_log_a = -1
+    max_log_a = 1
     # min_log_c = -10
-    min_log_c = None
-    max_log_c = None
+    min_log_c = -1
+    max_log_c = 1
     # max_log_c = 30
     minimum_window_spacing = 0
 
     injection_mode = "general_qpo"
-    injection_file_dir = "injection_files_pop"
-    injection_likelihood_model = "whittle"
-    recovery_mode = "red_noise"
-    likelihood_model = "gaussian_process_windowed"
-    background_model = "gaussian"
+    injection_file_dir = "injection_files"
+    injection_likelihood_model = "gaussian_process"
+    recovery_mode = "general_qpo"
+    likelihood_model = "gaussian_process"
+    background_model = "skew_gaussian"
     n_components = 1
     jitter_term = False
     normalisation = False
 
-    band_minimum = None
-    band_maximum = None
+    band_minimum = 1
+    band_maximum = 64
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
@@ -235,8 +235,9 @@ if data_source in ['grb', 'solar_flare']:
 elif data_source in ['hares_and_hounds']:
     yerr = np.zeros(len(y))
 elif data_source == 'injection':
+    if yerr is None:
+        yerr = np.zeros(len(y))
     # yerr = np.ones(len(y))
-    yerr = np.zeros(len(y))
 elif variance_stabilisation:
     y = bar_lev(y)
     yerr = np.ones(len(y))
