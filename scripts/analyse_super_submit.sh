@@ -58,7 +58,6 @@ do
         for injection_id in {0..1}
         do
           sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
-          sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
         done
     done
 done
