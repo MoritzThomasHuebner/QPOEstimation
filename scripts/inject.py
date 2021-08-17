@@ -29,8 +29,6 @@ if len(sys.argv) > 1:
     amplitude_max = args.amplitude_max
     offset_min = args.offset_min
     offset_max = args.offset_max
-    skewness_min = args.skewness_min
-    skewness_max = args.skewness_max
     sigma_min = args.sigma_min
     sigma_max = args.sigma_max
     t_0_min = args.t_0_min
@@ -68,8 +66,6 @@ else:
     amplitude_max = 100
     offset_min = -10
     offset_max = 10
-    skewness_min = 0.1
-    skewness_max = 10
     sigma_min = 0.1
     sigma_max = 1
     t_0_min = 0
@@ -99,8 +95,6 @@ mean_prior_bounds_dict = dict(
     amplitude_max=amplitude_max,
     offset_min=offset_min,
     offset_max=offset_max,
-    skewness_min=skewness_min,
-    skewness_max=skewness_max,
     sigma_min=sigma_min,
     sigma_max=sigma_max,
     t_0_min=t_0_min,
@@ -113,7 +107,7 @@ times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 
 kernel = get_kernel(kernel_type=injection_mode)
 
-priors = get_priors(times=times, likelihood_model=likelihood_model, kernel_type=injection_mode,
+priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,

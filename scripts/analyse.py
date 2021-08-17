@@ -99,7 +99,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "injection"  # "magnetar_flare_binned"
+    data_source = "giant_flare"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
@@ -123,8 +123,10 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -10
-    end_time = 10
+    # start_time = 102.060 + 20.378
+    # end_time = 103.060 + 20.378
+    start_time = 88.775 + 20.378
+    end_time = 90.775 + 20.378
 
     period_number = 14
     run_id = 6
@@ -133,8 +135,8 @@ else:
 
     injection_id = 1
 
-    offset = False
-    polynomial_max = 1000000
+    offset = True
+    polynomial_max = 1
     amplitude_min = None
     amplitude_max = None
     offset_min = None
@@ -162,10 +164,11 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
     recovery_mode = "red_noise"
-    likelihood_model = "gaussian_process"
-    background_model = 0
-    n_components = 0
-    jitter_term = True
+    likelihood_model = "gaussian_process_windowed"
+    background_model = "gaussian"
+    n_components = 1
+    jitter_term = False
+    normalisation = False
 
     band_minimum = None
     band_maximum = None
@@ -174,7 +177,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 400
+    nlive = 500
     use_ratio = False
 
     try_load = False
@@ -240,6 +243,9 @@ else:
     yerr = np.sqrt(y)
     yerr[np.where(yerr == 0)[0]] = 1
 
+if normalisation:
+    y = (y - np.min(y))/(np.max(y) - np.min(y)) * 1
+    yerr = yerr/(np.max(y) - np.min(y))
 
 if plot:
     # plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
