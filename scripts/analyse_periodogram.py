@@ -13,6 +13,7 @@ from QPOEstimation.prior.psd import *
 from QPOEstimation.utils import *
 
 if len(sys.argv) > 1:
+    plt.style.use('paper.mplstyle')
     parser = parse_args()
     args = parser.parse_args()
 
@@ -92,9 +93,9 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    matplotlib.use('Qt5Agg')
+    # matplotlib.use('Qt5Agg')
 
-    data_source = "injection"
+    data_source = "solar_flare"
     run_mode = 'select_time'
     sampling_frequency = 4096
     data_mode = 'normal'
@@ -107,7 +108,7 @@ else:
     solar_flare_folder = 'goes'
     solar_flare_id = "go1520130512"
     grb_id = "090709A"
-    grb_binning = "1s"
+    grb_binning = "64ms"
     grb_detector = 'swift'
     grb_energy_band = 'all'
 
@@ -118,8 +119,10 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = -10
-    end_time = 10
+    start_time = 73020
+    end_time = 75780
+    # start_time = 73020
+    # end_time = 75780
     # start_time = 210.735 + 20.378 + 0.5
     # end_time = 210.735 + 20.378 + 1
 
@@ -160,22 +163,22 @@ else:
     likelihood_model = "whittle"
     normalisation = True
 
-    window = "tukey"
+    window = "hann"
     frequency_mask_minimum = None
     frequency_mask_maximum = None
 
-    band_minimum = 0.05
-    band_maximum = None
+    band_minimum = 0.01
+    band_maximum = 1
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
-    sample = 'rslice'
-    nlive = 600
+    sample = 'rwalk'
+    nlive = 1000
     use_ratio = False
 
-    try_load = False
-    resume = False
+    try_load = True
+    resume = True
     plot = True
 
     # suffix = f"_{n_components}_fred"
@@ -201,15 +204,23 @@ times, y, _, outdir, label = get_data(
     hares_and_hounds_round=hares_and_hounds_round
     )
 
+sampling_frequency = 1 / (times[1] - times[0])
+if window == "tukey":
+    window = ("tukey", 0.05)
+
 
 if normalisation:
     y = (y - np.mean(y))/np.mean(y)
-
-sampling_frequency = 1 / (times[1] - times[0])
-
-if window == "tukey":
-    window = ("tukey", 0.05)
+    # from stingray.lightcurve import Lightcurve
+    # from stingray.powerspectrum import Powerspectrum
+    # from scipy.signal.windows import hann
+    #
+    # lc = Lightcurve(times, y * hann(len(y)), err=np.ones(len(y)))
+    # ps = Powerspectrum(lc=lc, norm='leahy')
+    # freqs = ps.freq
+    # powers = ps.power
 freqs, powers = periodogram(y, fs=sampling_frequency, window=window)
+
 
 if band_maximum is None:
     band_maximum = freqs[-1] + 1
@@ -230,6 +241,7 @@ if plot:
     plt.xlabel('frequency [Hz]')
     plt.ylabel('Power [AU]')
     plt.show()
+    plt.clf()
 
 if recovery_mode == "red_noise":
     priors = get_red_noise_prior()
@@ -288,7 +300,8 @@ if result is None:
 result.plot_corner()
 
 max_like_params = result.posterior.iloc[-1]
-plt.loglog(freqs[1:], powers[1:])
+plt.loglog()
+plt.step(freqs[1:], powers[1:], where='mid')
 if noise_model == 'broken_power_law':
     names_bpl = ['alpha_1', 'alpha_2', 'log_beta', 'log_delta', 'rho']
     max_l_bpl_params = dict()
@@ -326,22 +339,23 @@ elif noise_model == 'white_noise':
     max_l_psd_no_qpo = max_l_psd
 else:
     raise ValueError
-plt.loglog(freqs[1:], max_l_psd, label="Max Like fit")
+plt.loglog(freqs[1:], max_l_psd, label="Max. like. fit")
 threshold = -max_l_psd_no_qpo * np.log((1 - 0.9973) / len(freqs[1:]))  # Bonferroni correction
-plt.loglog(freqs[1:], threshold, label="3 sigma threshold")
+plt.loglog(freqs[1:], threshold, label="3 sigma thres.")
 threshold = -max_l_psd_no_qpo * np.log((1 - 0.954) / len(freqs[1:]))  # Bonferroni correction
-plt.loglog(freqs[1:], threshold, label="2 sigma threshold")
+plt.loglog(freqs[1:], threshold, label="2 sigma thres.")
 
 if recovery_mode == 'general_qpo':
     max_like_lorentz = QPOEstimation.model.psd.lorentzian(
         freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
         central_frequency=np.exp(max_like_params['log_frequency']),
         width=np.exp(max_like_params['log_width']))
-    plt.loglog(freqs[1:], max_like_lorentz, label="Max like QPO")
+    plt.loglog(freqs[1:], max_like_lorentz, label="Max. like. QPO")
 plt.xlabel("frequency [Hz]")
-plt.ylabel("Power [AU]")
+plt.ylabel("Power [arb. units]")
 plt.legend()
-plt.savefig(f'{outdir}/{label}_max_like_fit.png')
+plt.tight_layout()
+plt.savefig(f'{outdir}/{label}_max_like_fit.pdf')
 plt.show()
 
 # clean up
