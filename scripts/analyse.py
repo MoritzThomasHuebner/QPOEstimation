@@ -75,6 +75,7 @@ if len(sys.argv) > 1:
     injection_mode = args.injection_mode
     injection_file_dir = args.injection_file_dir
     injection_likelihood_model = args.injection_likelihood_model
+    normalisation = boolean_string(args.normalisation)
 
     recovery_mode = args.recovery_mode
     likelihood_model = args.likelihood_model
