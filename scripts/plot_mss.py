@@ -3,6 +3,7 @@ import json
 import sys
 
 import bilby
+import numpy as np
 
 from QPOEstimation.result import GPResult
 from QPOEstimation.utils import get_injection_outdir, get_injection_label
@@ -51,5 +52,10 @@ plt.hist(ln_bfs_red_noise_inj, alpha=0.5, density=True, bins=30, label="Simulate
 plt.semilogy()
 plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
 plt.ylabel("$p(\ln BF_{\mathrm{QPO}})$")
+plt.legend()
+plt.tight_layout()
 plt.savefig('thesis_figures/mss_plot.pdf')
 plt.show()
+
+print(len(np.where(np.array(ln_bfs_qpo_inj) > 0)[0]))
+print(len(np.where(np.array(ln_bfs_red_noise_inj) > 0)[0]))
