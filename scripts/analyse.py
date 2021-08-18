@@ -101,8 +101,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "injection"  # "magnetar_flare_binned"
-    run_mode = 'entire_segment'
+    data_source = "solar_flare"  # "magnetar_flare_binned"
+    run_mode = 'select_time'
     sampling_frequency = 256
     data_mode = 'normal'
     alpha = 0.02
@@ -127,8 +127,10 @@ else:
 
     # start_time = 102.060 + 20.378
     # end_time = 103.060 + 20.378
-    start_time = 88.775 + 20.378
-    end_time = 90.775 + 20.378
+    # start_time = 88.775 + 20.378
+    # end_time = 90.775 + 20.378
+    start_time = 74700
+    end_time = 74900
 
     period_number = 14
     run_id = 6
@@ -138,28 +140,24 @@ else:
     injection_id = 0
     base_injection_outdir = 'injection_pp'
 
-    offset = False
-    polynomial_max = 1
-    amplitude_min = 10
-    amplitude_max = 100
+    offset = True
+    polynomial_max = None
+    amplitude_min = None
+    amplitude_max = None
     offset_min = None
     offset_max = None
-    # sigma_min = 0.1
-    # sigma_max = 10000
-    sigma_min = 0.1
-    sigma_max = 1
-    # t_0_min = 1e-3
-    # t_0_max = 1000
+    sigma_min = None
+    sigma_max = None
     t_0_min = None
     t_0_max = None
     tau_min = None
     tau_max = None
 
-    min_log_a = -1
-    max_log_a = 1
+    min_log_a = -20
+    max_log_a = 20
     # min_log_c = -10
-    min_log_c = -1
-    max_log_c = 1
+    min_log_c = None
+    max_log_c = None
     # max_log_c = 30
     minimum_window_spacing = 0
 
@@ -168,13 +166,13 @@ else:
     injection_likelihood_model = "gaussian_process"
     recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process"
-    background_model = "skew_gaussian"
+    background_model = "fred"
     n_components = 1
-    jitter_term = False
-    normalisation = False
+    jitter_term = True
+    normalisation = True
 
-    band_minimum = 1
-    band_maximum = 64
+    band_minimum = None
+    band_maximum = None
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps

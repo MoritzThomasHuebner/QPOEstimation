@@ -39,25 +39,25 @@
 #end_time=10
 #
 #
-#for i in {0..19}
-#do
-#  sbatch analyse_submit.sh 01 red_noise gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-#  sbatch analyse_submit.sh 01 red_noise gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-#  sbatch analyse_submit.sh 01 general_qpo gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-#  sbatch analyse_submit.sh 01 general_qpo gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-#done
+for i in {0..19}
+do
+  sbatch analyse_submit.sh 01 red_noise gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+  sbatch analyse_submit.sh 01 red_noise gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+  sbatch analyse_submit.sh 01 general_qpo gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+  sbatch analyse_submit.sh 01 general_qpo gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+done
 
 # PP test
 
 
 
-for injection_mode in red_noise general_qpo
-do
-    for recovery_mode in red_noise general_qpo
-    do
-        for injection_id in {0..200}
-        do
-          sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
-        done
-    done
-done
+#for injection_mode in red_noise general_qpo
+#do
+#    for recovery_mode in red_noise general_qpo
+#    do
+#        for injection_id in {0..200}
+#        do
+#          sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
+#        done
+#    done
+#done
