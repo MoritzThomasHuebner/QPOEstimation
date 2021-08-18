@@ -1,6 +1,6 @@
 import json
 import numpy as np
-from .utils import get_injection_outdir
+from .utils import get_injection_outdir, get_injection_label
 
 
 def get_all_tte_magnetar_flare_data(magnetar_label, tag, bin_size=0.001, subtract_t0=True,
@@ -310,11 +310,7 @@ def get_data(data_source, **kwargs):
         outdir = get_injection_outdir(
             injection_mode=kwargs['injection_mode'], recovery_mode=recovery_mode,
             likelihood_model=kwargs["likelihood_model"], base_injection_outdir=kwargs['base_injection_outdir'])
-        label = f"{str(kwargs['injection_id']).zfill(2)}"
-        if run_mode == 'entire_segment':
-            label += f'_entire_segment'
-        elif run_mode == 'select_time':
-            label += f'_{start_time}_{end_time}'
+        label = get_injection_label(run_mode, kwargs['injection_id'], start_time, end_time)
     elif data_source == 'hares_and_hounds':
         times, y = get_hares_and_hounds_data(**kwargs)
         times -= times[0]

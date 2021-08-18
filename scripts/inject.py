@@ -113,7 +113,7 @@ priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likeli
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                     n_components=n_components, **mean_prior_bounds_dict)
 
-outdir = f'injection_files'
+outdir = f'injection_files_mss'
 Path(outdir).mkdir(exist_ok=True, parents=True)
 
 if minimum_id == maximum_id:

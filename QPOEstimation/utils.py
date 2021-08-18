@@ -26,6 +26,15 @@ def get_injection_outdir(injection_mode, recovery_mode, likelihood_model, base_i
     return f"{base_injection_outdir}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
 
 
+def get_injection_label(run_mode, injection_id, start_time=None, end_time=None):
+    label = f"{str(injection_id).zfill(2)}"
+    if run_mode == 'entire_segment':
+        label += f'_entire_segment'
+    elif run_mode == 'select_time':
+        label += f'_{start_time}_{end_time}'
+    return label
+
+
 def boolean_string(s):
     if s not in {'False', 'True'}:
         raise ValueError('Not a valid boolean string')
