@@ -31,7 +31,7 @@ outdir_red_noise_qpo = f"{outdir_red_noise_qpo}/results"
 ln_bfs_qpo_inj = []
 ln_bfs_red_noise_inj = []
 
-for injection_id in range(0, 200):
+for injection_id in range(0, 1000):
     print(injection_id)
     label = get_injection_label(run_mode='entire_segment', injection_id=injection_id) + "_1_0s"
     try:
