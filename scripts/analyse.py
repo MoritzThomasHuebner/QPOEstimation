@@ -101,9 +101,9 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "solar_flare"  # "magnetar_flare_binned"
+    data_source = "giant_flare"  # "magnetar_flare_binned"
     run_mode = 'select_time'
-    sampling_frequency = 256
+    sampling_frequency = 64
     data_mode = 'normal'
     alpha = 0.02
     variance_stabilisation = False
@@ -113,6 +113,7 @@ else:
 
     solar_flare_folder = 'goes'
     solar_flare_id = "go1520130512"
+    # solar_flare_id = "go1520110314"
     grb_id = "090709A"
     grb_binning = "64ms"
     grb_detector = 'swift'
@@ -125,20 +126,28 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    # start_time = 102.060 + 20.378
-    # end_time = 103.060 + 20.378
+    start_time = 101.060 + 20.0
+    end_time = 103.060 + 20.0
+    # start_time = 138.915 - 0.3 + 20.378
+    # end_time = 139.915 + 0.5 + 20.378
+    # start_time = 132.3 - 0.5 + 20.0
+    # end_time = 132.3 + 0.5 + 20.0
+    # start_time = 104
+    # end_time = 106
     # start_time = 88.775 + 20.378
     # end_time = 90.775 + 20.378
-    start_time = 74700
-    end_time = 74900
+    # start_time = -20.0
+    # end_time = 20.0
+    # start_time = 74700
+    # end_time = 74900
 
     period_number = 14
     run_id = 6
 
     candidate_id = 5
 
-    injection_id = 0
-    base_injection_outdir = 'injection_pp'
+    injection_id = 1
+    base_injection_outdir = 'injection'
 
     offset = True
     polynomial_max = None
@@ -153,8 +162,8 @@ else:
     tau_min = None
     tau_max = None
 
-    min_log_a = -20
-    max_log_a = 20
+    min_log_a = None
+    max_log_a = None
     # min_log_c = -10
     min_log_c = None
     max_log_c = None
@@ -162,14 +171,14 @@ else:
     minimum_window_spacing = 0
 
     injection_mode = "general_qpo"
-    injection_file_dir = "injection_files"
-    injection_likelihood_model = "gaussian_process"
+    injection_file_dir = "injection_files_pop"
+    injection_likelihood_model = "whittle"
     recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process"
-    background_model = "fred"
+    background_model = "skew_gaussian"
     n_components = 1
-    jitter_term = True
-    normalisation = True
+    jitter_term = False
+    normalisation = False
 
     band_minimum = None
     band_maximum = None
