@@ -68,31 +68,3 @@ def lorentzian(times, log_amplitude, t_0, log_sigma):
     amplitude = np.exp(log_amplitude)
     sigma = np.exp(log_sigma)
     return amplitude * (sigma / ((times - t_0) ** 2 + (sigma ** 2)))
-
-
-def piecewise_linear(times, beta_0, beta_1, beta_2, beta_3, beta_4, beta_5, k_2, k_3, k_4, k_5):
-    duration = times[-1] - times[0]
-    times = 2 * times / duration - 1
-    betas = np.array([beta_1, beta_2, beta_3, beta_4, beta_5])
-    ks = 2*np.array([0, k_2, k_3, k_4, k_5])/duration - 1
-    return beta_0 + np.sum([_linear(times, betas[i], ks[i]) for i in range(len(betas))], axis=0)
-
-
-def _linear(times, beta, k):
-    res = beta * (times - k)
-    res[np.where(times < k)] = 0
-    return res
-
-
-def piecewise_cubic(times, beta_0, beta_1, beta_2, beta_3, beta_4, beta_5, k_4, k_5):
-    duration = times[-1] - times[0]
-    times = 2 * times / duration - 1
-    betas = np.array([beta_3, beta_4, beta_5])
-    ks = 2 * np.array([0, k_4, k_5]) / duration - 1
-    return beta_0 + beta_1*times + beta_2 * times**2 + np.sum([_cubic(times, betas[i], ks[i]) for i in range(len(betas))], axis=0)
-
-
-def _cubic(times, beta, k):
-    res = beta * (times - k)**3
-    res[np.where(times < k)] = 0
-    return res

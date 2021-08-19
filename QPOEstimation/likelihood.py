@@ -10,7 +10,7 @@ from scipy.special import gamma
 from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model, \
-    get_n_component_piecewise
+    get_n_component_piecewise_cubic, get_n_component_piecewise_linear
 
 
 def get_celerite_likelihood(mean_model, kernel, fit_mean, times, y, yerr, likelihood_model='gaussian_process'):
@@ -454,9 +454,9 @@ def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_
     elif isinstance(model_type, (int, float)) or model_type.isnumeric():
         return float(model_type), False
     elif model_type == 'piecewise_linear':
-        return get_n_component_piecewise(n_components=n_components, likelihood_model=likelihood_model, mode="linear"), True
+        return get_n_component_piecewise_linear(n_components=n_components, likelihood_model=likelihood_model), True
     elif model_type == 'piecewise_cubic':
-        return get_n_component_piecewise(n_components=n_components, likelihood_model=likelihood_model, mode="cubic"), True
+        return get_n_component_piecewise_cubic(n_components=n_components, likelihood_model=likelihood_model), True
     elif model_type in mean_model_dict:
         return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components, offset=offset,
                                           likelihood_model=likelihood_model), True

@@ -119,11 +119,13 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
 #         parameter_names = names
 #
 #         def get_value(self, t):
-#             deltas = np.array([delta_0, delta_1, delta_2])
-#             ks = np.array([0, k_1, k_2])
-#             alphas = [alpha_0]
-#             betas = [beta_0]
-#             gammas = [gamma_0]
+#             duration = t[-1] - t[0]
+#             times = 2 * t / duration - 1
+#             deltas = np.array([getattr(self, f"delta_{i}") for i in range(n_components)])
+#             ks = 2 * np.array([getattr(self, f"k_{i}", 0) for i in range(n_components)]) / duration - 1
+#             alphas = [getattr(self, f"alpha_0")]
+#             betas = [getattr(self, f"beta_0")]
+#             gammas = [getattr(self, f"gamma_0")]
 #             for i in range(1, len(deltas)):
 #                 diff = (ks[i] - ks[i - 1])
 #                 alphas.append(
@@ -140,14 +142,6 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
 #             return res
 #
 #
-#
-#             duration = t[-1] - t[0]
-#             times = 2 * t / duration - 1
-#             betas = np.array([getattr(self, f"beta_{i}") for i in range(n_components)])
-#             ks = 2 * np.array([getattr(self, f"k_{i}", 0) for i in range(n_components)]) / duration - 1
-#             return betas[0] + betas[1] * times + betas[2] * times ** 2 + np.sum(
-#                 [_cubic(times, betas[i], ks[i]) for i in range(3, len(betas))], axis=0)
-#
 #         def compute_gradient(self, *args, **kwargs):
 #             pass
 #
@@ -156,7 +150,7 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
 #     else:
 #         return PiecewiseCubicMeanModel(**defaults)
 
-def get_n_component_piecewise(n_components=6, likelihood_model='gaussian_process', mode='linear'):
+def get_n_component_piecewise_cubic(n_components=6, likelihood_model='gaussian_process'):
     names = [f'delta_{i}' for i in range(n_components)]
     names.extend([f'k_{i}' for i in range(1, n_components)])
     names.extend(['alpha_0', 'beta_0', 'gamma_0'])
@@ -170,7 +164,6 @@ def get_n_component_piecewise(n_components=6, likelihood_model='gaussian_process
         m = GeorgeModel
     else:
         m = CeleriteModel
-
 
     class PiecewiseCubicMeanModel(m):
         parameter_names = names
@@ -203,6 +196,42 @@ def get_n_component_piecewise(n_components=6, likelihood_model='gaussian_process
             pass
 
     return PiecewiseCubicMeanModel(**defaults)
+
+
+def get_n_component_piecewise_linear(n_components=3, likelihood_model='gaussian_process'):
+    names = [f'beta_{i}' for i in range(n_components)]
+    names.extend([f'k_{i}' for i in range(1, n_components)])
+
+    names = tuple(names)
+    defaults = dict()
+    for name in names:
+        defaults[name] = 0.0
+
+    if likelihood_model == 'george_likelihood':
+        m = GeorgeModel
+    else:
+        m = CeleriteModel
+
+    def _linear(times, beta, k):
+        res = beta * (times - k)
+        res[np.where(times < k)] = 0
+        return res
+
+    class PiecewiseLinearMeanModel(m):
+        parameter_names = names
+
+        def get_value(self, t):
+            duration = t[-1] - t[0]
+            times = 2 * t / duration - 1
+            betas = np.array([getattr(self, f"beta_{i}") for i in range(n_components)])
+            ks = 2 * np.array([getattr(self, f"k_{i}", 0) for i in range(n_components)]) / duration - 1
+            return betas[0] + np.sum([_linear(times, betas[i], ks[i]) for i in range(1, len(betas))], axis=0)
+
+        def compute_gradient(self, *args, **kwargs):
+            pass
+
+    return PiecewiseLinearMeanModel(**defaults)
+
 
 def get_n_component_fred_model(n_freds=1):
     return get_n_component_mean_model(model=fred, n_models=n_freds)

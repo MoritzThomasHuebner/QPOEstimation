@@ -152,14 +152,20 @@ def get_piecewise_linear_priors(n_components, minimum_spacing, **kwargs):
     for i in range(n_components):
         priors[f"mean:beta_{i}"] = bilby.core.prior.Uniform(minimum=-1000, maximum=1000, name=f"beta_{i}")
 
-    for i in range(2, n_components):
-        if i == 2:
-            priors[f"mean:k_{i}"] = Beta(minimum=kwargs['t_0_min'], maximum=kwargs['t_0_max'],
-                                         alpha=1, beta=n_components-2, name=f"mean:k_{i}")
-        else:
-            priors[f"mean:k_{i}"] = QPOEstimation.prior.minimum.MinimumPrior(
-                order=n_components - i, minimum_spacing=minimum_spacing, minimum=kwargs['t_0_min'],
-                maximum=kwargs['t_0_max'], name=f"mean:k_{i}")
+    t_0_min = kwargs["times"][0]
+    t_0_max = kwargs["times"][-1]
+
+    for i in range(1, n_components):
+        loc = (t_0_max - t_0_min) * i / n_components + t_0_min
+        priors[f"mean:k_{i}"] = DeltaFunction(peak=loc, name=f"mean:k_{i}")
+    # for i in range(2, n_components):
+    #     if i == 2:
+    #         priors[f"mean:k_{i}"] = Beta(minimum=kwargs['t_0_min'], maximum=kwargs['t_0_max'],
+    #                                      alpha=1, beta=n_components-2, name=f"mean:k_{i}")
+    #     else:
+    #         priors[f"mean:k_{i}"] = QPOEstimation.prior.minimum.MinimumPrior(
+    #             order=n_components - i, minimum_spacing=minimum_spacing, minimum=kwargs['t_0_min'],
+    #             maximum=kwargs['t_0_max'], name=f"mean:k_{i}")
     priors._resolve_conditions()
     return priors
 
