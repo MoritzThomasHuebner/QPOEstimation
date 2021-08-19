@@ -25,6 +25,18 @@ def get_priors(**kwargs):
         elif kwargs['kernel_type'] in ['qpo', 'pure_qpo', 'general_qpo']:
             kwargs['max_log_c'] = np.log(kwargs['band_maximum'])
 
+
+    minimum = np.min(kwargs['y']) if kwargs.get('offset', False) else 0
+    maximum = np.max(kwargs['y'])
+    span = maximum - minimum
+    if kwargs['min_log_a'] is None:
+        if kwargs['yerr'] is not None:
+            kwargs['min_log_a'] = np.log(min(kwargs['yerr']))
+        else:
+            kwargs['min_log_a'] = np.log(span/1000)
+    if kwargs['max_log_a'] is None:
+        kwargs['max_log_a'] = np.log(2*span)
+
     if kwargs['t_0_min'] is None:
         kwargs['t_0_min'] = kwargs['times'][0] - 0.1 * segment_length
 
