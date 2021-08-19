@@ -10,9 +10,9 @@ import QPOEstimation
 from QPOEstimation.post_processing import InjectionStudyPostProcessor
 
 import matplotlib.pyplot as plt
-# plt.style.use('paper.mplstyle')
-import matplotlib
-matplotlib.use('Qt5Agg')
+plt.style.use('paper.mplstyle')
+# import matplotlib
+# matplotlib.use('Qt5Agg')
 
 
 modes = ['zeros', 'white_noise']
@@ -104,19 +104,43 @@ else:
 
 ln_bfs_gp = []
 ln_bfs_gp_windowed = []
+ln_zs_gp = []
+ln_zs_gp_windowed = []
+xs = []
+min_end_time = 10
 for end_time in range(10, 210, 10):
     label = f'{injection_id}_{-float(end_time)}_{float(end_time)}_1_0s'
     res_qpo = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/gaussian_process/results/', label=label)
     res_red_noise = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/gaussian_process/results/', label=label)
     res_qpo_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/gaussian_process_windowed/results/', label=label)
     res_red_noise_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/gaussian_process_windowed/results/', label=label)
-
+    ln_zs_gp.append(res_qpo.log_evidence)
+    ln_zs_gp_windowed.append(res_qpo_windowed.log_evidence)
     ln_bfs_gp.append(res_qpo.log_evidence - res_red_noise.log_evidence)
     ln_bfs_gp_windowed.append(res_qpo_windowed.log_evidence - res_red_noise_windowed.log_evidence)
+    xs.append(end_time/min_end_time)
 
-plt.plot(props.durations, props.ln_bfs)
-plt.plot(props.durations, ln_bfs_gp)
-plt.plot(props.durations, ln_bfs_gp_windowed)
-plt.show()
+
+plt.plot(xs, props.ln_bfs, label="periodogram")
+plt.plot(xs, ln_bfs_gp, label="stat. GP")
+plt.plot(xs, ln_bfs_gp_windowed, label="Non-stat. GP")
+plt.xlim(1, 20)
+plt.ylim(0, 50)
+plt.xlabel("$x$")
+plt.ylabel("$\ln BF$")
+plt.legend()
+plt.tight_layout()
+plt.savefig("thesis_figures/injection_periodogram_comparison.pdf")
+# plt.show()
+plt.clf()
+
+plt.plot(xs, np.array(ln_zs_gp_windowed) - np.array(ln_zs_gp))
+plt.xlim(1, 20)
+plt.xlabel("$x$")
+plt.ylabel("$\ln BF$")
+plt.savefig("thesis_figures/injection_periodogram_stat_vs_non_stat.pdf")
+# plt.show()
+plt.clf()
+
 
 # props.plot_all(show=False)
