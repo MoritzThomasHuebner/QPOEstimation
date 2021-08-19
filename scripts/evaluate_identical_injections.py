@@ -1,100 +1,61 @@
 import argparse
+import json
 import sys
 
 import bilby
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 
-from QPOEstimation.utils import get_injection_outdir
+from QPOEstimation.result import GPResult
+from QPOEstimation.utils import get_injection_outdir, get_injection_label
+from QPOEstimation.parse import likelihood_models, modes
+import matplotlib.pyplot as plt
+plt.style.use('paper.mplstyle')
 
-if len(sys.argv) > 1:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--minimum_id", default=1000, type=int)
-    parser.add_argument("--maximum_id", default=2000, type=int)
-    parser.add_argument("--injection_mode", default="qpo", choices=["qpo", "white_noise", "red_noise"], type=str)
-    parser.add_argument("--likelihood_model", default="gaussian_process",
-                        choices=["gaussian_process", "gaussian_process_windowed"], type=str)
-    parser.add_argument("--band_minimum", default=5, type=float)
-    parser.add_argument("--band_maximum", default=64, type=float)
+samples = []
+outdir_qpo_qpo = get_injection_outdir(
+    injection_mode='general_qpo', recovery_mode='general_qpo',
+    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+outdir_qpo_qpo = f"{outdir_qpo_qpo}/results"
+outdir_qpo_red_noise = get_injection_outdir(
+    injection_mode='general_qpo', recovery_mode='red_noise',
+    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+outdir_qpo_red_noise = f"{outdir_qpo_red_noise}/results"
+outdir_red_noise_red_noise = get_injection_outdir(
+    injection_mode='red_noise', recovery_mode='red_noise',
+    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+outdir_red_noise_red_noise = f"{outdir_red_noise_red_noise}/results"
+outdir_red_noise_qpo = get_injection_outdir(
+    injection_mode='red_noise', recovery_mode='general_qpo',
+    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+outdir_red_noise_qpo = f"{outdir_red_noise_qpo}/results"
 
-    args = parser.parse_args()
-    minimum_id = args.minimum_id
-    maximum_id = args.maximum_id
-    injection_mode = args.injection_mode
-    likelihood_model = args.likelihood_model
-    band_minimum = args.band_minimum
-    band_maximum = args.band_maximum
-else:
-    matplotlib.use('Qt5Agg')
-    minimum_id = 1000
-    maximum_id = 2000
+ln_bfs_qpo_inj = []
+ln_bfs_red_noise_inj = []
 
-    band_minimum = 5
-    band_maximum = 64
-
-    injection_mode = "qpo"
-    likelihood_model = "gaussian_process"
-
-
-band = f'{band_minimum}_{band_maximum}Hz'
-
-# averaged runs
-
-# log_bfs = []
-# for injection_id in range(minimum_id, maximum_id):
-#     res_qpo = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/qpo/results/{injection_id}_{likelihood_model}_result.json")
-#     res_red_noise = bilby.result.read_in_result(f"injection_{band}_normal_{injection_mode}/red_noise/results/{injection_id}_{likelihood_model}_result.json")
-#     log_bfs.append(res_qpo.log_evidence - res_red_noise.log_evidence)
-#     print(log_bfs[-1])
-#     print(injection_id)
-#
-# min_ln_bf = np.min(log_bfs)
-# max_ln_bf = np.max(log_bfs)
-#
-# plt.hist(log_bfs, bins="fd", label="1000 injections")
-# plt.axvline(min_ln_bf, label=f"minimum ln BF {min_ln_bf:.2f}", color='orange')
-# plt.axvline(max_ln_bf, label=f"maximum ln BF {max_ln_bf:.2f}", color='green')
-# plt.xlabel("ln BF QPO")
-# plt.ylabel('counts')
-# plt.legend()
-# plt.title(f'{injection_mode} injections')
-# plt.savefig(f'identical_{injection_mode}_injections.png')
-# plt.show()
-
-
-log_bfs_red_noise_injection = []
-log_bfs_qpo_injection = []
-for injection_id in range(minimum_id, maximum_id):
-    res_qpo_rn_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(injection_mode='red_noise', recovery_mode='qpo',
-                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
-    res_red_noise_rn_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(injection_mode='red_noise', recovery_mode='red_noise',
-                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
-    res_qpo_qpo_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(injection_mode='qpo', recovery_mode='qpo',
-                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
-    res_red_noise_qpo_injected = bilby.result.read_in_result(
-        outdir=get_injection_outdir(injection_mode='qpo', recovery_mode='red_noise',
-                                    likelihood_model=likelihood_model), label=f"{str(injection_id).zfill(2)}")
-    log_bfs_red_noise_injection.append(res_qpo_rn_injected.log_evidence - res_red_noise_rn_injected.log_evidence)
-    log_bfs_qpo_injection.append(res_qpo_qpo_injected.log_evidence - res_red_noise_qpo_injected.log_evidence)
-    print(log_bfs_red_noise_injection[-1])
-    print(log_bfs_qpo_injection[-1])
+for injection_id in range(0, 1000):
     print(injection_id)
+    label = get_injection_label(run_mode='entire_segment', injection_id=injection_id) + "_1_0s"
+    try:
+        res_qpo_qpo = GPResult.from_json(outdir=outdir_qpo_qpo, label=label)
+        res_qpo_red_noise = GPResult.from_json(outdir=outdir_qpo_red_noise, label=label)
+        res_red_noise_red_noise = GPResult.from_json(outdir=outdir_red_noise_red_noise, label=label)
+        res_red_noise_qpo = GPResult.from_json(outdir=outdir_red_noise_qpo, label=label)
+        ln_bfs_qpo_inj.append(res_qpo_qpo.log_evidence - res_qpo_red_noise.log_evidence)
+        ln_bfs_red_noise_inj.append(res_red_noise_qpo.log_evidence - res_red_noise_red_noise.log_evidence)
+    except (OSError, FileNotFoundError) as e:
+        print(e)
+        continue
 
-# min_ln_bf = np.min(log_bfs_red_noise_injection)
-# max_ln_bf = np.max(log_bfs_red_noise_injection)
 
-# plt.axvline(min_ln_bf, label=f"minimum ln BF {min_ln_bf:.2f}", color='orange')
-# plt.axvline(max_ln_bf, label=f"maximum ln BF {max_ln_bf:.2f}", color='green')
-plt.hist(log_bfs_red_noise_injection, bins="fd", label="Red noise injected", density=True, alpha=0.5)
-plt.hist(log_bfs_qpo_injection, bins="fd", label="QPO injected", density=True, alpha=0.5)
-plt.xlabel("ln BF QPO")
-plt.ylabel('p(ln BF)')
-plt.title(f'{injection_mode} injections')
+plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=30, label="Simulated red noise plus QPO")
+plt.hist(ln_bfs_red_noise_inj, alpha=0.5, density=True, bins=30, label="Simulated red noise")
+plt.semilogy()
+plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
+plt.ylabel("$p(\ln BF_{\mathrm{QPO}})$")
 plt.legend()
 plt.tight_layout()
-plt.savefig(f'identical_injections_comparison.png')
+plt.savefig('thesis_figures/mss_plot.pdf')
 plt.show()
+
+print(len(np.where(np.array(ln_bfs_qpo_inj) > 0)[0]))
+print(len(np.where(np.array(ln_bfs_red_noise_inj) > 0)[0]))
