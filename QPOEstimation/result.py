@@ -377,6 +377,31 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.png")
             plt.clf()
 
+
+    def plot_duration_posterior(self):
+        if self.likelihood_model == "gaussian_process_windowed":
+            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+            # plt.style.use(style_file)
+            Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
+            t_start_samples = np.array(self.posterior['window_minimum'])
+            t_end_samples = np.array(self.posterior['window_maximum'])
+            duration_samples = t_end_samples - t_start_samples
+
+            plt.hist(duration_samples, bins="fd", density=True)
+            plt.xlabel('frequency [Hz]')
+            plt.ylabel('normalised PDF')
+            median = np.median(duration_samples)
+            percentiles = np.percentile(duration_samples, [16, 84])
+            plt.title(
+                f"{np.mean(duration_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+            try:
+                plt.tight_layout()
+            except Exception:
+                pass
+            plt.savefig(f"{self.corner_outdir}/{self.label}_duration_posterior.png")
+            plt.clf()
+
+
     def plot_all(self):
         self.plot_corner()
         try:
@@ -389,8 +414,9 @@ class GPResult(bilby.result.Result):
             pass
         self.plot_lightcurve()
         self.plot_residual()
-        self.plot_qpo_log_amplitude()
-        self.plot_log_red_noise_power()
-        self.plot_log_qpo_power()
+        # self.plot_qpo_log_amplitude()
+        # self.plot_log_red_noise_power()
+        # self.plot_log_qpo_power()
         self.plot_frequency_posterior()
+        self.plot_duration_posterior()
         # self.plot_amplitude_ratio()
