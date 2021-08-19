@@ -124,7 +124,10 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
     except Exception:
         yerr = None
     if run_mode == 'select_time':
-        times, counts, yerr = truncate_data(times, counts, start=start_time, stop=end_time, yerr=yerr)
+        try:
+            times, counts, yerr = truncate_data(times, counts, start=start_time, stop=end_time, yerr=yerr)
+        except ValueError:
+            times, counts = truncate_data(times, counts, start=start_time, stop=end_time, yerr=yerr)
     return times, counts, yerr, truths
 
 
