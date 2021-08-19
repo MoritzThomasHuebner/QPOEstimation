@@ -39,13 +39,13 @@
 #end_time=10
 #
 #
-for i in {0..19}
-do
-  sbatch analyse_submit.sh 01 red_noise gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-  sbatch analyse_submit.sh 01 red_noise gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-  sbatch analyse_submit.sh 01 general_qpo gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-  sbatch analyse_submit.sh 01 general_qpo gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-done
+#for i in {0..19}
+#do
+#  sbatch analyse_submit.sh 01 red_noise gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#  sbatch analyse_submit.sh 01 red_noise gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#  sbatch analyse_submit.sh 01 general_qpo gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#  sbatch analyse_submit.sh 01 general_qpo gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#done
 
 # PP test
 
@@ -61,3 +61,20 @@ done
 #        done
 #    done
 #done
+
+
+## Giant flare
+
+period=7.56
+start_time_base=104.0
+end_time_base=106.0
+
+for i in {0..15}
+do
+  start_time=$(python -c "print(${start_time_base} + ${period} * ${i})")
+  end_time=$(python -c "print(${end_time_base} + ${period} * ${i})")
+  sbatch analyse_submit.sh red_noise gaussian_process ${start_time} ${end_time}
+  sbatch analyse_submit.sh red_noise gaussian_process_windowed ${start_time} ${end_time}
+  sbatch analyse_submit.sh general_qpo gaussian_process ${start_time} ${end_time}
+  sbatch analyse_submit.sh general_qpo gaussian_process_windowed ${start_time} ${end_time}
+done
