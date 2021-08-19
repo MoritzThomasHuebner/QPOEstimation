@@ -38,18 +38,18 @@ def rebin(times, counts, rebin_factor):
     return np.array(new_times), np.array(new_counts)
 
 
-def get_all_binned_magnetar_flare_data(magnetar_label, tag, subtract_t0=True, rebin_factor=1, **kwargs):
-    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{tag}_data.txt')
+def get_all_binned_magnetar_flare_data(magnetar_label, magnetar_tag, subtract_t0=True, rebin_factor=1, **kwargs):
+    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{magnetar_tag}_data.txt')
     times, counts = rebin(times=data[:, 0], counts=data[:, 1], rebin_factor=rebin_factor)
     if subtract_t0:
         times -= times[0]
     return times, counts
 
 
-def get_all_binned_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, tag,
+def get_all_binned_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, magnetar_tag,
                                                     subtract_t0=True, rebin_factor=1, **kwargs):
     times, counts = get_all_binned_magnetar_flare_data(
-        magnetar_label=magnetar_label, tag=tag, subtract_t0=subtract_t0, rebin_factor=rebin_factor, **kwargs)
+        magnetar_label=magnetar_label, magnetar_tag=magnetar_tag, subtract_t0=subtract_t0, rebin_factor=rebin_factor, **kwargs)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 

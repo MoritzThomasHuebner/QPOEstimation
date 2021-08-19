@@ -35,7 +35,7 @@ def get_priors(**kwargs):
         else:
             kwargs['min_log_a'] = np.log(span/1000)
     if kwargs['max_log_a'] is None:
-        kwargs['max_log_a'] = np.log(2*span)
+        kwargs['max_log_a'] = 20
 
     if kwargs['t_0_min'] is None:
         kwargs['t_0_min'] = kwargs['times'][0] - 0.1 * segment_length

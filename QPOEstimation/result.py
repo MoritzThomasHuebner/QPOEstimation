@@ -264,10 +264,10 @@ class GPResult(bilby.result.Result):
             super().plot_corner(outdir=self.corner_outdir, **kwargs)
 
     def plot_frequency_posterior(self):
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        # plt.style.use(style_file)
+        Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
-            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-            # plt.style.use(style_file)
-            Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             if 'kernel:log_f' in self.posterior:
                 frequency_samples = np.exp(np.array(self.posterior['kernel:log_f']))
             elif 'kernel:terms[0]:log_f' in self.posterior:
@@ -287,6 +287,25 @@ class GPResult(bilby.result.Result):
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior.png")
             plt.clf()
+        elif self.kernel_type == "double_qpo":
+            frequency_samples_1 = np.exp(np.array(self.posterior['kernel:terms[0]:log_f']))
+            frequency_samples_2 = np.exp(np.array(self.posterior['kernel:terms[1]:log_f']))
+
+            for i, frequency_samples in enumerate([frequency_samples_1, frequency_samples_2]):
+                plt.hist(frequency_samples, bins="fd", density=True)
+                plt.xlabel('frequency [Hz]')
+                plt.ylabel('normalised PDF')
+                median = np.median(frequency_samples)
+                percentiles = np.percentile(frequency_samples, [16, 84])
+                plt.title(
+                    f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+                try:
+                    plt.tight_layout()
+                except Exception:
+                    pass
+                plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.png")
+                plt.clf()
+
 
     def plot_qpo_log_amplitude(self):
         if self.kernel_type == "general_qpo":
