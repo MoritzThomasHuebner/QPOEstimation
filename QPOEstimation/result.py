@@ -133,7 +133,7 @@ class GPResult(bilby.result.Result):
 
     def plot_lightcurve(self, start_time=None, end_time=None):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        plt.style.use(style_file)
+        # plt.style.use(style_file)
         if start_time is None:
             start_time = self.times[0]
         if end_time is None:
@@ -148,7 +148,7 @@ class GPResult(bilby.result.Result):
 
         if self.likelihood_model == 'gaussian_process_windowed':
             plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan',
-                        label='$t_{\mathrm{start/end}}')
+                        label='$t_{\mathrm{start/end}}$')
             plt.axvline(self.max_likelihood_parameters['window_maximum'], color='cyan')
             x = np.linspace(self.max_likelihood_parameters['window_minimum'],
                             self.max_likelihood_parameters['window_maximum'], 5000)
@@ -186,7 +186,7 @@ class GPResult(bilby.result.Result):
 
         plt.xlabel("time [s]")
         plt.ylabel("y")
-        plt.legend()
+        plt.legend(ncol=2)
         try:
             plt.tight_layout()
         except Exception:
