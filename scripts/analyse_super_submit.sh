@@ -35,7 +35,7 @@
 ### Magnetar flare
 for model in red_noise general_qpo double_qpo
 do
-  for n_components in {0..4}
+  for n_components in {0..2}
   do
     sbatch analyse_submit.sh ${model} fred ${n_components}
     sbatch analyse_submit.sh ${model} fred_norris ${n_components}
