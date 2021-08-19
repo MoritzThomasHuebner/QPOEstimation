@@ -9,7 +9,7 @@ font.size: 18
 
 grid.linewidth: 0.8
 lines.linewidth: 1.0
-patch.linewidth: 0.24
+patch.linewidth: 0.8
 lines.markersize: 3.6
 lines.markeredgewidth: 0
 
