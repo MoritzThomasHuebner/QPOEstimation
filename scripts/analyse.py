@@ -274,7 +274,7 @@ if plot:
 mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset,
                                       likelihood_model=likelihood_model)
 
-priors = get_priors(times=times, y=y, likelihood_model=likelihood_model, kernel_type=recovery_mode,
+priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=minimum_window_spacing,
@@ -309,6 +309,15 @@ if plot:
     if len(sys.argv) < 1:
         result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
         result.plot_residual(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
+
+# plt.style.use('paper.mplstyle')
+# result.outdir = '.'
+# result.label = 'start_end_time_posterior'
+# result.parameter_labels[6] = 't_{\mathrm{start}}'
+# result.parameter_labels[7] = 't_{\mathrm{end}}'
+# result.parameter_labels_with_unit[6] = '$t_{\mathrm{start}}$ [s]'
+# result.parameter_labels_with_unit[7] = '$t_{\mathrm{end}}$ [s]'
+# result.plot_corner(parameters=['window_minimum', 'window_maximum'])
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',
