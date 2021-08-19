@@ -17,6 +17,8 @@ if len(sys.argv) > 1:
     parser = parse_args()
     parser.add_argument("--minimum_id", default=-1, type=int)
     parser.add_argument("--maximum_id", default=-1, type=int)
+    parser.add_argument("--min_log_a_red_noise", default=1, type=int)
+    parser.add_argument("--max_log_a_red_noise", default=1, type=int)
     args = parser.parse_args()
 
     injection_id = args.injection_id
@@ -38,6 +40,8 @@ if len(sys.argv) > 1:
 
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
+    min_log_a_red_noise = args.min_log_a_red_noise
+    max_log_a_red_noise = args.max_log_a_red_noise
     min_log_c = args.min_log_c
     max_log_c = args.max_log_c
     minimum_window_spacing = args.minimum_window_spacing
@@ -58,7 +62,7 @@ else:
     injection_id = 0
     minimum_id = -1
     maximum_id = -1
-    injection_mode = "qpo"
+    injection_mode = "general_qpo"
 
     polynomial_max = 1000
 
@@ -107,12 +111,21 @@ times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
 
 kernel = get_kernel(kernel_type=injection_mode)
 
-priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
-                    min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
-                    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
-                    model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
-                    n_components=n_components, **mean_prior_bounds_dict)
-
+if injection_mode == 'red_noise':
+    min_log_a = min_log_a_red_noise
+    max_log_a = min_log_a_red_noise
+    priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
+                        min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
+                        max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
+                        model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
+                        n_components=n_components, **mean_prior_bounds_dict)
+elif injection_mode == 'general_qpo':
+    priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
+                        min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
+                        max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
+                        model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
+                        n_components=n_components, **mean_prior_bounds_dict)
+    priors['kernel:terms[1]:log_a'].peak = min_log_a_red_noise
 outdir = f'injection_files_mss'
 Path(outdir).mkdir(exist_ok=True, parents=True)
 
