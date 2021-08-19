@@ -66,8 +66,8 @@
 ## Giant flare
 
 period=7.56
-start_time_base=106.0
-end_time_base=108.0
+start_time_base=103.0
+end_time_base=106.0
 
 for i in {0..15}
 do
