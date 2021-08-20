@@ -3,8 +3,8 @@
 #SBATCH --job-name=qpo
 #
 #SBATCH --ntasks=1
-#SBATCH --time=24:00:00
-#SBATCH --mem-per-cpu=4G
+#SBATCH --time=1:00:00
+#SBATCH --mem-per-cpu=2G
 
 #srun python analyse.py --data_source ${1} --injection_id ${2} --injection_mode pure_qpo --recovery_mode pure_qpo --amplitude_min 10 --amplitude_max 100 --skewness_min 0.1 --skewness_max 10 --sigma_min 0.1 --sigma_max 1 --t_0_min 0 --t_0_max 3 --min_log_a -1 --max_log_a 1 --min_log_c -1 --max_log_c 1 --likelihood_model ${3} --background_model fred --n_components 1 --segment_length 3 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True --nlive 500 --sample rwalk
 #srun python analyse.py --data_source grb --run_mode select_time--likelihood_model ${5} --data_mode normal --band_minimum 5 --band_maximum 64 --variance_stabilisation False --background_model gaussian --n_components ${6} --polynomial_max 1000 --segment_length ${7} --segment_step 0.2365 --sampling_frequency 256 --plot True --nlive 1000 --sample rslice --amplitude_min 0.001 --amplitude_max 1000 --offset True --offset_min 0 --offset_max 100 --try_load True
@@ -15,7 +15,7 @@
 #srun python analyse.py --data_source grb --run_mode select_time --grb_id 090709A --grb_binning 1s --start_time -4 --end_time 103 --recovery_mode ${1} --likelihood_model gaussian_process --background_model ${2} --n_components ${3} --sample rwalk --nlive 1000 --use_ratio False --resume False --try_load True --plot True --offset True --sampling_frequency 1 --jitter_term False --resume True --try_load True
 
 # Magnetar flare
-srun python analyse.py --data_source magnetar_flare_binned --run_mode entire_segment --magnetar_label SGR_0501 --magnetar_tag 080823478_lcobs --rebin_factor 32 --recovery_mode ${1} --likelihood_model gaussian_process --background_model ${2} --n_components ${3} --sample rwalk --nlive 1000 --use_ratio False --resume True --try_load True --plot True --offset True
+#srun python analyse.py --data_source magnetar_flare_binned --run_mode entire_segment --magnetar_label SGR_0501 --magnetar_tag 080823478_lcobs --rebin_factor 32 --recovery_mode ${1} --likelihood_model gaussian_process --background_model ${2} --n_components ${3} --sample rwalk --nlive 1000 --use_ratio False --resume True --try_load True --plot True --offset True
 
 
 #srun python analyse.py --data_source magnetar_flare --magnetar_label SGR_1806_20 --magnetar_tag 10223-01-03-010_90908036.8701 --magnetar_bin_size 0.001 --run_mode select_time --start_time 0.035 --end_time 0.3 --likelihood_model ${1} --recovery_mode ${2} --variance_stabilisation False --background_model fred --n_components ${3} --plot True --nlive 4000 --sample rwalk --min_log_a -10 --max_log_a 15 --resume True --try_load True
@@ -29,7 +29,7 @@ srun python analyse.py --data_source magnetar_flare_binned --run_mode entire_seg
 
 #srun python analyse.py --data_source injection --run_mode select_time --injection_id ${1} --injection_mode general_qpo --injection_file_dir injection_files_pop --injection_likelihood_model whittle --recovery_mode ${2} --likelihood_model ${3} --background_model 0 --plot True --nlive 500 --sample rslice --start_time ${4} --end_time ${5} --offset False --jitter_term True --min_log_a -5 --max_log_a 10
 
-#srun python analyse.py --data_source injection --run_mode entire_segment --injection_id ${1} --injection_mode ${2} --base_injection_outdir injection_pp --injection_file_dir injection_files --injection_likelihood_model gaussian_process --recovery_mode ${3} --plot True --nlive 500 --sample rslice --offset False --amplitude_min 10 --amplitude_max 100 --sigma_min 0.1 --sigma_max 1 --t_0_min 0 --t_0_max 2 --min_log_a -1 --max_log_a 1 --min_log_c -1 --max_log_c 1 --likelihood_model gaussian_process --background_model skew_gaussian --n_components 1 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True
+srun python analyse.py --data_source injection --run_mode entire_segment --injection_id ${1} --injection_mode ${2} --base_injection_outdir injection_pp_non_eq_dis --injection_file_dir injection_files_non_eq_dis --injection_likelihood_model gaussian_process --recovery_mode ${3} --plot True --nlive 500 --sample rslice --offset False --amplitude_min 10 --amplitude_max 100 --sigma_min 0.1 --sigma_max 1 --t_0_min 0 --t_0_max 2 --min_log_a -1 --max_log_a 1 --min_log_c -1 --max_log_c 1 --likelihood_model gaussian_process --background_model skew_gaussian --n_components 1 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True
 #srun python analyse.py --data_source injection --run_mode entire_segment --injection_id ${1} --injection_mode ${2} --base_injection_outdir injection --injection_file_dir injection_files_pop --injection_likelihood_model ${3} --recovery_mode ${2} --plot True --nlive 500 --sample rslice --offset False --min_log_a -2 --max_log_a 2 --min_log_c -1 --max_log_c 3 --likelihood_model ${3} --background_model skew_gaussian --n_components 1 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True
 #srun python analyse.py --data_source injection --run_mode entire_segment --injection_id ${1} --injection_mode ${2} --base_injection_outdir injection_mss --injection_file_dir injection_files_mss --injection_likelihood_model gaussian_process --recovery_mode ${3} --likelihood_model gaussian_process --plot True --nlive 500 --sample rslice --offset False --min_log_a -2 --max_log_a 2 --min_log_c -1 --max_log_c 3 --likelihood_model gaussian_process --background_model 0 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True
 
