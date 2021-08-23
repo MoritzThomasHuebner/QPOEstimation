@@ -8,8 +8,8 @@ import numpy as np
 from QPOEstimation.result import GPResult
 from QPOEstimation.utils import get_injection_outdir, get_injection_label
 from QPOEstimation.parse import likelihood_models, modes
-import matplotlib.pyplot as plt
-plt.style.use('paper.mplstyle')
+# import matplotlib.pyplot as plt
+# plt.style.use('paper.mplstyle')
 
 samples = []
 outdir_qpo_qpo = get_injection_outdir(
@@ -47,15 +47,15 @@ for injection_id in range(0, 1000):
         continue
 
 
-plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=30, label="Simulated red noise plus QPO")
-plt.hist(ln_bfs_red_noise_inj, alpha=0.5, density=True, bins=30, label="Simulated red noise")
-plt.semilogy()
-plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
-plt.ylabel("$p(\ln BF_{\mathrm{QPO}})$")
-plt.legend()
-plt.tight_layout()
-plt.savefig('thesis_figures/mss_plot.pdf')
-plt.show()
+# plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=30, label="Simulated red noise plus QPO")
+# plt.hist(ln_bfs_red_noise_inj, alpha=0.5, density=True, bins=30, label="Simulated red noise")
+# plt.semilogy()
+# plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
+# plt.ylabel("$p(\ln BF_{\mathrm{QPO}})$")
+# plt.legend()
+# plt.tight_layout()
+# plt.savefig('thesis_figures/mss_plot.pdf')
+# plt.show()
 
 print(len(np.where(np.array(ln_bfs_qpo_inj) > 0)[0]))
 print(len(np.where(np.array(ln_bfs_red_noise_inj) > 0)[0]))

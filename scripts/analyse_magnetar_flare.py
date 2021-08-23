@@ -14,7 +14,7 @@ res_dict = {}
 
 linestyle_dict = dict(fred='solid', skew_gaussian='dotted', fred_norris='dashed', fred_norris_extended='dashdot')
 label_dict_mean = dict(fred='skew exp.', fred_norris='FRED', fred_norris_extended='FRED-x', skew_gaussian='skew gaus.')
-label_dict_kernel = dict(general_qpo='qpo+rn', red_noise='rn')
+label_dict_kernel = dict(general_qpo='qpo+rn', red_noise='rn', double_qpo='qpo+qpo')
 
 plt.figure(figsize=(9.2, 7.2))
 # plt.figure(dpi=150)
@@ -27,9 +27,9 @@ for mean_model in ['fred', 'fred_norris', 'fred_norris_extended', 'skew_gaussian
         for n_component in range(1, 4):
             try:
                 res = GPResult.from_json(
-                    outdir=f'GRB090709A_swift/select_time/{recovery_mode}/'
+                    outdir=f'magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/'
                            f'gaussian_process/results/',
-                    label=f'-4.0_103.0_{n_component}_{mean_model}s')
+                    label=f'entire_segment_{n_component}_{mean_model}s')
                 if recovery_mode == 'general_qpo':
                     res_list.append(res)
                 evidences.append(res.log_evidence)
@@ -46,17 +46,20 @@ for mean_model in ['fred', 'fred_norris', 'fred_norris_extended', 'skew_gaussian
     print()
 
     for k, v in evidence_dict.items():
-        color_dict = dict(general_qpo="blue", red_noise="red")
+        color_dict = dict(general_qpo="blue", red_noise="red", double_qpo="green")
         plt.plot(np.arange(len(v)), np.array(v), label=f"{label_dict_mean[mean_model]},  {label_dict_kernel[k]}",
                  color=color_dict[k], linestyle=linestyle_dict[mean_model])
 
 plt.xlabel('Number of flare components')
 plt.ylabel(f'ln Z')
 plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
-plt.ylim(86, 102)
+# plt.xticks(ticks=[0, 1], labels=[1, 2])
+# plt.ylim(88, 104)
+
+plt.ylim(-372, -357)
 plt.legend(ncol=2)
 plt.tight_layout()
-plt.savefig(f'GRB_Ln_Z_plot.pdf')
+plt.savefig(f'Magnetar_Ln_Z_plot.pdf')
 plt.show()
 
 # plt.figure(figsize=(9.2, 7.2))
@@ -73,5 +76,5 @@ plt.show()
 # plt.xlabel("$\ln P_{\mathrm{QPO}}$")
 # plt.ylabel("Normalised PDF")
 # plt.legend()
-# plt.savefig(f"GRB_qpo_power_hist.png")
+# plt.savefig(f"Magnetar_qpo_power_hist.png")
 # plt.clf()

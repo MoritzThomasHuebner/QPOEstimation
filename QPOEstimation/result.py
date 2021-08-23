@@ -132,8 +132,8 @@ class GPResult(bilby.result.Result):
         plt.clf()
 
     def plot_lightcurve(self, start_time=None, end_time=None):
-        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        # matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        plt.style.use(style_file)
         if start_time is None:
             start_time = self.times[0]
         if end_time is None:
@@ -185,13 +185,14 @@ class GPResult(bilby.result.Result):
                 plt.plot(x, trend, color='green', alpha=0.3)
 
         plt.xlabel("time [s]")
-        plt.ylabel("y")
+        plt.ylabel("Normalised flux")
         plt.legend(ncol=2)
         try:
             plt.tight_layout()
         except Exception:
             pass
-        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.png")
+        # plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.png")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.pdf")
         plt.show()
         plt.clf()
 
@@ -245,7 +246,6 @@ class GPResult(bilby.result.Result):
         plt.fill_between(x, pred_mean + pred_std - trend_fine, pred_mean - pred_std - trend_fine, color=color,
                          alpha=0.3, edgecolor="none")
 
-
         plt.xlabel("time [s]")
         plt.ylabel("y")
         plt.legend()
@@ -264,8 +264,8 @@ class GPResult(bilby.result.Result):
             super().plot_corner(outdir=self.corner_outdir, **kwargs)
 
     def plot_frequency_posterior(self):
-        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        # matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        plt.style.use(style_file)
         Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
             if 'kernel:log_f' in self.posterior:
@@ -285,7 +285,7 @@ class GPResult(bilby.result.Result):
                 plt.tight_layout()
             except Exception:
                 pass
-            plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior.png")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior.pdf")
             plt.clf()
         elif self.kernel_type == "double_qpo":
             frequency_samples_1 = np.exp(np.array(self.posterior['kernel:terms[0]:log_f']))
@@ -305,7 +305,6 @@ class GPResult(bilby.result.Result):
                     pass
                 plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.png")
                 plt.clf()
-
 
     def plot_qpo_log_amplitude(self):
         if self.kernel_type == "general_qpo":
@@ -396,7 +395,6 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.png")
             plt.clf()
 
-
     def plot_duration_posterior(self):
         if self.likelihood_model == "gaussian_process_windowed":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -407,7 +405,7 @@ class GPResult(bilby.result.Result):
             duration_samples = t_end_samples - t_start_samples
 
             plt.hist(duration_samples, bins="fd", density=True)
-            plt.xlabel('frequency [Hz]')
+            plt.xlabel('duration [s]')
             plt.ylabel('normalised PDF')
             median = np.median(duration_samples)
             percentiles = np.percentile(duration_samples, [16, 84])
