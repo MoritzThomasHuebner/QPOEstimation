@@ -121,8 +121,8 @@ for end_time in range(10, 210, 10):
     xs.append(end_time/min_end_time)
 
 
-plt.plot(xs, props.ln_bfs, label="periodogram")
-plt.plot(xs, ln_bfs_gp, label="stat. GP")
+plt.plot(xs, props.ln_bfs, label="Periodogram")
+plt.plot(xs, ln_bfs_gp, label="Stat. GP")
 plt.plot(xs, ln_bfs_gp_windowed, label="Non-stat. GP")
 plt.xlim(1, 20)
 plt.ylim(0, 50)
