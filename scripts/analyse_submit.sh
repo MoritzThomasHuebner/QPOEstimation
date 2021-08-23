@@ -3,7 +3,7 @@
 #SBATCH --job-name=qpo
 #
 #SBATCH --ntasks=1
-#SBATCH --time=24:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem-per-cpu=4G
 
 #srun python analyse.py --data_source ${1} --injection_id ${2} --injection_mode pure_qpo --recovery_mode pure_qpo --amplitude_min 10 --amplitude_max 100 --skewness_min 0.1 --skewness_max 10 --sigma_min 0.1 --sigma_max 1 --t_0_min 0 --t_0_max 3 --min_log_a -1 --max_log_a 1 --min_log_c -1 --max_log_c 1 --likelihood_model ${3} --background_model fred --n_components 1 --segment_length 3 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True --nlive 500 --sample rwalk
@@ -37,5 +37,5 @@
 #srun python analyse.py --data_source giant_flare --run_mode select_time --likelihood_model ${2} --recovery_mode ${1} --start_time ${3} --end_time ${4} --background_model skew_gaussian --n_components 1 --offset True --plot True --nlive 500 --sample rslice --min_log_a 0 --max_log_a 10 --resume True --try_load True --sampling_frequency 64
 
 # Solar Flare
-srun python analyse.py --start_time 74700 --end_time 74900 --data_source solar_flare --solar_flare_folder goes --solar_flare_id go1520130512 --recovery_mode ${1} --run_mode select_time --likelihood_model gaussian_process --normalisation True --sample rwalk --nlive 1000 --n_components ${2} --jitter_term True --try_load False --resume False
+srun python analyse.py --start_time 74700 --end_time 74900 --data_source solar_flare --solar_flare_folder goes --solar_flare_id go1520130512 --recovery_mode ${1} --run_mode select_time --likelihood_model gaussian_process --normalisation True --sample rwalk --nlive 1000 --n_components ${2} --jitter_term True --try_load False --resume False --polynomial_max 2
 
