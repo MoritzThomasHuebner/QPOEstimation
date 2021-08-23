@@ -9,7 +9,7 @@ from QPOEstimation.utils import get_injection_outdir, get_injection_label
 from QPOEstimation.parse import likelihood_models, modes
 import matplotlib.pyplot as plt
 
-# plt.style.use("paper.mplstyle")
+plt.style.use("paper.mplstyle")
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -29,9 +29,9 @@ else:
     minimum_id = 0
     maximum_id = 100
 
-    injection_mode = "red_noise"
+    injection_mode = "general_qpo"
     likelihood_model = "gaussian_process"
-    base_injection_outdir = 'injection_pp'
+    base_injection_outdir = 'injection_pp_non_eq_dis'
 
 samples = []
 reslist = []
@@ -43,7 +43,7 @@ for injection_id in range(minimum_id, maximum_id):
     print(injection_id)
     label = get_injection_label(run_mode='entire_segment', injection_id=injection_id) + "_1_skew_gaussians"
     try:
-        with open(f'injection_files/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json') as f:
+        with open(f'injection_files_pp_non_eq_dis/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json') as f:
             injection_params = json.load(f)
         res = GPResult.from_json(outdir=outdir, label=label)
         reslist.append(res)
@@ -54,4 +54,18 @@ for injection_id in range(minimum_id, maximum_id):
 
 for key in reslist[0].priors:
     reslist[0].priors[key].latex_label = reslist[0].priors[key].latex_label.replace('_', '\\_')
-bilby.result.make_pp_plot(results=reslist, filename=f'{injection_mode}_{likelihood_model}_pp_plot.png')
+
+reslist[0].priors['kernel:terms[0]:log_a'].latex_label = "$a_{\mathrm{qpo}}$"
+reslist[0].priors['kernel:terms[0]:log_c'].latex_label = "$c_{\mathrm{qpo}}$"
+reslist[0].priors['kernel:terms[0]:log_f'].latex_label = "$f_{\mathrm{qpo}}$"
+
+reslist[0].priors['kernel:terms[1]:log_a'].latex_label = "$a_{\mathrm{rn}}$"
+reslist[0].priors['kernel:terms[1]:log_c'].latex_label = "$c_{\mathrm{rn}}$"
+
+reslist[0].priors['mean:log_amplitude_0'].latex_label = "$A$"
+reslist[0].priors['mean:log_sigma_rise_0'].latex_label = "$\sigma_1$"
+reslist[0].priors['mean:log_sigma_fall_0'].latex_label = "$\sigma_2$"
+reslist[0].priors['mean:t_0_0'].latex_label = "$t_0$"
+
+
+bilby.result.make_pp_plot(results=reslist, filename=f'{injection_mode}_{likelihood_model}_pp_plot_non_eq_dis.pdf')
