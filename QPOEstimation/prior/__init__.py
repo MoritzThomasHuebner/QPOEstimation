@@ -34,6 +34,8 @@ def get_priors(**kwargs):
             kwargs['min_log_a'] = np.log(min(kwargs['yerr']))
         else:
             kwargs['min_log_a'] = np.log(span/1000)
+        if np.isinf(kwargs['min_log_a']):
+            kwargs['min_log_a'] = np.log(span / 1000)
     if kwargs['max_log_a'] is None:
         kwargs['max_log_a'] = 20
 

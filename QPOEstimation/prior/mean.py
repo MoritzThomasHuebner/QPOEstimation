@@ -36,9 +36,9 @@ def get_mean_prior(model_type, **kwargs):
     return priors
 
 
-def get_polynomial_prior(order=4, **kwargs):
+def get_polynomial_prior(n_components=4, **kwargs):
     priors = bilby.core.prior.PriorDict()
-    for i in range(order + 1):
+    for i in range(n_components):
         if kwargs['polynomial_max'] == 0:
             priors[f'mean:a{i}'] = 0
         else:

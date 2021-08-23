@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
-
-
 # Hares and hounds
 #for filename in 10788 122522 129113 159804 161404 165101 166659 172202 173913 181841 186811 189376 19470 19778 202467 206268 236578 265386 265704 270100 271094 294407 294432 296222 297054 299667 300829 302062 305069 317016 319153 325910 329919 337630 338322 346770 352381 36096 361207 37274 379291 379938 384314 389450 389522 395421 400029 40287 404267 419839 428659 42890 429937 455290 458825 46475 472866 48429 487534 495362 539360 542708 555140 562635 563266 5700 598396 609742 612579 65858 673371 705126 71150 711796 732564 744131 758518 761192 762506 773629 820146 821893 845195 846898 857620 864638 869934 870036 878437 889948 898375 908144 909778 912965 923302 935871 940137 968250 976425 997404
 #do
@@ -87,13 +84,13 @@
 
 ## PP
 
-for recovery_mode in red_noise general_qpo
-do
-    for injection_id in {0..100}
-    do
-      sbatch analyse_submit.sh $injection_id $recovery_mode $recovery_mode
-    done
-done
+#for recovery_mode in red_noise general_qpo
+#do
+#    for injection_id in {0..100}
+#    do
+#      sbatch analyse_submit.sh $injection_id $recovery_mode $recovery_mode
+#    done
+#done
 
 
 ## Giant flare
@@ -111,3 +108,12 @@ done
 #  sbatch analyse_submit.sh general_qpo gaussian_process ${start_time} ${end_time}
 #  sbatch analyse_submit.sh general_qpo gaussian_process_windowed ${start_time} ${end_time}
 #done
+
+## Solar flare
+
+
+for i in {2..4}
+do
+  sbatch analyse_submit.sh red_noise ${i}
+  sbatch analyse_submit.sh general_qpo ${i}
+done
