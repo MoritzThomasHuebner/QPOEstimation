@@ -101,7 +101,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "giant_flare"  # "magnetar_flare_binned"
+    data_source = "magnetar_flare_binned"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 64
     data_mode = 'normal'
@@ -115,31 +115,31 @@ else:
     solar_flare_id = "go1520130512"
     # solar_flare_id = "go1520110314"
     grb_id = "090709A"
-    grb_binning = "64ms"
+    grb_binning = "1s"
     grb_detector = 'swift'
     grb_energy_band = 'all'
 
-    magnetar_label = 'SGR_0501'
-    magnetar_tag = '080823478_lcobs'
+    magnetar_label = 'SGR_unknown'
+    magnetar_tag = '210912845_b1_lc'
     magnetar_bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
-    rebin_factor = 1
+    rebin_factor = 64
 
-    start_time = 101.060 + 20.0
-    end_time = 103.060 + 20.0
+    # start_time = 102.060 + 20.0
+    # end_time = 103.060 + 20.0
     # start_time = 138.915 - 0.3 + 20.378
     # end_time = 139.915 + 0.5 + 20.378
     # start_time = 132.3 - 0.5 + 20.0
     # end_time = 132.3 + 0.5 + 20.0
-    # start_time = 104
-    # end_time = 106
+    # start_time = -4.0
+    # end_time = 103.0
     # start_time = 88.775 + 20.378
     # end_time = 90.775 + 20.378
     # start_time = -20.0
     # end_time = 20.0
-    # start_time = 74700
-    # end_time = 74900
+    start_time = 0.2
+    end_time = 1.1
 
     period_number = 14
     run_id = 6
@@ -150,7 +150,7 @@ else:
     base_injection_outdir = 'injection'
 
     offset = True
-    polynomial_max = None
+    polynomial_max = 2
     amplitude_min = None
     amplitude_max = None
     offset_min = None
@@ -173,10 +173,10 @@ else:
     injection_mode = "general_qpo"
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
-    recovery_mode = "general_qpo"
+    recovery_mode = "red_noise"
     likelihood_model = "gaussian_process"
     background_model = "skew_gaussian"
-    n_components = 1
+    n_components = 2
     jitter_term = False
     normalisation = False
 
@@ -187,7 +187,7 @@ else:
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rslice'
-    nlive = 500
+    nlive = 1000
     use_ratio = False
 
     try_load = False
@@ -236,6 +236,7 @@ times, y, yerr, outdir, label = get_data(
     hares_and_hounds_round=hares_and_hounds_round, base_injection_outdir=base_injection_outdir
     )
 
+print(len(times))
 
 if data_source in ['grb', 'solar_flare']:
     pass
@@ -303,6 +304,7 @@ result = None
 if try_load:
     try:
         result = QPOEstimation.result.GPResult.from_json(outdir=f"{outdir}/results", label=label)
+        result.outdir = f"{outdir}/results"
     except IOError:
         bilby.utils.logger.info("No result file found. Starting from scratch")
 if result is None:
