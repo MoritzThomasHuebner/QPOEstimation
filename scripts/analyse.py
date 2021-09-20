@@ -102,7 +102,7 @@ else:
     matplotlib.use('Qt5Agg')
 
     data_source = "magnetar_flare_binned"  # "magnetar_flare_binned"
-    run_mode = 'select_time'
+    run_mode = 'entire_segment'
     sampling_frequency = 64
     data_mode = 'normal'
     alpha = 0.02
@@ -124,7 +124,7 @@ else:
     magnetar_bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
-    rebin_factor = 64
+    rebin_factor = 32
 
     # start_time = 102.060 + 20.0
     # end_time = 103.060 + 20.0
