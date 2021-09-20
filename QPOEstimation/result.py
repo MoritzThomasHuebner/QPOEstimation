@@ -132,8 +132,8 @@ class GPResult(bilby.result.Result):
         plt.clf()
 
     def plot_lightcurve(self, start_time=None, end_time=None):
-        # matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        plt.style.use(style_file)
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        # plt.style.use(style_file)
         if start_time is None:
             start_time = self.times[0]
         if end_time is None:
@@ -264,8 +264,8 @@ class GPResult(bilby.result.Result):
             super().plot_corner(outdir=self.corner_outdir, **kwargs)
 
     def plot_frequency_posterior(self):
-        # matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        plt.style.use(style_file)
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        # plt.style.use(style_file)
         Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
             if 'kernel:log_f' in self.posterior:
@@ -308,8 +308,8 @@ class GPResult(bilby.result.Result):
 
 
     def plot_period_posterior(self):
-        # matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        plt.style.use(style_file)
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        # plt.style.use(style_file)
         Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
             if 'kernel:log_f' in self.posterior:

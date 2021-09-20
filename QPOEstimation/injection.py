@@ -179,7 +179,7 @@ def create_injection(params, injection_mode, sampling_frequency=None, segment_le
                                          times=times, outdir=outdir, injection_id=injection_id,
                                          likelihood_model=likelihood_model, mean_model=mean_model,
                                          n_components=n_components, poisson_data=poisson_data)
-
-    injection_creator.save()
+    if outdir is not None:
+        injection_creator.save()
     if plot:
         injection_creator.plot()
