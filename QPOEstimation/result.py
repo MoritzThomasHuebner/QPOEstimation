@@ -306,6 +306,34 @@ class GPResult(bilby.result.Result):
                 plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.png")
                 plt.clf()
 
+
+    def plot_period_posterior(self):
+        # matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        plt.style.use(style_file)
+        Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
+        if self.kernel_type in OSCILLATORY_MODELS:
+            if 'kernel:log_f' in self.posterior:
+                period_samples = 1/np.exp(np.array(self.posterior['kernel:log_f']))
+            elif 'kernel:terms[0]:log_f' in self.posterior:
+                period_samples = 1/np.exp(np.array(self.posterior['kernel:terms[0]:log_f']))
+            else:
+                return
+            plt.hist(period_samples, bins="fd", density=True)
+            plt.xlabel('period [s]')
+            plt.xlim(6.5, 10.5)
+            plt.ylabel('normalised PDF')
+            median = np.median(period_samples)
+            percentiles = np.percentile(period_samples, [16, 84])
+            plt.title(
+                f"{np.mean(period_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+            try:
+                plt.tight_layout()
+            except Exception:
+                pass
+            plt.savefig(f"{self.corner_outdir}/{self.label}_period_posterior.pdf")
+            plt.clf()
+
+
     def plot_qpo_log_amplitude(self):
         if self.kernel_type == "general_qpo":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -435,5 +463,6 @@ class GPResult(bilby.result.Result):
         # self.plot_log_red_noise_power()
         # self.plot_log_qpo_power()
         self.plot_frequency_posterior()
+        self.plot_period_posterior()
         self.plot_duration_posterior()
         # self.plot_amplitude_ratio()
