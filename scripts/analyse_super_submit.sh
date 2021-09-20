@@ -38,6 +38,7 @@ do
 #    sbatch analyse_submit.sh ${model} fred_norris ${n_components}
 #    sbatch analyse_submit.sh ${model} fred_norris_extended ${n_components}
 #    sbatch analyse_submit.sh ${model} skew_gaussian ${n_components}
+    echo 0
   done
 done
 
