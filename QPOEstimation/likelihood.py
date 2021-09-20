@@ -430,19 +430,30 @@ def get_kernel(kernel_type, jitter_term=False):
               PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
               PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
               ExponentialTerm(log_a=0.1, log_c=-0.01)
-
     elif kernel_type == 'sho':
         res = celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0)
     elif kernel_type == 'double_sho':
         res = celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0) + \
               celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0)
     elif kernel_type == 'matern32':
-        res = george.kernels.Matern32Kernel(metric=1.0)
+        res = george.kernels.Matern32Kernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
+    elif kernel_type == 'matern52':
+        res = george.kernels.Matern52Kernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
+    elif kernel_type == 'exp_sine2':
+        res = george.kernels.ExpSine2Kernel(gamma=1.0, log_period=10.0) * george.kernels.ConstantKernel(log_constant=0)
+    elif kernel_type == 'rational_quadratic':
+        res = george.kernels.RationalQuadraticKernel(log_alpha=0.0, metric=1.0)
+    elif kernel_type == 'exp_squared':
+        res = george.kernels.ExpSquaredKernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
+    elif kernel_type == 'exp_sine2_rn':
+        res = george.kernels.ExpSine2Kernel(gamma=1.0, log_period=10.0) * george.kernels.ConstantKernel(log_constant=0)\
+              + george.kernels.ExpKernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
     else:
         raise ValueError('Recovery mode not defined')
 
     if jitter_term:
         res += celerite.terms.JitterTerm(log_sigma=-20)
+
     return res
 
 
