@@ -31,6 +31,16 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
         priors = get_double_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
     elif kernel_type == "matern32":
         priors = get_matern_32_prior()
+    elif kernel_type == "matern52":
+        priors = get_matern_52_prior()
+    elif kernel_type == "exp_sine2":
+        priors = get_exp_sine2_prior(band_minimum=band_minimum, band_maximum=band_maximum)
+    elif kernel_type == "exp_sine2_rn":
+        priors = get_exp_sine2_rn_prior(band_minimum=band_minimum, band_maximum=band_maximum)
+    elif kernel_type == "rational_quadratic":
+        priors = get_rational_quadratic_prior()
+    elif kernel_type == "exp_squared":
+        priors = get_square_exponential_prior()
     else:
         raise ValueError('Recovery mode not defined')
     if jitter_term:
@@ -177,7 +187,47 @@ def get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, m
 
 def get_matern_32_prior():
     priors = bilby.prior.PriorDict()
+    priors['kernel:k1:metric:log_M_0_0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_M_0_0')
+    priors['kernel:k2:log_constant'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_alpha')
+    return priors
+
+
+def get_matern_52_prior():
+    priors = bilby.prior.PriorDict()
+    priors['kernel:k1:metric:log_M_0_0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_M_0_0')
+    priors['kernel:k2:log_constant'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_alpha')
+    return priors
+
+
+def get_exp_sine2_prior(band_minimum, band_maximum):
+    priors = bilby.prior.PriorDict()
+    priors['kernel:k1:metric:log_M_0_0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_M_0_0')
+    priors['kernel:k2:gamma'] = bilby.core.prior.Uniform(minimum=-10, maximum=1000, name='gamma')
+    priors['kernel:k2:log_period'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='log_period')
+    return priors
+
+
+def get_exp_sine2_rn_prior(band_minimum, band_maximum):
+    priors = bilby.prior.PriorDict()
+    priors['kernel:k1:k1:gamma'] = bilby.core.prior.Uniform(minimum=-10, maximum=1000, name='gamma')
+    priors['kernel:k1:k1:log_period'] = bilby.core.prior.Uniform(minimum=-np.log(band_maximum), maximum=-np.log(band_minimum), name='log_period')
+    priors['kernel:k1:k2:log_constant'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_alpha_1')
+    priors['kernel:k2:k1:metric:log_M_0_0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_M_0_0')
+    priors['kernel:k2:k2:log_constant'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_alpha_2')
+    return priors
+
+
+def get_rational_quadratic_prior():
+    priors = bilby.prior.PriorDict()
     priors['kernel:metric:log_M_0_0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_M_0_0')
+    priors['kernel:log_alpha'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_alpha')
+    return priors
+
+
+def get_square_exponential_prior():
+    priors = bilby.prior.PriorDict()
+    priors['kernel:k1:metric:log_M_0_0'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_M_0_0')
+    priors['kernel:k2:log_constant'] = bilby.core.prior.Uniform(minimum=-15, maximum=15, name='log_alpha')
     return priors
 
 
