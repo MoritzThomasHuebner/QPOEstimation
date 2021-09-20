@@ -448,7 +448,7 @@ class GPResult(bilby.result.Result):
 
 
     def plot_all(self):
-        # self.plot_corner()
+        self.plot_corner()
         try:
             self.plot_max_likelihood_psd()
         except Exception:
