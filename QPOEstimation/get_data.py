@@ -3,9 +3,9 @@ import numpy as np
 from .utils import get_injection_outdir, get_injection_label
 
 
-def get_all_tte_magnetar_flare_data(magnetar_label, tag, bin_size=0.001, subtract_t0=True,
+def get_all_tte_magnetar_flare_data(magnetar_label, magnetar_tag, bin_size=0.001, subtract_t0=True,
                                     unbarycentred_time=False, **kwargs):
-    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{tag}_data.txt')
+    data = np.loadtxt(f'data/magnetar_flares/{magnetar_label}/{magnetar_tag}_data.txt')
     column = 1 if unbarycentred_time else 0
     ttes = data[:, column]
 
@@ -16,10 +16,10 @@ def get_all_tte_magnetar_flare_data(magnetar_label, tag, bin_size=0.001, subtrac
     return times, counts
 
 
-def get_tte_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, tag, bin_size=0.001,
+def get_tte_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, magnetar_tag, bin_size=0.001,
                                              subtract_t0=True, unbarycentred_time=False, **kwargs):
     times, counts = get_all_tte_magnetar_flare_data(
-        magnetar_label=magnetar_label, tag=tag, bin_size=bin_size,
+        magnetar_label=magnetar_label, magnetar_tag=magnetar_tag, bin_size=bin_size,
         subtract_t0=subtract_t0, unbarycentred_time=unbarycentred_time, **kwargs)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
