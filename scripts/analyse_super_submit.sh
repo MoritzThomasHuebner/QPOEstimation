@@ -30,7 +30,7 @@
 #done
 
 ## Magnetar flare
-for model in red_noise general_qpo #double_qpo
+for model in red_noise general_qpo
 do
   for n_components in {1..4}
   do
@@ -117,9 +117,9 @@ done
 
 ## Solar flare
 
-
-for i in {2..4}
-do
-  sbatch analyse_submit.sh red_noise ${i}
-  sbatch analyse_submit.sh general_qpo ${i}
-done
+#
+#for i in {2..4}
+#do
+#  sbatch analyse_submit.sh red_noise ${i}
+#  sbatch analyse_submit.sh general_qpo ${i}
+#done
