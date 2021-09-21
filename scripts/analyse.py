@@ -165,7 +165,7 @@ else:
     min_log_a = None
     max_log_a = None
     # min_log_c = -10
-    min_log_c = 1.0
+    min_log_c = None
     max_log_c = None
     # max_log_c = 30
     minimum_window_spacing = 0

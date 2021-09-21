@@ -30,7 +30,7 @@
 #done
 
 ## Magnetar flare
-for model in red_noise general_qpo double_qpo
+for model in red_noise general_qpo #double_qpo
 do
   for n_components in {1..4}
   do
