@@ -13,7 +13,7 @@ from QPOEstimation.prior.psd import *
 from QPOEstimation.utils import *
 
 if len(sys.argv) > 1:
-    plt.style.use('paper.mplstyle')
+    # plt.style.use('paper.mplstyle')
     parser = parse_args()
     args = parser.parse_args()
 
@@ -359,6 +359,24 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(f'{outdir}/{label}_max_like_fit.pdf')
 plt.show()
+
+
+if recovery_mode in ['general_qpo', 'pure_qpo']:
+    frequency_samples = np.exp(result.posterior['log_frequency'])
+    plt.hist(frequency_samples, bins="fd", density=True)
+    plt.xlabel('frequency [Hz]')
+    plt.ylabel('normalised PDF')
+    median = np.median(frequency_samples)
+    percentiles = np.percentile(frequency_samples, [16, 84])
+    plt.title(
+        f"{np.mean(frequency_samples):.2f} + {percentiles[1] - median:.2f} / - {- percentiles[0] + median:.2f}")
+    try:
+        plt.tight_layout()
+    except Exception:
+        pass
+    plt.savefig(f"{outdir}/{label}_frequency_posterior.pdf")
+    plt.clf()
+
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',

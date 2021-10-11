@@ -30,6 +30,32 @@ def fred_norris(times, log_amplitude, log_psi, t_0, delta):
         return amplitude * np.exp(-psi * (frac + 1 / frac)) * np.exp(2 * psi)
 
 
+def fred_norris_wave_packet(times, log_amplitude, log_psi, t_0, delta, log_amplitude_res, delta_time_res, log_tau_res, omega, phase):
+    amplitude = np.exp(log_amplitude)
+    psi = np.exp(log_psi)
+
+    frac = (times + delta) / t_0
+    with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
+        return amplitude * np.exp(-psi * (frac + 1 / frac)) * np.exp(2 * psi) \
+               + wave_packet(times=times, log_amplitude_res=log_amplitude_res, delta_time_res=delta_time_res,
+                             log_tau_res=log_tau_res, omega=omega, phase=phase)
+
+
+def fred_norris_wave_packet_lensed(times, log_amplitude, log_psi, t_0, delta, log_amplitude_res, delta_time_res, log_tau_res, omega, phase, log_magnification, time_difference):
+    return fred_norris_wave_packet(times=times, log_amplitude=log_amplitude, log_psi=log_psi, t_0=t_0, delta=delta, log_amplitude_res=log_amplitude_res, delta_time_res=delta_time_res, log_tau_res=log_tau_res, omega=omega, phase=phase) + \
+           np.exp(log_magnification) * fred_norris_wave_packet(times=times, log_amplitude=log_amplitude, log_psi=log_psi, t_0=t_0 + time_difference, delta=delta, log_amplitude_res=log_amplitude_res, delta_time_res=delta_time_res + time_difference, log_tau_res=log_tau_res, omega=omega, phase=phase)
+
+
+def wave_packet(times, log_amplitude_res, delta_time_res, log_tau_res, omega, phase):
+    return np.exp(log_amplitude_res) * np.exp(-((times - delta_time_res) ** 2 / np.exp(log_tau_res))) * np.cos(omega * times + phase)
+
+
+def fred_norris_lensed(times, log_amplitude, log_psi, t_0, delta, log_magnification, time_difference):
+    return fred_norris(times=times, log_amplitude=log_amplitude, log_psi=log_psi, t_0=t_0, delta=delta) + \
+           np.exp(log_magnification) * fred_norris(times=times, log_amplitude=log_amplitude, log_psi=log_psi,
+                                               t_0=t_0 + time_difference, delta=delta)
+
+
 def fred_norris_extended(times, log_amplitude, log_psi, t_0, delta, log_gamma, log_nu):
     amplitude = np.exp(log_amplitude)
     nu = np.exp(log_nu)
@@ -41,7 +67,7 @@ def fred_norris_extended(times, log_amplitude, log_psi, t_0, delta, log_gamma, l
         return amplitude * np.exp(-psi**gamma * frac**gamma - psi**nu / frac**nu) * np.exp(2 * psi)
 
 
-def gaussian(times, log_amplitude, t_0, log_sigma):
+def gaussian(times, log_amplitude, t_0, log_sigma, **kwargs):
     amplitude = np.exp(log_amplitude)
     sigma = np.exp(log_sigma)
     return amplitude * np.exp(-(times - t_0) ** 2 / (2 * sigma ** 2))

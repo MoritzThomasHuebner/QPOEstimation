@@ -139,31 +139,39 @@ def get_grb_data_from_segment(
 
 
 def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band='all', **kwargs):
-    data_file = f'data/GRBs/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt'
-    data = np.loadtxt(data_file)
-    times = data[:, 0]
-    if grb_detector == 'swift':
-        if grb_energy_band == '15-25':
+    if grb_detector in ["swift", "konus"]:
+        data_file = f'data/GRBs/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt'
+        data = np.loadtxt(data_file)
+        times = data[:, 0]
+        if grb_detector == 'swift':
+            if grb_energy_band == '15-25':
+                y = data[:, 1]
+                yerr = data[:, 2]
+            elif grb_energy_band == '25-50':
+                y = data[:, 3]
+                yerr = data[:, 4]
+            elif grb_energy_band == '50-100':
+                y = data[:, 5]
+                yerr = data[:, 6]
+            elif grb_energy_band == '100-350':
+                y = data[:, 7]
+                yerr = data[:, 8]
+            elif grb_energy_band in ['all', '15-350']:
+                y = data[:, 9]
+                yerr = data[:, 10]
+            else:
+                raise ValueError(f'Energy band {grb_energy_band} not understood')
+            return times, y, yerr
+        elif grb_detector == 'konus':
             y = data[:, 1]
-            yerr = data[:, 2]
-        elif grb_energy_band == '25-50':
-            y = data[:, 3]
-            yerr = data[:, 4]
-        elif grb_energy_band == '50-100':
-            y = data[:, 5]
-            yerr = data[:, 6]
-        elif grb_energy_band == '100-350':
-            y = data[:, 7]
-            yerr = data[:, 8]
-        elif grb_energy_band in ['all', '15-350']:
-            y = data[:, 9]
-            yerr = data[:, 10]
-        else:
-            raise ValueError(f'Energy band {grb_energy_band} not understood')
-        return times, y, yerr
-    elif grb_detector == 'konus':
+            return times, y, np.sqrt(y)
+    elif grb_detector == "batse":
+        data_file = f'data/GRBs/GRB{grb_id}/GRB{grb_id}_{grb_energy_band}'
+        data = np.loadtxt(data_file)
+        times = data[:, 0]
         y = data[:, 1]
-        return times, y, np.sqrt(y)
+        yerr = np.sqrt(y)
+        return times, y, yerr
 
 
 def get_grb_data(run_mode, **kwargs):

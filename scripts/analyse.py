@@ -3,6 +3,7 @@ import os
 import sys
 from pathlib import Path
 
+import bilby.core.prior
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -317,9 +318,9 @@ if result is None:
 
 if plot:
     result.plot_all()
-    if len(sys.argv) < 1:
-        result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
-        result.plot_residual(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
+    # if len(sys.argv) < 1:
+    #     result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
+    #     result.plot_residual(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
 
 # plt.style.use('paper.mplstyle')
 # result.outdir = '.'
