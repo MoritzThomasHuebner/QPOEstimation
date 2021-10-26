@@ -5,7 +5,7 @@ for filename in 10788 122522 129113 159804 161404 165101 166659 172202 173913 18
 do
    for model in red_noise general_qpo
    do
-      sbatch analyse_periodogram_submit ${filename} ${model}
+      sbatch analyse_periodogram_submit.sh ${filename} ${model}
    done
 done
 
