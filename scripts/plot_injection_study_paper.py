@@ -1,3 +1,4 @@
+import bilby.core.result
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,7 +26,7 @@ y = y[indices]
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)
 ax1.set_xlabel(r'times [s]')
-ax1.set_ylabel(r'Flux [Arb. units]')
+ax1.set_ylabel(r'Flux [arb. units]')
 ax1.set_xlim(-30, 30)
 ax2 = ax1.twiny()
 ax2.set_xlabel("$x$")
@@ -275,7 +276,7 @@ inset_y = y[inset_indices]
 
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)
-ax1.set_xlabel(r'times [s]')
+ax1.set_xlabel(r'time [s]')
 ax1.set_ylabel(r'Counts')
 ax1.set_xlim(-200, 200)
 
@@ -326,3 +327,8 @@ data = np.loadtxt('injection_files_pop/general_qpo/whittle/05_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
+
+
+res = bilby.core.result.read_in_result("path/to/result.json")
+res.injection_parameters = dict(param_1=1, param_2=2)
+res.save_to_file()

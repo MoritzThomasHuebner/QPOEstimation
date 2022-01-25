@@ -20,7 +20,7 @@ sampling_frequency = int(round(1/(times[1] - times[0])))
 fig, ax = plt.subplots(dpi=150)
 ax.plot(times, y)
 ax.set_xlabel('time [s]')
-ax.set_ylabel('flux [arb. units]')
+ax.set_ylabel('Flux [arb. units]')
 ax.set_xlim(-40, 40)
 
 ax2 = ax.twiny()
@@ -38,9 +38,19 @@ fig.savefig("paper_figures/data_generation_example_white_noise_padding.pdf")
 times = data[:, 0]
 y = data[:, 1]
 
-plt.figure(figsize=(9, 6))
+# plt.figure(figsize=(13.5, 9))
+# fontsize = 32
+# plt.rcParams.update({"axes.labelsize": fontsize, "axes.titlesize": fontsize, "xtick.labelsize": fontsize, "ytick.labelsize": fontsize, "legend.fontsize": fontsize, "font.size": fontsize})
+# plt.rc('font', size=22)          # controls default text sizes
+# plt.rc('axes', titlesize=22)     # fontsize of the axes title
+# plt.rc('axes', labelsize=22)    # fontsize of the x and y labels
+# plt.rc('xtick', labelsize=22)    # fontsize of the tick labels
+# plt.rc('ytick', labelsize=22)    # fontsize of the tick labels
+# plt.rc('legend', fontsize=22)    # legend fontsize
+# plt.rc('figure', titlesize=22)  # fontsize of the figure title
+
 # plt.figure(dpi=150)
-for duration, label in zip([20, 40, 80, 160], ['$x=1$', '$x=2$', '$x=4$', '$x=8$']):
+for duration, label, ls in zip([20, 40, 80, 160], ['$x=1$', '$x=2$', '$x=4$', '$x=8$'], ['solid', 'dotted', 'dashed', 'dashdot']):
     indices = QPOEstimation.utils.get_indices_by_time(times=times, minimum_time=-duration/2, maximum_time=duration/2)
     cropped_y = y[indices]
     cropped_times = times[indices]
@@ -51,14 +61,14 @@ for duration, label in zip([20, 40, 80, 160], ['$x=1$', '$x=2$', '$x=4$', '$x=8$
     freqs, powers = periodogram(cropped_y, fs=sampling_frequency, window='boxcar')
     plt.loglog()
     df = freqs[1] - freqs[0]
-    plt.step(freqs[1:], powers[1:], label=label, where='mid')
+    plt.plot(freqs[1:], powers[1:], label=label, linestyle=ls, linewidth=2.5)  # , where='mid'
     plt.xlim(0.7, 1.3)
     plt.xlabel('frequency [Hz]')
-    plt.ylabel('power [Arb. units]')
-plt.axvline(1, label='QPO frequency', color='black', linestyle='--')
+    plt.ylabel('Power [arb. units]')
+plt.axvline(1, label='QPO frequency', color='black', linestyle='solid')
 plt.legend(loc='lower left', ncol=2)
 plt.xticks([0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3], [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3])
-plt.ylim(5e-3, 5e2)
+plt.ylim(1e-3, 1e2)
 plt.tight_layout()
 plt.savefig('paper_figures/example_zero_padding_effects.pdf')
 plt.show()
