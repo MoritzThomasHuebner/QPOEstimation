@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument("--solar_flare_folder", default='goes', type=str)
     parser.add_argument("--solar_flare_id", default='120704187', type=str)
     parser.add_argument("--grb_id", default='090709A', type=str)
+    parser.add_argument("--grb_label", default='ASIM_CLEANED_LED', type=str)
     parser.add_argument("--grb_binning", default='1s', type=str)
     parser.add_argument("--grb_detector", default='swift', type=str)
     parser.add_argument("--grb_energy_band", default='all', choices=grb_energy_bands, type=str)
