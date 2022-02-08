@@ -14,16 +14,16 @@
 
 
 ### GRB
-for model in red_noise general_qpo
-do
-  for n_components in {1..4}
-  do
-    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
-    sbatch analyse_submit.sh gaussian_process ${model} fred_norris ${n_components}
-    sbatch analyse_submit.sh gaussian_process ${model} fred_norris_extended ${n_components}
-    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
-  done
-done
+#for model in red_noise general_qpo
+#do
+#  for n_components in {1..4}
+#  do
+#    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
+#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris ${n_components}
+#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris_extended ${n_components}
+#    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
+#  done
+#done
 
 ## Magnetar flare
 #for model in red_noise general_qpo
@@ -113,9 +113,9 @@ done
 
 ## Solar flare
 
-#
-#for i in {2..4}
-#do
-#  sbatch analyse_submit.sh red_noise ${i}
-#  sbatch analyse_submit.sh general_qpo ${i}
-#done
+
+for i in {0..3}
+do
+  sbatch analyse_submit.sh red_noise ${i}
+  sbatch analyse_submit.sh general_qpo ${i}
+done
