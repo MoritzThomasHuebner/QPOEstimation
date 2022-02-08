@@ -18,7 +18,10 @@ def get_priors(**kwargs):
         kwargs['band_maximum'] = sampling_frequency / 2
 
     if kwargs['min_log_c'] is None:
-        kwargs['min_log_c'] = np.log(1 / 10 / segment_length)
+        if kwargs['kernel_type'] == 'red_noise':
+            kwargs['min_log_c'] = np.log(1 / segment_length)
+        elif kwargs['kernel_type'] in ['qpo', 'pure_qpo', 'general_qpo']:
+            kwargs['min_log_c'] = np.log(1 / 10 / segment_length)
     if kwargs['max_log_c'] is None:
         if kwargs['kernel_type'] == 'red_noise':
             kwargs['max_log_c'] = np.log(sampling_frequency)

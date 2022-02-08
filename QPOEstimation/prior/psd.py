@@ -2,11 +2,17 @@ import bilby
 import numpy as np
 
 
-def get_red_noise_prior():
+def get_red_noise_prior(**kwargs):
+    sigma_min = kwargs.get('sigma_min', -30)
+    sigma_max = kwargs.get('sigma_max', 30)
+
     prior = bilby.core.prior.ConditionalPriorDict()
     prior['alpha'] = bilby.core.prior.Uniform(0, 20, name='alpha')
     prior['log_beta'] = bilby.core.prior.Uniform(-100, 100, name='log_beta')
-    prior['log_sigma'] = bilby.core.prior.Uniform(-30, 30, name='log_sigma')
+    if sigma_min == sigma_max:
+        prior['log_sigma'] = bilby.core.prior.DeltaFunction(np.log(sigma_min), name='log_sigma')
+    else:
+        prior['log_sigma'] = bilby.core.prior.Uniform(np.log(sigma_min), np.log(sigma_max), name='log_sigma')
     return prior
 
 
