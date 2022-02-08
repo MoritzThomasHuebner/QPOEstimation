@@ -242,7 +242,7 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
         jitter = 0
         for k in self.parameters.keys():
-            if "log_sigma" in k:
+            if k.endswith("log_sigma"):
                 jitter = np.exp(self.parameters[k])
 
         self.gp.compute(self.t[self.windowed_indices], self.y_err[self.windowed_indices])
