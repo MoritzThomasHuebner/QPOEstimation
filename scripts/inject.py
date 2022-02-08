@@ -42,8 +42,10 @@ if len(sys.argv) > 1:
     max_log_a = args.max_log_a
     min_log_a_red_noise = args.min_log_a_red_noise
     max_log_a_red_noise = args.max_log_a_red_noise
-    min_log_c = args.min_log_c
-    max_log_c = args.max_log_c
+    min_log_c_red_noise = args.min_log_c_red_noise
+    max_log_c_red_noise = args.max_log_c_red_noise
+    min_log_c_qpo = args.min_log_c_qpo
+    max_log_c_qpo = args.max_log_c_qpo
     minimum_window_spacing = args.minimum_window_spacing
 
     likelihood_model = args.likelihood_model
@@ -79,8 +81,10 @@ else:
 
     min_log_a = -1
     max_log_a = 1
-    min_log_c = -1
-    max_log_c = 1
+    min_log_c_red_noise = -1
+    max_log_c_red_noise = 1
+    min_log_c_qpo = -1
+    max_log_c_qpo = 1
     minimum_window_spacing = 0
 
     likelihood_model = "gaussian_process"
@@ -117,14 +121,16 @@ if injection_mode == 'red_noise':
     min_log_a = min_log_a_red_noise
     max_log_a = min_log_a_red_noise
     priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
-                        min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
-                        max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
+                        min_log_a=min_log_a, max_log_a=max_log_a, min_log_c_red_noise=min_log_c_red_noise,
+                        max_log_c_red_noise=max_log_c_red_noise, min_log_c_qpo=min_log_c_qpo,
+                        max_log_c_qpo=max_log_c_qpo, band_minimum=band_minimum, band_maximum=band_maximum,
                         model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                         n_components=n_components, **mean_prior_bounds_dict)
 elif injection_mode == 'general_qpo':
     priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
-                        min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
-                        max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
+                        min_log_a=min_log_a, max_log_a=max_log_a, min_log_c_red_noise=min_log_c_red_noise,
+                        max_log_c_red_noise=max_log_c_red_noise, min_log_c_qpo=min_log_c_qpo,
+                        max_log_c_qpo=max_log_c_qpo, band_minimum=band_minimum, band_maximum=band_maximum,
                         model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                         n_components=n_components, **mean_prior_bounds_dict)
     priors['kernel:terms[1]:log_a'].peak = min_log_a_red_noise

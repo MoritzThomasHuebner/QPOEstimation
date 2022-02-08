@@ -70,8 +70,10 @@ def parse_args():
 
     parser.add_argument("--min_log_a", default=None, type=float)
     parser.add_argument("--max_log_a", default=None, type=float)
-    parser.add_argument("--min_log_c", default=None, type=float)
-    parser.add_argument("--max_log_c", default=None, type=float)
+    parser.add_argument("--min_log_c_red_noise", default=None, type=float)
+    parser.add_argument("--min_log_c_qpo", default=None, type=float)
+    parser.add_argument("--max_log_c_red_noise", default=None, type=float)
+    parser.add_argument("--max_log_c_qpo", default=None, type=float)
     parser.add_argument("--minimum_window_spacing", default=0, type=float)
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)

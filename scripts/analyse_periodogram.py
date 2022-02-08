@@ -60,10 +60,6 @@ if len(sys.argv) > 1:
     tau_min = args.tau_min
     tau_max = args.tau_max
 
-    min_log_a = args.min_log_a
-    max_log_a = args.max_log_a
-    min_log_c = args.min_log_c
-    max_log_c = args.max_log_c
     minimum_window_spacing = args.minimum_window_spacing
 
     injection_id = args.injection_id
@@ -151,12 +147,6 @@ else:
     tau_min = None
     tau_max = None
 
-    min_log_a = -10
-    max_log_a = 5
-    # min_log_c = -10
-    min_log_c = None
-    max_log_c = None
-    # max_log_c = 30
     minimum_window_spacing = 0
 
     injection_mode = "general_qpo"

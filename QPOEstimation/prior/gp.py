@@ -6,29 +6,30 @@ import bilby
 from QPOEstimation.prior.minimum import MinimumPrior
 
 
-def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c, band_minimum,
-                     band_maximum, max_log_c=np.nan, jitter_term=False, **kwargs):
-    if max_log_c is None or np.isnan(max_log_c):
-        max_log_c = np.log(band_maximum)
+def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c_red_noise, min_log_c_qpo, band_minimum,
+                     band_maximum, max_log_c_red_noise=np.nan, max_log_c_qpo=np.nan, jitter_term=False, **kwargs):
+    if max_log_c_qpo is None or np.isnan(max_log_c_qpo):
+        max_log_c_qpo = np.log(band_maximum)
 
     if kernel_type == "white_noise":
         return get_white_noise_prior(jitter_term=jitter_term)
     elif kernel_type == "qpo":
-        priors = get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c_qpo, min_log_a, min_log_c_qpo)
     elif kernel_type == "pure_qpo":
-        priors = get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_pure_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c_qpo, min_log_a, min_log_c_qpo)
     elif kernel_type == "red_noise":
-        priors = get_red_noise_prior(max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_red_noise_prior(max_log_a, max_log_c_red_noise, min_log_a, min_log_c_red_noise)
     elif kernel_type == "double_red_noise":
-        priors = get_double_red_noise_prior(max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_double_red_noise_prior(max_log_a, max_log_c_red_noise, min_log_a, min_log_c_red_noise)
     elif kernel_type == "general_qpo":
-        priors = get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c_red_noise, max_log_c_qpo,
+                                       min_log_a, min_log_c_red_noise, min_log_c_qpo)
     elif kernel_type == "double_qpo":
-        priors = get_double_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_double_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c_qpo, min_log_a, min_log_c_qpo)
     elif kernel_type == "sho":
-        priors = get_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c_qpo, min_log_a, min_log_c_qpo)
     elif kernel_type == "double_sho":
-        priors = get_double_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c)
+        priors = get_double_sho_prior(band_maximum, band_minimum, max_log_a, max_log_c_qpo, min_log_a, min_log_c_qpo)
     elif kernel_type == "matern32":
         priors = get_matern_32_prior()
     elif kernel_type == "matern52":
@@ -80,16 +81,18 @@ def get_white_noise_prior(jitter_term=False):
         return priors
 
 
-def get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c, min_log_a, min_log_c):
+def get_general_qpo_prior(band_maximum, band_minimum, max_log_a, max_log_c_red_noise, max_log_c_qpo,
+                          min_log_a, min_log_c_red_noise, min_log_c_qpo):
     min_log_f = np.log(band_minimum)
     max_log_f = np.log(band_maximum)
 
     priors = bilby.prior.PriorDict()
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[0]:log_a')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='terms[0]:log_c')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_c_qpo, maximum=max_log_c_qpo, label='terms[0]:log_c')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_f, maximum=max_log_f, label='terms[0]:log_f')
     _add_individual_kernel_prior(priors=priors, minimum=min_log_a, maximum=max_log_a, label='terms[1]:log_a')
-    _add_individual_kernel_prior(priors=priors, minimum=min_log_c, maximum=max_log_c, label='terms[1]:log_c')
+    _add_individual_kernel_prior(priors=priors, minimum=min_log_c_red_noise,
+                                 maximum=max_log_c_red_noise, label='terms[1]:log_c')
     priors['decay_constraint'] = bilby.core.prior.Constraint(minimum=-1000, maximum=0.0, name='decay_constraint')
     priors.conversion_function = decay_constrain_conversion_function
     return priors

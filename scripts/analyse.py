@@ -69,8 +69,10 @@ if len(sys.argv) > 1:
 
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
-    min_log_c = args.min_log_c
-    max_log_c = args.max_log_c
+    min_log_c_red_noise = args.min_log_c_red_noise
+    min_log_c_qpo = args.min_log_c_qpo
+    max_log_c_red_noise = args.max_log_c_red_noise
+    max_log_c_qpo = args.max_log_c_qpo
     minimum_window_spacing = args.minimum_window_spacing
 
     injection_id = args.injection_id
@@ -103,8 +105,8 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "magnetar_flare_binned"  # "magnetar_flare_binned"
-    run_mode = 'entire_segment'
+    data_source = "grb"  # "magnetar_flare_binned"
+    run_mode = 'select_time'
     sampling_frequency = 64
     data_mode = 'normal'
     alpha = 0.02
@@ -116,10 +118,10 @@ else:
     solar_flare_folder = 'goes'
     solar_flare_id = "go1520130512"
     # solar_flare_id = "go1520110314"
-    grb_id = "200415A"
-    grb_label = "ASIM_CLEANED_LED"
-    grb_binning = "64ms"
-    grb_detector = "asim"
+    grb_id = "090709A"
+    grb_label = ""
+    grb_binning = "1s"
+    grb_detector = "swift"
     grb_energy_band = 'all'
 
     magnetar_label = 'SGR_0501'
@@ -135,14 +137,14 @@ else:
     # end_time = 139.915 + 0.5 + 20.378
     # start_time = 132.3 - 0.5 + 20.0
     # end_time = 132.3 + 0.5 + 20.0
-    # start_time = -4.0
-    # end_time = 103.0
+    start_time = -4.0
+    end_time = 103.0
     # start_time = 88.775 + 20.378
     # end_time = 90.775 + 20.378
     # start_time = -20.0
     # end_time = 20.0
-    start_time = 0 * 1e-3
-    end_time = 5 * 1e-3
+    # start_time = 0 * 1e-3
+    # end_time = 5 * 1e-3
 
     period_number = 14
     run_id = 6
@@ -167,10 +169,10 @@ else:
 
     min_log_a = None
     max_log_a = None
-    # min_log_c = -10
-    min_log_c = None
-    max_log_c = None
-    # max_log_c = 30
+    min_log_c_red_noise = None
+    min_log_c_qpo = None
+    max_log_c_red_noise = None
+    max_log_c_qpo = None
     minimum_window_spacing = 0
 
     injection_mode = "general_qpo"
@@ -179,7 +181,7 @@ else:
     recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process"
     background_model = "fred"
-    n_components = 2
+    n_components = 1
     jitter_term = False
     normalisation = False
 
@@ -288,8 +290,9 @@ mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=
                                       likelihood_model=likelihood_model)
 
 priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_model, kernel_type=recovery_mode,
-                    min_log_a=min_log_a, max_log_a=max_log_a, min_log_c=min_log_c,
-                    max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
+                    min_log_a=min_log_a, max_log_a=max_log_a,
+                    min_log_c_red_noise=min_log_c_red_noise, max_log_c_red_noise=max_log_c_red_noise,
+                    min_log_c_qpo=min_log_c_qpo, max_log_c_qpo=max_log_c_qpo, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=minimum_window_spacing,
                     n_components=n_components, offset=offset, jitter_term=jitter_term, **mean_prior_bound_dict)
 

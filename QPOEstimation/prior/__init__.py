@@ -17,16 +17,14 @@ def get_priors(**kwargs):
     if kwargs['band_maximum'] is None:
         kwargs['band_maximum'] = sampling_frequency / 2
 
-    if kwargs['min_log_c'] is None:
-        if kwargs['kernel_type'] == 'red_noise':
-            kwargs['min_log_c'] = np.log(1 / segment_length)
-        elif kwargs['kernel_type'] in ['qpo', 'pure_qpo', 'general_qpo']:
-            kwargs['min_log_c'] = np.log(1 / 10 / segment_length)
-    if kwargs['max_log_c'] is None:
-        if kwargs['kernel_type'] == 'red_noise':
-            kwargs['max_log_c'] = np.log(sampling_frequency)
-        elif kwargs['kernel_type'] in ['qpo', 'pure_qpo', 'general_qpo']:
-            kwargs['max_log_c'] = np.log(kwargs['band_maximum'])
+    if kwargs['min_log_c_red_noise'] is None:
+        kwargs['min_log_c_red_noise'] = np.log(1 / segment_length)
+    if kwargs['min_log_c_qpo'] is None:
+        kwargs['min_log_c_qpo'] = np.log(1 / 10 / segment_length)
+    if kwargs['max_log_c_red_noise'] is None:
+        kwargs['max_log_c_red_noise'] = np.log(sampling_frequency)
+    if kwargs['max_log_c_qpo'] is None:
+        kwargs['max_log_c_qpo'] = np.log(kwargs.get('band_maximum', 1/2/segment_length))
 
 
     minimum = np.min(kwargs['y']) if kwargs.get('offset', False) else 0
