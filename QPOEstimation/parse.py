@@ -35,7 +35,7 @@ def parse_args():
 
     parser.add_argument("--magnetar_label", default='SGR_1806_20', type=str)
     parser.add_argument("--magnetar_tag", default='10223-01-03-010_90907122.0225', type=str)
-    parser.add_argument("--magnetar_bin_size", default=0.001, type=float)
+    parser.add_argument("--bin_size", default=0.001, type=float)
     parser.add_argument("--magnetar_subtract_t0", default="True", type=str)
     parser.add_argument("--magnetar_unbarycentred_time", default="False", type=str)
     parser.add_argument("--rebin_factor", default=1, type=int)
