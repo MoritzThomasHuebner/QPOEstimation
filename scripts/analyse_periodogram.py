@@ -30,12 +30,13 @@ if len(sys.argv) > 1:
     solar_flare_folder = args.solar_flare_folder
     solar_flare_id = args.solar_flare_id
     grb_id = args.grb_id
+    grb_label = args.grb_label
     grb_binning = args.grb_binning
     grb_detector = args.grb_detector
     grb_energy_band = args.grb_energy_band
     magnetar_label = args.magnetar_label
     magnetar_tag = args.magnetar_tag
-    magnetar_bin_size = args.magnetar_bin_size
+    bin_size = args.bin_size
     magnetar_subtract_t0 = boolean_string(args.magnetar_subtract_t0)
     magnetar_unbarycentred_time = boolean_string(args.magnetar_unbarycentred_time)
 
@@ -94,9 +95,9 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    # matplotlib.use('Qt5Agg')
+    matplotlib.use('Qt5Agg')
 
-    data_source = "solar_flare"
+    data_source = "grb"
     run_mode = 'select_time'
     sampling_frequency = 4096
     data_mode = 'normal'
@@ -108,20 +109,22 @@ else:
 
     solar_flare_folder = 'goes'
     solar_flare_id = "go1520130512"
-    grb_id = "090709A"
+    grb_id = "200415A"
+    grb_label = "ASIM_CLEANED_LED"
     grb_binning = "64ms"
-    grb_detector = 'swift'
+    grb_detector = "asim"
     grb_energy_band = 'all'
 
     magnetar_label = 'SGR_0501'
     magnetar_tag = '080823478_lcobs'
-    magnetar_bin_size = 0.001
+    # bin_size = 100*1e-6
+    bin_size = 0.1*1e-3
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
     rebin_factor = 1
 
-    start_time = 73020
-    end_time = 75780
+    start_time = 0 * 1e-3
+    end_time = 100 * 1e-3
     # start_time = 73020
     # end_time = 75780
     # start_time = 210.735 + 20.378 + 0.5
@@ -139,8 +142,8 @@ else:
     amplitude_max = None
     # sigma_min = 0.1
     # sigma_max = 10000
-    sigma_min = None
-    sigma_max = None
+    sigma_min = 2
+    sigma_max = 2
     # t_0_min = 1e-3
     # t_0_max = 1000
     t_0_min = None
@@ -161,22 +164,22 @@ else:
     injection_likelihood_model = "whittle"
     base_injection_outdir = "injection"
 
-    recovery_mode = "general_qpo"
+    recovery_mode = "red_noise"
     likelihood_model = "whittle"
     normalisation = True
 
-    window = "hann"
+    window = "tukey"
     frequency_mask_minimum = None
     frequency_mask_maximum = None
 
-    band_minimum = 0.01
-    band_maximum = 1
+    band_minimum = 500
+    band_maximum = 10000
     segment_length = 3.5
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
     sample = 'rwalk'
-    nlive = 1000
+    nlive = 500
     use_ratio = False
 
     try_load = True
@@ -196,15 +199,20 @@ times, y, _, outdir, label = get_data(
     sampling_frequency=sampling_frequency, alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id,
     period_number=period_number, run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time,
     run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str,
-    likelihood_model=likelihood_model,
-    magnetar_label=magnetar_label, magnetar_tag=magnetar_tag, magnetar_bin_size=magnetar_bin_size,
-    magnetar_subtract_t0=magnetar_subtract_t0, magnetar_unbarycentred_time=magnetar_unbarycentred_time,
-    rebin_factor=rebin_factor, solar_flare_folder=solar_flare_folder, solar_flare_id=solar_flare_id,
-    grb_id=grb_id, grb_binning=grb_binning, grb_detector=grb_detector, grb_energy_band=grb_energy_band,
+    likelihood_model=likelihood_model, magnetar_label=magnetar_label, magnetar_tag=magnetar_tag,
+    bin_size=bin_size, magnetar_subtract_t0=magnetar_subtract_t0,
+    magnetar_unbarycentred_time=magnetar_unbarycentred_time, rebin_factor=rebin_factor,
+    solar_flare_folder=solar_flare_folder, solar_flare_id=solar_flare_id, grb_id=grb_id, grb_binning=grb_binning,
+    grb_detector=grb_detector, grb_energy_band=grb_energy_band, grb_label=grb_label,
     injection_file_dir=injection_file_dir, injection_mode=injection_mode, injection_id=injection_id,
     injection_likelihood_model=injection_likelihood_model, hares_and_hounds_id=hares_and_hounds_id,
     hares_and_hounds_round=hares_and_hounds_round, base_injection_outdir=base_injection_outdir
     )
+
+if grb_label == "ASIM_CLEANED_LED":
+    outdir += 'LED'
+elif grb_label == "ASIM_CLEANED_HED":
+    outdir += 'HED'
 
 sampling_frequency = 1 / (times[1] - times[0])
 if window == "tukey":
@@ -212,17 +220,20 @@ if window == "tukey":
 
 
 if normalisation:
-    y = (y - np.mean(y))/np.mean(y)
-    # from stingray.lightcurve import Lightcurve
-    # from stingray.powerspectrum import Powerspectrum
-    # from scipy.signal.windows import hann
-    #
-    # lc = Lightcurve(times, y * hann(len(y)), err=np.ones(len(y)))
-    # ps = Powerspectrum(lc=lc, norm='leahy')
-    # freqs = ps.freq
-    # powers = ps.power
-freqs, powers = periodogram(y, fs=sampling_frequency, window=window)
+    # y = (y - np.mean(y))/np.mean(y)
+    from stingray.lightcurve import Lightcurve
+    from stingray.powerspectrum import Powerspectrum
+    from scipy.signal.windows import hann, tukey
 
+    # lc = Lightcurve(times, y * hann(len(y)), err=np.ones(len(y)))
+    # lc = Lightcurve(times, y * tukey(len(y), alpha=0.05), err=np.ones(len(y)))
+    lc = Lightcurve(times, y, err=np.ones(len(y)))
+
+
+    ps = Powerspectrum(lc=lc, norm='leahy')
+    freqs = ps.freq
+    powers = ps.power
+# freqs, powers = periodogram(y, fs=sampling_frequency, window='boxcar')
 
 if band_maximum is None:
     band_maximum = freqs[-1] + 1
@@ -232,6 +243,8 @@ if band_minimum is None:
 
 if plot:
     plt.step(times, y, label='data')
+    # plt.plot(times, tukey(len(y), alpha=0.05))
+
     # plt.plot(times, y, label='flux')
     plt.xlabel("time [s]")
     plt.ylabel("counts")
@@ -246,21 +259,21 @@ if plot:
     plt.clf()
 
 if recovery_mode == "red_noise":
-    priors = get_red_noise_prior()
+    priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
 elif recovery_mode == "general_qpo":
-    priors = get_red_noise_prior()
+    priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
     priors.update(get_qpo_prior(frequencies=freqs, min_log_f=np.log(band_minimum), max_log_f=np.log(band_maximum)))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
     priors._resolve_conditions()
 elif recovery_mode == "broken_power_law":
     priors = get_broken_power_law_prior(frequencies=freqs)
 elif recovery_mode == "pure_qpo":
-    priors = get_red_noise_prior()
+    priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
     priors.update(get_qpo_prior(frequencies=freqs, min_log_f=np.log(band_minimum), max_log_f=np.log(band_maximum)))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
     priors._resolve_conditions()
     del priors['alpha']
     del priors['log_beta']
 elif recovery_mode == 'white_noise':
-    priors = get_red_noise_prior()
+    priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
     del priors['alpha']
     del priors['log_beta']
 else:
@@ -379,7 +392,7 @@ if recovery_mode in ['general_qpo', 'pure_qpo']:
 
 
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',
+for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_checkpoint_trace_unit.png',
                   '_dynesty.pickle', '_resume.pickle', '_result.json.old', '_samples.dat']:
     try:
         os.remove(f"{outdir}/results/{label}{extension}")
