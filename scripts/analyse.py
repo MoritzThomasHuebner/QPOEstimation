@@ -34,12 +34,13 @@ if len(sys.argv) > 1:
     solar_flare_folder = args.solar_flare_folder
     solar_flare_id = args.solar_flare_id
     grb_id = args.grb_id
+    grb_label = args.grb_label
     grb_binning = args.grb_binning
     grb_detector = args.grb_detector
     grb_energy_band = args.grb_energy_band
     magnetar_label = args.magnetar_label
     magnetar_tag = args.magnetar_tag
-    magnetar_bin_size = args.magnetar_bin_size
+    bin_size = args.bin_size
     magnetar_subtract_t0 = boolean_string(args.magnetar_subtract_t0)
     magnetar_unbarycentred_time = boolean_string(args.magnetar_unbarycentred_time)
 
@@ -115,17 +116,18 @@ else:
     solar_flare_folder = 'goes'
     solar_flare_id = "go1520130512"
     # solar_flare_id = "go1520110314"
-    grb_id = "090709A"
-    grb_binning = "1s"
-    grb_detector = 'swift'
+    grb_id = "200415A"
+    grb_label = "ASIM_CLEANED_LED"
+    grb_binning = "64ms"
+    grb_detector = "asim"
     grb_energy_band = 'all'
 
-    magnetar_label = 'SGR_unknown'
-    magnetar_tag = '210912845_b1_lc'
-    magnetar_bin_size = 0.001
+    magnetar_label = 'SGR_0501'
+    magnetar_tag = '080823478_lcobs'
+    bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
-    rebin_factor = 32
+    rebin_factor = 8
 
     # start_time = 102.060 + 20.0
     # end_time = 103.060 + 20.0
@@ -139,8 +141,8 @@ else:
     # end_time = 90.775 + 20.378
     # start_time = -20.0
     # end_time = 20.0
-    start_time = 0.2
-    end_time = 1.1
+    start_time = 0 * 1e-3
+    end_time = 5 * 1e-3
 
     period_number = 14
     run_id = 6
@@ -150,7 +152,7 @@ else:
     injection_id = 1
     base_injection_outdir = 'injection'
 
-    offset = True
+    offset = False
     polynomial_max = 2
     amplitude_min = None
     amplitude_max = None
@@ -174,9 +176,9 @@ else:
     injection_mode = "general_qpo"
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
-    recovery_mode = "red_noise"
+    recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process"
-    background_model = "skew_gaussian"
+    background_model = "fred"
     n_components = 2
     jitter_term = False
     normalisation = False
@@ -228,10 +230,10 @@ times, y, yerr, outdir, label = get_data(
     sampling_frequency=sampling_frequency, alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id,
     period_number=period_number, run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time,
     run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str, likelihood_model=likelihood_model,
-    magnetar_label=magnetar_label,  magnetar_tag=magnetar_tag, magnetar_bin_size=magnetar_bin_size,
+    magnetar_label=magnetar_label,  magnetar_tag=magnetar_tag, bin_size=bin_size,
     magnetar_subtract_t0=magnetar_subtract_t0, magnetar_unbarycentred_time=magnetar_unbarycentred_time,
     rebin_factor=rebin_factor, solar_flare_folder=solar_flare_folder, solar_flare_id=solar_flare_id,
-    grb_id=grb_id, grb_binning=grb_binning, grb_detector=grb_detector, grb_energy_band=grb_energy_band,
+    grb_id=grb_id, grb_binning=grb_binning, grb_detector=grb_detector, grb_label=grb_label, grb_energy_band=grb_energy_band,
     injection_file_dir=injection_file_dir, injection_mode=injection_mode, injection_id=injection_id,
     injection_likelihood_model=injection_likelihood_model, hares_and_hounds_id=hares_and_hounds_id,
     hares_and_hounds_round=hares_and_hounds_round, base_injection_outdir=base_injection_outdir
@@ -263,7 +265,7 @@ if normalisation:
 if plot:
     # plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
     # plt.errorbar(times, y, yerr=yerr, capsize=0, label='data')
-    plt.plot(times, y, label='flux')
+    plt.step(times, y, label='flux')
     # plt.xlabel("time [s]")
     # plt.ylabel("counts/sec/det")
     # plt.title("GRB 090709A Swift-BAT 15-350 keV")
@@ -290,6 +292,9 @@ priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_mod
                     max_log_c=max_log_c, band_minimum=band_minimum, band_maximum=band_maximum,
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=minimum_window_spacing,
                     n_components=n_components, offset=offset, jitter_term=jitter_term, **mean_prior_bound_dict)
+
+# priors["kernel:terms[0]:log_f"] = bilby.core.prior.Uniform(minimum=np.log(3000), maximum=8.517193191416348, name='kernel:terms[0]:log_f', latex_label='kernel:terms[0]:log_f', unit=None, boundary='reflective')
+# suffix += "restricted_freq"
 
 kernel = get_kernel(kernel_type=recovery_mode, jitter_term=jitter_term)
 likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
@@ -332,7 +337,7 @@ if plot:
 # result.plot_corner(parameters=['window_minimum', 'window_maximum'])
 
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png',
+for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_checkpoint_trace_unit.png',
                   '_dynesty.pickle', '_resume.pickle', '_result.json.old', '_samples.dat',
                   '_checkpoint_trace_unit.png']:
     try:
