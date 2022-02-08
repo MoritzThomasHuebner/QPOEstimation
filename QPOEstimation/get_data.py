@@ -132,13 +132,15 @@ def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo
 
 
 def get_grb_data_from_segment(
-        grb_id, grb_binning, start_time, end_time, grb_detector=None, grb_energy_band='all', **kwargs):
+        grb_id, grb_binning, start_time, end_time, grb_detector=None, grb_energy_band='all', grb_label=None,
+        bin_size=None, **kwargs):
     times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id, grb_detector=grb_detector,
-                                      grb_energy_band=grb_energy_band)
+                                      grb_label=grb_label, grb_energy_band=grb_energy_band, bin_size=bin_size)
     return truncate_data(times=times, counts=y, start=start_time, stop=end_time, yerr=yerr)
 
 
-def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band='all', **kwargs):
+def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band='all', grb_label=None,
+                     bin_size=None, **kwargs):
     if grb_detector in ["swift", "konus"]:
         data_file = f'data/GRBs/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt'
         data = np.loadtxt(data_file)
@@ -170,6 +172,13 @@ def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band='al
         data = np.loadtxt(data_file)
         times = data[:, 0]
         y = data[:, 1]
+        yerr = np.sqrt(y)
+        return times, y, yerr
+    elif grb_detector.lower() == "asim":
+        data_file = f'data/GRBs/GRB{grb_id}/{grb_label}.txt'
+        ttes = np.loadtxt(data_file)
+        y, bin_edges = np.histogram(ttes, np.arange(ttes[0], ttes[-1], bin_size))
+        times = np.array([bin_edges[i] + (bin_edges[i + 1] - bin_edges[i]) / 2 for i in range(len(bin_edges) - 1)])
         yerr = np.sqrt(y)
         return times, y, yerr
 
@@ -314,7 +323,7 @@ def get_data(data_source, **kwargs):
             label = run_mode
         if kwargs['grb_energy_band'] != 'all':
             label += f"_{kwargs['grb_energy_band']}keV"
-        times -= times[0]
+        # times -= times[0]
 
     elif data_source == 'injection':
         times, y, yerr, truths = get_injection_data(**kwargs)
