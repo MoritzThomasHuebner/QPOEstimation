@@ -105,10 +105,10 @@ for i in {1..4}
 do
 #  start_time=$(python -c "print(${start_time_base} + ${period} * ${i})")
 #  end_time=$(python -c "print(${end_time_base} + ${period} * ${i})")
-  sbatch analyse_submit.sh red_noise gaussian_process ${i} 121.06 123.06
-  sbatch analyse_submit.sh red_noise gaussian_process_windowed ${i} 121.06 123.06
-  sbatch analyse_submit.sh general_qpo gaussian_process ${i} 121.06 123.06
-  sbatch analyse_submit.sh general_qpo gaussian_process_windowed ${i} 121.06 123.06
+  sbatch analyse_submit.sh red_noise gaussian_process 121.06 123.06 ${i}
+  sbatch analyse_submit.sh red_noise gaussian_process_windowed 121.06 123.06 ${i}
+  sbatch analyse_submit.sh general_qpo gaussian_process 121.06 123.06 ${i}
+  sbatch analyse_submit.sh general_qpo gaussian_process_windowed 121.06 123.06 ${i}
 done
 
 
