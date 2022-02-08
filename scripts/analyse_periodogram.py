@@ -224,12 +224,12 @@ if normalisation:
     from stingray.lightcurve import Lightcurve
     from stingray.powerspectrum import Powerspectrum
     from scipy.signal.windows import hann, tukey
-
-    # lc = Lightcurve(times, y * hann(len(y)), err=np.ones(len(y)))
-    # lc = Lightcurve(times, y * tukey(len(y), alpha=0.05), err=np.ones(len(y)))
-    lc = Lightcurve(times, y, err=np.ones(len(y)))
-
-
+#
+#     # lc = Lightcurve(times, y * hann(len(y)), err=np.ones(len(y)))
+    lc = Lightcurve(times, y * tukey(len(y), alpha=0.05), err=np.ones(len(y)))
+#     lc = Lightcurve(times, y, err=np.ones(len(y)))
+#
+#
     ps = Powerspectrum(lc=lc, norm='leahy')
     freqs = ps.freq
     powers = ps.power
