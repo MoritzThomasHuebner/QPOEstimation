@@ -4,8 +4,8 @@ from QPOEstimation.result import GPResult
 from QPOEstimation.model.celerite import power_qpo
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('Qt5Agg')
-# plt.style.use("paper.mplstyle")
+# matplotlib.use('Qt5Agg')
+plt.style.use("paper.mplstyle")
 
 evidence_dict = dict()
 evidence_err_dict = dict()
