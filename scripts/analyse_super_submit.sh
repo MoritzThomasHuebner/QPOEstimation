@@ -101,20 +101,19 @@
 #start_time_base=103.0
 #end_time_base=106.0
 
-for i in {1..4}
-do
-  sbatch analyse_submit.sh red_noise gaussian_process 121.06 123.06 ${i}
-  sbatch analyse_submit.sh red_noise gaussian_process_windowed 121.06 123.06 ${i}
-  sbatch analyse_submit.sh general_qpo gaussian_process 121.06 123.06 ${i}
-  sbatch analyse_submit.sh general_qpo gaussian_process_windowed 121.06 123.06 ${i}
-done
+#for i in {1..4}
+#do
+#  sbatch analyse_submit.sh red_noise gaussian_process 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh red_noise gaussian_process_windowed 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh general_qpo gaussian_process 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh general_qpo gaussian_process_windowed 121.06 123.06 ${i}
+#done
 
 
 ## Solar flare
 
-#for i in {0..3}
-#do
-#  sbatch analyse_submit.sh red_noise ${i}
-#  sbatch analyse_submit.sh general_qpo ${i}
-#done
-#
+for i in {0..3}
+do
+  sbatch analyse_submit.sh red_noise ${i}
+  sbatch analyse_submit.sh general_qpo ${i}
+done
