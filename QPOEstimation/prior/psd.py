@@ -3,8 +3,12 @@ import numpy as np
 
 
 def get_red_noise_prior(**kwargs):
-    sigma_min = kwargs.get('sigma_min', -30)
-    sigma_max = kwargs.get('sigma_max', 30)
+    sigma_min = kwargs.get('sigma_min', np.exp(-30))
+    sigma_max = kwargs.get('sigma_max', np.exp(30))
+    if sigma_min is None:
+        sigma_min = np.exp(-30)
+    if sigma_max is None:
+        sigma_max = np.exp(30)
 
     prior = bilby.core.prior.ConditionalPriorDict()
     prior['alpha'] = bilby.core.prior.Uniform(0, 20, name='alpha')
