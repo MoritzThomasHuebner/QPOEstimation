@@ -188,7 +188,7 @@ class GPResult(bilby.result.Result):
                 plt.plot(x, trend, color='green', alpha=0.3)
 
         plt.xlabel("time [s]")
-        plt.ylabel("Normalized flux")
+        plt.ylabel("Normalised flux")
         plt.legend(ncol=2)
         try:
             plt.tight_layout()
