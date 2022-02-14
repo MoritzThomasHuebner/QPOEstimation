@@ -54,7 +54,7 @@ plt.xlabel('Number of flare components')
 plt.ylabel(f'ln Z')
 plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
 # plt.xticks(ticks=[0, 1], labels=[1, 2])
-# plt.ylim(88, 104)
+plt.ylim(-1002.25, -980)
 
 # plt.ylim(-372, -357)
 plt.legend(ncol=2)

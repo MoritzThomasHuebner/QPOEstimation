@@ -13,17 +13,17 @@
 #done
 
 
-### GRB
-#for model in red_noise general_qpo
-#do
-#  for n_components in {1..4}
-#  do
-#    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris_extended ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
-#  done
-#done
+## GRB
+for model in red_noise general_qpo
+do
+  for n_components in {1..4}
+  do
+    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
+    sbatch analyse_submit.sh gaussian_process ${model} fred_norris ${n_components}
+    sbatch analyse_submit.sh gaussian_process ${model} fred_norris_extended ${n_components}
+    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
+  done
+done
 
 ## Magnetar flare
 #for model in red_noise general_qpo
@@ -101,15 +101,13 @@
 #start_time_base=103.0
 #end_time_base=106.0
 
-for i in {1..4}
-do
-#  start_time=$(python -c "print(${start_time_base} + ${period} * ${i})")
-#  end_time=$(python -c "print(${end_time_base} + ${period} * ${i})")
-  sbatch analyse_submit.sh red_noise gaussian_process 121.06 123.06 ${i}
-  sbatch analyse_submit.sh red_noise gaussian_process_windowed 121.06 123.06 ${i}
-  sbatch analyse_submit.sh general_qpo gaussian_process 121.06 123.06 ${i}
-  sbatch analyse_submit.sh general_qpo gaussian_process_windowed 121.06 123.06 ${i}
-done
+#for i in {1..4}
+#do
+#  sbatch analyse_submit.sh red_noise gaussian_process 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh red_noise gaussian_process_windowed 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh general_qpo gaussian_process 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh general_qpo gaussian_process_windowed 121.06 123.06 ${i}
+#done
 
 
 ## Solar flare

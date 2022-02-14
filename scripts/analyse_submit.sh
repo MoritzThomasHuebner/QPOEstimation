@@ -8,7 +8,7 @@
 
 
 # GRB
-#srun python analyse.py --data_source grb --run_mode select_time --grb_id 090709A --grb_binning 1s --grb_detector swift --start_time -4 --end_time 103  --likelihood_model ${1} --recovery_mode ${2} --background_model ${3} --n_components ${4} --sample rwalk --nlive 2000 --resume True --try_load True --plot True --offset False --jitter_term False
+srun python analyse.py --data_source grb --run_mode select_time --grb_id 090709A --grb_binning 1s --grb_detector swift --start_time -4 --end_time 103  --likelihood_model ${1} --recovery_mode ${2} --background_model ${3} --n_components ${4} --sample rwalk --nlive 2000 --resume True --try_load True --plot True --offset False --jitter_term False
 
 # Magnetar flare
 #srun python analyse.py --data_source magnetar_flare_binned --run_mode entire_segment --magnetar_label SGR_0501 --magnetar_tag 080823478_lcobs --rebin_factor 8 --likelihood_model ${1} --recovery_mode ${2} --background_model ${3} --n_components ${4} --plot True --nlive 2000 --sample rwalk --resume True --try_load True --offset False --jitter_term False
@@ -24,7 +24,7 @@
 #srun python analyse.py --data_source injection --run_mode entire_segment --injection_id ${1} --injection_mode ${2} --base_injection_outdir injection_mss --injection_file_dir injection_files_mss --injection_likelihood_model gaussian_process --recovery_mode ${3} --likelihood_model gaussian_process --plot True --nlive 500 --sample rslice --offset False --min_log_a -2 --max_log_a 2 --min_log_c_red_noise -1 --max_log_c_red_noise --min_log_c_qpo -1 --max_log_c_qpo 3 --likelihood_model gaussian_process --background_model 0 --sampling_frequency 256 --band_minimum 1 --band_maximum 64 --plot True
 
 # Giant Flare
-srun python analyse.py --data_source giant_flare --run_mode select_time  --recovery_mode ${1} --likelihood_model ${2} --start_time ${3} --end_time ${4} --background_model skew_gaussian --n_components ${5} --offset True --plot True --nlive 2000 --sample rwalk --resume True --try_load True --sampling_frequency 64
+#srun python analyse.py --data_source giant_flare --run_mode select_time  --recovery_mode ${1} --likelihood_model ${2} --start_time ${3} --end_time ${4} --background_model skew_gaussian --n_components ${5} --offset True --plot True --nlive 2000 --sample rwalk --resume True --try_load True --sampling_frequency 64
 
 # Solar Flare
 #srun python analyse.py --start_time 74700 --end_time 74900 --data_source solar_flare --solar_flare_folder goes --solar_flare_id go1520130512 --recovery_mode ${1} --background_model fred --run_mode select_time --likelihood_model gaussian_process --min_log_a -12 --normalisation True --sample rwalk --nlive 2000 --n_components ${2} --jitter_term True --try_load False --resume True

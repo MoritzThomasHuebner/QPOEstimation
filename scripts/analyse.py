@@ -325,19 +325,8 @@ if result is None:
 
 
 if plot:
-    result.plot_all()
-    # if len(sys.argv) < 1:
-    #     result.plot_lightcurve(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
-    #     result.plot_residual(end_time=times[-1] + (times[-1] - times[0]) * 0.2)
+    result.plot_all(paper_style=True)
 
-# plt.style.use('paper.mplstyle')
-# result.outdir = '.'
-# result.label = 'start_end_time_posterior'
-# result.parameter_labels[6] = 't_{\mathrm{start}}'
-# result.parameter_labels[7] = 't_{\mathrm{end}}'
-# result.parameter_labels_with_unit[6] = '$t_{\mathrm{start}}$ [s]'
-# result.parameter_labels_with_unit[7] = '$t_{\mathrm{end}}$ [s]'
-# result.plot_corner(parameters=['window_minimum', 'window_maximum'])
 
 # clean up
 for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_checkpoint_trace_unit.png',

@@ -92,9 +92,10 @@ class GPResult(bilby.result.Result):
     def segment_length(self):
         return self.times[-1] - self.times[0]
 
-    def plot_max_likelihood_psd(self):
+    def plot_max_likelihood_psd(self, paper_style=True):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        if paper_style:
+            plt.style.use(style_file)
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         psd_freqs = np.linspace(1/self.segment_length, self.sampling_frequency, 5000)
@@ -115,9 +116,10 @@ class GPResult(bilby.result.Result):
         plt.savefig(f"{self.fits_outdir}/{self.label}_psd.png")
         plt.clf()
 
-    def plot_kernel(self):
+    def plot_kernel(self, paper_style):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        if paper_style:
+            plt.style.use(style_file)
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
@@ -131,9 +133,10 @@ class GPResult(bilby.result.Result):
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.png")
         plt.clf()
 
-    def plot_lightcurve(self, start_time=None, end_time=None):
+    def plot_lightcurve(self, start_time=None, end_time=None, paper_style=True):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        if paper_style:
+            plt.style.use(style_file)
         if start_time is None:
             start_time = self.times[0]
         if end_time is None:
@@ -196,9 +199,10 @@ class GPResult(bilby.result.Result):
         plt.show()
         plt.clf()
 
-    def plot_residual(self, start_time=None, end_time=None):
+    def plot_residual(self, start_time=None, end_time=None, paper_style=True):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        if paper_style:
+            plt.style.use(style_file)
         if start_time is None:
             start_time = self.times[0]
         if end_time is None:
@@ -263,9 +267,11 @@ class GPResult(bilby.result.Result):
         except Exception:
             super().plot_corner(outdir=self.corner_outdir, **kwargs)
 
-    def plot_frequency_posterior(self):
+    def plot_frequency_posterior(self, paper_style=True):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        if paper_style:
+            plt.style.use(style_file)
+
         Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
             if 'kernel:log_f' in self.posterior:
@@ -307,9 +313,10 @@ class GPResult(bilby.result.Result):
                 plt.clf()
 
 
-    def plot_period_posterior(self):
+    def plot_period_posterior(self, paper_style=True):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        # plt.style.use(style_file)
+        if paper_style:
+            plt.style.use(style_file)
         Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
             if 'kernel:log_f' in self.posterior:
@@ -334,10 +341,11 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
 
-    def plot_qpo_log_amplitude(self):
+    def plot_qpo_log_amplitude(self, paper_style=True):
         if self.kernel_type == "general_qpo":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-            # plt.style.use(style_file)
+            if paper_style:
+                plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             label = 'kernel:terms[0]:log_a'
             log_amplitude_samples = np.array(self.posterior[label])
@@ -356,10 +364,11 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.png")
             plt.clf()
 
-    def plot_amplitude_ratio(self):
+    def plot_amplitude_ratio(self, paper_style=True):
         if self.kernel_type == "general_qpo":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-            # plt.style.use(style_file)
+            if paper_style:
+                plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             qpo_log_amplitude_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
             red_noise_log_amplitude_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
@@ -378,10 +387,11 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.png")
             plt.clf()
 
-    def plot_log_red_noise_power(self):
+    def plot_log_red_noise_power(self, paper_style=True):
         if self.kernel_type == "general_qpo":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-            # plt.style.use(style_file)
+            if paper_style:
+                plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
@@ -400,10 +410,11 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.png")
             plt.clf()
 
-    def plot_log_qpo_power(self):
+    def plot_log_qpo_power(self, paper_style=True):
         if self.kernel_type == "general_qpo":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-            # plt.style.use(style_file)
+            if paper_style:
+                plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             log_a_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
             log_c_samples = np.array(self.posterior['kernel:terms[0]:log_c'])
@@ -423,10 +434,11 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.png")
             plt.clf()
 
-    def plot_duration_posterior(self):
+    def plot_duration_posterior(self, paper_style=True):
         if self.likelihood_model == "gaussian_process_windowed":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-            # plt.style.use(style_file)
+            if paper_style:
+                plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
             t_start_samples = np.array(self.posterior['window_minimum'])
             t_end_samples = np.array(self.posterior['window_maximum'])
@@ -447,22 +459,22 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
 
-    def plot_all(self):
+    def plot_all(self, paper_style=True):
         self.plot_corner()
         try:
-            self.plot_max_likelihood_psd()
+            self.plot_max_likelihood_psd(paper_style=paper_style)
         except Exception:
             pass
         try:
-            self.plot_kernel()
+            self.plot_kernel(paper_style=paper_style)
         except Exception:
             pass
-        self.plot_lightcurve()
-        self.plot_residual()
-        # self.plot_qpo_log_amplitude()
-        # self.plot_log_red_noise_power()
-        # self.plot_log_qpo_power()
-        self.plot_frequency_posterior()
-        self.plot_period_posterior()
-        self.plot_duration_posterior()
-        # self.plot_amplitude_ratio()
+        self.plot_lightcurve(paper_style=paper_style)
+        self.plot_residual(paper_style=paper_style)
+        # self.plot_qpo_log_amplitude(paper_style=paper_style)
+        # self.plot_log_red_noise_power(paper_style=paper_style)
+        # self.plot_log_qpo_power(paper_style=paper_style)
+        self.plot_frequency_posterior(paper_style=paper_style)
+        self.plot_period_posterior(paper_style=paper_style)
+        self.plot_duration_posterior(paper_style=paper_style)
+        # self.plot_amplitude_ratio(paper_style=paper_style)
