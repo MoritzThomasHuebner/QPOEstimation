@@ -27,4 +27,4 @@
 #srun python analyse.py --data_source giant_flare --run_mode select_time  --recovery_mode ${1} --likelihood_model ${2} --start_time ${3} --end_time ${4} --background_model skew_gaussian --n_components ${5} --offset True --plot True --nlive 2000 --sample rwalk --resume True --try_load True --sampling_frequency 64
 
 # Solar Flare
-srun python analyse.py --start_time 74700 --end_time 74900 --data_source solar_flare --solar_flare_folder goes --solar_flare_id go1520130512 --recovery_mode ${1} --background_model fred --run_mode select_time --likelihood_model gaussian_process --min_log_a -12 --normalisation True --sample rwalk --nlive 2000 --n_components ${2} --jitter_term True --try_load False --resume True
+srun python analyse.py --start_time 74700 --end_time 74900 --data_source solar_flare --solar_flare_folder goes --solar_flare_id go1520130512 --recovery_mode ${1} --background_model polynomial --run_mode select_time --likelihood_model gaussian_process --min_log_a -12 --normalisation True --sample rwalk --nlive 2000 --n_components ${2} --jitter_term False --try_load True --resume True

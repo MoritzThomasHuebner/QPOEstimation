@@ -188,13 +188,12 @@ class GPResult(bilby.result.Result):
                 plt.plot(x, trend, color='green', alpha=0.3)
 
         plt.xlabel("time [s]")
-        plt.ylabel("Normalised flux")
+        plt.ylabel("Normalized flux")
         plt.legend(ncol=2)
         try:
             plt.tight_layout()
         except Exception:
             pass
-        # plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.png")
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.pdf")
         plt.show()
         plt.clf()
