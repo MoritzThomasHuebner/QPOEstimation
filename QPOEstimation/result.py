@@ -281,7 +281,7 @@ class GPResult(bilby.result.Result):
                 return
             plt.hist(frequency_samples, bins="fd", density=True)
             plt.xlabel('frequency [Hz]')
-            plt.ylabel('normalised PDF')
+            plt.ylabel('Normalised PDF')
             median = np.median(frequency_samples)
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
@@ -299,7 +299,7 @@ class GPResult(bilby.result.Result):
             for i, frequency_samples in enumerate([frequency_samples_1, frequency_samples_2]):
                 plt.hist(frequency_samples, bins="fd", density=True)
                 plt.xlabel('frequency [Hz]')
-                plt.ylabel('normalised PDF')
+                plt.ylabel('Normalised PDF')
                 median = np.median(frequency_samples)
                 percentiles = np.percentile(frequency_samples, [16, 84])
                 plt.title(
@@ -326,8 +326,8 @@ class GPResult(bilby.result.Result):
                 return
             plt.hist(period_samples, bins="fd", density=True)
             plt.xlabel('period [s]')
-            plt.xlim(6.5, 10.5)
-            plt.ylabel('normalised PDF')
+            # plt.xlim(6.5, 10.5)
+            plt.ylabel('Normalised PDF')
             median = np.median(period_samples)
             percentiles = np.percentile(period_samples, [16, 84])
             plt.title(
@@ -350,7 +350,7 @@ class GPResult(bilby.result.Result):
             log_amplitude_samples = np.array(self.posterior[label])
             plt.hist(log_amplitude_samples, bins="fd", density=True)
             plt.xlabel('$\ln \,a$')
-            plt.ylabel('normalised PDF')
+            plt.ylabel('Normalised PDF')
             median = np.median(log_amplitude_samples)
             percentiles = np.percentile(log_amplitude_samples, [16, 84])
             plt.title(
@@ -374,7 +374,7 @@ class GPResult(bilby.result.Result):
             amplitude_ratio_samples = np.exp(qpo_log_amplitude_samples - red_noise_log_amplitude_samples)
             plt.hist(amplitude_ratio_samples, bins="fd", density=True)
             plt.xlabel('$a_{\mathrm{qpo}}/a_{\mathrm{rn}}$')
-            plt.ylabel('normalised PDF')
+            plt.ylabel('Normalised PDF')
             median = np.median(amplitude_ratio_samples)
             percentiles = np.percentile(amplitude_ratio_samples, [16, 84])
             plt.title(
@@ -397,7 +397,7 @@ class GPResult(bilby.result.Result):
             power_samples = np.log(power_red_noise(a=np.exp(log_a_samples), c=np.exp(log_c_samples)))
             plt.hist(power_samples, bins="fd", density=True)
             plt.xlabel('$\ln P_{\mathrm{rn}}$')
-            plt.ylabel('normalised PDF')
+            plt.ylabel('Normalised PDF')
             median = np.median(power_samples)
             percentiles = np.percentile(power_samples, [16, 84])
             plt.title(
@@ -421,7 +421,7 @@ class GPResult(bilby.result.Result):
             power_samples = np.log(power_qpo(a=np.exp(log_a_samples), c=np.exp(log_c_samples), f=np.exp(log_f_samples)))
             plt.hist(power_samples, bins="fd", density=True)
             plt.xlabel('$\ln P_{\mathrm{qpo}}$')
-            plt.ylabel('normalised PDF')
+            plt.ylabel('Normalised PDF')
             median = np.median(power_samples)
             percentiles = np.percentile(power_samples, [16, 84])
             plt.title(
@@ -445,7 +445,7 @@ class GPResult(bilby.result.Result):
 
             plt.hist(duration_samples, bins="fd", density=True)
             plt.xlabel('duration [s]')
-            plt.ylabel('normalised PDF')
+            plt.ylabel('Normalised PDF')
             median = np.median(duration_samples)
             percentiles = np.percentile(duration_samples, [16, 84])
             plt.title(
