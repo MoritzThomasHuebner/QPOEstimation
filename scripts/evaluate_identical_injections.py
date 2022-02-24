@@ -42,6 +42,8 @@ for injection_id in range(0, 1000):
         print(e)
         continue
 
+np.savetxt('ln_bfs_qpo_inj_mss.txt', ln_bfs_qpo_inj)
+np.savetxt('ln_bfs_red_noise_inj_mss.txt', ln_bfs_red_noise_inj)
 # bins = np.arange(-5, 25)
 bins = 'fd'
 plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=30, label="Simulated red noise plus QPO")
