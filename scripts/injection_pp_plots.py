@@ -31,7 +31,7 @@ else:
 
     injection_mode = "qpo_plus_red_noise"
     likelihood_model = "celerite"
-    base_injection_outdir = 'injections/injection_pp_non_eq_dis'
+    base_injection_outdir = "injections/injection_pp_non_eq_dis"
 
 samples = []
 reslist = []
@@ -41,9 +41,9 @@ outdir = f"{outdir}/results"
 
 for injection_id in range(minimum_id, maximum_id):
     print(injection_id)
-    label = get_injection_label(run_mode='entire_segment', injection_id=injection_id) + "_1_skew_gaussians"
+    label = get_injection_label(run_mode="entire_segment", injection_id=injection_id) + "_1_skew_gaussians"
     try:
-        with open(f'{base_injection_outdir}/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json') as f:
+        with open(f"{base_injection_outdir}/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json") as f:
             injection_params = json.load(f)
         res = GPResult.from_json(outdir=outdir, label=label)
         reslist.append(res)
@@ -53,19 +53,19 @@ for injection_id in range(minimum_id, maximum_id):
         continue
 
 for key in reslist[0].priors:
-    reslist[0].priors[key].latex_label = reslist[0].priors[key].latex_label.replace('_', '\\_')
+    reslist[0].priors[key].latex_label = reslist[0].priors[key].latex_label.replace("_", "\\_")
 
-reslist[0].priors['kernel:terms[0]:log_a'].latex_label = "$a_{\mathrm{qpo}}$"
-reslist[0].priors['kernel:terms[0]:log_c'].latex_label = "$c_{\mathrm{qpo}}$"
-reslist[0].priors['kernel:terms[0]:log_f'].latex_label = "$f_{\mathrm{qpo}}$"
+reslist[0].priors["kernel:terms[0]:log_a"].latex_label = "$a_{\mathrm{qpo}}$"
+reslist[0].priors["kernel:terms[0]:log_c"].latex_label = "$c_{\mathrm{qpo}}$"
+reslist[0].priors["kernel:terms[0]:log_f"].latex_label = "$f_{\mathrm{qpo}}$"
 
-reslist[0].priors['kernel:terms[1]:log_a'].latex_label = "$a_{\mathrm{rn}}$"
-reslist[0].priors['kernel:terms[1]:log_c'].latex_label = "$c_{\mathrm{rn}}$"
+reslist[0].priors["kernel:terms[1]:log_a"].latex_label = "$a_{\mathrm{rn}}$"
+reslist[0].priors["kernel:terms[1]:log_c"].latex_label = "$c_{\mathrm{rn}}$"
 
-reslist[0].priors['mean:log_amplitude_0'].latex_label = "$A$"
-reslist[0].priors['mean:log_sigma_rise_0'].latex_label = "$\sigma_1$"
-reslist[0].priors['mean:log_sigma_fall_0'].latex_label = "$\sigma_2$"
-reslist[0].priors['mean:t_0_0'].latex_label = "$t_0$"
+reslist[0].priors["mean:log_amplitude_0"].latex_label = "$A$"
+reslist[0].priors["mean:log_sigma_rise_0"].latex_label = "$\sigma_1$"
+reslist[0].priors["mean:log_sigma_fall_0"].latex_label = "$\sigma_2$"
+reslist[0].priors["mean:t_0_0"].latex_label = "$t_0$"
 
 
-bilby.result.make_pp_plot(results=reslist, filename=f'results/{injection_mode}_{likelihood_model}_pp_plot_non_eq_dis.pdf')
+bilby.result.make_pp_plot(results=reslist, filename=f"results/{injection_mode}_{likelihood_model}_pp_plot_non_eq_dis.pdf")

@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("Qt5Agg")
 
-recovery_mode = 'qpo_plus_red_noise'
+recovery_mode = "qpo_plus_red_noise"
 
-res = bilby.result.read_in_result(f'results/SolarFlare/120704187_two_step/results/kernel_{recovery_mode}_result.json')
+res = bilby.result.read_in_result(f"results/SolarFlare/120704187_two_step/results/kernel_{recovery_mode}_result.json")
 max_like_parameteres = res.posterior.iloc[-1]
 
 kernel = get_kernel(kernel_type=recovery_mode)
 
 n_models = 1
-data = np.loadtxt(f'data/SolarFlare/120704187_ctime_lc_residual_{n_models}_gaussians.txt')
+data = np.loadtxt(f"data/SolarFlare/120704187_ctime_lc_residual_{n_models}_gaussians.txt")
 
 times = data[:, 0]
 res_y = data[:, 1]

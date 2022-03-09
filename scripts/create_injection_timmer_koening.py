@@ -35,7 +35,7 @@ duration_white_noise = 50
 x_break = beta/white_noise * central_frequency**(-alpha)
 print(x_break)
 
-extension_modes = ['zeros', 'white_noise', 'None']
+extension_modes = ["zeros", "white_noise", "None"]
 injection_id = "06"
 extension_mode_dict = {"00": 0, "01": 1, "02": 1, "03": 0, "04": 1, "05": 0, "06": 0, "07": 0}
 extension_mode = extension_modes[extension_mode_dict[injection_id]]
@@ -89,7 +89,7 @@ psd_signal = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_dens
 fd_data_signal, _ = psd_signal.get_noise_realisation(sampling_frequency=sampling_frequency, duration=duration_signal)
 td_data_signal = bilby.core.utils.infft(frequency_domain_strain=fd_data_signal, sampling_frequency=sampling_frequency)
 
-freqs_signal_periodogram, powers_signal_periodogram = periodogram(td_data_signal, fs=sampling_frequency, window='hann')
+freqs_signal_periodogram, powers_signal_periodogram = periodogram(td_data_signal, fs=sampling_frequency, window="hann")
 
 snr_qpo_optimal = np.sqrt(np.sum(
     np.nan_to_num((psd_qpo.power_spectral_density_interpolated(freqs_signal_periodogram) /
@@ -142,7 +142,7 @@ if injection_id == "05":
 plt.plot(series_combined.time_array, combined_signal)
 plt.show()
 
-freqs_combined_periodogram, powers_combined_periodogram = periodogram(combined_signal, fs=sampling_frequency, window='hann')
+freqs_combined_periodogram, powers_combined_periodogram = periodogram(combined_signal, fs=sampling_frequency, window="hann")
 
 plt.loglog()
 plt.step(freqs_signal_periodogram, powers_signal_periodogram)
@@ -155,9 +155,9 @@ times_save = series_combined.time_array - duration_white_noise/2
 plt.plot(times_save, combined_signal)
 plt.show()
 
-np.savetxt(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt', np.array([times_save, combined_signal]).T)
+np.savetxt(f"injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt", np.array([times_save, combined_signal]).T)
 
 params = dict(amplitude=amplitude, alpha=alpha, beta=beta, central_frequency=central_frequency, width=width, sigma=white_noise)
 
-with open(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_params.json', 'w') as f:
+with open(f"injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_params.json", "w") as f:
     json.dump(params, f)

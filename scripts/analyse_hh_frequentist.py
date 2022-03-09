@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 import os
 
 try:
-    flares = np.array(sorted(os.listdir('results/hares_and_hounds_HH2_just_figures')))
+    flares = np.array(sorted(os.listdir("results/hares_and_hounds_HH2_just_figures")))
 except Exception:
-    flares = np.array(sorted(os.listdir('results/hares_and_hounds_HH2')))
+    flares = np.array(sorted(os.listdir("results/hares_and_hounds_HH2")))
 print(len(flares))
-run_mode = 'from_maximum'
+run_mode = "from_maximum"
 
 results = np.loadtxt("data/hares_and_hounds/qpp_type_hh2.txt")
 flare_keys = results[:, 0]
@@ -33,35 +33,35 @@ for k, t in zip(flare_keys, flare_types):
         # res1.plot_amplitude_ratio()
         # res2.plot_qpo_log_amplitude()
         # res2.plot_amplitude_ratio()
-        res_1_a_qpo = np.exp(res1.posterior['kernel:terms[0]:log_a'])
-        res_1_c_qpo = np.exp(res1.posterior['kernel:terms[0]:log_c'])
-        res_1_f_qpo = np.exp(res1.posterior['kernel:terms[0]:log_f'])
+        res_1_a_qpo = np.exp(res1.posterior["kernel:terms[0]:log_a"])
+        res_1_c_qpo = np.exp(res1.posterior["kernel:terms[0]:log_c"])
+        res_1_f_qpo = np.exp(res1.posterior["kernel:terms[0]:log_f"])
 
-        res_1_a_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_a'])
-        res_1_c_red_noise = np.exp(res1.posterior['kernel:terms[1]:log_c'])
+        res_1_a_red_noise = np.exp(res1.posterior["kernel:terms[1]:log_a"])
+        res_1_c_red_noise = np.exp(res1.posterior["kernel:terms[1]:log_c"])
 
         res_1_power_qpo = np.array(power_qpo(res_1_a_qpo, res_1_c_qpo, res_1_f_qpo))
         res_1_power_red_noise = np.array(power_red_noise(res_1_a_red_noise, res_1_c_red_noise))
 
-        # plt.hist(np.log(res_1_power_qpo), bins='fd', histtype='step')
-        # plt.savefig(f'temp_plots/{k}_qpo_power.png')
+        # plt.hist(np.log(res_1_power_qpo), bins="fd", histtype="step")
+        # plt.savefig(f"temp_plots/{k}_qpo_power.png")
         # plt.clf()
 
-        # plt.hist(np.log(res_1_power_red_noise), bins='fd', histtype='step')
-        # plt.savefig(f'temp_plots/{k}_red_noise_power.png')
+        # plt.hist(np.log(res_1_power_red_noise), bins="fd", histtype="step")
+        # plt.savefig(f"temp_plots/{k}_red_noise_power.png")
         # plt.clf()
 
         # log_power = np.log(res_1_power_qpo/res_1_power_red_noise)
-        # plt.hist(log_power, bins='fd', histtype='step')
-        # plt.savefig(f'temp_plots/{k}_power_ratio.png')
+        # plt.hist(log_power, bins="fd", histtype="step")
+        # plt.savefig(f"temp_plots/{k}_power_ratio.png")
         # plt.clf()
-        # prior_range = res1.priors['kernel:terms[0]:log_f'].maximum - res1.priors['kernel:terms[0]:log_f'].minimum
-        # means = [np.std(res1.posterior['kernel:terms[0]:log_f'])/prior_range]
-        res_2_a_qpo = np.exp(res2.posterior['kernel:terms[0]:log_a'])
-        res_2_c_qpo = np.exp(res2.posterior['kernel:terms[0]:log_c'])
-        res_2_f_qpo = np.exp(res2.posterior['kernel:terms[0]:log_f'])
-        res_2_a_red_noise = np.exp(res2.posterior['kernel:terms[1]:log_a'])
-        res_2_c_red_noise = np.exp(res2.posterior['kernel:terms[1]:log_c'])
+        # prior_range = res1.priors["kernel:terms[0]:log_f"].maximum - res1.priors["kernel:terms[0]:log_f"].minimum
+        # means = [np.std(res1.posterior["kernel:terms[0]:log_f"])/prior_range]
+        res_2_a_qpo = np.exp(res2.posterior["kernel:terms[0]:log_a"])
+        res_2_c_qpo = np.exp(res2.posterior["kernel:terms[0]:log_c"])
+        res_2_f_qpo = np.exp(res2.posterior["kernel:terms[0]:log_f"])
+        res_2_a_red_noise = np.exp(res2.posterior["kernel:terms[1]:log_a"])
+        res_2_c_red_noise = np.exp(res2.posterior["kernel:terms[1]:log_c"])
         res_2_power_qpo = power_qpo(res_2_a_qpo, res_2_c_qpo, res_2_f_qpo)
         res_2_power_red_noise = power_red_noise(res_2_a_red_noise, res_2_c_red_noise)
 
@@ -69,7 +69,7 @@ for k, t in zip(flare_keys, flare_types):
         # res4 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/qpo_plus_red_noise/celerite/results/from_maximum_2_skew_exponentials_result.json")
 
         means = [np.mean(np.log(res_1_power_qpo)), np.mean(np.log(res_2_power_qpo))]
-                 # np.mean(res3.posterior['kernel:terms[0]:log_a']), np.mean(res4.posterior['kernel:terms[0]:log_a'])]
+                 # np.mean(res3.posterior["kernel:terms[0]:log_a"]), np.mean(res4.posterior["kernel:terms[0]:log_a"])]
         mean_qpo_log_amplitudes.append(np.mean(means))
     except Exception as e:
         print(e)

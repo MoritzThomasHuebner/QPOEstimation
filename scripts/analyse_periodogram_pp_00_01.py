@@ -10,11 +10,11 @@ import QPOEstimation
 from QPOEstimation.post_processing import InjectionStudyPostProcessor
 
 import matplotlib.pyplot as plt
-plt.style.use('paper.mplstyle')
-# matplotlib.use('Qt5Agg')
+plt.style.use("paper.mplstyle")
+# matplotlib.use("Qt5Agg")
 
 
-modes = ['zeros', 'white_noise']
+modes = ["zeros", "white_noise"]
 mode = int(sys.argv[1])
 # mode = 1
 # injection_id = str(mode + 6).zfill(2)
@@ -33,24 +33,24 @@ start_times = -end_times
 durations = 2 * end_times
 
 
-outdir_qpo_periodogram = f'injection/qpo_plus_red_noise_injection/qpo_plus_red_noise_recovery/whittle/results/'
-outdir_noise_periodogram = f'injection/qpo_plus_red_noise_injection/red_noise_recovery/whittle/results/'
+outdir_qpo_periodogram = f"injection/qpo_plus_red_noise_injection/qpo_plus_red_noise_recovery/whittle/results/"
+outdir_noise_periodogram = f"injection/qpo_plus_red_noise_injection/red_noise_recovery/whittle/results/"
 
 
-data = np.loadtxt(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt')
+data = np.loadtxt(f"injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 sampling_frequency = int(round(1/(times[1] - times[0])))
-with open(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_params.json', 'r') as f:
+with open(f"injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_params.json", "r") as f:
     injection_parameters = json.load(f)
 
 frequencies = np.linspace(1/100000, 20, 1000)
-alpha = injection_parameters['alpha']
-beta = injection_parameters['beta']
-white_noise = injection_parameters['sigma']
-amplitude = injection_parameters['amplitude']
-width = injection_parameters['width']
-central_frequency = injection_parameters['central_frequency']
+alpha = injection_parameters["alpha"]
+beta = injection_parameters["beta"]
+white_noise = injection_parameters["sigma"]
+amplitude = injection_parameters["amplitude"]
+width = injection_parameters["width"]
+central_frequency = injection_parameters["central_frequency"]
 
 psd_array_noise = QPOEstimation.model.psd.red_noise(frequencies=frequencies, alpha=alpha, beta=beta) + white_noise
 psd_array_white_noise = white_noise * np.ones(len(frequencies))

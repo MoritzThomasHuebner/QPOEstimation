@@ -10,11 +10,11 @@ import QPOEstimation
 # from scipy.signal import periodogram
 from scipy.signal.windows import hann
 
-plt.style.use('paper.mplstyle')
-# matplotlib.use('Qt5Agg')
+plt.style.use("paper.mplstyle")
+# matplotlib.use("Qt5Agg")
 
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/01_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/01_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
@@ -25,20 +25,20 @@ y = y[indices]
 
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)
-ax1.set_xlabel(r'times [s]')
-ax1.set_ylabel(r'Flux [arb. units]')
+ax1.set_xlabel(r"times [s]")
+ax1.set_ylabel(r"Flux [arb. units]")
 ax1.set_xlim(-30, 30)
 ax2 = ax1.twiny()
 ax2.set_xlabel("$x$")
 ax2.set_xticks(ticks=(-30, -20, -10, 0, 10, 20, 30))
 ax2.set_xticklabels(labels=(3, 2, 1, 0, 1, 2, 3))
 plt.tight_layout()
-plt.savefig('results/paper_figures/01_injection_time_series.pdf')
+plt.savefig("results/paper_figures/01_injection_time_series.pdf")
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/01_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/01_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
@@ -48,31 +48,31 @@ y = y[indices]
 
 
 lc = Lightcurve(time=times, counts=y * hann(len(y)), err=np.ones(len(times)))
-ps = Powerspectrum(lc=lc, norm='leahy')
+ps = Powerspectrum(lc=lc, norm="leahy")
 
 from scipy.signal import periodogram
 fs = 1/(times[1] - times[0])
-freqs, powers = periodogram(y, fs=fs, window='hann')
+freqs, powers = periodogram(y, fs=fs, window="hann")
 
 # lc = Lightcurve(time=inset_times, counts=inset_y * hann(len(inset_y)), err=np.ones(len(inset_times)))
-# ps = Powerspectrum(lc=lc, norm='leahy')
+# ps = Powerspectrum(lc=lc, norm="leahy")
 
 # freqs = ps.freq
 # powers = ps.power
 
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power [arb. units]')
-plt.axvline(1, label='QPO frequency', ls='--', color='black')
+plt.step(freqs[1:], powers[1:], where="mid")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [arb. units]")
+plt.axvline(1, label="QPO frequency", ls="--", color="black")
 plt.legend()
-plt.savefig('results/paper_figures/01_injection_periodogram.pdf')
+plt.savefig("results/paper_figures/01_injection_periodogram.pdf")
 plt.show()
 plt.clf()
 
 ### Flare injection 02
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/02_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/02_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
@@ -93,8 +93,8 @@ inset_y_detrended = inset_y - trend
 
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)
-ax1.set_xlabel(r'times [s]')
-ax1.set_ylabel(r'Flux [arb. units]')
+ax1.set_xlabel(r"times [s]")
+ax1.set_ylabel(r"Flux [arb. units]")
 ax1.set_xlim(-100, 100)
 
 ax4 = ax1.twiny()
@@ -119,7 +119,7 @@ ax2.plot([-10, 10], [inset_y[0], inset_y[-1]])
 ax2.set_xticks([])
 ax2.set_yticks([])
 
-mark_inset(ax1, ax2, loc1=2, loc2=4, fc='none', ec='0.5', zorder=4)
+mark_inset(ax1, ax2, loc1=2, loc2=4, fc="none", ec="0.5", zorder=4)
 
 ax3 = plt.axes([left, bottom, width, height])
 ax3.set_axes_locator(ip)
@@ -130,45 +130,45 @@ ax3.plot(inset_times, inset_y_detrended)
 
 
 plt.tight_layout()
-plt.savefig('results/paper_figures/02_injection_time_series.pdf')
+plt.savefig("results/paper_figures/02_injection_time_series.pdf")
 plt.show()
 plt.clf()
 
 
 lc = Lightcurve(time=inset_times, counts=inset_y * hann(len(inset_y)), err=np.ones(len(inset_times)))
-ps = Powerspectrum(lc=lc, norm='leahy')
+ps = Powerspectrum(lc=lc, norm="leahy")
 freqs = ps.freq
 powers = ps.power
 
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power [arb. units]')
-plt.axvline(1, label='QPO frequency', ls='--', color='black')
+plt.step(freqs[1:], powers[1:], where="mid")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [arb. units]")
+plt.axvline(1, label="QPO frequency", ls="--", color="black")
 plt.legend()
 plt.tight_layout()
-plt.savefig('results/paper_figures/02_injection_periodogram.pdf')
+plt.savefig("results/paper_figures/02_injection_periodogram.pdf")
 plt.show()
 plt.clf()
 
 lc = Lightcurve(time=times, counts=y * hann(len(y)), err=np.ones(len(times)))
-ps = Powerspectrum(lc=lc, norm='leahy')
+ps = Powerspectrum(lc=lc, norm="leahy")
 freqs = ps.freq
 powers = ps.power
 
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power [arb. units]')
-plt.axvline(1, label='QPO frequency', ls='--', color='black')
+plt.step(freqs[1:], powers[1:], where="mid")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [arb. units]")
+plt.axvline(1, label="QPO frequency", ls="--", color="black")
 plt.legend()
 plt.tight_layout()
-plt.savefig('results/paper_figures/02_injection_periodogram_total.pdf')
+plt.savefig("results/paper_figures/02_injection_periodogram_total.pdf")
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/03_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/03_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
@@ -179,36 +179,36 @@ y = y[indices]
 
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)
-ax1.set_xlabel(r'times [s]')
-ax1.set_ylabel(r'Flux [arb. units]')
+ax1.set_xlabel(r"times [s]")
+ax1.set_ylabel(r"Flux [arb. units]")
 
 plt.tight_layout()
-plt.savefig('results/paper_figures/03_injection_time_series.pdf')
+plt.savefig("results/paper_figures/03_injection_time_series.pdf")
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/03_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/03_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
 lc = Lightcurve(time=times, counts=(y + np.mean(y) + 1) * hann(len(y)), err=np.ones(len(times)))
-ps = Powerspectrum(lc=lc, norm='leahy')
+ps = Powerspectrum(lc=lc, norm="leahy")
 freqs = ps.freq
 powers = ps.power
 
 
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power [arb. units]')
-plt.axvline(5, label='QPO frequency', ls='--', color='black')
+plt.step(freqs[1:], powers[1:], where="mid")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [arb. units]")
+plt.axvline(5, label="QPO frequency", ls="--", color="black")
 plt.legend()
-plt.savefig('results/paper_figures/03_injection_periodogram.pdf')
+plt.savefig("results/paper_figures/03_injection_periodogram.pdf")
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/04_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/04_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
@@ -219,29 +219,29 @@ y = y[indices]
 
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)
-ax1.set_xlabel(r'times [s]')
-ax1.set_ylabel(r'Flux [arb. units]')
+ax1.set_xlabel(r"times [s]")
+ax1.set_ylabel(r"Flux [arb. units]")
 plt.tight_layout()
-plt.savefig('results/paper_figures/04_injection_time_series.pdf')
+plt.savefig("results/paper_figures/04_injection_time_series.pdf")
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/04_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/04_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
 lc = Lightcurve(time=times, counts=(y + np.mean(y) + 10000) * hann(len(y)), err=np.ones(len(times)))
-ps = Powerspectrum(lc=lc, norm='leahy')
+ps = Powerspectrum(lc=lc, norm="leahy")
 freqs = ps.freq
 powers = ps.power
 
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power [arb. units]')
-plt.axvline(5, label='QPO frequency', ls='--', color='black')
+plt.step(freqs[1:], powers[1:], where="mid")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [arb. units]")
+plt.axvline(5, label="QPO frequency", ls="--", color="black")
 plt.legend()
-plt.savefig('results/paper_figures/04_injection_periodogram_extended.pdf')
+plt.savefig("results/paper_figures/04_injection_periodogram_extended.pdf")
 plt.show()
 plt.clf()
 
@@ -250,22 +250,22 @@ times = times[indices]
 y = y[indices]
 
 lc = Lightcurve(time=times, counts=(y + np.mean(y) + 10000) * hann(len(y)), err=np.ones(len(times)))
-ps = Powerspectrum(lc=lc, norm='leahy')
+ps = Powerspectrum(lc=lc, norm="leahy")
 freqs = ps.freq
 powers = ps.power
 
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power [arb. units]')
-plt.axvline(5, label='QPO frequency', ls='--', color='black')
+plt.step(freqs[1:], powers[1:], where="mid")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [arb. units]")
+plt.axvline(5, label="QPO frequency", ls="--", color="black")
 plt.legend()
-plt.savefig('results/paper_figures/04_injection_periodogram.pdf')
+plt.savefig("results/paper_figures/04_injection_periodogram.pdf")
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/05_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/05_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 
@@ -276,8 +276,8 @@ inset_y = y[inset_indices]
 
 fig, ax1 = plt.subplots()
 ax1.plot(times, y)
-ax1.set_xlabel(r'time [s]')
-ax1.set_ylabel(r'Counts')
+ax1.set_xlabel(r"time [s]")
+ax1.set_ylabel(r"Counts")
 ax1.set_xlim(-200, 200)
 
 left = inset_times[0]
@@ -292,7 +292,7 @@ ax2.set_xticks([])
 ax2.set_yticks([])
 
 ax2.plot(inset_times, inset_y)
-mark_inset(ax1, ax2, loc1=2, loc2=4, fc='none', ec='0.5', zorder=4)
+mark_inset(ax1, ax2, loc1=2, loc2=4, fc="none", ec="0.5", zorder=4)
 
 ax3 = ax1.twiny()
 ax3.set_xlabel("$x$")
@@ -302,27 +302,27 @@ ax3.set_xticklabels(labels=("", 15, 10, 5, 1, 1, 5, 10, 15, 20))
 
 
 plt.tight_layout()
-plt.savefig('results/paper_figures/05_injection_time_series.pdf')
+plt.savefig("results/paper_figures/05_injection_time_series.pdf")
 plt.show()
 plt.clf()
 
 lc = Lightcurve(time=times, counts=y * hann(len(y)), err=np.ones(len(times)))
-ps = Powerspectrum(lc=lc, norm='leahy')
+ps = Powerspectrum(lc=lc, norm="leahy")
 freqs = ps.freq
 powers = ps.power
 
 
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power [arb. units]')
-plt.axvline(5, label='QPO frequency', ls='--', color='black')
-plt.axvline(0.5, label='Low frequency cut off', ls='-.', color='green')
+plt.step(freqs[1:], powers[1:], where="mid")
+plt.xlabel("frequency [Hz]")
+plt.ylabel("Power [arb. units]")
+plt.axvline(5, label="QPO frequency", ls="--", color="black")
+plt.axvline(0.5, label="Low frequency cut off", ls="-.", color="green")
 plt.legend()
-plt.savefig('results/paper_figures/05_injection_periodogram.pdf')
+plt.savefig("results/paper_figures/05_injection_periodogram.pdf")
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/05_data.txt')
+data = np.loadtxt("injections/injection_files_pop/qpo_plus_red_noise/whittle/05_data.txt")
 times = data[:, 0]
 y = data[:, 1]

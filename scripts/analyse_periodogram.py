@@ -13,7 +13,7 @@ from QPOEstimation.prior.psd import *
 from QPOEstimation.utils import *
 
 if len(sys.argv) > 1:
-    # plt.style.use('paper.mplstyle')
+    # plt.style.use("paper.mplstyle")
     parser = parse_args()
     args = parser.parse_args()
 
@@ -90,28 +90,28 @@ if len(sys.argv) > 1:
     resume = boolean_string(args.resume)
     plot = boolean_string(args.plot)
 else:
-    matplotlib.use('Qt5Agg')
+    matplotlib.use("Qt5Agg")
 
     data_source = "grb"
-    run_mode = 'select_time'
+    run_mode = "select_time"
     sampling_frequency = 4096
-    data_mode = 'normal'
+    data_mode = "normal"
     alpha = 0.02
     variance_stabilisation = False
 
     hares_and_hounds_id = "612579"
-    hares_and_hounds_round = 'HH2'
+    hares_and_hounds_round = "HH2"
 
-    solar_flare_folder = 'goes'
+    solar_flare_folder = "goes"
     solar_flare_id = "go1520130512"
     grb_id = "200415A"
     grb_label = "ASIM_CLEANED_LED"
     grb_binning = "64ms"
     grb_detector = "asim"
-    grb_energy_band = 'all'
+    grb_energy_band = "all"
 
-    magnetar_label = 'SGR_0501'
-    magnetar_tag = '080823478_lcobs'
+    magnetar_label = "SGR_0501"
+    magnetar_tag = "080823478_lcobs"
     # bin_size = 100*1e-6
     bin_size = 0.1*1e-3
     magnetar_subtract_t0 = True
@@ -167,7 +167,7 @@ else:
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
-    sample = 'rwalk'
+    sample = "rwalk"
     nlive = 500
     use_ratio = False
 
@@ -175,7 +175,7 @@ else:
     resume = True
     plot = True
 
-band = f'{band_minimum}_{band_maximum}Hz'
+band = f"{band_minimum}_{band_maximum}Hz"
 
 truths = None
 
@@ -197,9 +197,9 @@ times, y, _, outdir, label = get_data(
     )
 
 if grb_label == "ASIM_CLEANED_LED":
-    outdir += 'LED'
+    outdir += "LED"
 elif grb_label == "ASIM_CLEANED_HED":
-    outdir += 'HED'
+    outdir += "HED"
 
 sampling_frequency = 1 / (times[1] - times[0])
 if window == "tukey":
@@ -217,10 +217,10 @@ if normalisation:
 #     lc = Lightcurve(times, y, err=np.ones(len(y)))
 #
 #
-    ps = Powerspectrum(lc=lc, norm='leahy')
+    ps = Powerspectrum(lc=lc, norm="leahy")
     freqs = ps.freq
     powers = ps.power
-# freqs, powers = periodogram(y, fs=sampling_frequency, window='boxcar')
+# freqs, powers = periodogram(y, fs=sampling_frequency, window="boxcar")
 
 if band_maximum is None:
     band_maximum = freqs[-1] + 1
@@ -229,10 +229,10 @@ if band_minimum is None:
     band_minimum = freqs[1]
 
 if plot:
-    plt.step(times, y, label='data')
+    plt.step(times, y, label="data")
     # plt.plot(times, tukey(len(y), alpha=0.05))
 
-    # plt.plot(times, y, label='flux')
+    # plt.plot(times, y, label="flux")
     plt.xlabel("time [s]")
     plt.ylabel("counts")
     plt.show()
@@ -240,8 +240,8 @@ if plot:
 
     plt.loglog()
     plt.step(freqs[1:], powers[1:])
-    plt.xlabel('frequency [Hz]')
-    plt.ylabel('Power [AU]')
+    plt.xlabel("frequency [Hz]")
+    plt.ylabel("Power [AU]")
     plt.show()
     plt.clf()
 
@@ -257,12 +257,12 @@ elif recovery_mode == "pure_qpo":
     priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
     priors.update(get_qpo_prior(frequencies=freqs, min_log_f=np.log(band_minimum), max_log_f=np.log(band_maximum)))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
     priors._resolve_conditions()
-    del priors['alpha']
-    del priors['log_beta']
-elif recovery_mode == 'white_noise':
+    del priors["alpha"]
+    del priors["log_beta"]
+elif recovery_mode == "white_noise":
     priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
-    del priors['alpha']
-    del priors['log_beta']
+    del priors["alpha"]
+    del priors["log_beta"]
 else:
     raise ValueError
 
@@ -297,47 +297,47 @@ if try_load:
 if result is None:
     Path(f"{outdir}/results").mkdir(parents=True, exist_ok=True)
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                               label=label, sampler='dynesty', nlive=nlive, sample=sample,
+                               label=label, sampler="dynesty", nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio)
 result.plot_corner()
 
 max_like_params = result.posterior.iloc[-1]
 plt.loglog()
-plt.step(freqs[1:], powers[1:], where='mid')
-if noise_model == 'broken_power_law':
-    names_bpl = ['alpha_1', 'alpha_2', 'log_beta', 'log_delta', 'rho']
+plt.step(freqs[1:], powers[1:], where="mid")
+if noise_model == "broken_power_law":
+    names_bpl = ["alpha_1", "alpha_2", "log_beta", "log_delta", "rho"]
     max_l_bpl_params = dict()
     for name in names_bpl:
         max_l_bpl_params[name] = max_like_params[name]
-    max_l_bpl_params['beta'] = np.exp(max_l_bpl_params['log_beta'])
-    max_l_bpl_params['delta'] = np.exp(max_l_bpl_params['log_delta'])
-    del max_l_bpl_params['log_delta']
-    del max_l_bpl_params['log_beta']
+    max_l_bpl_params["beta"] = np.exp(max_l_bpl_params["log_beta"])
+    max_l_bpl_params["delta"] = np.exp(max_l_bpl_params["log_delta"])
+    del max_l_bpl_params["log_delta"]
+    del max_l_bpl_params["log_beta"]
 
-if recovery_mode == 'qpo_plus_red_noise':
-    max_l_psd_no_qpo = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'],
-                                                         beta=np.exp(max_like_params['log_beta'])) + np.exp(
-        max_like_params['log_sigma'])
+if recovery_mode == "qpo_plus_red_noise":
+    max_l_psd_no_qpo = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params["alpha"],
+                                                         beta=np.exp(max_like_params["log_beta"])) + np.exp(
+        max_like_params["log_sigma"])
     max_l_psd = max_l_psd_no_qpo + \
-                QPOEstimation.model.psd.lorentzian(freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
-                                                   central_frequency=np.exp(max_like_params['log_frequency']),
-                                                   width=np.exp(max_like_params['log_width']))
-elif noise_model == 'red_noise':
-    max_l_psd = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'],
-                                                  beta=np.exp(max_like_params['log_beta'])) + np.exp(
-        max_like_params['log_sigma'])
+                QPOEstimation.model.psd.lorentzian(freqs[1:], amplitude=np.exp(max_like_params["log_amplitude"]),
+                                                   central_frequency=np.exp(max_like_params["log_frequency"]),
+                                                   width=np.exp(max_like_params["log_width"]))
+elif noise_model == "red_noise":
+    max_l_psd = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params["alpha"],
+                                                  beta=np.exp(max_like_params["log_beta"])) + np.exp(
+        max_like_params["log_sigma"])
     max_l_psd_no_qpo = max_l_psd
-elif noise_model == 'broken_power_law':
+elif noise_model == "broken_power_law":
     max_l_psd = QPOEstimation.model.psd.broken_power_law_noise(freqs[1:], **max_l_bpl_params) + np.exp(
-        max_like_params['log_sigma'])
+        max_like_params["log_sigma"])
     max_l_psd_no_qpo = max_l_psd
 elif noise_model == "pure_qpo":
-    max_l_psd_no_qpo = np.exp(max_like_params['log_sigma']) * np.ones(len(freqs[1:]))
+    max_l_psd_no_qpo = np.exp(max_like_params["log_sigma"]) * np.ones(len(freqs[1:]))
     max_l_psd = max_l_psd_no_qpo + QPOEstimation.model.psd.lorentzian(
-        freqs[1:],  amplitude=np.exp(max_like_params['log_amplitude']),
-        central_frequency=np.exp(max_like_params['log_frequency']), width=np.exp(max_like_params['log_width']))
-elif noise_model == 'white_noise':
-    max_l_psd = np.exp(max_like_params['log_sigma']) * np.ones(len(freqs[1:]))
+        freqs[1:],  amplitude=np.exp(max_like_params["log_amplitude"]),
+        central_frequency=np.exp(max_like_params["log_frequency"]), width=np.exp(max_like_params["log_width"]))
+elif noise_model == "white_noise":
+    max_l_psd = np.exp(max_like_params["log_sigma"]) * np.ones(len(freqs[1:]))
     max_l_psd_no_qpo = max_l_psd
 else:
     raise ValueError
@@ -347,25 +347,25 @@ plt.loglog(freqs[1:], threshold, label="3 sigma thres.")
 threshold = -max_l_psd_no_qpo * np.log((1 - 0.954) / len(freqs[1:]))  # Bonferroni correction
 plt.loglog(freqs[1:], threshold, label="2 sigma thres.")
 
-if recovery_mode == 'qpo_plus_red_noise':
+if recovery_mode == "qpo_plus_red_noise":
     max_like_lorentz = QPOEstimation.model.psd.lorentzian(
-        freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
-        central_frequency=np.exp(max_like_params['log_frequency']),
-        width=np.exp(max_like_params['log_width']))
+        freqs[1:], amplitude=np.exp(max_like_params["log_amplitude"]),
+        central_frequency=np.exp(max_like_params["log_frequency"]),
+        width=np.exp(max_like_params["log_width"]))
     plt.loglog(freqs[1:], max_like_lorentz, label="Max. like. QPO")
 plt.xlabel("frequency [Hz]")
 plt.ylabel("Power [arb. units]")
 plt.legend()
 plt.tight_layout()
-plt.savefig(f'{outdir}/{label}_max_like_fit.pdf')
+plt.savefig(f"{outdir}/{label}_max_like_fit.pdf")
 plt.show()
 
 
-if recovery_mode in ['qpo_plus_red_noise', 'pure_qpo']:
-    frequency_samples = np.exp(result.posterior['log_frequency'])
+if recovery_mode in ["qpo_plus_red_noise", "pure_qpo"]:
+    frequency_samples = np.exp(result.posterior["log_frequency"])
     plt.hist(frequency_samples, bins="fd", density=True)
-    plt.xlabel('frequency [Hz]')
-    plt.ylabel('normalised PDF')
+    plt.xlabel("frequency [Hz]")
+    plt.ylabel("normalised PDF")
     median = np.median(frequency_samples)
     percentiles = np.percentile(frequency_samples, [16, 84])
     plt.title(
@@ -379,8 +379,8 @@ if recovery_mode in ['qpo_plus_red_noise', 'pure_qpo']:
 
 
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_checkpoint_trace_unit.png',
-                  '_dynesty.pickle', '_resume.pickle', '_result.json.old', '_samples.dat']:
+for extension in ["_checkpoint_run.png", "_checkpoint_stats.png", "_checkpoint_trace.png", "_checkpoint_trace_unit.png",
+                  "_dynesty.pickle", "_resume.pickle", "_result.json.old", "_samples.dat"]:
     try:
         os.remove(f"{outdir}/results/{label}{extension}")
     except Exception:

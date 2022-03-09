@@ -5,9 +5,9 @@ import numpy as np
 from QPOEstimation.post_processing import InjectionStudyPostProcessor
 
 import matplotlib.pyplot as plt
-plt.style.use('paper.mplstyle')
+plt.style.use("paper.mplstyle")
 # import matplotlib
-# matplotlib.use('Qt5Agg')
+# matplotlib.use("Qt5Agg")
 
 injection_id = "02"
 outdir = "results/periodogram_pop"
@@ -23,10 +23,10 @@ print(end_times)
 start_times = -end_times
 durations = 2 * end_times
 
-outdir_qpo_periodogram = f'injection/qpo_plus_red_noise_injection/qpo_plus_red_noise_recovery/whittle/results/'
-outdir_noise_periodogram = f'injection/qpo_plus_red_noise_injection/red_noise_recovery/whittle/results/'
+outdir_qpo_periodogram = f"injection/qpo_plus_red_noise_injection/qpo_plus_red_noise_recovery/whittle/results/"
+outdir_noise_periodogram = f"injection/qpo_plus_red_noise_injection/red_noise_recovery/whittle/results/"
 
-data = np.loadtxt(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt')
+data = np.loadtxt(f"injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt")
 times = data[:, 0]
 y = data[:, 1]
 

@@ -59,7 +59,7 @@ if len(sys.argv) > 1:
 
     plot = args.plot
 else:
-    matplotlib.use('Qt5Agg')
+    matplotlib.use("Qt5Agg")
 
     injection_id = 0
     minimum_id = -1
@@ -115,9 +115,9 @@ mean_prior_bounds_dict = dict(
 times = np.sort(np.random.uniform(0, 1, 256))
 
 kernel = get_kernel(kernel_type=injection_mode)
-outdir = f'injections/injection_files_pp_non_eq_dis'
+outdir = f"injections/injection_files_pp_non_eq_dis"
 
-if injection_mode == 'red_noise':
+if injection_mode == "red_noise":
     min_log_a = min_log_a_red_noise
     max_log_a = min_log_a_red_noise
     priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
@@ -126,14 +126,14 @@ if injection_mode == 'red_noise':
                         max_log_c_qpo=max_log_c_qpo, band_minimum=band_minimum, band_maximum=band_maximum,
                         model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                         n_components=n_components, **mean_prior_bounds_dict)
-elif injection_mode == 'qpo_plus_red_noise':
+elif injection_mode == "qpo_plus_red_noise":
     priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
                         min_log_a=min_log_a, max_log_a=max_log_a, min_log_c_red_noise=min_log_c_red_noise,
                         max_log_c_red_noise=max_log_c_red_noise, min_log_c_qpo=min_log_c_qpo,
                         max_log_c_qpo=max_log_c_qpo, band_minimum=band_minimum, band_maximum=band_maximum,
                         model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                         n_components=n_components, **mean_prior_bounds_dict)
-    priors['kernel:terms[1]:log_a'].peak = min_log_a_red_noise
+    priors["kernel:terms[1]:log_a"].peak = min_log_a_red_noise
 else:
     raise ValueError
 Path(outdir).mkdir(exist_ok=True, parents=True)

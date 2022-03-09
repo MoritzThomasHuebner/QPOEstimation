@@ -8,29 +8,29 @@ import pandas as pd
 
 import os
 
-flares = np.array(sorted(os.listdir('results/hares_and_hounds_HH2_just_figures')))
+flares = np.array(sorted(os.listdir("results/hares_and_hounds_HH2_just_figures")))
 print(len(flares))
-run_mode = 'from_maximum'
+run_mode = "from_maximum"
 
-results = np.genfromtxt("data/hares_and_hounds/qpp_type_hh2.csv", delimiter=',', dtype=int)
+results = np.genfromtxt("data/hares_and_hounds/qpp_type_hh2.csv", delimiter=",", dtype=int)
 flare_keys = results[:, 0]
 flare_types = results[:, 1]
 
 threshold_ln_bf = 0.24
 
 try:
-    evidence_qpo_1_skew_exponential_list = np.loadtxt('hh_evidence_qpo_1_skew_exponential')
-    evidence_qpo_2_skew_exponential_list = np.loadtxt('hh_evidence_qpo_2_skew_exponential')
-    evidence_qpo_3_skew_exponential_list = np.loadtxt('hh_evidence_qpo_3_skew_exponential')
-    evidence_qpo_1_gaussian_list = np.loadtxt('hh_evidence_qpo_1_gaussian')
-    evidence_qpo_2_gaussian_list = np.loadtxt('hh_evidence_qpo_2_gaussian')
-    evidence_qpo_3_gaussian_list = np.loadtxt('hh_evidence_qpo_3_gaussian')
-    evidence_red_noise_1_skew_exponential_list = np.loadtxt('hh_evidence_red_noise_1_skew_exponential')
-    evidence_red_noise_2_skew_exponential_list = np.loadtxt('hh_evidence_red_noise_2_skew_exponential')
-    evidence_red_noise_3_skew_exponential_list = np.loadtxt('hh_evidence_red_noise_3_skew_exponential')
-    evidence_red_noise_1_gaussian_list = np.loadtxt('hh_evidence_red_noise_1_gaussian')
-    evidence_red_noise_2_gaussian_list = np.loadtxt('hh_evidence_red_noise_2_gaussian')
-    evidence_red_noise_3_gaussian_list = np.loadtxt('hh_evidence_red_noise_3_gaussian')
+    evidence_qpo_1_skew_exponential_list = np.loadtxt("hh_evidence_qpo_1_skew_exponential")
+    evidence_qpo_2_skew_exponential_list = np.loadtxt("hh_evidence_qpo_2_skew_exponential")
+    evidence_qpo_3_skew_exponential_list = np.loadtxt("hh_evidence_qpo_3_skew_exponential")
+    evidence_qpo_1_gaussian_list = np.loadtxt("hh_evidence_qpo_1_gaussian")
+    evidence_qpo_2_gaussian_list = np.loadtxt("hh_evidence_qpo_2_gaussian")
+    evidence_qpo_3_gaussian_list = np.loadtxt("hh_evidence_qpo_3_gaussian")
+    evidence_red_noise_1_skew_exponential_list = np.loadtxt("hh_evidence_red_noise_1_skew_exponential")
+    evidence_red_noise_2_skew_exponential_list = np.loadtxt("hh_evidence_red_noise_2_skew_exponential")
+    evidence_red_noise_3_skew_exponential_list = np.loadtxt("hh_evidence_red_noise_3_skew_exponential")
+    evidence_red_noise_1_gaussian_list = np.loadtxt("hh_evidence_red_noise_1_gaussian")
+    evidence_red_noise_2_gaussian_list = np.loadtxt("hh_evidence_red_noise_2_gaussian")
+    evidence_red_noise_3_gaussian_list = np.loadtxt("hh_evidence_red_noise_3_gaussian")
 except Exception:
     evidence_qpo_1_skew_exponential_list = []
     evidence_qpo_2_skew_exponential_list = []
@@ -48,29 +48,29 @@ except Exception:
         print(flare)
         try:
             res_qpo_1_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_1_skew_exponentials_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_1_skew_exponentials_result.json")
             res_qpo_2_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_2_skew_exponentials_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_2_skew_exponentials_result.json")
             res_qpo_3_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_3_skew_exponentials_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_3_skew_exponentials_result.json")
             res_qpo_1_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_1_gaussians_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_1_gaussians_result.json")
             res_qpo_2_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_2_gaussians_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_2_gaussians_result.json")
             res_qpo_3_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_3_gaussians_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_3_gaussians_result.json")
             res_red_noise_1_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_1_skew_exponentials_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_1_skew_exponentials_result.json")
             res_red_noise_2_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_2_skew_exponentials_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_2_skew_exponentials_result.json")
             res_red_noise_3_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_3_skew_exponentials_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_3_skew_exponentials_result.json")
             res_red_noise_1_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_1_gaussians_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_1_gaussians_result.json")
             res_red_noise_2_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_2_gaussians_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_2_gaussians_result.json")
             res_red_noise_3_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_3_gaussians_result.json')
+                filename=f"results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_3_gaussians_result.json")
 
             evidence_qpo_1_skew_exponential = res_qpo_1_skew_exponential.log_evidence
             evidence_qpo_2_skew_exponential = res_qpo_2_skew_exponential.log_evidence
@@ -124,25 +124,25 @@ except Exception:
     evidence_red_noise_2_gaussian_list = np.array(evidence_red_noise_2_gaussian_list)
     evidence_red_noise_3_gaussian_list = np.array(evidence_red_noise_3_gaussian_list)
 
-    np.savetxt('results/hh_evidence_qpo_1_skew_exponential', evidence_qpo_1_skew_exponential_list)
-    np.savetxt('results/hh_evidence_qpo_2_skew_exponential', evidence_qpo_2_skew_exponential_list)
-    np.savetxt('results/hh_evidence_qpo_3_skew_exponential', evidence_qpo_3_skew_exponential_list)
-    np.savetxt('results/hh_evidence_qpo_1_gaussian', evidence_qpo_1_gaussian_list)
-    np.savetxt('results/hh_evidence_qpo_2_gaussian', evidence_qpo_2_gaussian_list)
-    np.savetxt('results/hh_evidence_qpo_3_gaussian', evidence_qpo_3_gaussian_list)
-    np.savetxt('results/hh_evidence_red_noise_1_skew_exponential', evidence_red_noise_1_skew_exponential_list)
-    np.savetxt('results/hh_evidence_red_noise_2_skew_exponential', evidence_red_noise_2_skew_exponential_list)
-    np.savetxt('results/hh_evidence_red_noise_3_skew_exponential', evidence_red_noise_3_skew_exponential_list)
-    np.savetxt('results/hh_evidence_red_noise_1_gaussian', evidence_red_noise_1_gaussian_list)
-    np.savetxt('results/hh_evidence_red_noise_2_gaussian', evidence_red_noise_2_gaussian_list)
-    np.savetxt('results/hh_evidence_red_noise_3_gaussian', evidence_red_noise_3_gaussian_list)
+    np.savetxt("results/hh_evidence_qpo_1_skew_exponential", evidence_qpo_1_skew_exponential_list)
+    np.savetxt("results/hh_evidence_qpo_2_skew_exponential", evidence_qpo_2_skew_exponential_list)
+    np.savetxt("results/hh_evidence_qpo_3_skew_exponential", evidence_qpo_3_skew_exponential_list)
+    np.savetxt("results/hh_evidence_qpo_1_gaussian", evidence_qpo_1_gaussian_list)
+    np.savetxt("results/hh_evidence_qpo_2_gaussian", evidence_qpo_2_gaussian_list)
+    np.savetxt("results/hh_evidence_qpo_3_gaussian", evidence_qpo_3_gaussian_list)
+    np.savetxt("results/hh_evidence_red_noise_1_skew_exponential", evidence_red_noise_1_skew_exponential_list)
+    np.savetxt("results/hh_evidence_red_noise_2_skew_exponential", evidence_red_noise_2_skew_exponential_list)
+    np.savetxt("results/hh_evidence_red_noise_3_skew_exponential", evidence_red_noise_3_skew_exponential_list)
+    np.savetxt("results/hh_evidence_red_noise_1_gaussian", evidence_red_noise_1_gaussian_list)
+    np.savetxt("results/hh_evidence_red_noise_2_gaussian", evidence_red_noise_2_gaussian_list)
+    np.savetxt("results/hh_evidence_red_noise_3_gaussian", evidence_red_noise_3_gaussian_list)
 
 for red_noise_evidences, qpo_evidences, label in zip(
         [evidence_qpo_1_skew_exponential_list, evidence_qpo_2_skew_exponential_list, evidence_qpo_3_skew_exponential_list, evidence_qpo_1_gaussian_list,
          evidence_qpo_2_gaussian_list, evidence_qpo_3_gaussian_list],
         [evidence_red_noise_1_skew_exponential_list, evidence_red_noise_2_skew_exponential_list, evidence_red_noise_3_skew_exponential_list,
          evidence_red_noise_1_gaussian_list, evidence_red_noise_2_gaussian_list, evidence_red_noise_3_gaussian_list],
-        ['1_skew_exponentials', '2_skew_exponentials', '3_skew_exponentials', '1_gaussians', '2_gaussians', '3_gaussians']):
+        ["1_skew_exponentials", "2_skew_exponentials", "3_skew_exponentials", "1_gaussians", "2_gaussians", "3_gaussians"]):
     ln_bfs_i = qpo_evidences - red_noise_evidences
     ln_bfs_1_skew_exponential = evidence_red_noise_1_skew_exponential_list - evidence_qpo_1_skew_exponential_list
     plt.plot([x for _, x in sorted(zip(ln_bfs_1_skew_exponential, ln_bfs_i))][::-1], label=label)
@@ -152,10 +152,10 @@ for red_noise_evidences, qpo_evidences, label in zip(
     print(flares[qpo_candidates])
     print()
 
-plt.xlabel('(Sorted) Event ID')
-plt.ylabel('QPO ln BF')
+plt.xlabel("(Sorted) Event ID")
+plt.ylabel("QPO ln BF")
 plt.legend()
-plt.savefig('results/hh_qpo_bayes_factors.png')
+plt.savefig("results/hh_qpo_bayes_factors.png")
 plt.clf()
 
 ln_bfs_1_skew_exponential = evidence_qpo_1_skew_exponential_list - evidence_qpo_1_skew_exponential_list
@@ -166,12 +166,12 @@ ln_bfs_2_gaussian = evidence_qpo_2_gaussian_list - evidence_qpo_1_skew_exponenti
 ln_bfs_3_gaussian = evidence_qpo_3_gaussian_list - evidence_qpo_1_skew_exponential_list
 for ln_bfs, label in zip(
         [ln_bfs_1_skew_exponential, ln_bfs_2_skew_exponential, ln_bfs_3_skew_exponential, ln_bfs_1_gaussian, ln_bfs_2_gaussian, ln_bfs_3_gaussian],
-        ['1_skew_exponentials', '2_skew_exponentials', '3_skew_exponentials', '1_gaussians', '2_gaussians', '3_gaussians']):
+        ["1_skew_exponentials", "2_skew_exponentials", "3_skew_exponentials", "1_gaussians", "2_gaussians", "3_gaussians"]):
     plt.plot([x for _, x in sorted(zip(ln_bfs_1_skew_exponential, ln_bfs))], label=label)
-plt.xlabel('(Sorted) Event ID')
-plt.ylabel('Mean model ln BF')
+plt.xlabel("(Sorted) Event ID")
+plt.ylabel("Mean model ln BF")
 plt.legend()
-plt.savefig('results/hh_mean_model_qpo_bayes_factors.png')
+plt.savefig("results/hh_mean_model_qpo_bayes_factors.png")
 plt.clf()
 
 ln_bfs_1_skew_exponential = evidence_red_noise_1_skew_exponential_list - evidence_red_noise_1_skew_exponential_list
@@ -183,13 +183,13 @@ ln_bfs_3_gaussian = evidence_red_noise_3_gaussian_list - evidence_red_noise_1_sk
 
 for ln_bfs, label in zip(
         [ln_bfs_1_skew_exponential, ln_bfs_2_skew_exponential, ln_bfs_3_skew_exponential, ln_bfs_1_gaussian, ln_bfs_2_gaussian, ln_bfs_3_gaussian],
-        ['1_skew_exponentials', '2_skew_exponentials', '3_skew_exponentials', '1_gaussians', '2_gaussians', '3_gaussians']):
+        ["1_skew_exponentials", "2_skew_exponentials", "3_skew_exponentials", "1_gaussians", "2_gaussians", "3_gaussians"]):
     plt.plot([x for _, x in sorted(zip(ln_bfs_1_skew_exponential, ln_bfs))], label=label)
 
-plt.xlabel('Event ID')
-plt.ylabel('Mean model ln BF')
+plt.xlabel("Event ID")
+plt.ylabel("Mean model ln BF")
 plt.legend()
-plt.savefig('results/hh_mean_model_red_noise_bayes_factors.png')
+plt.savefig("results/hh_mean_model_red_noise_bayes_factors.png")
 plt.clf()
 
 qpo_evidence_list_list = [evidence_qpo_1_skew_exponential_list, evidence_qpo_2_skew_exponential_list, evidence_qpo_3_skew_exponential_list,
@@ -222,10 +222,10 @@ qpo_evidences = np.array(qpo_evidences)
 red_noise_evidences = np.array(red_noise_evidences)
 
 plt.plot(qpo_evidences - red_noise_evidences)
-plt.xlabel('Event ID')
-plt.ylabel('QPO ln BF')
+plt.xlabel("Event ID")
+plt.ylabel("QPO ln BF")
 plt.legend()
-plt.savefig('results/hh_qpo_bayes_factors_optimal_mean.png')
+plt.savefig("results/hh_qpo_bayes_factors_optimal_mean.png")
 plt.clf()
 
 qpo_candidates = np.where(qpo_evidences - red_noise_evidences > threshold_ln_bf)[0]
