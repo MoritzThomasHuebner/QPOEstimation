@@ -15,6 +15,7 @@ from QPOEstimation.model.mean import polynomial
 
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
+
 def get_celerite_likelihood(mean_model, kernel, times, y, yerr, likelihood_model='gaussian_process'):
     return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)
 
@@ -140,18 +141,25 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
         self.white_noise_gp.compute(self.gp._t, self.yerr)
         self.white_noise_log_likelihood = self.white_noise_gp.log_likelihood(y=y)
 
-
     def log_likelihood(self):
-        if len(self.windowed_indices) == 0 or len(self.edge_indices) == 0:
+        if self._check_valid_indices_distribution():
             return -np.inf
 
-        jitter = 0
-        for k in self.parameters.keys():
-            if k.endswith("log_sigma"):
-                jitter = np.exp(self.parameters[k])
+        self._setup_gps()
 
+        log_l = self.gp.log_likelihood(self.y[self.windowed_indices]) + \
+            self.white_noise_gp.log_likelihood(self.y[self.edge_indices])
+        return np.nan_to_num(log_l, nan=-np.inf)
+
+    def _check_valid_indices_distribution(self):
+        return len(self.windowed_indices) == 0 or len(self.edge_indices) == 0
+
+    def _setup_gps(self):
         self.gp.compute(self.t[self.windowed_indices], self.yerr[self.windowed_indices])
-        self.white_noise_gp.compute(self.t[self.edge_indices], self.yerr[self.edge_indices] + jitter)
+        self.white_noise_gp.compute(self.t[self.edge_indices], self.yerr[self.edge_indices] + self.jitter)
+        self._set_parameters_to_gps()
+
+    def _set_parameters_to_gps(self):
         for name, value in self.parameters.items():
             if 'window' in name:
                 continue
@@ -159,9 +167,12 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
                 self.white_noise_gp.set_parameter(name=name, value=value)
             self.gp.set_parameter(name=name, value=value)
 
-        log_l = self.gp.log_likelihood(self.y[self.windowed_indices]) + \
-            self.white_noise_gp.log_likelihood(self.y[self.edge_indices])
-        return np.nan_to_num(log_l, nan=-np.inf)
+    @property
+    def jitter(self):
+        for k in self.parameters.keys():
+            if k.endswith("log_sigma"):
+                return np.exp(self.parameters[k])
+        return 0
 
     @property
     def edge_indices(self):
@@ -272,6 +283,7 @@ class QPOTerm(terms.Term):
 
     def compute_gradient(self, *args, **kwargs):
         pass
+
 
 class ExponentialTerm(terms.Term):
     parameter_names = ("log_a", "log_c")
