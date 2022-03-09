@@ -7,7 +7,7 @@
 #   do
 #      for n_components in {1..3}
 #      do
-#        sbatch analyse_submit.sh ${filename} gaussian_process ${model} ${n_components} skew_gaussian
+#        sbatch analyse_submit.sh ${filename} celerite ${model} ${n_components} skew_gaussian
 #      done
 #   done
 #done
@@ -18,10 +18,10 @@
 #do
 #  for n_components in {1..4}
 #  do
-#    sbatch analyse_submit.sh gaussian_process ${model} skew_exponential ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_extended ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} skew_exponential ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} fred ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} fred_extended ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
 #  done
 #done
 
@@ -30,10 +30,10 @@
 #do
 #  for n_components in {1..4}
 #  do
-#    sbatch analyse_submit.sh gaussian_process ${model} skew_exponential ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_extended ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} skew_exponential ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} fred ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} fred_extended ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
 #  done
 #done
 
@@ -52,8 +52,8 @@
 #
 #for i in {0..50}
 #do
-#  sbatch analyse_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process
-#  sbatch analyse_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 gaussian_process_windowed
+#  sbatch analyse_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 celerite
+#  sbatch analyse_submit.sh ${start_times[$i]} ${end_times[$i]} ${recovery_mode} 0 celerite_windowed
 #done
 
 # POP injections
@@ -65,10 +65,10 @@
 #
 #for i in {0..19}
 #do
-#  sbatch analyse_submit.sh 01 red_noise gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-#  sbatch analyse_submit.sh 01 red_noise gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-#  sbatch analyse_submit.sh 01 general_qpo gaussian_process $((start_time - extensions[$i])) $((end_time + extensions[$i]))
-#  sbatch analyse_submit.sh 01 general_qpo gaussian_process_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#  sbatch analyse_submit.sh 01 red_noise celerite $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#  sbatch analyse_submit.sh 01 red_noise celerite_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#  sbatch analyse_submit.sh 01 general_qpo celerite $((start_time - extensions[$i])) $((end_time + extensions[$i]))
+#  sbatch analyse_submit.sh 01 general_qpo celerite_windowed $((start_time - extensions[$i])) $((end_time + extensions[$i]))
 #done
 
 # MSS test
@@ -103,10 +103,10 @@
 #
 #for i in {1..4}
 #do
-#  sbatch analyse_submit.sh red_noise gaussian_process 121.06 123.06 ${i}
-#  sbatch analyse_submit.sh red_noise gaussian_process_windowed 121.06 123.06 ${i}
-#  sbatch analyse_submit.sh general_qpo gaussian_process 121.06 123.06 ${i}
-#  sbatch analyse_submit.sh general_qpo gaussian_process_windowed 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh red_noise celerite 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh red_noise celerite_windowed 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh general_qpo celerite 121.06 123.06 ${i}
+#  sbatch analyse_submit.sh general_qpo celerite_windowed 121.06 123.06 ${i}
 #done
 
 period=7.56
@@ -117,8 +117,8 @@ for i in {0..20}
 do
   start_time=$(python -c "print(${start_time_base} + ${period} * ${i})")
   end_time=$(python -c "print(${end_time_base} + ${period} * ${i})")
-  sbatch analyse_submit.sh red_noise gaussian_process_windowed ${start_time} ${end_time} 2
-  sbatch analyse_submit.sh general_qpo gaussian_process_windowed ${start_time} ${end_time} 2
+  sbatch analyse_submit.sh red_noise celerite_windowed ${start_time} ${end_time} 2
+  sbatch analyse_submit.sh general_qpo celerite_windowed ${start_time} ${end_time} 2
 done
 
 

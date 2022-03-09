@@ -22,7 +22,7 @@ else:
     injection_mode = "red_noise"
     n_injections = 100
 
-likelihood_model = 'gaussian_process'
+likelihood_model = 'celerite'
 injections = np.arange(0, n_injections)
 
 

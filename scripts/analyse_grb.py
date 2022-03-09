@@ -27,7 +27,7 @@ for mean_model in ['skew_exponential', 'fred', 'fred_extended', 'skew_gaussian']
             try:
                 res = GPResult.from_json(
                     outdir=f'results/GRB090709A_swift/select_time/{recovery_mode}/'
-                           f'gaussian_process/results/',
+                           f'celerite/results/',
                     label=f'-4.0_103.0_{n_component}_{mean_model}s')
                 if recovery_mode == 'general_qpo':
                     res_list.append(res)

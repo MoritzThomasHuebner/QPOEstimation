@@ -20,7 +20,7 @@ for i in range(100, 200):
 
         res = bilby.result.read_in_result(outdir=get_injection_outdir(
             injection_mode=injection_mode, recovery_mode=injection_mode,
-            likelihood_model="gaussian_process_windowed"), label=f"{str(i).zfill(2)}")
+            likelihood_model="celerite_windowed"), label=f"{str(i).zfill(2)}")
         plt.hist(res.posterior['window_maximum'], bins='fd', density=True)
         plt.axvline(injection_params['window_maximum'], color='orange')
         plt.savefig(f'injections/{injection_mode}_injections/{str(i).zfill(2)}.png')

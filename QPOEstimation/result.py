@@ -22,7 +22,7 @@ class GPResult(bilby.result.Result):
     times = MetaDataAccessor('times')
     y = MetaDataAccessor('y')
     yerr = MetaDataAccessor('yerr')
-    likelihood_model = MetaDataAccessor('likelihood_model', default='gaussian_process')
+    likelihood_model = MetaDataAccessor('likelihood_model', default='celerite')
     truths = MetaDataAccessor('truths')
     offset = MetaDataAccessor('offset')
 
@@ -45,10 +45,10 @@ class GPResult(bilby.result.Result):
         return [self.posterior.iloc[np.random.randint(len(self.posterior))] for _ in range(n_samples)]
 
     def get_likelihood(self):
-        if self.likelihood_model == "gaussian_process_windowed":
+        if self.likelihood_model == "celerite_windowed":
             likelihood = WindowedCeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                                     t=self.times, y=self.y, yerr=self.yerr)
-        elif self.likelihood_model == 'gaussian_process':
+        elif self.likelihood_model == 'celerite':
             likelihood = CeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                             t=self.times, y=self.y, yerr=self.yerr)
         elif self.likelihood_model == 'george':
@@ -148,7 +148,7 @@ class GPResult(bilby.result.Result):
             if 'log_sigma' in k and self.jitter_term:
                 jitter = np.exp(self.max_likelihood_parameters[k])
 
-        if self.likelihood_model == 'gaussian_process_windowed':
+        if self.likelihood_model == 'celerite_windowed':
             plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan',
                         label='$t_{\mathrm{start/end}}$')
             plt.axvline(self.max_likelihood_parameters['window_maximum'], color='cyan')
@@ -213,7 +213,7 @@ class GPResult(bilby.result.Result):
             if 'log_sigma' in k and self.jitter_term:
                 jitter = np.exp(self.max_likelihood_parameters[k])
 
-        if self.likelihood_model == 'gaussian_process_windowed':
+        if self.likelihood_model == 'celerite_windowed':
             plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan',
                         label='start/end stochastic process')
             plt.axvline(self.max_likelihood_parameters['window_maximum'], color='cyan')
@@ -431,7 +431,7 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
     def plot_duration_posterior(self, paper_style=True):
-        if self.likelihood_model == "gaussian_process_windowed":
+        if self.likelihood_model == "celerite_windowed":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
                 plt.style.use(style_file)

@@ -12,7 +12,7 @@ from QPOEstimation.likelihood import get_kernel, get_mean_model
 class InjectionCreator(object):
 
     def __init__(self, params, injection_mode, sampling_frequency=256, segment_length=1., times=None,
-                 outdir='injection_files', injection_id=0, likelihood_model='gaussian_process', mean_model=None,
+                 outdir='injection_files', injection_id=0, likelihood_model='celerite', mean_model=None,
                  n_components=1, poisson_data=False):
         self.params = params
         self.injection_mode = injection_mode
@@ -54,7 +54,7 @@ class InjectionCreator(object):
 
     @property
     def windowed_indices(self):
-        if self.likelihood_model == 'gaussian_process':
+        if self.likelihood_model == 'celerite':
             return np.where(np.logical_and(-np.inf < self.times, self.times < np.inf))[0]
         else:
             return np.where(np.logical_and(self.params['window_minimum'] < self.times,
@@ -62,7 +62,7 @@ class InjectionCreator(object):
 
     @property
     def outside_window_indices(self):
-        if self.likelihood_model == 'gaussian_process_windowed':
+        if self.likelihood_model == 'celerite_windowed':
             return np.where(np.logical_or(self.params['window_minimum'] >= self.times,
                                           self.times >= self.params['window_maximum']))[0]
         else:
@@ -164,7 +164,7 @@ class InjectionCreator(object):
             self.update_params()
             x = np.linspace(self.windowed_times[0], self.windowed_times[-1], 5000)
             self.gp.compute(self.windowed_times, self.windowed_yerr)
-            if self.likelihood_model == 'gaussian_process_windowed':
+            if self.likelihood_model == 'celerite_windowed':
                 plt.axvline(self.params['window_minimum'], color='cyan', label='start/end stochastic process')
                 plt.axvline(self.params['window_maximum'], color='cyan')
             pred_mean, pred_var = self.gp.predict(self.y_realisation[self.windowed_indices], x, return_var=True)
@@ -181,7 +181,7 @@ class InjectionCreator(object):
 
 
 def create_injection(params, injection_mode, sampling_frequency=None, segment_length=None, times=None,
-                     outdir='injection_files', injection_id=0, plot=False, likelihood_model='gaussian_process',
+                     outdir='injection_files', injection_id=0, plot=False, likelihood_model='celerite',
                      mean_model='mean', n_components=1, poisson_data=False):
     injection_creator = InjectionCreator(params=params, injection_mode=injection_mode,
                                          sampling_frequency=sampling_frequency, segment_length=segment_length,

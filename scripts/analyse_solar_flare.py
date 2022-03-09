@@ -28,7 +28,7 @@ for recovery_mode in ['general_qpo', 'red_noise']:
         try:
             res = GPResult.from_json(
                 outdir=f'results/solar_flare_go1520130512/select_time/{recovery_mode}/'
-                       f'gaussian_process/results/',
+                       f'celerite/results/',
                 label=f'74700.0_74900.0_{n_component}_{mean_model}s')
             if recovery_mode == 'general_qpo':
                 res_list.append(res)

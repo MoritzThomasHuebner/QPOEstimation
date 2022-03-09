@@ -214,8 +214,8 @@ def _add_individual_kernel_prior(priors, minimum, maximum, label):
         priors[f'kernel:{label}'] = bilby.core.prior.Uniform(minimum=minimum, maximum=maximum, name=label)
 
 
-def get_window_priors(times, likelihood_model='gaussian_process_windowed', **kwargs):
-    if likelihood_model == 'gaussian_process_windowed':
+def get_window_priors(times, likelihood_model='celerite_windowed', **kwargs):
+    if likelihood_model == 'celerite_windowed':
         priors = bilby.core.prior.ConditionalPriorDict()
         priors['window_minimum'] = bilby.core.prior.Beta(minimum=times[0], maximum=times[-1], alpha=1, beta=2,
                                                          name='window_minimum', boundary='reflective')

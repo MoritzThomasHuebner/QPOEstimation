@@ -179,7 +179,7 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
     recovery_mode = "general_qpo"
-    likelihood_model = "gaussian_process_windowed"
+    likelihood_model = "celerite_windowed"
     background_model = "skew_gaussian"
     n_components = 3
     jitter_term = False

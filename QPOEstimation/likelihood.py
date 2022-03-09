@@ -16,7 +16,7 @@ from QPOEstimation.model.mean import polynomial
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
 
-def get_celerite_likelihood(mean_model, kernel, times, y, yerr, likelihood_model='gaussian_process'):
+def get_celerite_likelihood(mean_model, kernel, times, y, yerr, likelihood_model='celerite'):
     return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)
 
 
@@ -372,7 +372,7 @@ def get_kernel(kernel_type, jitter_term=False):
     return res
 
 
-def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model='gaussian_process'):
+def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model='celerite'):
     if model_type == 'polynomial':
         return function_to_celerite_mean_model(polynomial)(a0=0, a1=0, a2=0, a3=0, a4=0)
     elif model_type == 'mean':
@@ -386,5 +386,5 @@ def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_
         raise ValueError
 
 
-LIKELIHOOD_MODELS = dict(gaussian_process=CeleriteLikelihood, gaussian_process_windowed=WindowedCeleriteLikelihood,
-                         george=GeorgeLikelihood)
+LIKELIHOOD_MODELS = dict(
+    celerite=CeleriteLikelihood, celerite_windowed=WindowedCeleriteLikelihood, george=GeorgeLikelihood)

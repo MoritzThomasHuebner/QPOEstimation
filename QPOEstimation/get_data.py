@@ -108,7 +108,7 @@ def truncate_data(times, counts, start, stop, yerr=None):
 
 
 def get_injection_data(injection_file_dir='injection_files', injection_mode='qpo', recovery_mode='qpo',
-                       injection_likelihood_model='gaussian_process', injection_id=0, start_time=None, end_time=None,
+                       injection_likelihood_model='celerite', injection_id=0, start_time=None, end_time=None,
                        run_mode='entire_segment', **kwargs):
     data = np.loadtxt(f'{injection_file_dir}/{injection_mode}/{injection_likelihood_model}/{str(injection_id).zfill(2)}_data.txt')
     if injection_mode == recovery_mode:

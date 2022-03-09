@@ -1,6 +1,6 @@
 import argparse
 
-likelihood_models = ["gaussian_process", "gaussian_process_windowed", "george", "whittle"]
+likelihood_models = ["celerite", "celerite_windowed", "george", "whittle"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo",
          "double_red_noise", "double_qpo", 'matern32', "broken_power_law", "matern52", "exp_sine2",
          "rational_quadratic",  "exp_squared", "exp_sine2_rn"]
@@ -76,7 +76,7 @@ def parse_args():
     parser.add_argument("--minimum_window_spacing", default=0, type=float)
 
     parser.add_argument("--recovery_mode", default="qpo", choices=modes)
-    parser.add_argument("--likelihood_model", default="gaussian_process", choices=likelihood_models)
+    parser.add_argument("--likelihood_model", default="celerite", choices=likelihood_models)
     parser.add_argument("--normalisation", default="False", type=str)
     parser.add_argument("--background_model", default="polynomial", choices=background_models)
     parser.add_argument("--n_components", default=1, type=int)

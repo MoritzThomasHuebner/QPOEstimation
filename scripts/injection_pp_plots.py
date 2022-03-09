@@ -16,7 +16,7 @@ if len(sys.argv) > 1:
     parser.add_argument("--minimum_id", default=0, type=int)
     parser.add_argument("--maximum_id", default=100, type=int)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
-    parser.add_argument("--likelihood_model", default="gaussian_process",
+    parser.add_argument("--likelihood_model", default="celerite",
                         choices=likelihood_models, type=str)
     parser.add_argument("--base_injection_outdir", default="injection", type=str)
     args = parser.parse_args()
@@ -30,7 +30,7 @@ else:
     maximum_id = 100
 
     injection_mode = "general_qpo"
-    likelihood_model = "gaussian_process"
+    likelihood_model = "celerite"
     base_injection_outdir = 'injections/injection_pp_non_eq_dis'
 
 samples = []

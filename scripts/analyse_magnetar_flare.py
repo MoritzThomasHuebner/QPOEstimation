@@ -27,7 +27,7 @@ for mean_model in ['skew_exponential', 'fred', 'fred_extended', 'skew_gaussian']
             try:
                 res = GPResult.from_json(
                     outdir=f'results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/'
-                           f'gaussian_process/results/',
+                           f'celerite/results/',
                     label=f'entire_segment_{n_component}_{mean_model}s')
                 if recovery_mode == 'general_qpo':
                     res_list.append(res)

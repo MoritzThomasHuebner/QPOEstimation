@@ -87,7 +87,7 @@ else:
     max_log_c_qpo = 1
     minimum_window_spacing = 0
 
-    likelihood_model = "gaussian_process"
+    likelihood_model = "celerite"
     background_model = "skew_exponential"
     n_components = 1
 

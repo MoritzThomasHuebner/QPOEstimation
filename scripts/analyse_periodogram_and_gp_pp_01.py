@@ -110,10 +110,10 @@ xs = []
 min_end_time = 10
 for end_time in range(10, 210, 10):
     label = f'{injection_id}_{-float(end_time)}_{float(end_time)}_1_0s'
-    res_qpo = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/gaussian_process/results/', label=label)
-    res_red_noise = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/gaussian_process/results/', label=label)
-    res_qpo_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/gaussian_process_windowed/results/', label=label)
-    res_red_noise_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/gaussian_process_windowed/results/', label=label)
+    res_qpo = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/celerite/results/', label=label)
+    res_red_noise = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/celerite/results/', label=label)
+    res_qpo_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/celerite_windowed/results/', label=label)
+    res_red_noise_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/celerite_windowed/results/', label=label)
     ln_zs_gp.append(res_qpo.log_evidence)
     ln_zs_gp_windowed.append(res_qpo_windowed.log_evidence)
     ln_bfs_gp.append(res_qpo.log_evidence - res_red_noise.log_evidence)
