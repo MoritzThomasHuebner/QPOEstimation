@@ -1,6 +1,6 @@
 import argparse
 
-likelihood_models = ["gaussian_process", "gaussian_process_windowed", "george_likelihood", "whittle"]
+likelihood_models = ["gaussian_process", "gaussian_process_windowed", "george", "whittle"]
 modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo",
          "double_red_noise", "double_qpo", 'matern32', "broken_power_law", "matern52", "exp_sine2",
          "rational_quadratic",  "exp_squared", "exp_sine2_rn"]

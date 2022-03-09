@@ -4,7 +4,7 @@ import bilby
 
 
 def _get_model_class(likelihood_model="gaussian_process"):
-    if likelihood_model == "george_likelihood":
+    if likelihood_model == "george":
         from george.modeling import Model as GeorgeModel
         return GeorgeModel
     else:

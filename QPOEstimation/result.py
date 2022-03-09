@@ -51,7 +51,7 @@ class GPResult(bilby.result.Result):
         elif self.likelihood_model == 'gaussian_process':
             likelihood = CeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                             t=self.times, y=self.y, yerr=self.yerr)
-        elif self.likelihood_model == 'george_likelihood':
+        elif self.likelihood_model == 'george':
             likelihood = GeorgeLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                           t=self.times, y=self.y, yerr=self.yerr)
         else:
