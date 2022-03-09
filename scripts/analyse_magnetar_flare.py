@@ -13,13 +13,13 @@ res_dict = {}
 
 linestyle_dict = dict(skew_exponential='solid', skew_gaussian='dotted', fred='dashed', fred_extended='dashdot')
 label_dict_mean = dict(skew_exponential='skew exp.', fred='FRED', fred_extended='FRED-x', skew_gaussian='skew gaus.')
-label_dict_kernel = dict(general_qpo='qpo+rn', red_noise='rn', double_qpo='qpo+qpo')
+label_dict_kernel = dict(qpo_plus_red_noise='qpo+rn', red_noise='rn', double_qpo='qpo+qpo')
 
 plt.figure(figsize=(9.2, 7.2))
 # plt.figure(dpi=150)
 for mean_model in ['skew_exponential', 'fred', 'fred_extended', 'skew_gaussian']:
     print(mean_model)
-    for recovery_mode in ['general_qpo', 'red_noise']:
+    for recovery_mode in ['qpo_plus_red_noise', 'red_noise']:
         evidences = []
         evidence_errs = []
         res_list = []
@@ -29,7 +29,7 @@ for mean_model in ['skew_exponential', 'fred', 'fred_extended', 'skew_gaussian']
                     outdir=f'results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/'
                            f'celerite/results/',
                     label=f'entire_segment_{n_component}_{mean_model}s')
-                if recovery_mode == 'general_qpo':
+                if recovery_mode == 'qpo_plus_red_noise':
                     res_list.append(res)
                 evidences.append(res.log_evidence)
                 evidence_errs.append(res.log_evidence_err)
@@ -38,14 +38,14 @@ for mean_model in ['skew_exponential', 'fred', 'fred_extended', 'skew_gaussian']
                 print(e)
                 evidences.append(np.nan)
                 evidence_errs.append(np.nan)
-        if recovery_mode == 'general_qpo':
+        if recovery_mode == 'qpo_plus_red_noise':
             res_dict[mean_model] = res_list
         evidence_dict[recovery_mode] = np.array(evidences)
         evidence_err_dict[recovery_mode] = np.array(evidence_errs)
     print()
 
     for k, v in evidence_dict.items():
-        color_dict = dict(general_qpo="blue", red_noise="red", double_qpo="green")
+        color_dict = dict(qpo_plus_red_noise="blue", red_noise="red", double_qpo="green")
         plt.plot(np.arange(len(v)), np.array(v), label=f"{label_dict_mean[mean_model]},  {label_dict_kernel[k]}",
                  color=color_dict[k], linestyle=linestyle_dict[mean_model])
 

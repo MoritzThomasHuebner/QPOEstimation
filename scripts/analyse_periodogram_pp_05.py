@@ -22,10 +22,10 @@ end_times = np.arange(10, 200, 10)
 start_times = -end_times
 durations = 2 * end_times
 
-outdir_qpo_periodogram = f'injection/general_qpo_injection/pure_qpo_recovery/whittle/results/'
-outdir_noise_periodogram = f'injection/general_qpo_injection/white_noise_recovery/whittle/results/'
+outdir_qpo_periodogram = f'injection/qpo_plus_red_noise_injection/pure_qpo_recovery/whittle/results/'
+outdir_noise_periodogram = f'injection/qpo_plus_red_noise_injection/white_noise_recovery/whittle/results/'
 
-data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/{injection_id}_data.txt')
+data = np.loadtxt(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 

@@ -55,16 +55,16 @@ done
 #end_time=10
 #
 #
-#sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 00 general_qpo tukey 0.1 0.5
+#sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 00 qpo_plus_red_noise tukey 0.1 0.5
 #sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 00 red_noise tukey 0.1 0.5
-#sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 01 general_qpo tukey 0.1 0.5
+#sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 01 qpo_plus_red_noise tukey 0.1 0.5
 #sbatch analyse_periodogram_submit.sh $((start_time - extensions[0])) $((end_time + extensions[0])) 01 red_noise tukey 0.1 0.5
 #
 #for i in {1..19}
 #do
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 00 general_qpo hann 0.1 0.5
+#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 00 qpo_plus_red_noise hann 0.1 0.5
 #  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 00 red_noise hann 0.1 0.5
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 01 general_qpo hann 0.1 0.5
+#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 01 qpo_plus_red_noise hann 0.1 0.5
 #  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 01 red_noise hann 0.1 0.5
 #done
 #
@@ -76,7 +76,7 @@ done
 #for i in {0..18}
 #do
 #  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 02 red_noise hann 0.1 0.1
-#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 02 general_qpo hann 0.1 0.1
+#  sbatch analyse_periodogram_submit.sh $((start_time - extensions[$i])) $((end_time + extensions[$i])) 02 qpo_plus_red_noise hann 0.1 0.1
 #done
 #
 extensions=($(seq 0 10 190))

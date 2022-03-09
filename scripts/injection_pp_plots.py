@@ -29,7 +29,7 @@ else:
     minimum_id = 0
     maximum_id = 100
 
-    injection_mode = "general_qpo"
+    injection_mode = "qpo_plus_red_noise"
     likelihood_model = "celerite"
     base_injection_outdir = 'injections/injection_pp_non_eq_dis'
 
