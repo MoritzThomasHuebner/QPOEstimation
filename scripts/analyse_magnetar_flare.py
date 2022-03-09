@@ -1,7 +1,6 @@
 import numpy as np
 import bilby
-from QPOEstimation.result import GPResult
-from QPOEstimation.model.celerite import power_qpo
+from QPOEstimation.result import GPResult, power_qpo
 import matplotlib.pyplot as plt
 import matplotlib
 # matplotlib.use('Qt5Agg')

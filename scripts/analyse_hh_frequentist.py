@@ -1,7 +1,7 @@
 import QPOEstimation
 import numpy as np
 
-from QPOEstimation.model.celerite import power_qpo, power_red_noise
+from QPOEstimation.result import power_qpo, power_red_noise
 
 import matplotlib
 import matplotlib.pyplot as plt

@@ -7,7 +7,6 @@ from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
 from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import WindowedCeleriteLikelihood, get_kernel, get_mean_model
-from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
 style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
 
@@ -477,3 +476,11 @@ class GPResult(bilby.result.Result):
         self.plot_period_posterior(paper_style=paper_style)
         self.plot_duration_posterior(paper_style=paper_style)
         # self.plot_amplitude_ratio(paper_style=paper_style)
+
+
+def power_qpo(a, c, f):
+    return a * np.sqrt((c**2 + 2 * np.pi**2 * f**2)/(c * (c**2 + 4 * np.pi**2 * f**2)))
+
+
+def power_red_noise(a, c):
+    return a / c**0.5

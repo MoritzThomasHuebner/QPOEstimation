@@ -1,18 +1,17 @@
-import bilby
 import numpy as np
-from bilby.core.likelihood import Likelihood
+from bilby.core.likelihood import Likelihood, function_to_celerite_mean_model
 import celerite
 from celerite import terms
+
 try:
     import george
 except ImportError:
     pass
-from scipy.special import gamma
-
 
 from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
-from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model
+from QPOEstimation.model.celerite import get_n_component_mean_model
+from QPOEstimation.model.mean import polynomial
 
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
@@ -363,7 +362,7 @@ def get_kernel(kernel_type, jitter_term=False):
 
 def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model='gaussian_process'):
     if model_type == 'polynomial':
-        return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)
+        return function_to_celerite_mean_model(polynomial)(a0=0, a1=0, a2=0, a3=0, a4=0)
     elif model_type == 'mean':
         return np.mean(y)
     elif isinstance(model_type, (int, float)) or model_type.isnumeric():

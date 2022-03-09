@@ -103,7 +103,7 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    matplotlib.use('Qt5Agg')
+    # matplotlib.use('Qt5Agg')
 
     data_source = "giant_flare"  # "magnetar_flare_binned"
     run_mode = 'select_time'
@@ -181,7 +181,7 @@ else:
     recovery_mode = "general_qpo"
     likelihood_model = "gaussian_process_windowed"
     background_model = "skew_gaussian"
-    n_components = 1
+    n_components = 3
     jitter_term = False
     normalisation = False
 
