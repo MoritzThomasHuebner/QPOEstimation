@@ -1,10 +1,10 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import bilby
-from .plotting import *
-import QPOEstimation
 import warnings
+
+import bilby
 from scipy.signal import periodogram
+
+import QPOEstimation
+from .plotting import *
 
 
 class InjectionStudyPostProcessor(object):
@@ -71,9 +71,10 @@ class InjectionStudyPostProcessor(object):
                          chi_squares_high_freqs=self.chi_squares_high_freqs, show=show)
 
     def plot_snrs(self, show=False):
-        plot_snrs(outdir=self.outdir, label=self.label, extension_factors=self.extension_factors, snrs_optimal=self.snrs_optimal,
-                  snrs_max_like=self.snrs_max_like, snrs_max_like_quantiles=self.snrs_max_like_quantiles,
-                  x_break=self.x_break, show=show)
+        plot_snrs(
+            outdir=self.outdir, label=self.label, extension_factors=self.extension_factors,
+            snrs_optimal=self.snrs_optimal, snrs_max_like=self.snrs_max_like,
+            snrs_max_like_quantiles=self.snrs_max_like_quantiles, x_break=self.x_break, show=show)
 
     def plot_ln_bfs(self, show=False):
         plot_ln_bfs(outdir=self.outdir, label=self.label, extension_factors=self.extension_factors, ln_bfs=self.ln_bfs,
@@ -290,7 +291,8 @@ class InjectionStudyPostProcessor(object):
                 + self.injection_parameters['sigma'] / self.extension_factors[-1]
         else:
             psd_array_noise_diluted = \
-                self.injection_psds['red_noise'].psd_array / self.extension_factors[-1] + self.injection_parameters['sigma']
+                self.injection_psds['red_noise'].psd_array / self.extension_factors[-1] \
+                + self.injection_parameters['sigma']
 
         psd_array_qpo_diluted = self.injection_psds['qpo'].psd_array / self.extension_factors[-1]
 
