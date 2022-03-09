@@ -26,7 +26,6 @@ def get_priors(**kwargs):
     if kwargs['max_log_c_qpo'] is None:
         kwargs['max_log_c_qpo'] = np.log(kwargs.get('band_maximum', 1/2/segment_length))
 
-
     minimum = np.min(kwargs['y']) if kwargs.get('offset', False) else 0
     maximum = np.max(kwargs['y'])
     span = maximum - minimum
@@ -61,5 +60,5 @@ def get_priors(**kwargs):
     priors.update(kernel_priors)
     priors.update(window_priors)
     priors._resolve_conditions()
-    priors.conversion_function = gp.decay_constrain_conversion_function
+    priors.conversion_function = gp.decay_constraint_conversion_function
     return priors
