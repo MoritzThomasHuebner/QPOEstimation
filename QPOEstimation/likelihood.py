@@ -15,10 +15,10 @@ from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noi
 from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model, \
     get_n_component_piecewise_cubic, get_n_component_piecewise_linear
 
+from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
-def get_celerite_likelihood(mean_model, kernel, fit_mean, times, y, yerr, likelihood_model='gaussian_process'):
-    return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel,
-                                               fit_mean=fit_mean, t=times, y=y, yerr=yerr)
+def get_celerite_likelihood(mean_model, kernel, times, y, yerr, likelihood_model='gaussian_process'):
+    return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)
 
 
 class ParameterAccessor(object):
@@ -128,85 +128,20 @@ class WhittleLikelihood(Likelihood):
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
 
 
-class CeleriteLikelihood(bilby.likelihood.Likelihood):
-
-    def __init__(self, kernel, mean_model, fit_mean, t, y, yerr, conversion_func=None):
-        """ Celerite to bilby likelihood interface """
-
-        self.kernel = kernel
-        self.mean_model = mean_model
-        self.fit_mean = fit_mean
-        self.t = np.array(t)
-        self.y = np.array(y)
-        self.y_err = np.array(yerr)
-
-        if conversion_func is None:
-            self.conversion_func = lambda x: x
-        else:
-            self.conversion_func = conversion_func
-        self.gp = celerite.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean)
-        self.gp.compute(t=t, yerr=yerr)
-
-        self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
-        self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel, mean=self.mean_model, fit_mean=self.fit_mean)
-        self.white_noise_gp.compute(self.gp._t, self.y_err)
-        self.white_noise_log_likelihood = self.white_noise_gp.log_likelihood(y=y)
-        super().__init__(parameters=self.gp.get_parameter_dict())
-
-    def log_likelihood(self):
-        celerite_params = self.conversion_func(self.parameters)
-        self.gp.set_parameter_vector(vector=np.array(list(celerite_params.values())))
-        try:
-            return self.gp.log_likelihood(self.y)
-        except Exception:
-            return -np.inf
-
-    def noise_log_likelihood(self):
-        return self.white_noise_log_likelihood
-
-
-class GeorgeLikelihood(bilby.likelihood.Likelihood):
-
-    def __init__(self, kernel, mean_model, fit_mean, t, y, yerr, conversion_func=None):
-        """ Celerite to bilby likelihood interface """
-
-        self.kernel = kernel
-        self.mean_model = mean_model
-        self.fit_mean = fit_mean
-        self.t = np.array(t)
-        self.y = np.array(y)
-        self.y_err = np.array(yerr)
-
-        if conversion_func is None:
-            self.conversion_func = lambda x: x
-        else:
-            self.conversion_func = conversion_func
-
-        self.gp = george.GP(kernel=kernel, mean=mean_model, fit_mean=fit_mean, fit_white_noise=False)
-        self.gp.compute(x=t, yerr=yerr)
-        super().__init__(parameters=self.gp.get_parameter_dict())
-
-    def log_likelihood(self):
-        celerite_params = self.conversion_func(self.parameters)
-        for name, value in celerite_params.items():
-            try:
-                self.gp.set_parameter(name=name, value=value)
-            except ValueError:
-                raise ValueError(f"Parameter {name} not a valid parameter for the GP.")
-        try:
-            return self.gp.log_likelihood(self.y)
-        except Exception:
-            return -np.inf
-
-
 class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
-    def __init__(self, mean_model, kernel, fit_mean, t, y, yerr, conversion_func=None):
+    def __init__(self, mean_model, kernel, t, y, yerr):
         """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
-        super(WindowedCeleriteLikelihood, self).__init__(kernel=kernel, mean_model=mean_model, fit_mean=fit_mean, t=t,
-                                                         y=y, yerr=yerr, conversion_func=conversion_func)
+        super(WindowedCeleriteLikelihood, self).__init__(
+            kernel=kernel, mean_model=mean_model, t=t, y=y, yerr=yerr)
         self.parameters['window_minimum'] = t[0]
         self.parameters['window_maximum'] = t[-1]
+
+        self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
+        self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel, mean=self.mean_model)
+        self.white_noise_gp.compute(self.gp._t, self.yerr)
+        self.white_noise_log_likelihood = self.white_noise_gp.log_likelihood(y=y)
+
 
     def log_likelihood(self):
         if len(self.windowed_indices) == 0 or len(self.edge_indices) == 0:
@@ -217,10 +152,9 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
             if k.endswith("log_sigma"):
                 jitter = np.exp(self.parameters[k])
 
-        self.gp.compute(self.t[self.windowed_indices], self.y_err[self.windowed_indices])
-        self.white_noise_gp.compute(self.t[self.edge_indices], self.y_err[self.edge_indices] + jitter)
-        celerite_params = self.conversion_func(self.parameters)
-        for name, value in celerite_params.items():
+        self.gp.compute(self.t[self.windowed_indices], self.yerr[self.windowed_indices])
+        self.white_noise_gp.compute(self.t[self.edge_indices], self.yerr[self.edge_indices] + jitter)
+        for name, value in self.parameters.items():
             if 'window' in name:
                 continue
             if 'mean' in name:
@@ -253,27 +187,20 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
 class DoubleCeleriteLikelihood(Likelihood):
 
-    def __init__(self, mean_model, kernel_0, kernel_1, fit_mean, t, y, y_err,
-                 joint_parameters=None, conversion_func=None):
+    def __init__(self, mean_model, kernel_0, kernel_1, t, y, yerr, joint_parameters=None):
         """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
         self.kernel_0 = kernel_0
         self.kernel_1 = kernel_1
         self.mean_model = mean_model
-        self.fit_mean = fit_mean
         self.t = t
         self.y = y
-        self.y_err = y_err
-
-        if conversion_func is None:
-            self.conversion_func = lambda x: x
-        else:
-            self.conversion_func = conversion_func
+        self.yerr = yerr
 
         self.parameters = dict(transition_time=0)
-        self.gp_0 = celerite.GP(kernel=kernel_0, mean=mean_model, fit_mean=fit_mean)
-        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.y_err[self.before_transition_indices])
-        self.gp_1 = celerite.GP(kernel=kernel_1, mean=mean_model, fit_mean=fit_mean)
-        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.y_err[self.after_transition_indices])
+        self.gp_0 = celerite.GP(kernel=kernel_0, mean=mean_model, fit_mean=True)
+        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.yerr[self.before_transition_indices])
+        self.gp_1 = celerite.GP(kernel=kernel_1, mean=mean_model, fit_mean=True)
+        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.yerr[self.after_transition_indices])
         if joint_parameters is None:
             self.joint_parameters = []
         else:
@@ -310,11 +237,10 @@ class DoubleCeleriteLikelihood(Likelihood):
     def log_likelihood(self):
         if len(self.before_transition_indices) == 0 or len(self.after_transition_indices) == 0:
             return -np.inf
-        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.y_err[self.before_transition_indices])
-        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.y_err[self.after_transition_indices])
+        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.yerr[self.before_transition_indices])
+        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.yerr[self.after_transition_indices])
 
-        celerite_params = self.conversion_func(self.parameters)
-        for name, value in celerite_params.items():
+        for name, value in self.parameters.items():
             if name in self.joint_parameters:
                 self.gp_0.set_parameter(name=name, value=value)
                 self.gp_1.set_parameter(name=name, value=value)
@@ -438,18 +364,18 @@ def get_kernel(kernel_type, jitter_term=False):
 
 def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model='gaussian_process'):
     if model_type == 'polynomial':
-        return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0), True
+        return PolynomialMeanModel(a0=0, a1=0, a2=0, a3=0, a4=0)
     elif model_type == 'mean':
-        return np.mean(y), False
+        return np.mean(y)
     elif isinstance(model_type, (int, float)) or model_type.isnumeric():
-        return float(model_type), False
+        return float(model_type)
     elif model_type == 'piecewise_linear':
-        return get_n_component_piecewise_linear(n_components=n_components, likelihood_model=likelihood_model), True
+        return get_n_component_piecewise_linear(n_components=n_components, likelihood_model=likelihood_model)
     elif model_type == 'piecewise_cubic':
-        return get_n_component_piecewise_cubic(n_components=n_components, likelihood_model=likelihood_model), True
+        return get_n_component_piecewise_cubic(n_components=n_components, likelihood_model=likelihood_model)
     elif model_type in mean_model_dict:
         return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components, offset=offset,
-                                          likelihood_model=likelihood_model), True
+                                          likelihood_model=likelihood_model)
     else:
         raise ValueError
 

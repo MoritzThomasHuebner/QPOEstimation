@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import bilby
+from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
 from QPOEstimation.utils import MetaDataAccessor
-from QPOEstimation.likelihood import CeleriteLikelihood, WindowedCeleriteLikelihood, \
-    GeorgeLikelihood, get_kernel, get_mean_model
+from QPOEstimation.likelihood import WindowedCeleriteLikelihood, get_kernel, get_mean_model
 from QPOEstimation.model.celerite import power_qpo, power_red_noise
 
 style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
@@ -48,12 +48,12 @@ class GPResult(bilby.result.Result):
     def get_likelihood(self):
         if self.likelihood_model == "gaussian_process_windowed":
             likelihood = WindowedCeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
-                                                    fit_mean=True, t=self.times, y=self.y, yerr=self.yerr)
+                                                    t=self.times, y=self.y, yerr=self.yerr)
         elif self.likelihood_model == 'gaussian_process':
-            likelihood = CeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(), fit_mean=True,
+            likelihood = CeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                             t=self.times, y=self.y, yerr=self.yerr)
         elif self.likelihood_model == 'george_likelihood':
-            likelihood = GeorgeLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(), fit_mean=True,
+            likelihood = GeorgeLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                           t=self.times, y=self.y, yerr=self.yerr)
         else:
             raise ValueError
