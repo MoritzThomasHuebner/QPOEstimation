@@ -6,7 +6,7 @@ import bilby
 
 from QPOEstimation.result import GPResult
 from QPOEstimation.utils import get_injection_outdir, get_injection_label
-from QPOEstimation.parse import likelihood_models, modes
+from QPOEstimation.parse import LIKELIHOOD_MODELS, MODES
 import matplotlib.pyplot as plt
 
 plt.style.use("paper.mplstyle")
@@ -15,9 +15,9 @@ if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument("--minimum_id", default=0, type=int)
     parser.add_argument("--maximum_id", default=100, type=int)
-    parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=MODES, type=str)
     parser.add_argument("--likelihood_model", default="celerite",
-                        choices=likelihood_models, type=str)
+                        choices=LIKELIHOOD_MODELS, type=str)
     parser.add_argument("--base_injection_outdir", default="injection", type=str)
     args = parser.parse_args()
     minimum_id = args.minimum_id

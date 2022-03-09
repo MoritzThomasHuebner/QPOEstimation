@@ -5,12 +5,11 @@ from pathlib import Path
 import bilby
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
+from QPOEstimation.parse import OSCILLATORY_MODELS
 from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import WindowedCeleriteLikelihood, get_kernel, get_mean_model
 
 style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
-
-OSCILLATORY_MODELS = ["qpo", "pure_qpo", "general_qpo", "fourier_series"]
 
 
 class GPResult(bilby.result.Result):

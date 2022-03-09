@@ -1,24 +1,24 @@
 import argparse
 
-likelihood_models = ["celerite", "celerite_windowed", "george", "whittle"]
-modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "qpo_plus_red_noise",
+LIKELIHOOD_MODELS = ["celerite", "celerite_windowed", "george", "whittle"]
+MODES = ["qpo", "white_noise", "red_noise", "pure_qpo", "qpo_plus_red_noise",
          "double_red_noise", "double_qpo", 'matern32', "broken_power_law", "matern52", "exp_sine2",
          "rational_quadratic",  "exp_squared", "exp_sine2_rn"]
-data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flare',
+DATA_SOURCES = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flare',
                 'magnetar_flare_binned', 'hares_and_hounds']
-run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment', 'from_maximum']
-background_models = ["polynomial", "exponential", "skew_exponential", "gaussian", "log_normal", "lorentzian", "mean",
+RUN_MODES = ['select_time', 'sliding_window', 'entire_segment', 'from_maximum']
+BACKGROUND_MODELS = ["polynomial", "exponential", "skew_exponential", "gaussian", "log_normal", "lorentzian", "mean",
                      "skew_gaussian", "fred", "fred_extended", "0"]
-data_modes = ['normal', 'smoothed', 'smoothed_residual']
-grb_energy_bands = ['15-25', '25-50', '50-100', '100-350', '15-350', 'all']
+DATA_MODES = ['normal', 'smoothed', 'smoothed_residual']
+GRB_ENERGY_BANDS = ['15-25', '25-50', '50-100', '100-350', '15-350', 'all']
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_source", default='giant_flare', choices=data_sources)
-    parser.add_argument("--run_mode", default='sliding_window', choices=run_modes)
+    parser.add_argument("--data_source", default='giant_flare', choices=DATA_SOURCES)
+    parser.add_argument("--run_mode", default='sliding_window', choices=RUN_MODES)
     parser.add_argument("--sampling_frequency", default=None, type=int)
-    parser.add_argument("--data_mode", choices=data_modes, default='normal', type=str)
+    parser.add_argument("--data_mode", choices=DATA_MODES, default='normal', type=str)
     parser.add_argument("--alpha", default=0.02, type=float)
     parser.add_argument("--variance_stabilisation", default='False', type=str)
 
@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument("--grb_label", default='ASIM_CLEANED_LED', type=str)
     parser.add_argument("--grb_binning", default='1s', type=str)
     parser.add_argument("--grb_detector", default='swift', type=str)
-    parser.add_argument("--grb_energy_band", default='all', choices=grb_energy_bands, type=str)
+    parser.add_argument("--grb_energy_band", default='all', choices=GRB_ENERGY_BANDS, type=str)
 
     parser.add_argument("--magnetar_label", default='SGR_1806_20', type=str)
     parser.add_argument("--magnetar_tag", default='10223-01-03-010_90907122.0225', type=str)
@@ -50,8 +50,8 @@ def parse_args():
 
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_file_dir", default="injection_files", type=str)
-    parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
-    parser.add_argument("--injection_likelihood_model", default="qpo_plus_red_noise", choices=likelihood_models, type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=MODES, type=str)
+    parser.add_argument("--injection_likelihood_model", default="qpo_plus_red_noise", choices=LIKELIHOOD_MODELS, type=str)
     parser.add_argument("--base_injection_outdir", default="injections/injection", type=str)
 
     parser.add_argument("--offset", default='False', type=str)
@@ -75,10 +75,10 @@ def parse_args():
     parser.add_argument("--max_log_c_qpo", default=None, type=float)
     parser.add_argument("--minimum_window_spacing", default=0, type=float)
 
-    parser.add_argument("--recovery_mode", default="qpo", choices=modes)
-    parser.add_argument("--likelihood_model", default="celerite", choices=likelihood_models)
+    parser.add_argument("--recovery_mode", default="qpo", choices=MODES)
+    parser.add_argument("--likelihood_model", default="celerite", choices=LIKELIHOOD_MODELS)
     parser.add_argument("--normalisation", default="False", type=str)
-    parser.add_argument("--background_model", default="polynomial", choices=background_models)
+    parser.add_argument("--background_model", default="polynomial", choices=BACKGROUND_MODELS)
     parser.add_argument("--n_components", default=1, type=int)
     parser.add_argument("--jitter_term", default="False", type=str)
     parser.add_argument("--window", default="hann", choices=["hann", "tukey", "boxcar"])
@@ -100,3 +100,6 @@ def parse_args():
     parser.add_argument("--plot", default='True', type=str)
     parser.add_argument("--suffix", default='', type=str)
     return parser
+
+
+OSCILLATORY_MODELS = ["qpo", "pure_qpo", "general_qpo", "fourier_series"]

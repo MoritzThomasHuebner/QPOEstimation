@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from QPOEstimation.utils import get_injection_outdir
-from QPOEstimation.parse import modes
+from QPOEstimation.parse import MODES
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
+    parser.add_argument("--injection_mode", default="qpo", choices=MODES, type=str)
     parser.add_argument("--n_injections", default=100, type=int)
     args = parser.parse_args()
 

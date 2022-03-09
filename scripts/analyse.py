@@ -228,7 +228,7 @@ if jitter_term:
 
 times, y, yerr, outdir, label = get_data(
     data_source=data_source, band=band, data_mode=data_mode, segment_length=segment_length,
-    sampling_frequency=sampling_frequency, alpha=alpha, candidates_file_dir='candidates', candidate_id=candidate_id,
+    sampling_frequency=sampling_frequency, alpha=alpha,
     period_number=period_number, run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time,
     run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str, likelihood_model=likelihood_model,
     magnetar_label=magnetar_label,  magnetar_tag=magnetar_tag, bin_size=bin_size,

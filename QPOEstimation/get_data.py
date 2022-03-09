@@ -58,15 +58,6 @@ def get_giant_flare_data(run_mode, **kwargs):
     return _GIANT_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
-def get_candidates_data(candidates_file_dir='candidates', band='5_64Hz', data_mode='normal', candidate_id=0,
-                        segment_length=1, sampling_frequency=256, alpha=0.02, **kwargs):
-    candidates = np.loadtxt(f'{candidates_file_dir}/candidates_{band}_{data_mode}.txt')
-    start = candidates[candidate_id][0]
-    stop = start + segment_length
-    return get_giant_flare_data_from_segment(start_time=start, end_time=stop, data_mode=data_mode,
-                                             sampling_frequency=sampling_frequency, alpha=alpha)
-
-
 def get_giant_flare_data_from_period(data_mode='normal', period_number=0, run_id=0, segment_step=0.54,
                                      segment_length=1, sampling_frequency=256, alpha=0.02, **kwargs):
     pulse_period = 7.56  # see papers
@@ -259,8 +250,7 @@ _MAGNETAR_BINNED_FLARE_RUN_MODES = dict(select_time=get_all_binned_magnetar_flar
 _SOLAR_FLARE_RUN_MODES = dict(select_time=get_solar_flare_data_from_segment,
                               entire_segment=get_all_solar_flare_data)
 
-_GIANT_FLARE_RUN_MODES = dict(candidates=get_candidates_data,
-                              sliding_window=get_giant_flare_data_from_period,
+_GIANT_FLARE_RUN_MODES = dict(sliding_window=get_giant_flare_data_from_period,
                               select_time=get_giant_flare_data_from_segment,
                               entire_segment=get_all_giant_flare_data)
 
@@ -280,9 +270,7 @@ def get_data(data_source, **kwargs):
     if data_source == 'giant_flare':
         times, y = get_giant_flare_data(**kwargs)
         outdir = f"SGR_1806_20/{run_mode}/{kwargs['band']}/{recovery_mode_str}/{likelihood_model}/"
-        if run_mode == 'candidates':
-            label = f"{kwargs['candidate_id']}"
-        elif run_mode == 'sliding_window':
+        if run_mode == 'sliding_window':
             outdir += f"period_{kwargs['period_number']}/"
             label = f"{kwargs['run_id']}"
         elif run_mode == 'select_time':
