@@ -17,8 +17,8 @@ class MinimumPrior(ConditionalBeta):
             name=name, latex_label=latex_label, unit=unit,
             boundary=boundary, condition_func=self.minimum_condition
         )
-        self.reference_params['order'] = order
-        self.reference_params['minimum_spacing'] = minimum_spacing
+        self.reference_params["order"] = order
+        self.reference_params["minimum_spacing"] = minimum_spacing
         self.order = order
 
         if reference_name is None:
@@ -27,8 +27,8 @@ class MinimumPrior(ConditionalBeta):
             self.reference_name = reference_name
         self._required_variables = [self.reference_name]
         self.minimum_spacing = minimum_spacing
-        self.__class__.__name__ = 'MinimumPrior'
-        self.__class__.__qualname__ = 'MinimumPrior'
+        self.__class__.__name__ = "MinimumPrior"
+        self.__class__.__qualname__ = "MinimumPrior"
 
     def minimum_condition(self, reference_params, **kwargs):  # noqa
         return dict(minimum=kwargs[self.reference_name] + self.minimum_spacing)
@@ -46,7 +46,7 @@ class MinimumPrior(ConditionalBeta):
 
 def get_frequency_mode_priors(n_freqs=1, f_min=5, f_max=32, minimum_spacing=0):
     priors = ConditionalPriorDict()
-    keys = [f'log_f_{i}' for i in range(n_freqs)]
+    keys = [f"log_f_{i}" for i in range(n_freqs)]
     if n_freqs == 1:
         priors[keys[0]] = Uniform(minimum=np.log(f_min), maximum=np.log(f_max))
         return priors

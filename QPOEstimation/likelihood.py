@@ -16,7 +16,7 @@ from QPOEstimation.model.mean import polynomial
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
 
-def get_celerite_likelihood(mean_model, kernel, times, y, yerr, likelihood_model='celerite'):
+def get_celerite_likelihood(mean_model, kernel, times, y, yerr, likelihood_model="celerite"):
     return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)
 
 
@@ -32,19 +32,19 @@ class ParameterAccessor(object):
 
 
 class WhittleLikelihood(Likelihood):
-    VALID_NOISE_MODELS = ['red_noise', 'broken_power_law', 'pure_qpo', 'white_noise']
-    alpha = ParameterAccessor('alpha')
-    alpha_1 = ParameterAccessor('alpha_1')
-    alpha_2 = ParameterAccessor('alpha_2')
-    log_beta = ParameterAccessor('log_beta')
-    log_sigma = ParameterAccessor('log_sigma')
-    rho = ParameterAccessor('rho')
-    log_delta = ParameterAccessor('log_delta')
-    log_amplitude = ParameterAccessor('log_amplitude')
-    log_width = ParameterAccessor('log_width')
-    log_frequency = ParameterAccessor('log_frequency')
+    VALID_NOISE_MODELS = ["red_noise", "broken_power_law", "pure_qpo", "white_noise"]
+    alpha = ParameterAccessor("alpha")
+    alpha_1 = ParameterAccessor("alpha_1")
+    alpha_2 = ParameterAccessor("alpha_2")
+    log_beta = ParameterAccessor("log_beta")
+    log_sigma = ParameterAccessor("log_sigma")
+    rho = ParameterAccessor("rho")
+    log_delta = ParameterAccessor("log_delta")
+    log_amplitude = ParameterAccessor("log_amplitude")
+    log_width = ParameterAccessor("log_width")
+    log_frequency = ParameterAccessor("log_frequency")
 
-    def __init__(self, frequencies, periodogram, frequency_mask, noise_model='red_noise'):
+    def __init__(self, frequencies, periodogram, frequency_mask, noise_model="red_noise"):
         super(WhittleLikelihood, self).__init__(
             parameters=dict(alpha=0, alpha_1=0, alpha_2=0, log_beta=0, log_sigma=0, log_delta=0, rho=0,
                             log_amplitude=0, log_width=1, log_frequency=127))
@@ -109,19 +109,19 @@ class WhittleLikelihood(Likelihood):
     def noise_model(self, noise_model):
         if noise_model in self.VALID_NOISE_MODELS:
             self._noise_model = noise_model
-        elif noise_model == 'qpo_plus_red_noise':
-            self._noise_model = 'red_noise'
+        elif noise_model == "qpo_plus_red_noise":
+            self._noise_model = "red_noise"
         else:
-            raise ValueError(f'Unknown noise model {noise_model}')
+            raise ValueError(f"Unknown noise model {noise_model}")
 
     @property
     def psd(self):
-        if self.noise_model == 'red_noise':
+        if self.noise_model == "red_noise":
             return red_noise(frequencies=self.frequencies, alpha=self.alpha, beta=self.beta) \
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
-        elif self.noise_model in ['pure_qpo', 'white_noise']:
+        elif self.noise_model in ["pure_qpo", "white_noise"]:
             return white_noise(frequencies=self.frequencies, sigma=self.sigma)
-        elif self.noise_model == 'broken_power_law':
+        elif self.noise_model == "broken_power_law":
             return broken_power_law_noise(frequencies=self.frequencies, alpha_1=self.alpha_1,
                                           alpha_2=self.alpha_2, beta=self.beta, delta=self.delta, rho=self.rho) \
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
@@ -133,8 +133,8 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
         """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
         super(WindowedCeleriteLikelihood, self).__init__(
             kernel=kernel, mean_model=mean_model, t=t, y=y, yerr=yerr)
-        self.parameters['window_minimum'] = t[0]
-        self.parameters['window_maximum'] = t[-1]
+        self.parameters["window_minimum"] = t[0]
+        self.parameters["window_maximum"] = t[-1]
 
         self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
         self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel, mean=self.mean_model)
@@ -161,9 +161,9 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
     def _set_parameters_to_gps(self):
         for name, value in self.parameters.items():
-            if 'window' in name:
+            if "window" in name:
                 continue
-            if 'mean' in name:
+            if "mean" in name:
                 self.white_noise_gp.set_parameter(name=name, value=value)
             self.gp.set_parameter(name=name, value=value)
 
@@ -184,11 +184,11 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
     @property
     def window_minimum(self):
-        return self.parameters['window_minimum']
+        return self.parameters["window_minimum"]
 
     @property
     def window_maximum(self):
-        return self.parameters['window_maximum']
+        return self.parameters["window_maximum"]
 
     def noise_log_likelihood(self):
         return self.white_noise_log_likelihood
@@ -215,7 +215,7 @@ class DoubleCeleriteLikelihood(Likelihood):
         else:
             self.joint_parameters = joint_parameters
         for name, val in self.gp_0.get_parameter_dict().items():
-            if 'mean' in name:
+            if "mean" in name:
                 self.joint_parameters.append(name)
 
         parameters_0 = self.gp_0.get_parameter_dict()
@@ -233,15 +233,15 @@ class DoubleCeleriteLikelihood(Likelihood):
             parameters[f"{param}_1"] = val
 
         super().__init__(parameters=parameters)
-        self.parameters['transition_time'] = t[-1] - t[0]
+        self.parameters["transition_time"] = t[-1] - t[0]
 
     @property
     def before_transition_indices(self):
-        return np.where(self.t < self.parameters['transition_time'])[0]
+        return np.where(self.t < self.parameters["transition_time"])[0]
 
     @property
     def after_transition_indices(self):
-        return np.where(self.t >= self.parameters['transition_time'])[0]
+        return np.where(self.t >= self.parameters["transition_time"])[0]
 
     def log_likelihood(self):
         if len(self.before_transition_indices) == 0 or len(self.after_transition_indices) == 0:
@@ -345,26 +345,26 @@ def get_kernel(kernel_type, jitter_term=False):
               PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
               PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + \
               ExponentialTerm(log_a=0.1, log_c=-0.01)
-    elif kernel_type == 'sho':
+    elif kernel_type == "sho":
         res = celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0)
-    elif kernel_type == 'double_sho':
+    elif kernel_type == "double_sho":
         res = celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0) + \
               celerite.terms.SHOTerm(log_S0=1, log_Q=0, log_omega0=0)
-    elif kernel_type == 'matern32':
+    elif kernel_type == "matern32":
         res = george.kernels.Matern32Kernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
-    elif kernel_type == 'matern52':
+    elif kernel_type == "matern52":
         res = george.kernels.Matern52Kernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
-    elif kernel_type == 'exp_sine2':
+    elif kernel_type == "exp_sine2":
         res = george.kernels.ExpSine2Kernel(gamma=1.0, log_period=10.0) * george.kernels.ConstantKernel(log_constant=0)
-    elif kernel_type == 'rational_quadratic':
+    elif kernel_type == "rational_quadratic":
         res = george.kernels.RationalQuadraticKernel(log_alpha=0.0, metric=1.0)
-    elif kernel_type == 'exp_squared':
+    elif kernel_type == "exp_squared":
         res = george.kernels.ExpSquaredKernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
-    elif kernel_type == 'exp_sine2_rn':
+    elif kernel_type == "exp_sine2_rn":
         res = george.kernels.ExpSine2Kernel(gamma=1.0, log_period=10.0) * george.kernels.ConstantKernel(log_constant=0)\
               + george.kernels.ExpKernel(metric=1.0) * george.kernels.ConstantKernel(log_constant=0)
     else:
-        raise ValueError('Recovery mode not defined')
+        raise ValueError("Recovery mode not defined")
 
     if jitter_term:
         res += celerite.terms.JitterTerm(log_sigma=-20)
@@ -372,10 +372,10 @@ def get_kernel(kernel_type, jitter_term=False):
     return res
 
 
-def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model='celerite'):
-    if model_type == 'polynomial':
+def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model="celerite"):
+    if model_type == "polynomial":
         return function_to_celerite_mean_model(polynomial)(a0=0, a1=0, a2=0, a3=0, a4=0)
-    elif model_type == 'mean':
+    elif model_type == "mean":
         return np.mean(y)
     elif isinstance(model_type, (int, float)) or model_type.isnumeric():
         return float(model_type)

@@ -3,20 +3,20 @@ import numpy as np
 
 
 def get_red_noise_prior(**kwargs):
-    sigma_min = kwargs.get('sigma_min', np.exp(-30))
-    sigma_max = kwargs.get('sigma_max', np.exp(30))
+    sigma_min = kwargs.get("sigma_min", np.exp(-30))
+    sigma_max = kwargs.get("sigma_max", np.exp(30))
     if sigma_min is None:
         sigma_min = np.exp(-30)
     if sigma_max is None:
         sigma_max = np.exp(30)
 
     prior = bilby.core.prior.ConditionalPriorDict()
-    prior['alpha'] = bilby.core.prior.Uniform(0, 20, name='alpha')
-    prior['log_beta'] = bilby.core.prior.Uniform(-100, 100, name='log_beta')
+    prior["alpha"] = bilby.core.prior.Uniform(0, 20, name="alpha")
+    prior["log_beta"] = bilby.core.prior.Uniform(-100, 100, name="log_beta")
     if sigma_min == sigma_max:
-        prior['log_sigma'] = bilby.core.prior.DeltaFunction(np.log(sigma_min), name='log_sigma')
+        prior["log_sigma"] = bilby.core.prior.DeltaFunction(np.log(sigma_min), name="log_sigma")
     else:
-        prior['log_sigma'] = bilby.core.prior.Uniform(np.log(sigma_min), np.log(sigma_max), name='log_sigma')
+        prior["log_sigma"] = bilby.core.prior.Uniform(np.log(sigma_min), np.log(sigma_max), name="log_sigma")
     return prior
 
 
@@ -36,39 +36,39 @@ def get_qpo_prior(frequencies=None, **kwargs):
         df = frequencies[1] - frequencies[0]
         max_frequency = frequencies[-1]
     prior = bilby.core.prior.ConditionalPriorDict()
-    prior['log_amplitude'] = bilby.core.prior.Uniform(-30, 30, name='log_amplitude')
-    prior['log_width'] = bilby.core.prior.ConditionalUniform(condition_func=log_width_condition_func,
-        minimum=np.log(df/np.pi), maximum=kwargs.get('max_log_width', np.log(0.25*max_frequency)), name='log_width')
-    # prior['log_frequency'] = bilby.core.prior.Uniform(np.log(2*df), np.log(max_frequency), name='log_frequency')
-    prior['log_frequency'] = bilby.core.prior.Uniform(kwargs.get('min_log_f', np.log(2*df)), kwargs.get('max_log_f', np.log(max_frequency)), name='log_frequency')
+    prior["log_amplitude"] = bilby.core.prior.Uniform(-30, 30, name="log_amplitude")
+    prior["log_width"] = bilby.core.prior.ConditionalUniform(condition_func=log_width_condition_func,
+        minimum=np.log(df/np.pi), maximum=kwargs.get("max_log_width", np.log(0.25*max_frequency)), name="log_width")
+    # prior["log_frequency"] = bilby.core.prior.Uniform(np.log(2*df), np.log(max_frequency), name="log_frequency")
+    prior["log_frequency"] = bilby.core.prior.Uniform(kwargs.get("min_log_f", np.log(2*df)), kwargs.get("max_log_f", np.log(max_frequency)), name="log_frequency")
     prior._resolve_conditions()
     return prior
 
 
 def broken_power_law_conversion_function(params, **kwargs):
     new_params = params.copy()
-    new_params['alpha_diffs'] = new_params['alpha_1'] - new_params['alpha_2']
+    new_params["alpha_diffs"] = new_params["alpha_1"] - new_params["alpha_2"]
     return new_params
 
 
 def get_broken_power_law_prior(frequencies=None):
     prior = bilby.core.prior.PriorDict()
-    prior['alpha_1'] = bilby.core.prior.Uniform(0, 10, name='alpha_1')
-    prior['alpha_2'] = bilby.core.prior.Uniform(0, 10, name='alpha_2')
+    prior["alpha_1"] = bilby.core.prior.Uniform(0, 10, name="alpha_1")
+    prior["alpha_2"] = bilby.core.prior.Uniform(0, 10, name="alpha_2")
     if frequencies is None:
-        prior['log_delta'] = bilby.core.prior.Uniform(-30, 30, name='log_delta')
+        prior["log_delta"] = bilby.core.prior.Uniform(-30, 30, name="log_delta")
     else:
-        prior['log_delta'] = bilby.core.prior.Uniform(np.log(frequencies[1]), np.log(frequencies[-1]), name='log_delta')
-    prior['rho'] = bilby.core.prior.DeltaFunction(peak=-1)
-    prior['log_beta'] = bilby.core.prior.Uniform(-60, 60, name='log_beta')
-    prior['log_sigma'] = bilby.core.prior.Uniform(-30, 30, name='log_sigma')
-    prior['alpha_diffs'] = bilby.core.prior.Constraint(0, 1000, name='alpha_diffs')
+        prior["log_delta"] = bilby.core.prior.Uniform(np.log(frequencies[1]), np.log(frequencies[-1]), name="log_delta")
+    prior["rho"] = bilby.core.prior.DeltaFunction(peak=-1)
+    prior["log_beta"] = bilby.core.prior.Uniform(-60, 60, name="log_beta")
+    prior["log_sigma"] = bilby.core.prior.Uniform(-30, 30, name="log_sigma")
+    prior["alpha_diffs"] = bilby.core.prior.Constraint(0, 1000, name="alpha_diffs")
     prior.conversion_function = broken_power_law_conversion_function
     return prior
 
 
-def get_full_prior(noise_model='red_noise', frequencies=None):
-    if noise_model == 'broken_power_law':
+def get_full_prior(noise_model="red_noise", frequencies=None):
+    if noise_model == "broken_power_law":
         noise_prior = get_broken_power_law_prior()
     else:
         noise_prior = get_red_noise_prior()

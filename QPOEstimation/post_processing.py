@@ -53,13 +53,13 @@ class InjectionStudyPostProcessor(object):
             print(e)
 
     def _calculate_x_break(self):
-        if self.injection_parameters is not None and self.extension_mode == 'white_noise':
+        if self.injection_parameters is not None and self.extension_mode == "white_noise":
             self.x_break = \
-                self.injection_parameters['beta'] / self.injection_parameters['sigma'] * \
-                self.injection_parameters['central_frequency'] ** (-self.injection_parameters['alpha'])
+                self.injection_parameters["beta"] / self.injection_parameters["sigma"] * \
+                self.injection_parameters["central_frequency"] ** (-self.injection_parameters["alpha"])
 
     def _calculate_max_like_x_break(self):
-        if self.extension_mode == 'white_noise':
+        if self.extension_mode == "white_noise":
             self.x_break_max_like = \
                 self._beta_max_like / self._white_noise_max_like * \
                 self._central_frequency_max_like ** (-self._alpha_max_like)
@@ -104,7 +104,7 @@ class InjectionStudyPostProcessor(object):
 
     def fill(self, n_snrs=100):
         for start_time, end_time, duration in zip(self.start_times, self.end_times, self.durations):
-            label = f'{self.label}_{float(start_time)}_{float(end_time)}'
+            label = f"{self.label}_{float(start_time)}_{float(end_time)}"
             self._res_noise = bilby.result.read_in_result(outdir=self.outdir_noise_periodogram, label=label)
             self._res_qpo = bilby.result.read_in_result(outdir=self.outdir_qpo_periodogram, label=label)
 
@@ -130,7 +130,7 @@ class InjectionStudyPostProcessor(object):
         self.snrs_max_like_quantiles = np.array(self.snrs_max_like_quantiles)
 
     def _calculate_periodogram(self):
-        if self.extension_factors[-1] == 1 and self.extension_mode == 'zeros':
+        if self.extension_factors[-1] == 1 and self.extension_mode == "zeros":
             window = ("tukey", 0.05)
         else:
             window = "hann"
@@ -151,14 +151,14 @@ class InjectionStudyPostProcessor(object):
 
     def _calculate_log_frequency_spreads(self):
         self.log_frequency_spreads = \
-            np.append(self.log_frequency_spreads, np.std(self._res_qpo.posterior['log_frequency']))
+            np.append(self.log_frequency_spreads, np.std(self._res_qpo.posterior["log_frequency"]))
 
     def _calculate_ln_bfs(self):
         self.ln_bfs = np.append(self.ln_bfs, self._res_qpo.log_evidence - self._res_noise.log_evidence)
 
     def _calculate_delta_bic(self):
-        bic_qpo = 6 * np.log(len(self._y_selected)) - 2 * self._res_qpo.posterior.iloc[-1]['log_likelihood']
-        bic_noise = 3 * np.log(len(self._y_selected)) - 2 * self._res_noise.posterior.iloc[-1]['log_likelihood']
+        bic_qpo = 6 * np.log(len(self._y_selected)) - 2 * self._res_qpo.posterior.iloc[-1]["log_likelihood"]
+        bic_noise = 3 * np.log(len(self._y_selected)) - 2 * self._res_noise.posterior.iloc[-1]["log_likelihood"]
         self.delta_bics = np.append(self.delta_bics, bic_qpo - bic_noise)
 
     def _calculate_chi_squares(self):
@@ -216,12 +216,12 @@ class InjectionStudyPostProcessor(object):
         snrs = []
         for i in range(n_snrs):
             params = self._res_qpo.posterior.iloc[np.random.randint(0, len(self._res_qpo.posterior))]
-            alpha = params.get('alpha', 1)
-            beta = np.exp(params.get('log_beta', -30))
-            white_noise = np.exp(params['log_sigma'])
-            amplitude = np.exp(params['log_amplitude'])
-            width = np.exp(params['log_width'])
-            central_frequency = np.exp(params['log_frequency'])
+            alpha = params.get("alpha", 1)
+            beta = np.exp(params.get("log_beta", -30))
+            white_noise = np.exp(params["log_sigma"])
+            amplitude = np.exp(params["log_amplitude"])
+            width = np.exp(params["log_width"])
+            central_frequency = np.exp(params["log_frequency"])
 
             psd_array_noise = QPOEstimation.model.psd.red_noise(
                 frequencies=self.frequencies, alpha=alpha,
@@ -246,12 +246,12 @@ class InjectionStudyPostProcessor(object):
         # print(self.snrs_max_like_quantiles)
 
     def _calculate_qpo_max_like_parameters(self):
-        self._alpha_max_like = self._res_qpo.posterior.iloc[-1].get('alpha', 0)
-        self._beta_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get('log_beta', -100))
-        self._white_noise_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get('log_sigma', -100))
-        self._amplitude_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get('log_amplitude', -100))
-        self._width_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get('log_width', -100))
-        self._central_frequency_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get('log_frequency', -100))
+        self._alpha_max_like = self._res_qpo.posterior.iloc[-1].get("alpha", 0)
+        self._beta_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get("log_beta", -100))
+        self._white_noise_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get("log_sigma", -100))
+        self._amplitude_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get("log_amplitude", -100))
+        self._width_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get("log_width", -100))
+        self._central_frequency_max_like = np.exp(self._res_qpo.posterior.iloc[-1].get("log_frequency", -100))
         self.max_like_parameters = dict(alpha=self._alpha_max_like,
                                         beta=self._beta_max_like,
                                         white_nosie=self._white_noise_max_like,
@@ -283,18 +283,18 @@ class InjectionStudyPostProcessor(object):
         if None in [self.injection_parameters, self.injection_psds, self.extension_mode]:
             return
         # freqs_combined_periodogram, powers_combined_periodogram = \
-        #     periodogram(self._y_selected, fs=self.sampling_frequency, window='hann')
+        #     periodogram(self._y_selected, fs=self.sampling_frequency, window="hann")
 
-        if self.extension_mode == 'zeros':
+        if self.extension_mode == "zeros":
             psd_array_noise_diluted = \
-                self.injection_psds['red_noise'].psd_array / self.extension_factors[-1] \
-                + self.injection_parameters['sigma'] / self.extension_factors[-1]
+                self.injection_psds["red_noise"].psd_array / self.extension_factors[-1] \
+                + self.injection_parameters["sigma"] / self.extension_factors[-1]
         else:
             psd_array_noise_diluted = \
-                self.injection_psds['red_noise'].psd_array / self.extension_factors[-1] \
-                + self.injection_parameters['sigma']
+                self.injection_psds["red_noise"].psd_array / self.extension_factors[-1] \
+                + self.injection_parameters["sigma"]
 
-        psd_array_qpo_diluted = self.injection_psds['qpo'].psd_array / self.extension_factors[-1]
+        psd_array_qpo_diluted = self.injection_psds["qpo"].psd_array / self.extension_factors[-1]
 
         psd_noise_diluted = bilby.gw.detector.psd.PowerSpectralDensity.from_power_spectral_density_array(
             frequency_array=self.frequencies, psd_array=psd_array_noise_diluted)

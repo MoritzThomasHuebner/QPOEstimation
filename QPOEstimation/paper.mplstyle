@@ -33,4 +33,4 @@ text.usetex: True
 axes.formatter.use_mathtext: True
 axes.formatter.useoffset: False
 axes.formatter.limits : -3, 3
-#axes.prop_cycle: cycler('color', ['k', 'k', 'k']) + cycler('linestyle', ['-', '--', ':'])
+#axes.prop_cycle: cycler("color", ["k", "k", "k"]) + cycler("linestyle", ["-", "--", ":"])

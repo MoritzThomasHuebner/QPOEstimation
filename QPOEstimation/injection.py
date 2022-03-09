@@ -12,7 +12,7 @@ from QPOEstimation.likelihood import get_kernel, get_mean_model
 class InjectionCreator(object):
 
     def __init__(self, params, injection_mode, sampling_frequency=256, segment_length=1., times=None,
-                 outdir='injection_files', injection_id=0, likelihood_model='celerite', mean_model=None,
+                 outdir="injection_files", injection_id=0, likelihood_model="celerite", mean_model=None,
                  n_components=1, poisson_data=False):
         self.params = params
         self.injection_mode = injection_mode
@@ -28,7 +28,7 @@ class InjectionCreator(object):
         self.mean_model = get_mean_model(model_type=mean_model, n_components=n_components, y=0)
         for key, value in params.items():
             if key.startswith("mean"):
-                self.mean_model.__setattr__(key.replace('mean:', ''), value)
+                self.mean_model.__setattr__(key.replace("mean:", ""), value)
         self.gp = celerite.GP(kernel=self.kernel, mean=self.mean_model)
         self.gp.compute(self.windowed_times, self.windowed_yerr)
         self.update_params()
@@ -39,7 +39,7 @@ class InjectionCreator(object):
         self.create_outdir()
 
     def create_outdir(self):
-        Path(f'{self.outdir}/{self.injection_mode}/{self.likelihood_model}').mkdir(exist_ok=True, parents=True)
+        Path(f"{self.outdir}/{self.injection_mode}/{self.likelihood_model}").mkdir(exist_ok=True, parents=True)
 
     @property
     def times(self):
@@ -54,17 +54,17 @@ class InjectionCreator(object):
 
     @property
     def windowed_indices(self):
-        if self.likelihood_model == 'celerite':
+        if self.likelihood_model == "celerite":
             return np.where(np.logical_and(-np.inf < self.times, self.times < np.inf))[0]
         else:
-            return np.where(np.logical_and(self.params['window_minimum'] < self.times,
-                                           self.times < self.params['window_maximum']))[0]
+            return np.where(np.logical_and(self.params["window_minimum"] < self.times,
+                                           self.times < self.params["window_maximum"]))[0]
 
     @property
     def outside_window_indices(self):
-        if self.likelihood_model == 'celerite_windowed':
-            return np.where(np.logical_or(self.params['window_minimum'] >= self.times,
-                                          self.times >= self.params['window_maximum']))[0]
+        if self.likelihood_model == "celerite_windowed":
+            return np.where(np.logical_or(self.params["window_minimum"] >= self.times,
+                                          self.times >= self.params["window_maximum"]))[0]
         else:
             return []
 
@@ -116,18 +116,18 @@ class InjectionCreator(object):
     def params_mean(self):
         params_mean = dict()
         for param, value in self.params.items():
-            if param.startswith('mean:'):
-                params_mean[param.replace('mean:', '')] = value
+            if param.startswith("mean:"):
+                params_mean[param.replace("mean:", "")] = value
         return params_mean
 
     @property
     def params_kernel(self):
         params_kernel = dict()
         for param, value in self.params.items():
-            if param.startswith('kernel:'):
-                params_kernel[param.replace('kernel:', '')] = value
-        if self.injection_mode == 'qpo':
-            params_kernel['log_b'] = -15
+            if param.startswith("kernel:"):
+                params_kernel[param.replace("kernel:", "")] = value
+        if self.injection_mode == "qpo":
+            params_kernel["log_b"] = -15
         return params_kernel
 
     def update_params(self):
@@ -152,37 +152,37 @@ class InjectionCreator(object):
         return f"{self.outdir}/{self.injection_mode}/{self.likelihood_model}/{self.injection_id}"
 
     def save(self):
-        np.savetxt(f'{self.outdir_path_stub}_data.txt',
+        np.savetxt(f"{self.outdir_path_stub}_data.txt",
                    np.array([self.times, self.y_realisation, self.yerr]).T)
-        with open(f'{self.outdir_path_stub}_params.json', 'w') as f:
+        with open(f"{self.outdir_path_stub}_params.json", "w") as f:
             json.dump(self.params, f)
 
     def plot(self):
         color = "#ff7f0e"
-        plt.errorbar(self.times, self.y_realisation, yerr=self.yerr, fmt=".k", capsize=0, label='data')
-        if self.injection_mode != 'white_noise':
+        plt.errorbar(self.times, self.y_realisation, yerr=self.yerr, fmt=".k", capsize=0, label="data")
+        if self.injection_mode != "white_noise":
             self.update_params()
             x = np.linspace(self.windowed_times[0], self.windowed_times[-1], 5000)
             self.gp.compute(self.windowed_times, self.windowed_yerr)
-            if self.likelihood_model == 'celerite_windowed':
-                plt.axvline(self.params['window_minimum'], color='cyan', label='start/end stochastic process')
-                plt.axvline(self.params['window_maximum'], color='cyan')
+            if self.likelihood_model == "celerite_windowed":
+                plt.axvline(self.params["window_minimum"], color="cyan", label="start/end stochastic process")
+                plt.axvline(self.params["window_maximum"], color="cyan")
             pred_mean, pred_var = self.gp.predict(self.y_realisation[self.windowed_indices], x, return_var=True)
             pred_std = np.sqrt(pred_var)
-            plt.plot(x, pred_mean, color=color, label='Prediction')
+            plt.plot(x, pred_mean, color=color, label="Prediction")
             plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std,
                              color=color, alpha=0.3, edgecolor="none")
 
-        plt.plot(self.times, self.gp.mean.get_value(self.times), color='green', label='Mean function')
+        plt.plot(self.times, self.gp.mean.get_value(self.times), color="green", label="Mean function")
         plt.legend()
-        plt.savefig(f'{self.outdir_path_stub}_data.pdf')
+        plt.savefig(f"{self.outdir_path_stub}_data.pdf")
         plt.show()
         plt.clf()
 
 
 def create_injection(params, injection_mode, sampling_frequency=None, segment_length=None, times=None,
-                     outdir='injection_files', injection_id=0, plot=False, likelihood_model='celerite',
-                     mean_model='mean', n_components=1, poisson_data=False):
+                     outdir="injection_files", injection_id=0, plot=False, likelihood_model="celerite",
+                     mean_model="mean", n_components=1, poisson_data=False):
     injection_creator = InjectionCreator(params=params, injection_mode=injection_mode,
                                          sampling_frequency=sampling_frequency, segment_length=segment_length,
                                          times=times, outdir=outdir, injection_id=injection_id,

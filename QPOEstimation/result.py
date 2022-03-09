@@ -14,27 +14,27 @@ style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
 
 class GPResult(bilby.result.Result):
 
-    kernel_type = MetaDataAccessor('kernel_type')
-    jitter_term = MetaDataAccessor('jitter_term')
-    mean_model = MetaDataAccessor('mean_model')
-    n_components = MetaDataAccessor('n_components', default=1)
-    times = MetaDataAccessor('times')
-    y = MetaDataAccessor('y')
-    yerr = MetaDataAccessor('yerr')
-    likelihood_model = MetaDataAccessor('likelihood_model', default='celerite')
-    truths = MetaDataAccessor('truths')
-    offset = MetaDataAccessor('offset')
+    kernel_type = MetaDataAccessor("kernel_type")
+    jitter_term = MetaDataAccessor("jitter_term")
+    mean_model = MetaDataAccessor("mean_model")
+    n_components = MetaDataAccessor("n_components", default=1)
+    times = MetaDataAccessor("times")
+    y = MetaDataAccessor("y")
+    yerr = MetaDataAccessor("yerr")
+    likelihood_model = MetaDataAccessor("likelihood_model", default="celerite")
+    truths = MetaDataAccessor("truths")
+    offset = MetaDataAccessor("offset")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     @property
     def corner_outdir(self):
-        return self.outdir.replace('results', 'corner')
+        return self.outdir.replace("results", "corner")
 
     @property
     def fits_outdir(self):
-        return self.outdir.replace('results', 'fits')
+        return self.outdir.replace("results", "fits")
 
     @property
     def max_likelihood_parameters(self):
@@ -47,10 +47,10 @@ class GPResult(bilby.result.Result):
         if self.likelihood_model == "celerite_windowed":
             likelihood = WindowedCeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                                     t=self.times, y=self.y, yerr=self.yerr)
-        elif self.likelihood_model == 'celerite':
+        elif self.likelihood_model == "celerite":
             likelihood = CeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                             t=self.times, y=self.y, yerr=self.yerr)
-        elif self.likelihood_model == 'george':
+        elif self.likelihood_model == "george":
             likelihood = GeorgeLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                           t=self.times, y=self.y, yerr=self.yerr)
         else:
@@ -99,9 +99,9 @@ class GPResult(bilby.result.Result):
         psd_freqs = np.linspace(1/self.segment_length, self.sampling_frequency, 5000)
         psd = likelihood.gp.kernel.get_psd(psd_freqs * 2 * np.pi)
 
-        plt.loglog(psd_freqs, psd, label='complete GP')
+        plt.loglog(psd_freqs, psd, label="complete GP")
         for i, k in enumerate(likelihood.gp.kernel.terms):
-            plt.loglog(psd_freqs, k.get_psd(psd_freqs * 2 * np.pi), "--", label=f'term {i}')
+            plt.loglog(psd_freqs, k.get_psd(psd_freqs * 2 * np.pi), "--", label=f"term {i}")
 
         plt.xlim(psd_freqs[0], psd_freqs[-1])
         plt.xlabel("f[Hz]")
@@ -122,8 +122,8 @@ class GPResult(bilby.result.Result):
         likelihood = self.get_likelihood()
         taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
         plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue")
-        plt.xlabel('tau [s]')
-        plt.ylabel('kernel')
+        plt.xlabel("tau [s]")
+        plt.ylabel("kernel")
         try:
             plt.tight_layout()
         except Exception:
@@ -144,18 +144,18 @@ class GPResult(bilby.result.Result):
 
         jitter = 0
         for k in list(self.max_likelihood_parameters.keys()):
-            if 'log_sigma' in k and self.jitter_term:
+            if "log_sigma" in k and self.jitter_term:
                 jitter = np.exp(self.max_likelihood_parameters[k])
 
-        if self.likelihood_model == 'celerite_windowed':
-            plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan',
-                        label='$t_{\mathrm{start/end}}$')
-            plt.axvline(self.max_likelihood_parameters['window_maximum'], color='cyan')
-            x = np.linspace(self.max_likelihood_parameters['window_minimum'],
-                            self.max_likelihood_parameters['window_maximum'], 5000)
+        if self.likelihood_model == "celerite_windowed":
+            plt.axvline(self.max_likelihood_parameters["window_minimum"], color="cyan",
+                        label="$t_{\mathrm{start/end}}$")
+            plt.axvline(self.max_likelihood_parameters["window_maximum"], color="cyan")
+            x = np.linspace(self.max_likelihood_parameters["window_minimum"],
+                            self.max_likelihood_parameters["window_maximum"], 5000)
             windowed_indices = np.where(
-                np.logical_and(self.max_likelihood_parameters['window_minimum'] < self.times,
-                               self.times < self.max_likelihood_parameters['window_maximum']))
+                np.logical_and(self.max_likelihood_parameters["window_minimum"] < self.times,
+                               self.times < self.max_likelihood_parameters["window_maximum"]))
             likelihood.gp.compute(self.times[windowed_indices], self.yerr[windowed_indices] + jitter)
             pred_mean, pred_var = likelihood.gp.predict(self.y[windowed_indices], x, return_var=True)
         else:
@@ -165,8 +165,8 @@ class GPResult(bilby.result.Result):
         pred_std = np.sqrt(pred_var)
 
         color = "#ff7f0e"
-        plt.errorbar(self.times, self.y, yerr=self.yerr + jitter, fmt=".k", capsize=0, label='data')
-        plt.plot(x, pred_mean, color=color, label='Prediction')
+        plt.errorbar(self.times, self.y, yerr=self.yerr + jitter, fmt=".k", capsize=0, label="data")
+        plt.plot(x, pred_mean, color=color, label="Prediction")
         plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color, alpha=0.3,
                          edgecolor="none")
         if self.mean_model != "mean":
@@ -175,7 +175,7 @@ class GPResult(bilby.result.Result):
                 trend = np.ones(len(x)) * likelihood.mean_model
             else:
                 trend = likelihood.mean_model.get_value(x)
-            plt.plot(x, trend, color='green', label='Mean')
+            plt.plot(x, trend, color="green", label="Mean")
             samples = self.get_random_posterior_samples(10)
             for sample in samples:
                 likelihood = self._set_likelihood_parameters(likelihood=likelihood, parameters=sample)
@@ -183,7 +183,7 @@ class GPResult(bilby.result.Result):
                     trend = np.ones(len(x)) * likelihood.mean_model
                 else:
                     trend = likelihood.mean_model.get_value(x)
-                plt.plot(x, trend, color='green', alpha=0.3)
+                plt.plot(x, trend, color="green", alpha=0.3)
 
         plt.xlabel("time [s]")
         plt.ylabel("Normalised flux")
@@ -209,18 +209,18 @@ class GPResult(bilby.result.Result):
 
         jitter = 0
         for k in list(self.max_likelihood_parameters.keys()):
-            if 'log_sigma' in k and self.jitter_term:
+            if "log_sigma" in k and self.jitter_term:
                 jitter = np.exp(self.max_likelihood_parameters[k])
 
-        if self.likelihood_model == 'celerite_windowed':
-            plt.axvline(self.max_likelihood_parameters['window_minimum'], color='cyan',
-                        label='start/end stochastic process')
-            plt.axvline(self.max_likelihood_parameters['window_maximum'], color='cyan')
-            x = np.linspace(self.max_likelihood_parameters['window_minimum'],
-                            self.max_likelihood_parameters['window_maximum'], 5000)
+        if self.likelihood_model == "celerite_windowed":
+            plt.axvline(self.max_likelihood_parameters["window_minimum"], color="cyan",
+                        label="start/end stochastic process")
+            plt.axvline(self.max_likelihood_parameters["window_maximum"], color="cyan")
+            x = np.linspace(self.max_likelihood_parameters["window_minimum"],
+                            self.max_likelihood_parameters["window_maximum"], 5000)
             windowed_indices = np.where(
-                np.logical_and(self.max_likelihood_parameters['window_minimum'] < self.times,
-                               self.times < self.max_likelihood_parameters['window_maximum']))
+                np.logical_and(self.max_likelihood_parameters["window_minimum"] < self.times,
+                               self.times < self.max_likelihood_parameters["window_maximum"]))
             likelihood.gp.compute(self.times[windowed_indices], self.yerr[windowed_indices] + jitter)
             pred_mean, pred_var = likelihood.gp.predict(self.y[windowed_indices], x, return_var=True)
         else:
@@ -242,8 +242,8 @@ class GPResult(bilby.result.Result):
             trend_fine = 0
 
         color = "#ff7f0e"
-        plt.errorbar(self.times, self.y - trend, yerr=self.yerr + jitter, fmt=".k", capsize=0, label='data', color='black')
-        plt.plot(x, pred_mean - trend_fine, color=color, label='Prediction')
+        plt.errorbar(self.times, self.y - trend, yerr=self.yerr + jitter, fmt=".k", capsize=0, label="data", color="black")
+        plt.plot(x, pred_mean - trend_fine, color=color, label="Prediction")
         plt.fill_between(x, pred_mean + pred_std - trend_fine, pred_mean - pred_std - trend_fine, color=color,
                          alpha=0.3, edgecolor="none")
 
@@ -271,15 +271,15 @@ class GPResult(bilby.result.Result):
 
         Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
-            if 'kernel:log_f' in self.posterior:
-                frequency_samples = np.exp(np.array(self.posterior['kernel:log_f']))
-            elif 'kernel:terms[0]:log_f' in self.posterior:
-                frequency_samples = np.exp(np.array(self.posterior['kernel:terms[0]:log_f']))
+            if "kernel:log_f" in self.posterior:
+                frequency_samples = np.exp(np.array(self.posterior["kernel:log_f"]))
+            elif "kernel:terms[0]:log_f" in self.posterior:
+                frequency_samples = np.exp(np.array(self.posterior["kernel:terms[0]:log_f"]))
             else:
                 return
             plt.hist(frequency_samples, bins="fd", density=True)
-            plt.xlabel('frequency [Hz]')
-            plt.ylabel('Normalised PDF')
+            plt.xlabel("frequency [Hz]")
+            plt.ylabel("Normalised PDF")
             median = np.median(frequency_samples)
             percentiles = np.percentile(frequency_samples, [16, 84])
             plt.title(
@@ -291,13 +291,13 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior.pdf")
             plt.clf()
         elif self.kernel_type == "double_qpo":
-            frequency_samples_1 = np.exp(np.array(self.posterior['kernel:terms[0]:log_f']))
-            frequency_samples_2 = np.exp(np.array(self.posterior['kernel:terms[1]:log_f']))
+            frequency_samples_1 = np.exp(np.array(self.posterior["kernel:terms[0]:log_f"]))
+            frequency_samples_2 = np.exp(np.array(self.posterior["kernel:terms[1]:log_f"]))
 
             for i, frequency_samples in enumerate([frequency_samples_1, frequency_samples_2]):
                 plt.hist(frequency_samples, bins="fd", density=True)
-                plt.xlabel('frequency [Hz]')
-                plt.ylabel('Normalised PDF')
+                plt.xlabel("frequency [Hz]")
+                plt.ylabel("Normalised PDF")
                 median = np.median(frequency_samples)
                 percentiles = np.percentile(frequency_samples, [16, 84])
                 plt.title(
@@ -315,16 +315,16 @@ class GPResult(bilby.result.Result):
             plt.style.use(style_file)
         Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
         if self.kernel_type in OSCILLATORY_MODELS:
-            if 'kernel:log_f' in self.posterior:
-                period_samples = 1/np.exp(np.array(self.posterior['kernel:log_f']))
-            elif 'kernel:terms[0]:log_f' in self.posterior:
-                period_samples = 1/np.exp(np.array(self.posterior['kernel:terms[0]:log_f']))
+            if "kernel:log_f" in self.posterior:
+                period_samples = 1/np.exp(np.array(self.posterior["kernel:log_f"]))
+            elif "kernel:terms[0]:log_f" in self.posterior:
+                period_samples = 1/np.exp(np.array(self.posterior["kernel:terms[0]:log_f"]))
             else:
                 return
             plt.hist(period_samples, bins="fd", density=True)
-            plt.xlabel('period [s]')
+            plt.xlabel("period [s]")
             # plt.xlim(6.5, 10.5)
-            plt.ylabel('Normalised PDF')
+            plt.ylabel("Normalised PDF")
             median = np.median(period_samples)
             percentiles = np.percentile(period_samples, [16, 84])
             plt.title(
@@ -342,11 +342,11 @@ class GPResult(bilby.result.Result):
             if paper_style:
                 plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
-            label = 'kernel:terms[0]:log_a'
+            label = "kernel:terms[0]:log_a"
             log_amplitude_samples = np.array(self.posterior[label])
             plt.hist(log_amplitude_samples, bins="fd", density=True)
-            plt.xlabel('$\ln \,a$')
-            plt.ylabel('Normalised PDF')
+            plt.xlabel("$\ln \,a$")
+            plt.ylabel("Normalised PDF")
             median = np.median(log_amplitude_samples)
             percentiles = np.percentile(log_amplitude_samples, [16, 84])
             plt.title(
@@ -365,12 +365,12 @@ class GPResult(bilby.result.Result):
             if paper_style:
                 plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
-            qpo_log_amplitude_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
-            red_noise_log_amplitude_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
+            qpo_log_amplitude_samples = np.array(self.posterior["kernel:terms[0]:log_a"])
+            red_noise_log_amplitude_samples = np.array(self.posterior["kernel:terms[1]:log_a"])
             amplitude_ratio_samples = np.exp(qpo_log_amplitude_samples - red_noise_log_amplitude_samples)
             plt.hist(amplitude_ratio_samples, bins="fd", density=True)
-            plt.xlabel('$a_{\mathrm{qpo}}/a_{\mathrm{rn}}$')
-            plt.ylabel('Normalised PDF')
+            plt.xlabel("$a_{\mathrm{qpo}}/a_{\mathrm{rn}}$")
+            plt.ylabel("Normalised PDF")
             median = np.median(amplitude_ratio_samples)
             percentiles = np.percentile(amplitude_ratio_samples, [16, 84])
             plt.title(
@@ -388,12 +388,12 @@ class GPResult(bilby.result.Result):
             if paper_style:
                 plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
-            log_a_samples = np.array(self.posterior['kernel:terms[1]:log_a'])
-            log_c_samples = np.array(self.posterior['kernel:terms[1]:log_c'])
+            log_a_samples = np.array(self.posterior["kernel:terms[1]:log_a"])
+            log_c_samples = np.array(self.posterior["kernel:terms[1]:log_c"])
             power_samples = np.log(power_red_noise(a=np.exp(log_a_samples), c=np.exp(log_c_samples)))
             plt.hist(power_samples, bins="fd", density=True)
-            plt.xlabel('$\ln P_{\mathrm{rn}}$')
-            plt.ylabel('Normalised PDF')
+            plt.xlabel("$\ln P_{\mathrm{rn}}$")
+            plt.ylabel("Normalised PDF")
             median = np.median(power_samples)
             percentiles = np.percentile(power_samples, [16, 84])
             plt.title(
@@ -411,13 +411,13 @@ class GPResult(bilby.result.Result):
             if paper_style:
                 plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
-            log_a_samples = np.array(self.posterior['kernel:terms[0]:log_a'])
-            log_c_samples = np.array(self.posterior['kernel:terms[0]:log_c'])
-            log_f_samples = np.array(self.posterior['kernel:terms[0]:log_f'])
+            log_a_samples = np.array(self.posterior["kernel:terms[0]:log_a"])
+            log_c_samples = np.array(self.posterior["kernel:terms[0]:log_c"])
+            log_f_samples = np.array(self.posterior["kernel:terms[0]:log_f"])
             power_samples = np.log(power_qpo(a=np.exp(log_a_samples), c=np.exp(log_c_samples), f=np.exp(log_f_samples)))
             plt.hist(power_samples, bins="fd", density=True)
-            plt.xlabel('$\ln P_{\mathrm{qpo}}$')
-            plt.ylabel('Normalised PDF')
+            plt.xlabel("$\ln P_{\mathrm{qpo}}$")
+            plt.ylabel("Normalised PDF")
             median = np.median(power_samples)
             percentiles = np.percentile(power_samples, [16, 84])
             plt.title(
@@ -435,13 +435,13 @@ class GPResult(bilby.result.Result):
             if paper_style:
                 plt.style.use(style_file)
             Path(self.corner_outdir).mkdir(parents=True, exist_ok=True)
-            t_start_samples = np.array(self.posterior['window_minimum'])
-            t_end_samples = np.array(self.posterior['window_maximum'])
+            t_start_samples = np.array(self.posterior["window_minimum"])
+            t_end_samples = np.array(self.posterior["window_maximum"])
             duration_samples = t_end_samples - t_start_samples
 
             plt.hist(duration_samples, bins="fd", density=True)
-            plt.xlabel('duration [s]')
-            plt.ylabel('Normalised PDF')
+            plt.xlabel("duration [s]")
+            plt.ylabel("Normalised PDF")
             median = np.median(duration_samples)
             percentiles = np.percentile(duration_samples, [16, 84])
             plt.title(

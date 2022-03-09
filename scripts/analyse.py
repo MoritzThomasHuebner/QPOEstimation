@@ -103,29 +103,29 @@ if len(sys.argv) > 1:
     plot = boolean_string(args.plot)
     suffix = args.suffix
 else:
-    # matplotlib.use('Qt5Agg')
+    # matplotlib.use("Qt5Agg")
 
     data_source = "giant_flare"  # "magnetar_flare_binned"
-    run_mode = 'select_time'
+    run_mode = "select_time"
     sampling_frequency = 64
-    data_mode = 'normal'
+    data_mode = "normal"
     alpha = 0.02
     variance_stabilisation = False
 
     hares_and_hounds_id = "612579"
-    hares_and_hounds_round = 'HH2'
+    hares_and_hounds_round = "HH2"
 
-    solar_flare_folder = 'goes'
+    solar_flare_folder = "goes"
     solar_flare_id = "go1520130512"
     # solar_flare_id = "go1520110314"
     grb_id = "090709A"
     grb_label = ""
     grb_binning = "1s"
     grb_detector = "swift"
-    grb_energy_band = 'all'
+    grb_energy_band = "all"
 
-    magnetar_label = 'SGR_0501'
-    magnetar_tag = '080823478_lcobs'
+    magnetar_label = "SGR_0501"
+    magnetar_tag = "080823478_lcobs"
     bin_size = 0.001
     magnetar_subtract_t0 = True
     magnetar_unbarycentred_time = False
@@ -152,7 +152,7 @@ else:
     candidate_id = 5
 
     injection_id = 1
-    base_injection_outdir = 'injections/injection'
+    base_injection_outdir = "injections/injection"
 
     offset = False
     polynomial_max = 2
@@ -191,7 +191,7 @@ else:
     # segment_step = 0.945  # Requires 8 steps
     segment_step = 0.23625  # Requires 32 steps
 
-    sample = 'rslice'
+    sample = "rslice"
     nlive = 1000
     use_ratio = False
 
@@ -218,7 +218,7 @@ mean_prior_bound_dict = dict(
     tau_max=tau_max
 )
 
-band = f'{band_minimum}_{band_maximum}Hz'
+band = f"{band_minimum}_{band_maximum}Hz"
 
 truths = None
 
@@ -242,18 +242,18 @@ times, y, yerr, outdir, label = get_data(
 
 print(len(times))
 
-if data_source in ['grb', 'solar_flare']:
+if data_source in ["grb", "solar_flare"]:
     pass
-elif data_source in ['hares_and_hounds']:
+elif data_source in ["hares_and_hounds"]:
     yerr = np.zeros(len(y))
-elif data_source == 'injection':
+elif data_source == "injection":
     if yerr is None:
         yerr = np.zeros(len(y))
     # yerr = np.ones(len(y))
 elif variance_stabilisation:
     y = bar_lev(y)
     yerr = np.ones(len(y))
-elif data_source == 'test':
+elif data_source == "test":
     pass
 else:
     yerr = np.sqrt(y)
@@ -264,9 +264,9 @@ if normalisation:
     yerr = yerr/(np.max(y) - np.min(y))
 
 if plot:
-    # plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label='data')
-    # plt.errorbar(times, y, yerr=yerr, capsize=0, label='data')
-    plt.step(times, y, label='flux')
+    # plt.errorbar(times, y, yerr=yerr, fmt=".k", capsize=0, label="data")
+    # plt.errorbar(times, y, yerr=yerr, capsize=0, label="data")
+    plt.step(times, y, label="flux")
     # plt.xlabel("time [s]")
     # plt.ylabel("counts/sec/det")
     # plt.title("GRB 090709A Swift-BAT 15-350 keV")
@@ -276,10 +276,10 @@ if plot:
     fs = 1/(times[1] - times[0])
 
     from scipy.signal import periodogram
-    freqs, powers = periodogram(y, fs=fs, window='hann')
+    freqs, powers = periodogram(y, fs=fs, window="hann")
     plt.loglog()
     plt.step(freqs[1:], powers[1:])
-    # plt.axvline(1/8.1, color='black', linestyle='--', label="QPO?")
+    # plt.axvline(1/8.1, color="black", linestyle="--", label="QPO?")
     plt.xlabel("frequency [Hz]")
     plt.ylabel("Power [arb. units]")
     plt.legend()
@@ -295,7 +295,7 @@ priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_mod
                     model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=minimum_window_spacing,
                     n_components=n_components, offset=offset, jitter_term=jitter_term, **mean_prior_bound_dict)
 
-# priors["kernel:terms[0]:log_f"] = bilby.core.prior.Uniform(minimum=np.log(3000), maximum=8.517193191416348, name='kernel:terms[0]:log_f', latex_label='kernel:terms[0]:log_f', unit=None, boundary='reflective')
+# priors["kernel:terms[0]:log_f"] = bilby.core.prior.Uniform(minimum=np.log(3000), maximum=8.517193191416348, name="kernel:terms[0]:log_f", latex_label="kernel:terms[0]:log_f", unit=None, boundary="reflective")
 # suffix += "restricted_freq"
 
 kernel = get_kernel(kernel_type=recovery_mode, jitter_term=jitter_term)
@@ -318,7 +318,7 @@ if try_load:
 if result is None:
     Path(f"{outdir}/results").mkdir(parents=True, exist_ok=True)
     result = bilby.run_sampler(likelihood=likelihood, priors=priors, outdir=f"{outdir}/results",
-                               label=label, sampler='dynesty', nlive=nlive, sample=sample,
+                               label=label, sampler="dynesty", nlive=nlive, sample=sample,
                                resume=resume, use_ratio=use_ratio, result_class=QPOEstimation.result.GPResult,
                                meta_data=meta_data, save=True, gzip=False, nact=5)
 
@@ -328,9 +328,9 @@ if plot:
 
 
 # clean up
-for extension in ['_checkpoint_run.png', '_checkpoint_stats.png', '_checkpoint_trace.png', '_checkpoint_trace_unit.png',
-                  '_dynesty.pickle', '_resume.pickle', '_result.json.old', '_samples.dat',
-                  '_checkpoint_trace_unit.png']:
+for extension in ["_checkpoint_run.png", "_checkpoint_stats.png", "_checkpoint_trace.png", "_checkpoint_trace_unit.png",
+                  "_dynesty.pickle", "_resume.pickle", "_result.json.old", "_samples.dat",
+                  "_checkpoint_trace_unit.png"]:
     try:
         os.remove(f"{outdir}/results/{label}{extension}")
     except Exception:

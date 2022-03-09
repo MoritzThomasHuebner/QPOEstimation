@@ -18,12 +18,12 @@ def _get_names(base_names, n_models, offset):
         for base in base_names:
             names.extend([f"{base}_{i}"])
     if offset:
-        names.extend(['offset'])
+        names.extend(["offset"])
     names = tuple(names)
     return names
 
 
-def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, likelihood_model='gaussian_process'):
+def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, likelihood_model="gaussian_process"):
     base_names = bilby.core.utils.infer_parameters_from_function(func=model)
     names = _get_names(base_names, n_models, offset)
     defaults = defaults or {name: 0.1 for name in names}
