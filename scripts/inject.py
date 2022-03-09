@@ -115,7 +115,7 @@ mean_prior_bounds_dict = dict(
 times = np.sort(np.random.uniform(0, 1, 256))
 
 kernel = get_kernel(kernel_type=injection_mode)
-outdir = f'injection_files_pp_non_eq_dis'
+outdir = f'injections/injection_files_pp_non_eq_dis'
 
 if injection_mode == 'red_noise':
     min_log_a = min_log_a_red_noise
@@ -134,6 +134,8 @@ elif injection_mode == 'general_qpo':
                         model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                         n_components=n_components, **mean_prior_bounds_dict)
     priors['kernel:terms[1]:log_a'].peak = min_log_a_red_noise
+else:
+    raise ValueError
 Path(outdir).mkdir(exist_ok=True, parents=True)
 
 if minimum_id == maximum_id:

@@ -27,7 +27,7 @@ for mean_model in ['skew_exponential', 'fred', 'fred_extended', 'skew_gaussian']
         for n_component in range(1, 4):
             try:
                 res = GPResult.from_json(
-                    outdir=f'GRB090709A_swift/select_time/{recovery_mode}/'
+                    outdir=f'results/GRB090709A_swift/select_time/{recovery_mode}/'
                            f'gaussian_process/results/',
                     label=f'-4.0_103.0_{n_component}_{mean_model}s')
                 if recovery_mode == 'general_qpo':
@@ -56,7 +56,7 @@ plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
 plt.ylim(86, 102)
 plt.legend(ncol=2)
 plt.tight_layout()
-plt.savefig(f'GRB_Ln_Z_plot.pdf')
+plt.savefig(f'results/GRB_Ln_Z_plot.pdf')
 plt.show()
 
 # plt.figure(figsize=(9.2, 7.2))

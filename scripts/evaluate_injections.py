@@ -6,7 +6,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from QPOEstimation.utils import get_injection_outdir, modes
+from QPOEstimation.utils import get_injection_outdir
+from QPOEstimation.parse import modes
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -79,9 +80,9 @@ for i in range(10):
     suffix = '20Hz'
     plt.title("10 runs averaged")
     if injection_mode == 'qpo':
-        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_{suffix}_{i}.png')
+        plt.savefig(f'results/ln_a_v_ln_BF_{injection_mode}_{suffix}_{i}.png')
     else:
-        plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_{i}.png')
+        plt.savefig(f'results/ln_a_v_ln_BF_{injection_mode}_{i}.png')
     plt.show()
     plt.clf()
 
@@ -94,9 +95,9 @@ plt.legend()
 suffix = '20Hz'
 plt.title("Standard deviation based on 10 injections")
 if injection_mode == 'qpo':
-    plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_{suffix}_errs.png')
+    plt.savefig(f'results/ln_a_v_ln_BF_{injection_mode}_{suffix}_errs.png')
 else:
-    plt.savefig(f'ln_a_v_ln_BF_{injection_mode}_errs.png')
+    plt.savefig(f'results/ln_a_v_ln_BF_{injection_mode}_errs.png')
 plt.show()
 plt.clf()
 
@@ -108,9 +109,9 @@ for i in range(10):
     plt.legend()
     plt.title("10 runs averaged")
     if injection_mode == 'qpo':
-        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}_{i}.png')
+        plt.savefig(f'results/ln_c_v_ln_BF_{injection_mode}_{suffix}_{i}.png')
     else:
-        plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{i}.png')
+        plt.savefig(f'results/ln_c_v_ln_BF_{injection_mode}_{i}.png')
     plt.show()
     plt.clf()
 
@@ -121,9 +122,9 @@ for i in range(10):
 plt.legend()
 plt.title("Standard deviation based on 10 injections")
 if injection_mode == 'qpo':
-    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_{suffix}_errs.png')
+    plt.savefig(f'results/ln_c_v_ln_BF_{injection_mode}_{suffix}_errs.png')
 else:
-    plt.savefig(f'ln_c_v_ln_BF_{injection_mode}_errs.png')
+    plt.savefig(f'results/ln_c_v_ln_BF_{injection_mode}_errs.png')
 
 plt.show()
 plt.clf()
@@ -140,8 +141,8 @@ plt.xlabel('ln c')
 plt.ylabel('ln a')
 plt.title("10 runs averaged")
 if injection_mode == 'qpo':
-    plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
+    plt.savefig(f'results/ln_a_v_ln_c_v_ln_BF_{injection_mode}_{suffix}.png')
 else:
-    plt.savefig(f'ln_a_v_ln_c_v_ln_BF_{injection_mode}')
+    plt.savefig(f'results/ln_a_v_ln_c_v_ln_BF_{injection_mode}')
 plt.show()
 plt.clf()

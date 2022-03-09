@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 import os
 
 try:
-    flares = np.array(sorted(os.listdir('hares_and_hounds_HH2_just_figures')))
+    flares = np.array(sorted(os.listdir('results/hares_and_hounds_HH2_just_figures')))
 except Exception:
-    flares = np.array(sorted(os.listdir('hares_and_hounds_HH2')))
+    flares = np.array(sorted(os.listdir('results/hares_and_hounds_HH2')))
 print(len(flares))
 run_mode = 'from_maximum'
 
@@ -27,8 +27,8 @@ mean_qpo_log_amplitudes = []
 
 for k, t in zip(flare_keys, flare_types):
     try:
-        res1 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_gaussians_result.json")
-        res2 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_skew_exponentials_result.json")
+        res1 = QPOEstimation.result.GPResult.from_json(f"results/hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_gaussians_result.json")
+        res2 = QPOEstimation.result.GPResult.from_json(f"results/hares_and_hounds_HH2/{k}/from_maximum/general_qpo/gaussian_process/results/from_maximum_3_skew_exponentials_result.json")
         # res1.plot_qpo_log_amplitude()
         # res1.plot_amplitude_ratio()
         # res2.plot_qpo_log_amplitude()

@@ -35,7 +35,7 @@ else:
 
 band = f'{band_minimum}_{band_maximum}Hz'
 suffix = ''
-outdir = f"SGR_1806_20/{run_mode}/{band}/{data_mode}"
+outdir = f"results/SGR_1806_20/{run_mode}/{band}/{data_mode}"
 outdir_qpo_model = f"{outdir}/{kernel_type}/{likelihood_model}/"
 outdir_red_noise = f"{outdir}/red_noise/{likelihood_model}/"
 

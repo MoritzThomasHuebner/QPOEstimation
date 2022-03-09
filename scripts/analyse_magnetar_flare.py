@@ -27,7 +27,7 @@ for mean_model in ['skew_exponential', 'fred', 'fred_extended', 'skew_gaussian']
         for n_component in range(1, 4):
             try:
                 res = GPResult.from_json(
-                    outdir=f'magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/'
+                    outdir=f'results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/'
                            f'gaussian_process/results/',
                     label=f'entire_segment_{n_component}_{mean_model}s')
                 if recovery_mode == 'general_qpo':
@@ -59,7 +59,7 @@ plt.ylim(-1002.25, -980)
 # plt.ylim(-372, -357)
 plt.legend(ncol=2)
 plt.tight_layout()
-plt.savefig(f'Magnetar_Ln_Z_plot.pdf')
+plt.savefig(f'results/Magnetar_Ln_Z_plot.pdf')
 plt.show()
 
 # plt.figure(figsize=(9.2, 7.2))
@@ -76,5 +76,5 @@ plt.show()
 # plt.xlabel("$\ln P_{\mathrm{QPO}}$")
 # plt.ylabel("Normalised PDF")
 # plt.legend()
-# plt.savefig(f"Magnetar_qpo_power_hist.png")
+# plt.savefig(f"results/Magnetar_qpo_power_hist.png")
 # plt.clf()

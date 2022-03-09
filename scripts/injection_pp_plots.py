@@ -43,7 +43,7 @@ for injection_id in range(minimum_id, maximum_id):
     print(injection_id)
     label = get_injection_label(run_mode='entire_segment', injection_id=injection_id) + "_1_skew_gaussians"
     try:
-        with open(f'injection_files_pp_non_eq_dis/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json') as f:
+        with open(f'{base_injection_outdir}/{injection_mode}/{likelihood_model}/{str(injection_id).zfill(2)}_params.json') as f:
             injection_params = json.load(f)
         res = GPResult.from_json(outdir=outdir, label=label)
         reslist.append(res)
@@ -68,4 +68,4 @@ reslist[0].priors['mean:log_sigma_fall_0'].latex_label = "$\sigma_2$"
 reslist[0].priors['mean:t_0_0'].latex_label = "$t_0$"
 
 
-bilby.result.make_pp_plot(results=reslist, filename=f'{injection_mode}_{likelihood_model}_pp_plot_non_eq_dis.pdf')
+bilby.result.make_pp_plot(results=reslist, filename=f'results/{injection_mode}_{likelihood_model}_pp_plot_non_eq_dis.pdf')

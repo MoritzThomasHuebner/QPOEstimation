@@ -19,7 +19,7 @@ modes = ['zeros', 'white_noise']
 # mode = int(sys.argv[1])
 mode = 1
 injection_id = str(mode).zfill(2)
-outdir = "periodogram_pop"
+outdir = "results/periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 
@@ -130,7 +130,7 @@ plt.xlabel("$x$")
 plt.ylabel("$\ln BF$")
 plt.legend()
 plt.tight_layout()
-plt.savefig("thesis_figures/injection_periodogram_comparison.pdf")
+plt.savefig("results/thesis_figures/injection_periodogram_comparison.pdf")
 # plt.show()
 plt.clf()
 
@@ -138,7 +138,7 @@ plt.plot(xs, np.array(ln_zs_gp_windowed) - np.array(ln_zs_gp))
 plt.xlim(1, 20)
 plt.xlabel("$x$")
 plt.ylabel("$\ln BF$")
-plt.savefig("thesis_figures/injection_periodogram_stat_vs_non_stat.pdf")
+plt.savefig("results/thesis_figures/injection_periodogram_stat_vs_non_stat.pdf")
 # plt.show()
 plt.clf()
 

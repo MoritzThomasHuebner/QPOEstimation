@@ -42,8 +42,8 @@ for injection_id in range(0, 1000):
         print(e)
         continue
 
-np.savetxt('ln_bfs_qpo_inj_mss.txt', ln_bfs_qpo_inj)
-np.savetxt('ln_bfs_red_noise_inj_mss.txt', ln_bfs_red_noise_inj)
+np.savetxt('results/ln_bfs_qpo_inj_mss.txt', ln_bfs_qpo_inj)
+np.savetxt('results/ln_bfs_red_noise_inj_mss.txt', ln_bfs_red_noise_inj)
 bins = np.arange(-5, 25)
 # bins = 'fd'
 plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise plus QPO")
@@ -53,7 +53,7 @@ plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
 plt.ylabel("$p(\ln BF_{\mathrm{QPO}})$")
 plt.legend()
 plt.tight_layout()
-plt.savefig('mss_plot_new.pdf')
+plt.savefig('results/mss_plot_new.pdf')
 plt.show()
 
 print(len(np.where(np.array(ln_bfs_qpo_inj) > 0)[0]))

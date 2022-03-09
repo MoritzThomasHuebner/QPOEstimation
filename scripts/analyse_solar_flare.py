@@ -28,7 +28,7 @@ for recovery_mode in ['general_qpo', 'red_noise']:
     for n_component in range(2, 5):
         try:
             res = GPResult.from_json(
-                outdir=f'solar_flare_go1520130512/select_time/{recovery_mode}/'
+                outdir=f'results/solar_flare_go1520130512/select_time/{recovery_mode}/'
                        f'gaussian_process/results/',
                 label=f'74700.0_74900.0_{n_component}_{mean_model}s')
             if recovery_mode == 'general_qpo':
@@ -59,7 +59,7 @@ plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
 # plt.ylim(-372, -357)
 plt.legend(ncol=2)
 plt.tight_layout()
-plt.savefig(f'Solar_Ln_Z_plot.pdf')
+plt.savefig(f'results/Solar_Ln_Z_plot.pdf')
 plt.show()
 
 # plt.figure(figsize=(9.2, 7.2))

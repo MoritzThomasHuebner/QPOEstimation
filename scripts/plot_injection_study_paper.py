@@ -14,7 +14,7 @@ plt.style.use('paper.mplstyle')
 # matplotlib.use('Qt5Agg')
 
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/01_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/01_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -33,12 +33,12 @@ ax2.set_xlabel("$x$")
 ax2.set_xticks(ticks=(-30, -20, -10, 0, 10, 20, 30))
 ax2.set_xticklabels(labels=(3, 2, 1, 0, 1, 2, 3))
 plt.tight_layout()
-plt.savefig('paper_figures/01_injection_time_series.pdf')
+plt.savefig('results/paper_figures/01_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/01_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/01_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -66,13 +66,13 @@ plt.xlabel('frequency [Hz]')
 plt.ylabel('Power [arb. units]')
 plt.axvline(1, label='QPO frequency', ls='--', color='black')
 plt.legend()
-plt.savefig('paper_figures/01_injection_periodogram.pdf')
+plt.savefig('results/paper_figures/01_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
 ### Flare injection 02
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/02_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/02_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -130,7 +130,7 @@ ax3.plot(inset_times, inset_y_detrended)
 
 
 plt.tight_layout()
-plt.savefig('paper_figures/02_injection_time_series.pdf')
+plt.savefig('results/paper_figures/02_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
@@ -147,7 +147,7 @@ plt.ylabel('Power [arb. units]')
 plt.axvline(1, label='QPO frequency', ls='--', color='black')
 plt.legend()
 plt.tight_layout()
-plt.savefig('paper_figures/02_injection_periodogram.pdf')
+plt.savefig('results/paper_figures/02_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
@@ -163,12 +163,12 @@ plt.ylabel('Power [arb. units]')
 plt.axvline(1, label='QPO frequency', ls='--', color='black')
 plt.legend()
 plt.tight_layout()
-plt.savefig('paper_figures/02_injection_periodogram_total.pdf')
+plt.savefig('results/paper_figures/02_injection_periodogram_total.pdf')
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/03_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/03_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -183,12 +183,12 @@ ax1.set_xlabel(r'times [s]')
 ax1.set_ylabel(r'Flux [arb. units]')
 
 plt.tight_layout()
-plt.savefig('paper_figures/03_injection_time_series.pdf')
+plt.savefig('results/paper_figures/03_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/03_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/03_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -204,11 +204,11 @@ plt.xlabel('frequency [Hz]')
 plt.ylabel('Power [arb. units]')
 plt.axvline(5, label='QPO frequency', ls='--', color='black')
 plt.legend()
-plt.savefig('paper_figures/03_injection_periodogram.pdf')
+plt.savefig('results/paper_figures/03_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/04_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/04_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -222,11 +222,11 @@ ax1.plot(times, y)
 ax1.set_xlabel(r'times [s]')
 ax1.set_ylabel(r'Flux [arb. units]')
 plt.tight_layout()
-plt.savefig('paper_figures/04_injection_time_series.pdf')
+plt.savefig('results/paper_figures/04_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/04_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/04_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -241,7 +241,7 @@ plt.xlabel('frequency [Hz]')
 plt.ylabel('Power [arb. units]')
 plt.axvline(5, label='QPO frequency', ls='--', color='black')
 plt.legend()
-plt.savefig('paper_figures/04_injection_periodogram_extended.pdf')
+plt.savefig('results/paper_figures/04_injection_periodogram_extended.pdf')
 plt.show()
 plt.clf()
 
@@ -260,12 +260,12 @@ plt.xlabel('frequency [Hz]')
 plt.ylabel('Power [arb. units]')
 plt.axvline(5, label='QPO frequency', ls='--', color='black')
 plt.legend()
-plt.savefig('paper_figures/04_injection_periodogram.pdf')
+plt.savefig('results/paper_figures/04_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/05_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/05_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -302,7 +302,7 @@ ax3.set_xticklabels(labels=("", 15, 10, 5, 1, 1, 5, 10, 15, 20))
 
 
 plt.tight_layout()
-plt.savefig('paper_figures/05_injection_time_series.pdf')
+plt.savefig('results/paper_figures/05_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
@@ -319,16 +319,10 @@ plt.ylabel('Power [arb. units]')
 plt.axvline(5, label='QPO frequency', ls='--', color='black')
 plt.axvline(0.5, label='Low frequency cut off', ls='-.', color='green')
 plt.legend()
-plt.savefig('paper_figures/05_injection_periodogram.pdf')
+plt.savefig('results/paper_figures/05_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injection_files_pop/general_qpo/whittle/05_data.txt')
+data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/05_data.txt')
 times = data[:, 0]
 y = data[:, 1]
-
-
-
-res = bilby.core.result.read_in_result("path/to/result.json")
-res.injection_parameters = dict(param_1=1, param_2=2)
-res.save_to_file()

@@ -19,7 +19,7 @@ mode = int(sys.argv[1])
 # mode = 1
 # injection_id = str(mode + 6).zfill(2)
 injection_id = str(mode + 0).zfill(2)
-outdir = "periodogram_pop"
+outdir = "results/periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 

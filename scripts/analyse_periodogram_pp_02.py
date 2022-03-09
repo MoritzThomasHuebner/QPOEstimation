@@ -10,7 +10,7 @@ plt.style.use('paper.mplstyle')
 # matplotlib.use('Qt5Agg')
 
 injection_id = "02"
-outdir = "periodogram_pop"
+outdir = "results/periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 

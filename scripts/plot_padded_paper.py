@@ -10,7 +10,7 @@ from scipy.signal import periodogram
 # matplotlib.use('Qt5Agg')
 plt.style.use('paper.mplstyle')
 
-data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/00_data.txt')
+data = np.loadtxt(f'injections/injection_files_pop/general_qpo/whittle/00_data.txt')
 
 times = data[:, 0]
 y = data[:, 1]
@@ -30,7 +30,7 @@ ax2.set_xticklabels(labels=(4, 3, 2, 1, 0, 1, 2, 3, 4))
 
 fig.tight_layout()
 fig.show()
-fig.savefig("paper_figures/data_generation_example_white_noise_padding.pdf")
+fig.savefig("results/paper_figures/data_generation_example_white_noise_padding.pdf")
 
 
 # data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/00_data.txt')
@@ -70,6 +70,5 @@ plt.legend(loc='lower left', ncol=2)
 plt.xticks([0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3], [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3])
 plt.ylim(1e-3, 1e2)
 plt.tight_layout()
-plt.savefig('paper_figures/example_zero_padding_effects.pdf')
+plt.savefig('results/paper_figures/example_zero_padding_effects.pdf')
 plt.show()
-

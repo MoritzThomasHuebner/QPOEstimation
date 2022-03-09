@@ -8,7 +8,7 @@ matplotlib.use("Qt5Agg")
 
 recovery_mode = 'general_qpo'
 
-res = bilby.result.read_in_result(f'SolarFlare/120704187_two_step/results/kernel_{recovery_mode}_result.json')
+res = bilby.result.read_in_result(f'results/SolarFlare/120704187_two_step/results/kernel_{recovery_mode}_result.json')
 max_like_parameteres = res.posterior.iloc[-1]
 
 kernel = get_kernel(kernel_type=recovery_mode)
@@ -40,7 +40,7 @@ for i in range(100):
     plt.xlabel("Time [s]")
     plt.ylabel("Flux [AU]")
     plt.tight_layout()
-    plt.savefig(f"SolarFlare/120704187_two_step/fits/kernel_{recovery_mode}_generation_comparison.png")
+    plt.savefig(f"results/SolarFlare/120704187_two_step/fits/kernel_{recovery_mode}_generation_comparison.png")
     plt.show()
 
     from scipy.signal import periodogram
@@ -51,4 +51,3 @@ for i in range(100):
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power [AU]")
     plt.show()
-

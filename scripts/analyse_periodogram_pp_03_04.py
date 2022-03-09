@@ -13,7 +13,7 @@ plt.style.use('paper.mplstyle')
 modes = ['zeros', 'white_noise']
 mode = int(sys.argv[1])
 injection_id = str(mode + 3).zfill(2)
-outdir = "periodogram_pop"
+outdir = "results/periodogram_pop"
 Path(outdir).mkdir(parents=True, exist_ok=True)
 normalisation = False
 
