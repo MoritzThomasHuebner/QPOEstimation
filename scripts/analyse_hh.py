@@ -48,17 +48,17 @@ except Exception:
         print(flare)
         try:
             res_qpo_1_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/general_qpo/celerite/results/{run_mode}_1_skew_exponentials_result.json')
+                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_1_skew_exponentials_result.json')
             res_qpo_2_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/general_qpo/celerite/results/{run_mode}_2_skew_exponentials_result.json')
+                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_2_skew_exponentials_result.json')
             res_qpo_3_skew_exponential = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/general_qpo/celerite/results/{run_mode}_3_skew_exponentials_result.json')
+                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_3_skew_exponentials_result.json')
             res_qpo_1_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/general_qpo/celerite/results/{run_mode}_1_gaussians_result.json')
+                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_1_gaussians_result.json')
             res_qpo_2_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/general_qpo/celerite/results/{run_mode}_2_gaussians_result.json')
+                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_2_gaussians_result.json')
             res_qpo_3_gaussian = QPOEstimation.result.GPResult.from_json(
-                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/general_qpo/celerite/results/{run_mode}_3_gaussians_result.json')
+                filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/qpo_plus_red_noise/celerite/results/{run_mode}_3_gaussians_result.json')
             res_red_noise_1_skew_exponential = QPOEstimation.result.GPResult.from_json(
                 filename=f'results/hares_and_hounds_HH2/{flare}/{run_mode}/red_noise/celerite/results/{run_mode}_1_skew_exponentials_result.json')
             res_red_noise_2_skew_exponential = QPOEstimation.result.GPResult.from_json(

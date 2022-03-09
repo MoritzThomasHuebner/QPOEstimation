@@ -1,7 +1,7 @@
 import argparse
 
 likelihood_models = ["celerite", "celerite_windowed", "george", "whittle"]
-modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "general_qpo",
+modes = ["qpo", "white_noise", "red_noise", "pure_qpo", "qpo_plus_red_noise",
          "double_red_noise", "double_qpo", 'matern32', "broken_power_law", "matern52", "exp_sine2",
          "rational_quadratic",  "exp_squared", "exp_sine2_rn"]
 data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flare',
@@ -51,7 +51,7 @@ def parse_args():
     parser.add_argument("--injection_id", default=0, type=int)
     parser.add_argument("--injection_file_dir", default="injection_files", type=str)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
-    parser.add_argument("--injection_likelihood_model", default="general_qpo", choices=likelihood_models, type=str)
+    parser.add_argument("--injection_likelihood_model", default="qpo_plus_red_noise", choices=likelihood_models, type=str)
     parser.add_argument("--base_injection_outdir", default="injections/injection", type=str)
 
     parser.add_argument("--offset", default='False', type=str)

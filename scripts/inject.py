@@ -64,7 +64,7 @@ else:
     injection_id = 0
     minimum_id = -1
     maximum_id = -1
-    injection_mode = "general_qpo"
+    injection_mode = "qpo_plus_red_noise"
 
     polynomial_max = 1000
 
@@ -126,7 +126,7 @@ if injection_mode == 'red_noise':
                         max_log_c_qpo=max_log_c_qpo, band_minimum=band_minimum, band_maximum=band_maximum,
                         model_type=background_model, polynomial_max=polynomial_max, minimum_spacing=0,
                         n_components=n_components, **mean_prior_bounds_dict)
-elif injection_mode == 'general_qpo':
+elif injection_mode == 'qpo_plus_red_noise':
     priors = get_priors(times=times, y=np.zeros(len(times)), likelihood_model=likelihood_model, kernel_type=injection_mode,
                         min_log_a=min_log_a, max_log_a=max_log_a, min_log_c_red_noise=min_log_c_red_noise,
                         max_log_c_red_noise=max_log_c_red_noise, min_log_c_qpo=min_log_c_qpo,

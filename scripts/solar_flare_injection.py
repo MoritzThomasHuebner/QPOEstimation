@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("Qt5Agg")
 
-recovery_mode = 'general_qpo'
+recovery_mode = 'qpo_plus_red_noise'
 
 res = bilby.result.read_in_result(f'results/SolarFlare/120704187_two_step/results/kernel_{recovery_mode}_result.json')
 max_like_parameteres = res.posterior.iloc[-1]

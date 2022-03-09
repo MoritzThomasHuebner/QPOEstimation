@@ -109,7 +109,7 @@ class WhittleLikelihood(Likelihood):
     def noise_model(self, noise_model):
         if noise_model in self.VALID_NOISE_MODELS:
             self._noise_model = noise_model
-        elif noise_model == 'general_qpo':
+        elif noise_model == 'qpo_plus_red_noise':
             self._noise_model = 'red_noise'
         else:
             raise ValueError(f'Unknown noise model {noise_model}')
@@ -334,7 +334,7 @@ def get_kernel(kernel_type, jitter_term=False):
         res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3)
     elif kernel_type == "red_noise":
         res = ExponentialTerm(log_a=0.1, log_c=-0.01)
-    elif kernel_type == "general_qpo":
+    elif kernel_type == "qpo_plus_red_noise":
         res = PureQPOTerm(log_a=0.1, log_c=-0.01, log_f=3) + ExponentialTerm(log_a=0.1, log_c=-0.01)
     elif kernel_type == "double_red_noise":
         res = ExponentialTerm(log_a=0.1, log_c=-0.01) + ExponentialTerm(log_a=0.1, log_c=-0.01)

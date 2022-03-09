@@ -10,7 +10,7 @@ from scipy.signal import periodogram
 # matplotlib.use('Qt5Agg')
 plt.style.use('paper.mplstyle')
 
-data = np.loadtxt(f'injections/injection_files_pop/general_qpo/whittle/00_data.txt')
+data = np.loadtxt(f'injections/injection_files_pop/qpo_plus_red_noise/whittle/00_data.txt')
 
 times = data[:, 0]
 y = data[:, 1]
@@ -33,7 +33,7 @@ fig.show()
 fig.savefig("results/paper_figures/data_generation_example_white_noise_padding.pdf")
 
 
-# data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/00_data.txt')
+# data = np.loadtxt(f'injection_files_pop/qpo_plus_red_noise/whittle/00_data.txt')
 
 times = data[:, 0]
 y = data[:, 1]

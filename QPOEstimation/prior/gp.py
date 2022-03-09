@@ -53,7 +53,7 @@ def get_white_noise_prior(jitter_term=False, **kwargs):
         return priors
 
 
-def get_general_qpo_prior(
+def get_qpo_plus_red_noise_prior(
         band_maximum, band_minimum, max_log_a, max_log_c_red_noise, max_log_c_qpo, min_log_a, min_log_c_red_noise,
         min_log_c_qpo, **kwargs):
     min_log_f = np.log(band_minimum)
@@ -245,7 +245,7 @@ def decay_constrain_conversion_function_2(sample):
 
 kernel_prior_getters = dict(
     white_noise=get_white_noise_prior, qpo=get_qpo_prior, pure_qpo=get_pure_qpo_prior,  red_noise=get_red_noise_prior,
-    double_red_noise=get_double_red_noise_prior, general_qpo=get_general_qpo_prior, double_qpo=get_double_qpo_prior,
+    double_red_noise=get_double_red_noise_prior, qpo_plus_red_noise=get_qpo_plus_red_noise_prior, double_qpo=get_double_qpo_prior,
     sho=get_sho_prior, double_sho=get_double_sho_prior, matern32=get_matern_32_prior, matern52=get_matern_52_prior,
     exp_sine2=get_exp_sine2_prior, exp_sine2_rn=get_exp_sine2_rn_prior, rational_quadratic=get_rational_quadratic_prior,
     exp_squared=get_square_exponential_prior

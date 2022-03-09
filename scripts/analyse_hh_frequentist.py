@@ -27,8 +27,8 @@ mean_qpo_log_amplitudes = []
 
 for k, t in zip(flare_keys, flare_types):
     try:
-        res1 = QPOEstimation.result.GPResult.from_json(f"results/hares_and_hounds_HH2/{k}/from_maximum/general_qpo/celerite/results/from_maximum_3_gaussians_result.json")
-        res2 = QPOEstimation.result.GPResult.from_json(f"results/hares_and_hounds_HH2/{k}/from_maximum/general_qpo/celerite/results/from_maximum_3_skew_exponentials_result.json")
+        res1 = QPOEstimation.result.GPResult.from_json(f"results/hares_and_hounds_HH2/{k}/from_maximum/qpo_plus_red_noise/celerite/results/from_maximum_3_gaussians_result.json")
+        res2 = QPOEstimation.result.GPResult.from_json(f"results/hares_and_hounds_HH2/{k}/from_maximum/qpo_plus_red_noise/celerite/results/from_maximum_3_skew_exponentials_result.json")
         # res1.plot_qpo_log_amplitude()
         # res1.plot_amplitude_ratio()
         # res2.plot_qpo_log_amplitude()
@@ -65,8 +65,8 @@ for k, t in zip(flare_keys, flare_types):
         res_2_power_qpo = power_qpo(res_2_a_qpo, res_2_c_qpo, res_2_f_qpo)
         res_2_power_red_noise = power_red_noise(res_2_a_red_noise, res_2_c_red_noise)
 
-        # res3 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/celerite/results/from_maximum_1_skew_exponentials_result.json")
-        # res4 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/general_qpo/celerite/results/from_maximum_2_skew_exponentials_result.json")
+        # res3 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/qpo_plus_red_noise/celerite/results/from_maximum_1_skew_exponentials_result.json")
+        # res4 = QPOEstimation.result.GPResult.from_json(f"hares_and_hounds_HH2/{k}/from_maximum/qpo_plus_red_noise/celerite/results/from_maximum_2_skew_exponentials_result.json")
 
         means = [np.mean(np.log(res_1_power_qpo)), np.mean(np.log(res_2_power_qpo))]
                  # np.mean(res3.posterior['kernel:terms[0]:log_a']), np.mean(res4.posterior['kernel:terms[0]:log_a'])]

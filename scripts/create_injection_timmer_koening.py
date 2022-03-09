@@ -155,9 +155,9 @@ times_save = series_combined.time_array - duration_white_noise/2
 plt.plot(times_save, combined_signal)
 plt.show()
 
-np.savetxt(f'injection_files_pop/general_qpo/whittle/{injection_id}_data.txt', np.array([times_save, combined_signal]).T)
+np.savetxt(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt', np.array([times_save, combined_signal]).T)
 
 params = dict(amplitude=amplitude, alpha=alpha, beta=beta, central_frequency=central_frequency, width=width, sigma=white_noise)
 
-with open(f'injection_files_pop/general_qpo/whittle/{injection_id}_params.json', 'w') as f:
+with open(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_params.json', 'w') as f:
     json.dump(params, f)

@@ -14,7 +14,7 @@ plt.style.use('paper.mplstyle')
 # matplotlib.use('Qt5Agg')
 
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/01_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/01_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -38,7 +38,7 @@ plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/01_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/01_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -72,7 +72,7 @@ plt.clf()
 
 ### Flare injection 02
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/02_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/02_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -168,7 +168,7 @@ plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/03_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/03_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -188,7 +188,7 @@ plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/03_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/03_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -208,7 +208,7 @@ plt.savefig('results/paper_figures/03_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/04_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/04_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -226,7 +226,7 @@ plt.savefig('results/paper_figures/04_injection_time_series.pdf')
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/04_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/04_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -265,7 +265,7 @@ plt.show()
 plt.clf()
 
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/05_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/05_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 
@@ -323,6 +323,6 @@ plt.savefig('results/paper_figures/05_injection_periodogram.pdf')
 plt.show()
 plt.clf()
 
-data = np.loadtxt('injections/injection_files_pop/general_qpo/whittle/05_data.txt')
+data = np.loadtxt('injections/injection_files_pop/qpo_plus_red_noise/whittle/05_data.txt')
 times = data[:, 0]
 y = data[:, 1]

@@ -148,7 +148,7 @@ else:
 
     minimum_window_spacing = 0
 
-    injection_mode = "general_qpo"
+    injection_mode = "qpo_plus_red_noise"
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
     base_injection_outdir = "injections/injection"
@@ -247,7 +247,7 @@ if plot:
 
 if recovery_mode == "red_noise":
     priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
-elif recovery_mode == "general_qpo":
+elif recovery_mode == "qpo_plus_red_noise":
     priors = get_red_noise_prior(sigma_min=sigma_min, sigma_max=sigma_max)
     priors.update(get_qpo_prior(frequencies=freqs, min_log_f=np.log(band_minimum), max_log_f=np.log(band_maximum)))#, max_log_width=np.log(0.25), min_log_f=np.log(0.5)))
     priors._resolve_conditions()
@@ -277,7 +277,7 @@ idxs = QPOEstimation.utils.get_indices_by_time(minimum_time=frequency_mask_minim
                                                maximum_time=frequency_mask_maximum, times=freqs)
 frequency_mask[idxs] = True
 
-if recovery_mode == "general_qpo":
+if recovery_mode == "qpo_plus_red_noise":
     noise_model = "red_noise"
 else:
     noise_model = recovery_mode
@@ -314,7 +314,7 @@ if noise_model == 'broken_power_law':
     del max_l_bpl_params['log_delta']
     del max_l_bpl_params['log_beta']
 
-if recovery_mode == 'general_qpo':
+if recovery_mode == 'qpo_plus_red_noise':
     max_l_psd_no_qpo = QPOEstimation.model.psd.red_noise(freqs[1:], alpha=max_like_params['alpha'],
                                                          beta=np.exp(max_like_params['log_beta'])) + np.exp(
         max_like_params['log_sigma'])
@@ -347,7 +347,7 @@ plt.loglog(freqs[1:], threshold, label="3 sigma thres.")
 threshold = -max_l_psd_no_qpo * np.log((1 - 0.954) / len(freqs[1:]))  # Bonferroni correction
 plt.loglog(freqs[1:], threshold, label="2 sigma thres.")
 
-if recovery_mode == 'general_qpo':
+if recovery_mode == 'qpo_plus_red_noise':
     max_like_lorentz = QPOEstimation.model.psd.lorentzian(
         freqs[1:], amplitude=np.exp(max_like_params['log_amplitude']),
         central_frequency=np.exp(max_like_params['log_frequency']),
@@ -361,7 +361,7 @@ plt.savefig(f'{outdir}/{label}_max_like_fit.pdf')
 plt.show()
 
 
-if recovery_mode in ['general_qpo', 'pure_qpo']:
+if recovery_mode in ['qpo_plus_red_noise', 'pure_qpo']:
     frequency_samples = np.exp(result.posterior['log_frequency'])
     plt.hist(frequency_samples, bins="fd", density=True)
     plt.xlabel('frequency [Hz]')

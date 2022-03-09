@@ -20,7 +20,7 @@ matplotlib.use('Qt5Agg')
 
 
 
-outdir_qpo_periodogram = f'results/solar_flare_go1520130512/select_time/general_qpo/whittle/results/'
+outdir_qpo_periodogram = f'results/solar_flare_go1520130512/select_time/qpo_plus_red_noise/whittle/results/'
 outdir_red_noise_periodogram = f'results/solar_flare_go1520130512/select_time/red_noise/whittle/results/'
 outdir_bpl_periodogram = f'results/solar_flare_go1520130512/select_time/broken_power_law/whittle/results/'
 

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from QPOEstimation.utils import get_injection_outdir
 
-injection_mode = "general_qpo"
+injection_mode = "qpo_plus_red_noise"
 band_minimum = 5
 band_maximum = 64
 

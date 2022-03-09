@@ -175,10 +175,10 @@ else:
     max_log_c_qpo = None
     minimum_window_spacing = 0
 
-    injection_mode = "general_qpo"
+    injection_mode = "qpo_plus_red_noise"
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
-    recovery_mode = "general_qpo"
+    recovery_mode = "qpo_plus_red_noise"
     likelihood_model = "celerite_windowed"
     background_model = "skew_gaussian"
     n_components = 3

@@ -33,15 +33,15 @@ start_times = -end_times
 durations = 2 * end_times
 
 
-outdir_qpo_periodogram = f'injection/general_qpo_injection/general_qpo_recovery/whittle/results/'
-outdir_noise_periodogram = f'injection/general_qpo_injection/red_noise_recovery/whittle/results/'
+outdir_qpo_periodogram = f'injection/qpo_plus_red_noise_injection/qpo_plus_red_noise_recovery/whittle/results/'
+outdir_noise_periodogram = f'injection/qpo_plus_red_noise_injection/red_noise_recovery/whittle/results/'
 
 
-data = np.loadtxt(f'injection_files_pop/general_qpo/whittle/{injection_id}_data.txt')
+data = np.loadtxt(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_data.txt')
 times = data[:, 0]
 y = data[:, 1]
 sampling_frequency = int(round(1/(times[1] - times[0])))
-with open(f'injection_files_pop/general_qpo/whittle/{injection_id}_params.json', 'r') as f:
+with open(f'injection_files_pop/qpo_plus_red_noise/whittle/{injection_id}_params.json', 'r') as f:
     injection_parameters = json.load(f)
 
 frequencies = np.linspace(1/100000, 20, 1000)
@@ -110,10 +110,10 @@ xs = []
 min_end_time = 10
 for end_time in range(10, 210, 10):
     label = f'{injection_id}_{-float(end_time)}_{float(end_time)}_1_0s'
-    res_qpo = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/celerite/results/', label=label)
-    res_red_noise = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/celerite/results/', label=label)
-    res_qpo_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/general_qpo_recovery/celerite_windowed/results/', label=label)
-    res_red_noise_windowed = bilby.result.read_in_result(outdir='injection/general_qpo_injection/red_noise_recovery/celerite_windowed/results/', label=label)
+    res_qpo = bilby.result.read_in_result(outdir='injection/qpo_plus_red_noise_injection/qpo_plus_red_noise_recovery/celerite/results/', label=label)
+    res_red_noise = bilby.result.read_in_result(outdir='injection/qpo_plus_red_noise_injection/red_noise_recovery/celerite/results/', label=label)
+    res_qpo_windowed = bilby.result.read_in_result(outdir='injection/qpo_plus_red_noise_injection/qpo_plus_red_noise_recovery/celerite_windowed/results/', label=label)
+    res_red_noise_windowed = bilby.result.read_in_result(outdir='injection/qpo_plus_red_noise_injection/red_noise_recovery/celerite_windowed/results/', label=label)
     ln_zs_gp.append(res_qpo.log_evidence)
     ln_zs_gp_windowed.append(res_qpo_windowed.log_evidence)
     ln_bfs_gp.append(res_qpo.log_evidence - res_red_noise.log_evidence)
