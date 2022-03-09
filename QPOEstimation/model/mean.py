@@ -29,6 +29,7 @@ def fred(times, log_amplitude, log_psi, t_0, delta):
     with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
         return amplitude * np.exp(-psi * (frac + 1 / frac)) * np.exp(2 * psi)
 
+
 def fred_extended(times, log_amplitude, log_psi, t_0, delta, log_gamma, log_nu):
     amplitude = np.exp(log_amplitude)
     nu = np.exp(log_nu)
