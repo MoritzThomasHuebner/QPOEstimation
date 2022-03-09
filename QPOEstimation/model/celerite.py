@@ -55,10 +55,6 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
     return MultipleMeanModel(**defaults)
 
 
-def get_n_component_skew_exponential_model(n_exps=1):
-    return get_n_component_mean_model(model=skew_exponential, n_models=n_exps)
-
-
 def power_qpo(a, c, f):
     return a * np.sqrt((c**2 + 2 * np.pi**2 * f**2)/(c * (c**2 + 4 * np.pi**2 * f**2)))
 
