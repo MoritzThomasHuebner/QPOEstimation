@@ -96,10 +96,7 @@ class WhittleLikelihood(Likelihood):
 
     def log_likelihood(self):
         psd = self.psd + self.model
-        log_l = -np.sum(np.log(psd) + self.periodogram / psd)
-        # if np.isnan(log_l):
-        #     print(log_l)
-        return log_l
+        return -np.sum(np.log(psd) + self.periodogram / psd)
 
     @property
     def lorentzian(self):
@@ -129,34 +126,6 @@ class WhittleLikelihood(Likelihood):
             return broken_power_law_noise(frequencies=self.frequencies, alpha_1=self.alpha_1,
                                           alpha_2=self.alpha_2, beta=self.beta, delta=self.delta, rho=self.rho) \
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
-
-
-class GrothLikelihood(WhittleLikelihood):
-
-    def __init__(self, frequencies, periodogram, noise_model='red_noise'):
-        super(GrothLikelihood, self).__init__(frequencies=frequencies, periodogram=periodogram,
-                                              frequency_mask=[True]*len(frequencies), noise_model=noise_model)
-
-    def log_likelihood(self):
-        log_l = -np.sum(self.psd + self.model + self.periodogram)
-        for i, freq in enumerate(self.frequencies):
-            groth_sum = 0
-            for m in range(20):
-                groth_sum_factor = (self.psd[i] + self.model[i])**m * self.periodogram[i]**m
-                groth_term = groth_sum_factor / (gamma(m + 1)) ** 2
-                groth_sum += groth_term
-                if groth_term < 1e-20:
-                    break
-            log_l += np.log(groth_sum)
-        return log_l
-
-    @property
-    def psd(self):
-        if self.noise_model == 'red_noise':
-            return red_noise(frequencies=self.frequencies, alpha=self.alpha, beta=self.beta)
-        elif self.noise_model == 'broken_power_law':
-            return broken_power_law_noise(frequencies=self.frequencies, alpha_1=self.alpha_1,
-                                          alpha_2=self.alpha_2, beta=self.beta, delta=self.delta, rho=self.rho)
 
 
 class CeleriteLikelihood(bilby.likelihood.Likelihood):
@@ -276,7 +245,6 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
     @property
     def window_maximum(self):
-        # return self.parameters['window_minimum'] + self.parameters['window_size']
         return self.parameters['window_maximum']
 
     def noise_log_likelihood(self):
@@ -378,6 +346,8 @@ class QPOTerm(terms.Term):
             np.exp(log_c), 2 * np.pi * np.exp(log_f),
         )
 
+    def compute_gradient(self, *args, **kwargs):
+        pass
 
 class ExponentialTerm(terms.Term):
     parameter_names = ("log_a", "log_c")
@@ -397,6 +367,9 @@ class ExponentialTerm(terms.Term):
             np.exp(log_c), 50,
         )
 
+    def compute_gradient(self, *args, **kwargs):
+        pass
+
 
 class PureQPOTerm(terms.Term):
     parameter_names = ("log_a", "log_c", "log_f")
@@ -411,6 +384,9 @@ class PureQPOTerm(terms.Term):
         c = np.exp(log_c)
         f = np.exp(log_f)
         return a, 0.0, c, 2 * np.pi * f,
+
+    def compute_gradient(self, *args, **kwargs):
+        pass
 
 
 def get_kernel(kernel_type, jitter_term=False):
