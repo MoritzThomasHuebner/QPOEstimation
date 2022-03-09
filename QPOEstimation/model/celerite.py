@@ -3,7 +3,7 @@ import numpy as np
 import bilby
 
 
-def _get_model_class(likelihood_model="gaussian_process"):
+def _get_model_class(likelihood_model="celerite"):
     if likelihood_model == "george":
         from george.modeling import Model as GeorgeModel
         return GeorgeModel
@@ -23,7 +23,7 @@ def _get_names(base_names, n_models, offset):
     return names
 
 
-def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, likelihood_model="gaussian_process"):
+def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, likelihood_model="celerite"):
     base_names = bilby.core.utils.infer_parameters_from_function(func=model)
     names = _get_names(base_names, n_models, offset)
     defaults = defaults or {name: 0.1 for name in names}

@@ -337,7 +337,7 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
     def plot_qpo_log_amplitude(self, paper_style=True):
-        if self.kernel_type == "general_qpo":
+        if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
                 plt.style.use(style_file)
@@ -360,7 +360,7 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
     def plot_amplitude_ratio(self, paper_style=True):
-        if self.kernel_type == "general_qpo":
+        if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
                 plt.style.use(style_file)
@@ -383,7 +383,7 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
     def plot_log_red_noise_power(self, paper_style=True):
-        if self.kernel_type == "general_qpo":
+        if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
                 plt.style.use(style_file)
@@ -406,7 +406,7 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
     def plot_log_qpo_power(self, paper_style=True):
-        if self.kernel_type == "general_qpo":
+        if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
                 plt.style.use(style_file)

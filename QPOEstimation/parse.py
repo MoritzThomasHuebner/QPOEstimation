@@ -102,4 +102,4 @@ def parse_args():
     return parser
 
 
-OSCILLATORY_MODELS = ["qpo", "pure_qpo", "general_qpo", "fourier_series"]
+OSCILLATORY_MODELS = ["qpo", "pure_qpo", "qpo_plus_red_noise", "fourier_series"]
