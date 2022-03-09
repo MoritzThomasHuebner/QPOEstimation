@@ -103,7 +103,7 @@ def get_lorentzian_prior(n_components=1, minimum_spacing=0, **kwargs):
     return get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
 
 
-def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
+def get_skew_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for p in list(priors.keys()):
         if 'sigma' in p:
@@ -185,7 +185,7 @@ def get_fred_norris_extended_priors(n_components=1, minimum_spacing=0, **kwargs)
 
 _N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
                            log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,
-                           fred=get_fred_priors, skew_gaussian=get_skew_gaussian_priors,
+                           skew_exponential=get_skew_exponential_priors, skew_gaussian=get_skew_gaussian_priors,
                            fred_norris=get_fred_norris_priors, fred_norris_extended=get_fred_norris_extended_priors,
                            fred_norris_lensed=get_fred_norris_lensed_priors, fred_norris_wave_packet=get_fred_norris_wave_packet_priors,
                            fred_norris_wave_packet_lensed=get_fred_norris_wave_packet_lensed_priors)

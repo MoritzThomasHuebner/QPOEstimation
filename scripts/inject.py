@@ -88,7 +88,7 @@ else:
     minimum_window_spacing = 0
 
     likelihood_model = "gaussian_process"
-    background_model = "fred"
+    background_model = "skew_exponential"
     n_components = 1
 
     segment_length = 3

@@ -128,7 +128,7 @@ except ValueError:
     combined_signal[signal_indices] += td_data_signal_windowed
 
 if injection_id == "02":
-    combined_signal += QPOEstimation.model.mean.fred(
+    combined_signal += QPOEstimation.model.mean.skew_exponential(
         times=series_combined.time_array, log_amplitude=np.log(profile_amplitude), t_0=profile_t_0,
         log_sigma_fall=np.log(sigma_fall), log_sigma_rise=np.log(sigma_rise))
 

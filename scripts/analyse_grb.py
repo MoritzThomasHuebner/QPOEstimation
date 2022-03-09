@@ -12,13 +12,13 @@ evidence_err_dict = dict()
 
 res_dict = {}
 
-linestyle_dict = dict(fred='solid', skew_gaussian='dotted', fred_norris='dashed', fred_norris_extended='dashdot')
-label_dict_mean = dict(fred='skew exp.', fred_norris='FRED', fred_norris_extended='FRED-x', skew_gaussian='skew gaus.')
+linestyle_dict = dict(skew_exponential='solid', skew_gaussian='dotted', fred_norris='dashed', fred_norris_extended='dashdot')
+label_dict_mean = dict(skew_exponential='skew exp.', fred_norris='FRED', fred_norris_extended='FRED-x', skew_gaussian='skew gaus.')
 label_dict_kernel = dict(general_qpo='qpo+rn', red_noise='rn')
 
 plt.figure(figsize=(9.2, 7.2))
 # plt.figure(dpi=150)
-for mean_model in ['fred', 'fred_norris', 'fred_norris_extended', 'skew_gaussian']:
+for mean_model in ['skew_exponential', 'fred_norris', 'fred_norris_extended', 'skew_gaussian']:
     print(mean_model)
     for recovery_mode in ['general_qpo', 'red_noise']:
         evidences = []

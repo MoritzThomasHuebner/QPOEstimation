@@ -85,7 +85,7 @@ profile_t_0 = 70
 sigma_fall = 20
 sigma_rise = 10
 
-trend = QPOEstimation.model.mean.fred(
+trend = QPOEstimation.model.mean.skew_exponential(
         times=inset_times + 100, log_amplitude=np.log(profile_amplitude), t_0=profile_t_0,
         log_sigma_fall=np.log(sigma_fall), log_sigma_rise=np.log(sigma_rise))
 

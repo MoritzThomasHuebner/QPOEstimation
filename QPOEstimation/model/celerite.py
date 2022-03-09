@@ -5,7 +5,7 @@ try:
     from george.modeling import Model as GeorgeModel
 except ImportError:
     pass
-from QPOEstimation.model.mean import fred, polynomial, gaussian, log_normal, \
+from QPOEstimation.model.mean import skew_exponential, polynomial, gaussian, log_normal, \
     lorentzian
 import bilby
 from bilby.core.likelihood import function_to_celerite_mean_model
@@ -15,7 +15,7 @@ PolynomialMeanModel = function_to_celerite_mean_model(polynomial)
 GaussianMeanModel = function_to_celerite_mean_model(gaussian)
 LogNormalMeanModel = function_to_celerite_mean_model(log_normal)
 LorentzianMeanModel = function_to_celerite_mean_model(lorentzian)
-FREDMeanModel = function_to_celerite_mean_model(fred)
+SkewExponentialMeanModel = function_to_celerite_mean_model(skew_exponential)
 
 
 def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, likelihood_model='gaussian_process'):
@@ -55,8 +55,8 @@ def get_n_component_mean_model(model, n_models=1, defaults=None, offset=False, l
     return MultipleMeanModel(**defaults)
 
 
-def get_n_component_fred_model(n_freds=1):
-    return get_n_component_mean_model(model=fred, n_models=n_freds)
+def get_n_component_skew_exponential_model(n_exps=1):
+    return get_n_component_mean_model(model=skew_exponential, n_models=n_exps)
 
 
 def power_qpo(a, c, f):

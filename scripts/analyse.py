@@ -199,7 +199,6 @@ else:
     resume = False
     plot = True
 
-    # suffix = f"_{n_components}_fred"
 if variance_stabilisation:
     suffix = f"_variance_stabilised"
 else:
