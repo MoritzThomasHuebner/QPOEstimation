@@ -152,7 +152,7 @@ else:
     candidate_id = 5
 
     injection_id = 1
-    base_injection_outdir = 'injection'
+    base_injection_outdir = 'injections/injection'
 
     offset = False
     polynomial_max = 2

@@ -31,7 +31,7 @@ else:
 
     injection_mode = "general_qpo"
     likelihood_model = "gaussian_process"
-    base_injection_outdir = 'injection_pp_non_eq_dis'
+    base_injection_outdir = 'injections/injection_pp_non_eq_dis'
 
 samples = []
 reslist = []

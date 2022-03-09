@@ -10,19 +10,19 @@ from QPOEstimation.utils import get_injection_outdir, get_injection_label
 samples = []
 outdir_qpo_qpo = get_injection_outdir(
     injection_mode='general_qpo', recovery_mode='general_qpo',
-    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+    likelihood_model='gaussian_process', base_injection_outdir='injections/injection_mss')
 outdir_qpo_qpo = f"{outdir_qpo_qpo}/results"
 outdir_qpo_red_noise = get_injection_outdir(
     injection_mode='general_qpo', recovery_mode='red_noise',
-    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+    likelihood_model='gaussian_process', base_injection_outdir='injections/injection_mss')
 outdir_qpo_red_noise = f"{outdir_qpo_red_noise}/results"
 outdir_red_noise_red_noise = get_injection_outdir(
     injection_mode='red_noise', recovery_mode='red_noise',
-    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+    likelihood_model='gaussian_process', base_injection_outdir='injections/injection_mss')
 outdir_red_noise_red_noise = f"{outdir_red_noise_red_noise}/results"
 outdir_red_noise_qpo = get_injection_outdir(
     injection_mode='red_noise', recovery_mode='general_qpo',
-    likelihood_model='gaussian_process', base_injection_outdir='injection_mss')
+    likelihood_model='gaussian_process', base_injection_outdir='injections/injection_mss')
 outdir_red_noise_qpo = f"{outdir_red_noise_qpo}/results"
 
 ln_bfs_qpo_inj = []

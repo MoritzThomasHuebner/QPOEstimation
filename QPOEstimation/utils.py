@@ -22,7 +22,7 @@ class MetaDataAccessor(object):
         getattr(instance, self.container_instance_name)[self.property_name] = value
 
 
-def get_injection_outdir(injection_mode, recovery_mode, likelihood_model, base_injection_outdir='injection'):
+def get_injection_outdir(injection_mode, recovery_mode, likelihood_model, base_injection_outdir='injections/injection'):
     return f"{base_injection_outdir}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
 
 

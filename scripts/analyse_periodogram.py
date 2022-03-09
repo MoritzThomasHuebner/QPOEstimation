@@ -151,7 +151,7 @@ else:
     injection_mode = "general_qpo"
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
-    base_injection_outdir = "injection"
+    base_injection_outdir = "injections/injection"
 
     recovery_mode = "red_noise"
     likelihood_model = "whittle"

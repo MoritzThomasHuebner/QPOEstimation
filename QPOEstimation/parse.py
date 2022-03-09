@@ -52,7 +52,7 @@ def parse_args():
     parser.add_argument("--injection_file_dir", default="injection_files", type=str)
     parser.add_argument("--injection_mode", default="qpo", choices=modes, type=str)
     parser.add_argument("--injection_likelihood_model", default="general_qpo", choices=likelihood_models, type=str)
-    parser.add_argument("--base_injection_outdir", default="injection", type=str)
+    parser.add_argument("--base_injection_outdir", default="injections/injection", type=str)
 
     parser.add_argument("--offset", default='False', type=str)
     parser.add_argument("--polynomial_max", default=1000, type=float)
