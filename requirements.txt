@@ -1,9 +1,9 @@
-matplotlib~=3.1.3
-bilby~=1.0.3
-celerite~=0.4.0
-numpy~=1.18.1
-scipy~=1.5.2
-astropy~=3.2.3
-setuptools~=45.2.0
-stingray~=0.1
+matplotlib
+bilby
+celerite
+numpy
+scipy
+astropy
+setuptools
+stingray
 george

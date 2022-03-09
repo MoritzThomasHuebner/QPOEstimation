@@ -3,7 +3,10 @@ import numpy as np
 from bilby.core.likelihood import Likelihood
 import celerite
 from celerite import terms
-import george
+try:
+    import george
+except ImportError:
+    pass
 from scipy.special import gamma
 
 

@@ -1,8 +1,10 @@
 import numpy as np
 
 from celerite.modeling import Model as CeleriteModel
-from george.modeling import Model as GeorgeModel
-
+try:
+    from george.modeling import Model as GeorgeModel
+except ImportError:
+    pass
 from QPOEstimation.model.mean import fred, polynomial, gaussian, log_normal, \
     lorentzian
 import bilby
