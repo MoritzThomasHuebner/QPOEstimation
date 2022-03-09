@@ -124,7 +124,7 @@ def get_skew_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-def get_fred_norris_priors(n_components=1, minimum_spacing=0, **kwargs):
+def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
         del priors[f'mean:log_sigma_{ii}']
@@ -135,46 +135,8 @@ def get_fred_norris_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-def get_fred_norris_lensed_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_fred_norris_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
-    priors["mean:log_magnification_0"] = bilby.core.prior.Uniform(minimum=np.log(1e-3), maximum=np.log(1e3), name="log magni")
-    priors["mean:time_difference_0"] = bilby.core.prior.Uniform(minimum=0, maximum=kwargs['times'][-1], name="log magni")
-    return priors
-
-def get_fred_norris_wave_packet_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_fred_norris_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
-    for ii in range(n_components):
-        if kwargs['t_0_min'] == kwargs['t_0_max']:
-            priors[f'mean:delta_time_res_{ii}'] = DeltaFunction(kwargs['t_0_min'], name=f"mean:delta_time_res_{ii}")
-        elif n_components == 1:
-            priors[f'mean:delta_time_res_{ii}'] = Uniform(kwargs['t_0_min'], kwargs['t_0_max'], name=f"mean:delta_time_res_{ii}")
-        elif ii == 0:
-            priors[f"mean:delta_time_res_{ii}"] = Beta(minimum=kwargs['t_0_min'], maximum=kwargs['t_0_max'], alpha=1,
-                                            beta=n_components, name=f"mean:delta_time_res_{ii}")
-        else:
-            priors[f"mean:delta_time_res_{ii}"] = QPOEstimation.prior.minimum.MinimumPrior(
-                order=n_components - ii, minimum_spacing=minimum_spacing, minimum=kwargs['t_0_min'],
-                maximum=kwargs['t_0_max'], name=f"mean:delta_time_res_{ii}")
-
-        priors[f'mean:log_amplitude_res_{ii}'] = bilby.core.prior.Uniform(
-            minimum=np.log(kwargs['amplitude_min']), maximum=np.log(kwargs['amplitude_max']), name=f'ln A_res {ii}')
-        priors[f'mean:log_tau_res_{ii}'] = bilby.core.prior.Uniform(
-            minimum=np.log(kwargs['sigma_min']), maximum=np.log(kwargs['sigma_max']), name=f'ln tau_res_{ii}')
-
-        priors[f'mean:omega_{ii}'] = bilby.core.prior.LogUniform(minimum=kwargs["times"][1]-kwargs["times"][0], maximum=kwargs["times"][-1]-kwargs["times"][0], name=f"omega_{ii}")
-        priors[f'mean:phase_{ii}'] = bilby.core.prior.Uniform(minimum=0, maximum=2*np.pi, name=f"phase {ii}")
-    return priors
-
-
-def get_fred_norris_wave_packet_lensed_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_fred_norris_wave_packet_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
-    priors["mean:log_magnification_0"] = bilby.core.prior.Uniform(minimum=np.log(1e-3), maximum=np.log(1e3), name="log magni")
-    priors["mean:time_difference_0"] = bilby.core.prior.Uniform(minimum=0, maximum=kwargs['times'][-1], name="log magni")
-    return priors
-
-
-def get_fred_norris_extended_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_fred_norris_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+def get_fred_extended_priors(n_components=1, minimum_spacing=0, **kwargs):
+    priors = get_fred_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
         priors[f'mean:log_gamma_{ii}'] = bilby.core.prior.Uniform(minimum=np.log(1e-3), maximum=np.log(1e3),
                                                                   name=f'log_gamma_{ii}')
@@ -186,6 +148,4 @@ def get_fred_norris_extended_priors(n_components=1, minimum_spacing=0, **kwargs)
 _N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
                            log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,
                            skew_exponential=get_skew_exponential_priors, skew_gaussian=get_skew_gaussian_priors,
-                           fred_norris=get_fred_norris_priors, fred_norris_extended=get_fred_norris_extended_priors,
-                           fred_norris_lensed=get_fred_norris_lensed_priors, fred_norris_wave_packet=get_fred_norris_wave_packet_priors,
-                           fred_norris_wave_packet_lensed=get_fred_norris_wave_packet_lensed_priors)
+                           fred=get_fred_priors, fred_extended=get_fred_extended_priors)

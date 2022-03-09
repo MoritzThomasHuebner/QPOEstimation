@@ -21,7 +21,7 @@ def skew_exponential(times, log_amplitude, t_0, log_sigma_rise, log_sigma_fall):
     return envelope
 
 
-def fred_norris(times, log_amplitude, log_psi, t_0, delta):
+def fred(times, log_amplitude, log_psi, t_0, delta):
     amplitude = np.exp(log_amplitude)
     psi = np.exp(log_psi)
 
@@ -29,7 +29,7 @@ def fred_norris(times, log_amplitude, log_psi, t_0, delta):
     with np.errstate(divide='ignore', invalid='ignore', over='ignore'):
         return amplitude * np.exp(-psi * (frac + 1 / frac)) * np.exp(2 * psi)
 
-def fred_norris_extended(times, log_amplitude, log_psi, t_0, delta, log_gamma, log_nu):
+def fred_extended(times, log_amplitude, log_psi, t_0, delta, log_gamma, log_nu):
     amplitude = np.exp(log_amplitude)
     nu = np.exp(log_nu)
     gamma = np.exp(log_gamma)

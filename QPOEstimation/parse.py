@@ -8,8 +8,7 @@ data_sources = ['injection', 'giant_flare', 'solar_flare', 'grb', 'magnetar_flar
                 'magnetar_flare_binned', 'hares_and_hounds']
 run_modes = ['select_time', 'sliding_window', 'candidates', 'entire_segment', 'from_maximum']
 background_models = ["polynomial", "exponential", "skew_exponential", "gaussian", "log_normal", "lorentzian", "mean",
-                     "skew_gaussian", "fred_norris", "fred_norris_extended", "0",
-                     "fred_norris_lensed", "fred_norris_wave_packet", "fred_norris_wave_packet_lensed"]
+                     "skew_gaussian", "fred", "fred_extended", "0"]
 data_modes = ['normal', 'smoothed', 'smoothed_residual']
 grb_energy_bands = ['15-25', '25-50', '50-100', '100-350', '15-350', 'all']
 

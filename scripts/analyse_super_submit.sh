@@ -19,8 +19,8 @@
 #  for n_components in {1..4}
 #  do
 #    sbatch analyse_submit.sh gaussian_process ${model} skew_exponential ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris_extended ${n_components}
+#    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
+#    sbatch analyse_submit.sh gaussian_process ${model} fred_extended ${n_components}
 #    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
 #  done
 #done
@@ -31,15 +31,15 @@
 #  for n_components in {1..4}
 #  do
 #    sbatch analyse_submit.sh gaussian_process ${model} skew_exponential ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris ${n_components}
-#    sbatch analyse_submit.sh gaussian_process ${model} fred_norris_extended ${n_components}
+#    sbatch analyse_submit.sh gaussian_process ${model} fred ${n_components}
+#    sbatch analyse_submit.sh gaussian_process ${model} fred_extended ${n_components}
 #    sbatch analyse_submit.sh gaussian_process ${model} skew_gaussian ${n_components}
 #  done
 #done
 
 #for n_components in {3..10}
 #do
-#  sbatch analyse_submit.sh white_noise fred_norris ${n_components}
+#  sbatch analyse_submit.sh white_noise fred ${n_components}
 #done
 
 
