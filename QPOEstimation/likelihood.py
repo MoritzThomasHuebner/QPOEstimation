@@ -12,8 +12,7 @@ from scipy.special import gamma
 
 from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
-from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model, \
-    get_n_component_piecewise_cubic, get_n_component_piecewise_linear
+from QPOEstimation.model.celerite import PolynomialMeanModel, get_n_component_mean_model
 
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
@@ -369,10 +368,6 @@ def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_
         return np.mean(y)
     elif isinstance(model_type, (int, float)) or model_type.isnumeric():
         return float(model_type)
-    elif model_type == 'piecewise_linear':
-        return get_n_component_piecewise_linear(n_components=n_components, likelihood_model=likelihood_model)
-    elif model_type == 'piecewise_cubic':
-        return get_n_component_piecewise_cubic(n_components=n_components, likelihood_model=likelihood_model)
     elif model_type in mean_model_dict:
         return get_n_component_mean_model(mean_model_dict[model_type], n_models=n_components, offset=offset,
                                           likelihood_model=likelihood_model)

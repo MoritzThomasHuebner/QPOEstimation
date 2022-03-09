@@ -105,7 +105,7 @@ if len(sys.argv) > 1:
 else:
     matplotlib.use('Qt5Agg')
 
-    data_source = "grb"  # "magnetar_flare_binned"
+    data_source = "giant_flare"  # "magnetar_flare_binned"
     run_mode = 'select_time'
     sampling_frequency = 64
     data_mode = 'normal'
@@ -131,14 +131,14 @@ else:
     magnetar_unbarycentred_time = False
     rebin_factor = 8
 
-    # start_time = 102.060 + 20.0
-    # end_time = 103.060 + 20.0
+    start_time = 101.060 + 20.0
+    end_time = 103.060 + 20.0
     # start_time = 138.915 - 0.3 + 20.378
     # end_time = 139.915 + 0.5 + 20.378
     # start_time = 132.3 - 0.5 + 20.0
     # end_time = 132.3 + 0.5 + 20.0
-    start_time = -4.0
-    end_time = 103.0
+    # start_time = -4.0
+    # end_time = 103.0
     # start_time = 88.775 + 20.378
     # end_time = 90.775 + 20.378
     # start_time = -20.0
@@ -179,8 +179,8 @@ else:
     injection_file_dir = "injection_files_pop"
     injection_likelihood_model = "whittle"
     recovery_mode = "general_qpo"
-    likelihood_model = "gaussian_process"
-    background_model = "fred"
+    likelihood_model = "gaussian_process_windowed"
+    background_model = "skew_gaussian"
     n_components = 1
     jitter_term = False
     normalisation = False
@@ -286,7 +286,7 @@ if plot:
     plt.legend()
     plt.show()
 
-mean_model, fit_mean = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset,
+mean_model = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset,
                                       likelihood_model=likelihood_model)
 
 priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_model, kernel_type=recovery_mode,
@@ -300,8 +300,8 @@ priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_mod
 # suffix += "restricted_freq"
 
 kernel = get_kernel(kernel_type=recovery_mode, jitter_term=jitter_term)
-likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, fit_mean=fit_mean, times=times,
-                                     y=y, yerr=yerr, likelihood_model=likelihood_model)
+likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, times=times, y=y, yerr=yerr,
+                                     likelihood_model=likelihood_model)
 
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components,
