@@ -79,8 +79,8 @@ class GPResult(bilby.result.Result):
         return get_kernel(kernel_type=self.kernel_type)
 
     def get_mean_model(self):
-        mean_model, _ = get_mean_model(model_type=self.mean_model, n_components=self.n_components, y=self.y,
-                                       offset=self.offset)
+        mean_model = get_mean_model(
+            model_type=self.mean_model, n_components=self.n_components, y=self.y, offset=self.offset)
         return mean_model
 
     @property

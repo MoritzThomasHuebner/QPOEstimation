@@ -50,6 +50,7 @@ def broken_power_law_conversion_function(params, **kwargs):
     new_params['alpha_diffs'] = new_params['alpha_1'] - new_params['alpha_2']
     return new_params
 
+
 def get_broken_power_law_prior(frequencies=None):
     prior = bilby.core.prior.PriorDict()
     prior['alpha_1'] = bilby.core.prior.Uniform(0, 10, name='alpha_1')

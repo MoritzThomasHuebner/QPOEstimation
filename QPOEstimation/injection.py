@@ -19,13 +19,13 @@ class InjectionCreator(object):
         self.sampling_frequency = sampling_frequency
         self.segment_length = segment_length
         self.outdir = outdir
-        self.injection_id = str(injection_id).zfill(2)
+        self.injection_id = injection_id
         self.poisson_data = poisson_data
         self.likelihood_model = likelihood_model
         self.kernel = get_kernel(self.injection_mode)
 
         self.times = times
-        self.mean_model, _ = get_mean_model(model_type=mean_model, n_components=n_components, y=0)
+        self.mean_model = get_mean_model(model_type=mean_model, n_components=n_components, y=0)
         for key, value in params.items():
             if key.startswith("mean"):
                 self.mean_model.__setattr__(key.replace('mean:', ''), value)
@@ -90,6 +90,15 @@ class InjectionCreator(object):
     @property
     def windowed_yerr(self):
         return self.yerr[self.windowed_indices]
+
+    @property
+    def injection_id(self):
+        return self._injection_id
+
+    @injection_id.setter
+    def injection_id(self, injection_id):
+        self._injection_id = str(injection_id).zfill(2)
+
 
     @property
     def params(self):
