@@ -1,7 +1,7 @@
 import numpy as np
 
-class MetaDataAccessor(object):
 
+class MetaDataAccessor(object):
     """
     Generic descriptor class that allows handy access of properties without long
     boilerplate code. Allows easy access to meta_data dict entries
