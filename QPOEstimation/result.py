@@ -310,7 +310,6 @@ class GPResult(bilby.result.Result):
                 plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.png")
                 plt.clf()
 
-
     def plot_period_posterior(self, paper_style=True):
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
@@ -337,7 +336,6 @@ class GPResult(bilby.result.Result):
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_period_posterior.pdf")
             plt.clf()
-
 
     def plot_qpo_log_amplitude(self, paper_style=True):
         if self.kernel_type == "general_qpo":
@@ -455,7 +453,6 @@ class GPResult(bilby.result.Result):
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_duration_posterior.png")
             plt.clf()
-
 
     def plot_all(self, paper_style=True):
         self.plot_corner()
