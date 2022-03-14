@@ -6,7 +6,7 @@ import celerite
 
 import QPOEstimation
 
-# plt.style.use("paper.mplstyle")
+plt.style.use("paper.mplstyle")
 
 xs = np.linspace(-1, 1, 5000)
 yerr = np.zeros(len(xs))
@@ -23,7 +23,8 @@ for ys in yss:
     plt.plot(xs, ys)
 plt.xlabel("Time [s]")
 plt.ylabel("y")
-plt.savefig("realisations_red_noise.png")
+plt.tight_layout()
+plt.savefig("results/realisations_red_noise.pdf")
 plt.show()
 
 print(kernel_qpo.parameter_names)
@@ -37,7 +38,8 @@ for ys in yss:
     plt.plot(xs, ys)
 plt.xlabel("Time [s]")
 plt.ylabel("y")
-plt.savefig("realisations_qpo.png")
+plt.tight_layout()
+plt.savefig("results/realisations_qpo.pdf")
 plt.show()
 
 
@@ -53,5 +55,6 @@ for ys in yss:
     plt.plot(xs, ys)
 plt.xlabel("Time [s]")
 plt.ylabel("y")
-plt.savefig("realisations_qpo_plus_red_noise.png")
+plt.tight_layout()
+plt.savefig("results/realisations_qpo_plus_red_noise.pdf")
 plt.show()

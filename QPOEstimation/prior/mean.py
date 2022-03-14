@@ -1,3 +1,5 @@
+import math
+
 import bilby
 import numpy as np
 from bilby.core.prior import ConditionalPriorDict, Uniform, Beta, DeltaFunction
@@ -29,10 +31,12 @@ def get_mean_prior(model_type, **kwargs):
         offset_max = maximum
 
     if kwargs.get("offset", False):
-        priors["mean:offset"] = bilby.prior.Uniform(minimum=offset_min, maximum=offset_max,
-                                                    name="log offset")
+        if math.isclose(offset_min, offset_max):
+            priors["mean:offset"] = bilby.prior.DeltaFunction(peak=offset_max, name="log offset")
+        else:
+            priors["mean:offset"] = bilby.prior.Uniform(minimum=offset_min, maximum=offset_max,
+                                                        name="offset")
     return priors
-
 
 def get_polynomial_prior(n_components=4, **kwargs):
     priors = bilby.core.prior.PriorDict()
@@ -57,16 +61,21 @@ def get_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
             priors[f"mean:tau_{ii}"] = QPOEstimation.prior.minimum.MinimumPrior(
                 order=n_components - ii, minimum_spacing=minimum_spacing, minimum=kwargs["tau_min"],
                 maximum=kwargs["tau_max"], name=f"mean:tau_{ii}")
-        priors[f"mean:log_amplitude_{ii}"] = bilby.core.prior.Uniform(
-            minimum=np.log(kwargs["amplitude_min"]),
-            maximum=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
+
+        if math.isclose(np.log(kwargs["amplitude_min"]), np.log(kwargs["amplitude_max"])):
+            priors[f"mean:log_amplitude_{ii}"] = \
+                bilby.prior.DeltaFunction(peak=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
+        else:
+            priors[f"mean:log_amplitude_{ii}"] = bilby.core.prior.Uniform(
+                minimum=np.log(kwargs["amplitude_min"]),
+                maximum=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
     return priors
 
 
 def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = ConditionalPriorDict()
     for ii in range(n_components):
-        if kwargs["t_0_min"] == kwargs["t_0_max"]:
+        if math.isclose(kwargs["t_0_min"], kwargs["t_0_max"]):
             priors[f"mean:t_0_{ii}"] = DeltaFunction(kwargs["t_0_min"], name=f"mean:t_0_{ii}")
         elif n_components == 1:
             priors[f"mean:t_0_{ii}"] = Uniform(kwargs["t_0_min"], kwargs["t_0_max"], name=f"mean:t_0_{ii}")
@@ -77,21 +86,40 @@ def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
             priors[f"mean:t_0_{ii}"] = QPOEstimation.prior.minimum.MinimumPrior(
                 order=n_components - ii, minimum_spacing=minimum_spacing, minimum=kwargs["t_0_min"],
                 maximum=kwargs["t_0_max"], name=f"mean:t_0_{ii}")
-        priors[f"mean:log_amplitude_{ii}"] = bilby.core.prior.Uniform(
-            minimum=np.log(kwargs["amplitude_min"]), maximum=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
-        priors[f"mean:log_sigma_{ii}"] = bilby.core.prior.Uniform(
-            minimum=np.log(kwargs["sigma_min"]), maximum=np.log(kwargs["sigma_max"]), name=f"ln sigma_{ii}")
+
+        if math.isclose(np.log(kwargs["amplitude_min"]), np.log(kwargs["amplitude_max"])):
+            priors[f"mean:log_amplitude_{ii}"] = \
+                bilby.prior.DeltaFunction(peak=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
+        else:
+            priors[f"mean:log_amplitude_{ii}"] = bilby.core.prior.Uniform(
+                minimum=np.log(kwargs["amplitude_min"]),
+                maximum=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
+
+        if math.isclose(np.log(kwargs["sigma_min"]), np.log(kwargs["sigma_max"])):
+            priors[f"mean:log_sigma_{ii}"] = \
+                bilby.prior.DeltaFunction(peak=np.log(kwargs["sigma_max"]), name=f"ln sigma_{ii}")
+        else:
+            priors[f"mean:log_sigma_{ii}"] = bilby.core.prior.Uniform(
+                minimum=np.log(kwargs["sigma_min"]),
+                maximum=np.log(kwargs["sigma_max"]), name=f"ln sigma_{ii}")
     return priors
 
 
 def get_skew_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
-        del priors[f"mean:log_sigma_{ii}"]
-        priors[f"mean:log_sigma_rise_{ii}"] = bilby.core.prior.Uniform(
-            minimum=np.log(kwargs["sigma_min"]), maximum=np.log(kwargs["sigma_max"]), name=f"ln sigma_rise_{ii}")
-        priors[f"mean:log_sigma_fall_{ii}"] = bilby.core.prior.Uniform(
-            minimum=np.log(kwargs["sigma_min"]), maximum=np.log(kwargs["sigma_max"]), name=f"ln sigma_fall_{ii}")
+
+        if math.isclose(np.log(kwargs["sigma_min"]), np.log(kwargs["sigma_max"])):
+            priors[f"mean:log_sigma_rise_{ii}"] = bilby.core.prior.DeltaFunction(
+                peak=np.log(kwargs["sigma_max"]), name=f"ln sigma_rise_{ii}")
+            priors[f"mean:log_sigma_fall_{ii}"] = bilby.core.prior.DeltaFunction(
+                peak=np.log(kwargs["sigma_max"]), name=f"ln sigma_fall_{ii}")
+        else:
+            priors[f"mean:log_sigma_rise_{ii}"] = bilby.core.prior.Uniform(
+                minimum=np.log(kwargs["sigma_min"]), maximum=np.log(kwargs["sigma_max"]), name=f"ln sigma_rise_{ii}")
+            priors[f"mean:log_sigma_fall_{ii}"] = bilby.core.prior.Uniform(
+                minimum=np.log(kwargs["sigma_min"]), maximum=np.log(kwargs["sigma_max"]), name=f"ln sigma_fall_{ii}")
+
     return priors
 
 
@@ -117,10 +145,16 @@ def get_skew_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
             sigma_min = dt
         if sigma_max is None:
             sigma_max = duration
-        priors[f"mean:log_sigma_rise_{ii}"] = bilby.core.prior.Uniform(
-            minimum=np.log(sigma_min), maximum=np.log(sigma_max), name=f"ln sigma_rise_{ii}")
-        priors[f"mean:log_sigma_fall_{ii}"] = bilby.core.prior.Uniform(
-            minimum=np.log(sigma_min), maximum=np.log(sigma_max), name=f"ln sigma_fall_{ii}")
+        if math.isclose(sigma_min, sigma_max):
+            priors[f"mean:log_sigma_rise_{ii}"] = bilby.core.prior.DeltaFunction(
+                peak=np.log(sigma_max), name=f"ln sigma_rise_{ii}")
+            priors[f"mean:log_sigma_fall_{ii}"] = bilby.core.prior.DeltaFunction(
+                peak=np.log(sigma_max), name=f"ln sigma_fall_{ii}")
+        else:
+            priors[f"mean:log_sigma_rise_{ii}"] = bilby.core.prior.Uniform(
+                minimum=np.log(sigma_min), maximum=np.log(sigma_max), name=f"ln sigma_rise_{ii}")
+            priors[f"mean:log_sigma_fall_{ii}"] = bilby.core.prior.Uniform(
+                minimum=np.log(sigma_min), maximum=np.log(sigma_max), name=f"ln sigma_fall_{ii}")
     return priors
 
 

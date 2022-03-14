@@ -174,7 +174,10 @@ class InjectionCreator(object):
                              color=color, alpha=0.3, edgecolor="none")
 
         plt.plot(self.times, self.gp.mean.get_value(self.times), color="green", label="Mean function")
+        plt.xlabel("Time [s]")
+        plt.ylabel("y")
         plt.legend()
+        plt.tight_layout()
         plt.savefig(f"{self.outdir_path_stub}_data.pdf")
         plt.show()
         plt.clf()

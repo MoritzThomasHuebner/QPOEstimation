@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from copy import deepcopy
 
@@ -14,7 +16,7 @@ def get_kernel_prior(kernel_type, min_log_a, max_log_a, min_log_c_red_noise, min
         kernel_prior_getters[kernel_type](
             min_log_a=min_log_a, max_log_a=max_log_a, min_log_c_red_noise=min_log_c_red_noise,
             min_log_c_qpo=min_log_c_qpo, band_minimum=band_minimum, band_maximum=band_maximum,
-            max_log_c_red_noise=max_log_c_red_noise, max_log_c_qpo=max_log_c_qpo, jitter_term=jitter_term)
+            max_log_c_red_noise=max_log_c_red_noise, max_log_c_qpo=max_log_c_qpo, jitter_term=jitter_term, **kwargs)
 
     if jitter_term and kernel_type != "white_noise":
         priors = _add_jitter_term(priors)
@@ -208,7 +210,7 @@ def get_square_exponential_prior(**kwargs):
 
 
 def _add_individual_kernel_prior(priors, minimum, maximum, label):
-    if minimum == maximum:
+    if math.isclose(minimum, maximum):
         priors[f"kernel:{label}"] = bilby.core.prior.DeltaFunction(peak=maximum, name=label)
     else:
         priors[f"kernel:{label}"] = bilby.core.prior.Uniform(minimum=minimum, maximum=maximum, name=label)
