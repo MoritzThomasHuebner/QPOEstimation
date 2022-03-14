@@ -73,16 +73,16 @@
 
 # MSS test
 
-#for injection_mode in red_noise qpo_plus_red_noise
-#do
-#    for recovery_mode in red_noise qpo_plus_red_noise
-#    do
-#        for injection_id in {0..200}
-#        do
-#          sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
-#        done
-#    done
-#done
+for injection_mode in red_noise qpo_plus_red_noise
+do
+    for recovery_mode in red_noise qpo_plus_red_noise
+    do
+        for injection_id in {0..1}
+        do
+          sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
+        done
+    done
+done
 
 ## PP
 
@@ -109,17 +109,17 @@
 #  sbatch analyse_submit.sh qpo_plus_red_noise celerite_windowed 121.06 123.06 ${i}
 #done
 
-period=7.56
-start_time_base=98.38
-end_time_base=100.38
-
-for i in {0..20}
-do
-  start_time=$(python -c "print(${start_time_base} + ${period} * ${i})")
-  end_time=$(python -c "print(${end_time_base} + ${period} * ${i})")
-  sbatch analyse_submit.sh red_noise celerite_windowed ${start_time} ${end_time} 2
-  sbatch analyse_submit.sh qpo_plus_red_noise celerite_windowed ${start_time} ${end_time} 2
-done
+#period=7.56
+#start_time_base=98.38
+#end_time_base=100.38
+#
+#for i in {0..20}
+#do
+#  start_time=$(python -c "print(${start_time_base} + ${period} * ${i})")
+#  end_time=$(python -c "print(${end_time_base} + ${period} * ${i})")
+#  sbatch analyse_submit.sh red_noise celerite_windowed ${start_time} ${end_time} 2
+#  sbatch analyse_submit.sh qpo_plus_red_noise celerite_windowed ${start_time} ${end_time} 2
+#done
 
 
 ## Solar flare

@@ -63,8 +63,8 @@ else:
     plt.style.use("paper.mplstyle")
 
     injection_id = 0
-    minimum_id = 10
-    maximum_id = 1000
+    minimum_id = 0
+    maximum_id = 10
     injection_mode = "qpo_plus_red_noise"
 
     polynomial_max = 1000
@@ -99,7 +99,7 @@ else:
     band_minimum = 20
     band_maximum = 20
 
-    plot = False
+    plot = True
 
 mean_prior_bounds_dict = dict(
     amplitude_min=amplitude_min,
