@@ -332,6 +332,6 @@ for extension in ["_checkpoint_run.png", "_checkpoint_stats.png", "_checkpoint_t
                   "_dynesty.pickle", "_resume.pickle", "_result.json.old", "_samples.dat",
                   "_checkpoint_trace_unit.png"]:
     try:
-        os.remove(f"{outdir}/results/{label}{extension}")
+        os.remove(f"{result.outdir}/results/{label}{extension}")
     except Exception:
         pass
