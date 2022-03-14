@@ -108,7 +108,7 @@ def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
 def get_skew_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
-
+        del priors[f"mean:log_sigma_{ii}"]
         if math.isclose(np.log(kwargs["sigma_min"]), np.log(kwargs["sigma_max"])):
             priors[f"mean:log_sigma_rise_{ii}"] = bilby.core.prior.DeltaFunction(
                 peak=np.log(kwargs["sigma_max"]), name=f"ln sigma_rise_{ii}")
