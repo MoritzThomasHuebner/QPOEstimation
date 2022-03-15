@@ -25,17 +25,17 @@ done
 #  done
 #done
 
-### Magnetar flare
-#for model in red_noise qpo_plus_red_noise
-#do
-#  for n_components in {1..4}
-#  do
-#    sbatch analyse_submit.sh celerite ${model} skew_exponential ${n_components}
-#    sbatch analyse_submit.sh celerite ${model} fred ${n_components}
-#    sbatch analyse_submit.sh celerite ${model} fred_extended ${n_components}
-#    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
-#  done
-#done
+## Magnetar flare
+for model in red_noise qpo_plus_red_noise
+do
+  for n_components in {1..3}
+  do
+    sbatch analyse_submit.sh celerite ${model} skew_exponential ${n_components}
+    sbatch analyse_submit.sh celerite ${model} fred ${n_components}
+    sbatch analyse_submit.sh celerite ${model} fred_extended ${n_components}
+    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
+  done
+done
 
 #for n_components in {3..10}
 #do
@@ -73,16 +73,16 @@ done
 
 # MSS test
 
-for injection_mode in red_noise qpo_plus_red_noise
-do
-    for recovery_mode in red_noise qpo_plus_red_noise
-    do
-        for injection_id in {0..999}
-        do
-          sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
-        done
-    done
-done
+#for injection_mode in red_noise qpo_plus_red_noise
+#do
+#    for recovery_mode in red_noise qpo_plus_red_noise
+#    do
+#        for injection_id in {0..999}
+#        do
+#          sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
+#        done
+#    done
+#done
 
 ## PP
 
