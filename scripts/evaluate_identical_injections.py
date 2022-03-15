@@ -53,7 +53,7 @@ ln_bfs_red_noise_inj = np.loadtxt("results/ln_bfs_red_noise_inj_mss.txt")
 print(ln_bfs_red_noise_inj)
 bins = np.arange(-5, 25)
 # bins = "fd"
-plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise plus QPO")
+plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise\n plus QPO")
 plt.hist(ln_bfs_red_noise_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise")
 plt.semilogy()
 plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
