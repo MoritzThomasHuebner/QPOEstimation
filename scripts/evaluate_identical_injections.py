@@ -8,7 +8,7 @@ from QPOEstimation.utils import get_injection_outdir, get_injection_label
 matplotlib.rcParams['text.usetex'] = True
 plt.style.use("paper.mplstyle")
 
-base_injection_outdir="results/injection_mss_with_mean"
+base_injection_outdir="results/injection_files_mss_with_mean"
 
 samples = []
 outdir_qpo_qpo = get_injection_outdir(
