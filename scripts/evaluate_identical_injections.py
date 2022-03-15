@@ -1,9 +1,11 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 from QPOEstimation.result import GPResult
 from QPOEstimation.utils import get_injection_outdir, get_injection_label
 
+matplotlib.rcParams['text.usetex'] = True
 plt.style.use("paper.mplstyle")
 
 base_injection_outdir="injections/injection_mss_with_mean"
