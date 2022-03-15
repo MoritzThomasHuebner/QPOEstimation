@@ -269,7 +269,7 @@ def get_data(data_source, **kwargs):
     yerr = None
     if data_source == "giant_flare":
         times, y = get_giant_flare_data(**kwargs)
-        outdir = f"SGR_1806_20/{run_mode}/{kwargs['band']}/{recovery_mode_str}/{likelihood_model}/"
+        outdir = f"results/SGR_1806_20/{run_mode}/{kwargs['band']}/{recovery_mode_str}/{likelihood_model}/"
         if run_mode == "sliding_window":
             outdir += f"period_{kwargs['period_number']}/"
             label = f"{kwargs['run_id']}"
@@ -281,7 +281,7 @@ def get_data(data_source, **kwargs):
             raise ValueError
     elif data_source == "magnetar_flare":
         times, y = get_tte_magnetar_flare_data(**kwargs)
-        outdir = f"magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
+        outdir = f"results/magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
                  f"{recovery_mode_str}/{likelihood_model}/"
         if run_mode == "select_time":
             label = f"{start_time}_{end_time}"
@@ -289,7 +289,7 @@ def get_data(data_source, **kwargs):
             label = run_mode
     elif data_source == "magnetar_flare_binned":
         times, y = get_binned_magnetar_flare_data(**kwargs)
-        outdir = f"magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
+        outdir = f"results/magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
                  f"{recovery_mode_str}/{likelihood_model}/"
         if run_mode == "select_time":
             label = f"{start_time}_{end_time}"
@@ -297,14 +297,15 @@ def get_data(data_source, **kwargs):
             label = run_mode
     elif data_source == "solar_flare":
         times, y, yerr = get_solar_flare_data(**kwargs)
-        outdir = f"solar_flare_{kwargs['solar_flare_id']}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
+        outdir = f"results/solar_flare_{kwargs['solar_flare_id']}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
         if run_mode == "select_time":
             label = f"{start_time}_{end_time}"
         else:
             label = run_mode
     elif data_source == "grb":
         times, y, yerr = get_grb_data(**kwargs)
-        outdir = f"GRB{kwargs['grb_id']}_{kwargs['grb_detector']}/{run_mode}/{recovery_mode_str}/{likelihood_model}"
+        outdir = f"results/GRB{kwargs['grb_id']}_{kwargs['grb_detector']}/" \
+                 f"{run_mode}/{recovery_mode_str}/{likelihood_model}"
         if run_mode == "select_time":
             label = f"{start_time}_{end_time}"
         else:
@@ -322,7 +323,8 @@ def get_data(data_source, **kwargs):
     elif data_source == "hares_and_hounds":
         times, y = get_hares_and_hounds_data(**kwargs)
         times -= times[0]
-        outdir = f"hares_and_hounds_{kwargs['hares_and_hounds_round']}/{kwargs['hares_and_hounds_id']}/{run_mode}/" \
+        outdir = f"results/hares_and_hounds_{kwargs['hares_and_hounds_round']}/" \
+                 f"{kwargs['hares_and_hounds_id']}/{run_mode}/" \
                  f"{recovery_mode}/{likelihood_model}"
         if run_mode == "select_time":
             label = f"{start_time}_{end_time}"
@@ -336,7 +338,7 @@ def get_data(data_source, **kwargs):
         times, y, yerr = truncate_data(times=times, counts=y, yerr=yerr, start=start_time, stop=end_time)
         times -= times[0]
 
-        outdir = f"goes_gp/{run_mode}/{recovery_mode}/{likelihood_model}"
+        outdir = f"results/goes_gp/{run_mode}/{recovery_mode}/{likelihood_model}"
         label = f"{start_time}_{end_time}"
     else:
         raise ValueError
