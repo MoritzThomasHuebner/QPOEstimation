@@ -21,7 +21,7 @@ yss = gp.sample(3)
 
 for ys in yss:
     plt.plot(xs, ys)
-plt.xlabel("Time [s]")
+plt.xlabel("time [s]")
 plt.ylabel("y")
 plt.tight_layout()
 plt.savefig("results/realisations_red_noise.pdf")
@@ -36,7 +36,7 @@ yss = gp.sample(3)
 
 for ys in yss:
     plt.plot(xs, ys)
-plt.xlabel("Time [s]")
+plt.xlabel("time [s]")
 plt.ylabel("y")
 plt.tight_layout()
 plt.savefig("results/realisations_qpo.pdf")
@@ -53,7 +53,7 @@ yss = gp.sample(3)
 
 for ys in yss:
     plt.plot(xs, ys)
-plt.xlabel("Time [s]")
+plt.xlabel("time [s]")
 plt.ylabel("y")
 plt.tight_layout()
 plt.savefig("results/realisations_qpo_plus_red_noise.pdf")
