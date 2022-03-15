@@ -33,7 +33,7 @@ ln_bfs_red_noise_inj = []
 
 for injection_id in range(0, 1000):
     print(injection_id)
-    label = get_injection_label(run_mode="entire_segment", injection_id=injection_id) + "_1_0s"
+    label = get_injection_label(run_mode="entire_segment", injection_id=injection_id) + "_1_skew_gaussians"
     try:
         res_qpo_qpo = GPResult.from_json(outdir=outdir_qpo_qpo, label=label)
         res_qpo_red_noise = GPResult.from_json(outdir=outdir_qpo_red_noise, label=label)
