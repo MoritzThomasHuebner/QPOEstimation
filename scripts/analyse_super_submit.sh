@@ -14,18 +14,6 @@
 
 
 ### GRB
-#for model in red_noise qpo_plus_red_noise
-#do
-#  for n_components in {1..4}
-#  do
-#    sbatch analyse_submit.sh celerite ${model} skew_exponential ${n_components}
-#    sbatch analyse_submit.sh celerite ${model} fred ${n_components}
-#    sbatch analyse_submit.sh celerite ${model} fred_extended ${n_components}
-#    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
-#  done
-#done
-
-## Magnetar flare
 for model in red_noise qpo_plus_red_noise
 do
   for n_components in {1..3}
@@ -37,9 +25,16 @@ do
   done
 done
 
-#for n_components in {3..10}
+## Magnetar flare
+#for model in red_noise qpo_plus_red_noise
 #do
-#  sbatch analyse_submit.sh white_noise fred ${n_components}
+#  for n_components in {1..3}
+#  do
+#    sbatch analyse_submit.sh celerite ${model} skew_exponential ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} fred ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} fred_extended ${n_components}
+#    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
+#  done
 #done
 
 
