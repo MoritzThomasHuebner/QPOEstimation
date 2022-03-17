@@ -3,18 +3,18 @@
 #SBATCH --job-name=qpo
 #
 #SBATCH --ntasks=1
-#SBATCH --time=6:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem-per-cpu=1G
 
 
 # GRB
-#srun python analyse.py --data_source grb --run_mode select_time --grb_id 090709A --grb_binning 1s --grb_detector swift --start_time -4 --end_time 103  --likelihood_model ${1} --recovery_mode ${2} --background_model ${3} --n_components ${4} --sample rwalk --nlive 2000 --resume True --try_load True --plot True --offset False --jitter_term False
+srun python analyse.py --data_source grb --run_mode select_time --grb_id 090709A --grb_binning 1s --grb_detector swift --start_time -4 --end_time 103  --likelihood_model ${1} --recovery_mode ${2} --background_model ${3} --n_components ${4} --sample rwalk --nlive 2000 --resume True --try_load True --plot True --offset False --jitter_term False
 
 # Magnetar flare
 #srun python analyse.py --data_source magnetar_flare_binned --run_mode entire_segment --magnetar_label SGR_0501 --magnetar_tag 080823478_lcobs --rebin_factor 8 --likelihood_model ${1} --recovery_mode ${2} --background_model ${3} --n_components ${4} --plot True --nlive 2000 --sample rwalk --resume True --try_load True --offset False --jitter_term False
 
 # Hares and Hounds
-srun python analyse.py --data_source hares_and_hounds --run_mode from_maximum  --hares_and_hounds_id ${1} --hares_and_hounds_round HH2  --likelihood_model ${2} --recovery_mode ${3} --n_components ${4} --background_model ${5} --sample rwalk --nlive 1000 --use_ratio False --try_load True --resume True --plot True --offset True --jitter_term True --sampling_frequency 1
+#srun python analyse.py --data_source hares_and_hounds --run_mode from_maximum  --hares_and_hounds_id ${1} --hares_and_hounds_round HH2  --likelihood_model ${2} --recovery_mode ${3} --n_components ${4} --background_model ${5} --sample rwalk --nlive 1000 --use_ratio False --try_load True --resume True --plot True --offset True --jitter_term True --sampling_frequency 1
 
 # Injection
 #srun python analyse.py --start_time ${1} --end_time ${2} --data_source injection --injection_id ${4} --injection_mode qpo_plus_red_noise --recovery_mode ${3} --run_mode select_time --injection_file_dir injection_files_pop --injection_likelihood_model celerite_windowed --likelihood_model ${5} --sample rwalk --nlive 500 --try_load True --resume True --background_model 0

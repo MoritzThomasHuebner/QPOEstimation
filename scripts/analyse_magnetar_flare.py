@@ -15,89 +15,136 @@ linestyle_dict = dict(skew_exponential="solid", skew_gaussian="dotted", fred="da
 label_dict_mean = dict(skew_exponential="skew exp.", fred="FRED", fred_extended="FRED-x", skew_gaussian="skew gaus.")
 label_dict_kernel = dict(qpo_plus_red_noise="qpo+rn", red_noise="rn", double_qpo="qpo+qpo")
 
-plt.figure(figsize=(9.2, 7.2))
-# plt.figure(dpi=150)
-for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
-    print(mean_model)
-    for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
-        evidences = []
-        evidence_errs = []
-        res_list = []
-        for n_component in range(1, 4):
-            try:
-                res = GPResult.from_json(
-                    outdir=f"results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/"
-                           f"celerite/results/",
-                    label=f"entire_segment_{n_component}_{mean_model}s")
-                if recovery_mode == "qpo_plus_red_noise":
-                    res_list.append(res)
-                evidences.append(res.log_evidence)
-                evidence_errs.append(res.log_evidence_err)
-                print(f"{recovery_mode}\t{n_component}\t{res.log_evidence}\t{res.posterior.iloc[-1]['log_likelihood']}")
-            except Exception as e:
-                print(e)
-                evidences.append(np.nan)
-                evidence_errs.append(np.nan)
-        if recovery_mode == "qpo_plus_red_noise":
-            res_dict[mean_model] = res_list
-        evidence_dict[recovery_mode] = np.array(evidences)
-        evidence_err_dict[recovery_mode] = np.array(evidence_errs)
-    print()
-
-    for k, v in evidence_dict.items():
-        color_dict = dict(qpo_plus_red_noise="blue", red_noise="red")
-        plt.plot(np.arange(len(v)), np.array(v), label=f"{label_dict_mean[mean_model]},  {label_dict_kernel[k]}",
-                 color=color_dict[k], linestyle=linestyle_dict[mean_model])
-
-plt.xlabel("Number of flare components")
-plt.ylabel(f"ln Z")
-plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
-# plt.xticks(ticks=[0, 1], labels=[1, 2])
-plt.ylim(-1002.25, -980)
-
-# plt.ylim(-372, -357)
-plt.legend(ncol=2)
-plt.tight_layout()
-plt.savefig(f"results/Magnetar_Ln_Z_plot.pdf")
+# plt.figure(figsize=(9.2, 7.2))
+# # plt.figure(dpi=150)
+# for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
+#     print(mean_model)
+#     for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
+#         evidences = []
+#         evidence_errs = []
+#         res_list = []
+#         for n_component in range(1, 4):
+#             try:
+#                 res = GPResult.from_json(
+#                     outdir=f"results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/"
+#                            f"celerite/results/",
+#                     label=f"entire_segment_{n_component}_{mean_model}s")
+#                 if recovery_mode == "qpo_plus_red_noise":
+#                     res_list.append(res)
+#                 evidences.append(res.log_evidence)
+#                 evidence_errs.append(res.log_evidence_err)
+#                 print(f"{recovery_mode}\t{n_component}\t{res.log_evidence}\t{res.posterior.iloc[-1]['log_likelihood']}")
+#             except Exception as e:
+#                 print(e)
+#                 evidences.append(np.nan)
+#                 evidence_errs.append(np.nan)
+#         if recovery_mode == "qpo_plus_red_noise":
+#             res_dict[mean_model] = res_list
+#         evidence_dict[recovery_mode] = np.array(evidences)
+#         evidence_err_dict[recovery_mode] = np.array(evidence_errs)
+#     print()
+#
+#     for k, v in evidence_dict.items():
+#         color_dict = dict(qpo_plus_red_noise="blue", red_noise="red")
+#         plt.plot(np.arange(len(v)), np.array(v), label=f"{label_dict_mean[mean_model]},  {label_dict_kernel[k]}",
+#                  color=color_dict[k], linestyle=linestyle_dict[mean_model])
+#
+# plt.xlabel("Number of flare components")
+# plt.ylabel(f"ln Z")
+# plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
+# # plt.xticks(ticks=[0, 1], labels=[1, 2])
+# plt.ylim(-1002.25, -980)
+#
+# # plt.ylim(-372, -357)
+# plt.legend(ncol=2)
+# plt.tight_layout()
+# plt.savefig(f"results/Magnetar_Ln_Z_plot.pdf")
+# # plt.show()
+# plt.close('all')
+#
+# for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
+#     print(mean_model)
+#     for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
+#         evidences = []
+#         evidence_errs = []
+#         res_list = []
+#         for n_component in range(1, 4):
+#             try:
+#                 res = GPResult.from_json(
+#                     outdir=f"results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/"
+#                            f"celerite/results/",
+#                     label=f"entire_segment_{n_component}_{mean_model}s")
+#                 if recovery_mode == "qpo_plus_red_noise":
+#                     res_list.append(res)
+#                 evidences.append(res.log_evidence)
+#                 evidence_errs.append(res.log_evidence_err)
+#                 print(f"{recovery_mode}\t{n_component}\t{res.log_evidence}\t{res.log_evidence_err}")
+#             except Exception as e:
+#                 print(e)
+#                 evidences.append(np.nan)
+#                 evidence_errs.append(np.nan)
+#         if recovery_mode == "qpo_plus_red_noise":
+#             res_dict[mean_model] = res_list
+#         evidence_dict[recovery_mode] = np.array(evidences)
+#         evidence_err_dict[recovery_mode] = np.array(evidence_errs)
+#     print()
+#     bfs = evidence_dict["qpo_plus_red_noise"] - evidence_dict["red_noise"]
+#     # bfs_error = np.sqrt(evidence_err_dict["qpo_plus_red_noise"]**2 + evidence_err_dict["red_noise"]**2)
+#     plt.plot(np.arange(3), bfs, label=f"{label_dict_mean[mean_model]}", linestyle=linestyle_dict[mean_model])
+#
+# plt.xlabel("Number of flare components")
+# plt.ylabel(r"$\ln BF_{\mathrm{QPO}}$")
+# plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
+# plt.legend(ncol=2)
+# plt.tight_layout()
+# plt.savefig(f"results/Magnetar_Ln_BF_plot.pdf")
 # plt.show()
-plt.close('all')
 
+
+evidence_dict = dict()
+evidence_err_dict = dict()
+
+res_dict = {}
+
+
+ref_evidence = None
 for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
-    print(mean_model)
-    for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
-        evidences = []
-        evidence_errs = []
-        res_list = []
-        for n_component in range(1, 4):
-            try:
-                res = GPResult.from_json(
-                    outdir=f"results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/{recovery_mode}/"
-                           f"celerite/results/",
-                    label=f"entire_segment_{n_component}_{mean_model}s")
-                if recovery_mode == "qpo_plus_red_noise":
-                    res_list.append(res)
-                evidences.append(res.log_evidence)
-                evidence_errs.append(res.log_evidence_err)
-                print(f"{recovery_mode}\t{n_component}\t{res.log_evidence}\t{res.posterior.iloc[-1]['log_likelihood']}")
-            except Exception as e:
-                print(e)
-                evidences.append(np.nan)
-                evidence_errs.append(np.nan)
-        if recovery_mode == "qpo_plus_red_noise":
-            res_dict[mean_model] = res_list
-        evidence_dict[recovery_mode] = np.array(evidences)
-        evidence_err_dict[recovery_mode] = np.array(evidence_errs)
-    print()
-    bfs = evidence_dict["qpo_plus_red_noise"] - evidence_dict["red_noise"]
-    plt.plot(np.arange(3), bfs, label=f"{label_dict_mean[mean_model]}", linestyle=linestyle_dict[mean_model])
+    recovery_mode = "qpo_plus_red_noise"
+    evidences = []
+    evidence_errs = []
+    res_list = []
+    for n_component in range(1, 4):
+        try:
+            res = GPResult.from_json(
+                outdir=f"results/magnetar_flares/SGR_0501/080823478_lcobs/entire_segment/qpo_plus_red_noise/"
+                       f"celerite/results/",
+                label=f"entire_segment_{n_component}_{mean_model}s")
+            if ref_evidence is None:
+                ref_evidence = res.log_evidence
+            res_list.append(res)
+            evidences.append(res.log_evidence)
+            evidence_errs.append(res.log_evidence_err)
+            print(f"{recovery_mode}\t{n_component}\t{res.log_evidence}\t{res.log_evidence_err}")
+        except Exception as e:
+            print(e)
+            evidences.append(np.nan)
+            evidence_errs.append(np.nan)
+    res_dict[mean_model] = res_list
+    evidence_dict[recovery_mode] = np.array(evidences)
+    evidence_err_dict[recovery_mode] = np.array(evidence_errs)
+    for k, v in evidence_dict.items():
+        plt.plot(np.arange(len(v)), np.array(v)-ref_evidence, label=f"{label_dict_mean[mean_model]}",
+                 linestyle=linestyle_dict[mean_model])
+        # plt.plot(np.arange(len(v)), np.array(v), label=f"{label_dict_mean[mean_model]}",
+        #          linestyle=linestyle_dict[mean_model])
 
 plt.xlabel("Number of flare components")
-plt.ylabel(r"$\ln BF_{\mathrm{QPO}}$")
+plt.ylabel(r"$\ln BF$")
 plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
 plt.legend(ncol=2)
+plt.ylim(-12, 8)
 plt.tight_layout()
-plt.savefig(f"results/Magnetar_Ln_BF_plot.pdf")
+plt.savefig(f"results/Magnetar_mean_Ln_BF_plot.pdf")
 plt.show()
-
 
 
