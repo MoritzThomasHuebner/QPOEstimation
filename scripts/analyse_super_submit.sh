@@ -24,10 +24,6 @@
 #    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
 #  done
 #done
-for model in red_noise qpo_plus_red_noise
-do
-  sbatch analyse_submit.sh celerite ${model} skew_exponential 0
-done
 
 ## Magnetar flare
 #for model in red_noise qpo_plus_red_noise
@@ -40,6 +36,10 @@ done
 #    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
 #  done
 #done
+for model in red_noise qpo_plus_red_noise
+do
+  sbatch analyse_submit.sh celerite ${model} skew_exponential 0
+done
 
 
 #start_times=(4900 4920 4940 4960 4980)
