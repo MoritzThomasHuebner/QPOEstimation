@@ -8,7 +8,7 @@ import pandas as pd
 
 import os
 
-flares = np.array(sorted(os.listdir("results/hares_and_hounds_HH2_just_figures")))
+flares = np.array(sorted(os.listdir("results/hares_and_hounds_HH2")))
 print(len(flares))
 run_mode = "from_maximum"
 
