@@ -12,7 +12,7 @@ flares = np.array(sorted(os.listdir("results/hares_and_hounds_HH2")))
 print(len(flares))
 run_mode = "from_maximum"
 
-results = np.genfromtxt("data/hares_and_hounds/qpp_type_hh2.csv", delimiter=",", dtype=int)
+results = np.genfromtxt("data/hares_and_hounds/qpp_type_hh2.txt", delimiter=",", dtype=int)
 flare_keys = results[:, 0]
 flare_types = results[:, 1]
 
