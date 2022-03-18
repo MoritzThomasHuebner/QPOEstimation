@@ -36,10 +36,13 @@
 #    sbatch analyse_submit.sh celerite ${model} skew_gaussian ${n_components}
 #  done
 #done
-for model in red_noise qpo_plus_red_noise
-do
-  sbatch analyse_submit.sh celerite ${model} skew_exponential 0
-done
+#for model in red_noise qpo_plus_red_noise
+#do
+#  sbatch analyse_submit.sh celerite ${model} skew_exponential 0
+#done
+sbatch analyse_submit.sh celerite qpo_plus_red_noise fred_extended 3
+sbatch analyse_submit.sh celerite qpo_plus_red_noise fred 3
+sbatch analyse_submit.sh celerite red_noise fred_extended 3
 
 
 #start_times=(4900 4920 4940 4960 4980)
