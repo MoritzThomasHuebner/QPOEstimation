@@ -13,9 +13,9 @@ print(len(flares))
 run_mode = "from_maximum"
 
 # results = np.genfromtxt("data/hares_and_hounds/qpp_type_hh2.csv", delimiter=",", dtype=int)
-results = np.loadtxt("data/hares_and_hounds/qpp_type_hh2.txt", delimiter=",")
+results = np.loadtxt("data/hares_and_hounds/qpp_type_hh2.txt")
 flare_keys = results[:, 0]
-flare_keys = [int(k) for k in flare_keys]
+# flare_keys = [int(k) for k in flare_keys]
 flare_types = results[:, 1]
 
 threshold_ln_bf = 0.24
