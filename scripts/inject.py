@@ -65,28 +65,28 @@ else:
     injection_id = 0
     minimum_id = 0
     maximum_id = 1000
-    injection_mode = "red_noise"
+    injection_mode = "qpo_plus_red_noise"
 
     polynomial_max = 1000
 
-    amplitude_min = 3
-    amplitude_max = 3
+    amplitude_min = 10
+    amplitude_max = 100
     offset_min = 0
     offset_max = 0
-    sigma_min = 0.2
-    sigma_max = 0.2
-    t_0_min = 0.5
-    t_0_max = 0.5
+    sigma_min = 0.1
+    sigma_max = 1.0
+    t_0_min = 0
+    t_0_max = 1
     tau_min = 0
     tau_max = 3
 
-    min_log_a_red_noise = 1
+    min_log_a_red_noise = -1
     max_log_a_red_noise = 1
-    min_log_a = -2
-    max_log_a = -2
-    min_log_c_red_noise = 1
+    min_log_a = -1
+    max_log_a = 1
+    min_log_c_red_noise = -1
     max_log_c_red_noise = 1
-    min_log_c_qpo = 1
+    min_log_c_qpo = -1
     max_log_c_qpo = 1
     minimum_window_spacing = 0
 
@@ -96,10 +96,10 @@ else:
 
     segment_length = 1
     sampling_frequency = 256
-    band_minimum = 20
-    band_maximum = 20
+    band_minimum = 1
+    band_maximum = 64
 
-    plot = False
+    plot = True
 
 mean_prior_bounds_dict = dict(
     amplitude_min=amplitude_min,
@@ -114,8 +114,8 @@ mean_prior_bounds_dict = dict(
     tau_max=tau_max
 )
 
-times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
-# times = np.sort(np.random.uniform(0, 1, 256))
+# times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))
+times = np.sort(np.random.uniform(0, 1, 256))
 
 kernel = get_kernel(kernel_type=injection_mode)
 outdir = f"injections/injection_files_mss_with_mean"
@@ -154,6 +154,7 @@ if minimum_id == maximum_id:
 if minimum_id != maximum_id:
     for injection_id in range(minimum_id, maximum_id):
         print(injection_id)
+        times = np.sort(np.random.uniform(0, 1, 256))
         params = priors.sample()
         create_injection(params=params, injection_mode=injection_mode, times=times, outdir=outdir,
                          injection_id=injection_id, plot=plot, likelihood_model=likelihood_model,
