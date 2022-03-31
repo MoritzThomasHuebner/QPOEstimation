@@ -77,7 +77,7 @@ for injection_mode in qpo_plus_red_noise #red_noise
 do
     for recovery_mode in red_noise qpo_plus_red_noise
     do
-        for injection_id in {0..999}
+        for injection_id in {1000..1999}
         do
           sbatch analyse_submit.sh $injection_id $injection_mode $recovery_mode
         done
