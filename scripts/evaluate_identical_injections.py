@@ -30,30 +30,39 @@ outdir_red_noise_qpo = f"{outdir_red_noise_qpo}/results"
 
 ln_bfs_qpo_inj = []
 ln_bfs_red_noise_inj = []
+ln_bfs_high_amp_qpo_inj = []
 
-# for injection_id in range(0, 1000):
-#     print(injection_id)
-#     label = get_injection_label(run_mode="entire_segment", injection_id=injection_id) + "_1_skew_gaussians"
-#     try:
-#         res_qpo_qpo = GPResult.from_json(outdir=outdir_qpo_qpo, label=label)
-#         res_qpo_red_noise = GPResult.from_json(outdir=outdir_qpo_red_noise, label=label)
-#         res_red_noise_red_noise = GPResult.from_json(outdir=outdir_red_noise_red_noise, label=label)
-#         res_red_noise_qpo = GPResult.from_json(outdir=outdir_red_noise_qpo, label=label)
-#         ln_bfs_qpo_inj.append(res_qpo_qpo.log_evidence - res_qpo_red_noise.log_evidence)
-#         ln_bfs_red_noise_inj.append(res_red_noise_qpo.log_evidence - res_red_noise_red_noise.log_evidence)
-#     except (OSError, FileNotFoundError) as e:
-#         print(e)
-#         continue
+for injection_id in range(0, 1000):
+    print(injection_id)
+    label = get_injection_label(run_mode="entire_segment", injection_id=injection_id) + "_1_skew_gaussians"
+    label_high_qpo_amp = get_injection_label(
+        run_mode="entire_segment", injection_id=injection_id + 1000) + "_1_skew_gaussians"
+    try:
+        # res_qpo_qpo = GPResult.from_json(outdir=outdir_qpo_qpo, label=label)
+        # res_qpo_red_noise = GPResult.from_json(outdir=outdir_qpo_red_noise, label=label)
+        res_high_amp_qpo_qpo = GPResult.from_json(outdir=outdir_qpo_qpo, label=label_high_qpo_amp)
+        res_high_amp_qpo_red_noise = GPResult.from_json(outdir=outdir_qpo_red_noise, label=label_high_qpo_amp)
+        # res_red_noise_red_noise = GPResult.from_json(outdir=outdir_red_noise_red_noise, label=label)
+        # res_red_noise_qpo = GPResult.from_json(outdir=outdir_red_noise_qpo, label=label)
+        # ln_bfs_qpo_inj.append(res_qpo_qpo.log_evidence - res_qpo_red_noise.log_evidence)
+        ln_bfs_high_amp_qpo_inj.append(res_high_amp_qpo_qpo.log_evidence - res_high_amp_qpo_red_noise.log_evidence)
+        # ln_bfs_red_noise_inj.append(res_red_noise_qpo.log_evidence - res_red_noise_red_noise.log_evidence)
+    except (OSError, FileNotFoundError) as e:
+        print(e)
+        continue
 
 # np.savetxt("results/ln_bfs_qpo_inj_mss.txt", ln_bfs_qpo_inj)
+np.savetxt("results/ln_bfs_high_amp_qpo_inj_mss.txt", ln_bfs_qpo_inj)
 # np.savetxt("results/ln_bfs_red_noise_inj_mss.txt", ln_bfs_red_noise_inj)
 
 ln_bfs_qpo_inj = np.loadtxt("results/ln_bfs_qpo_inj_mss.txt")
+# ln_bfs_high_amp_qpo_inj = np.loadtxt("results/ln_bfs_high_amp_qpo_inj_mss.txt")
 ln_bfs_red_noise_inj = np.loadtxt("results/ln_bfs_red_noise_inj_mss.txt")
 print(ln_bfs_red_noise_inj)
 bins = np.arange(-5, 25)
 # bins = "fd"
 plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise\n plus QPO")
+plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise\n plus high amp. QPO")
 plt.hist(ln_bfs_red_noise_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise")
 plt.semilogy()
 plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
