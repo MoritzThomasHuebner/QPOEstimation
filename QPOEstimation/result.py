@@ -30,11 +30,11 @@ class GPResult(bilby.result.Result):
 
     @property
     def corner_outdir(self):
-        return self.outdir.replace("results", "corner")
+        return self.outdir.replace("/results", "/corner")
 
     @property
     def fits_outdir(self):
-        return self.outdir.replace("results", "fits")
+        return self.outdir.replace("/results", "/fits")
 
     @property
     def max_likelihood_parameters(self):
@@ -128,7 +128,7 @@ class GPResult(bilby.result.Result):
             plt.tight_layout()
         except Exception:
             pass
-        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.png")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.pdf")
         plt.clf()
 
     def plot_lightcurve(self, start_time=None, end_time=None, paper_style=True):
@@ -254,7 +254,7 @@ class GPResult(bilby.result.Result):
             plt.tight_layout()
         except Exception:
             pass
-        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_residual_fit.png")
+        plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_residual_fit.pdf")
         plt.show()
         plt.clf()
 
@@ -306,7 +306,7 @@ class GPResult(bilby.result.Result):
                     plt.tight_layout()
                 except Exception:
                     pass
-                plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.png")
+                plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.pdf")
                 plt.clf()
 
     def plot_period_posterior(self, paper_style=True):
@@ -356,7 +356,7 @@ class GPResult(bilby.result.Result):
                 plt.tight_layout()
             except Exception:
                 pass
-            plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.png")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.pdf")
             plt.clf()
 
     def plot_amplitude_ratio(self, paper_style=True):
@@ -379,7 +379,7 @@ class GPResult(bilby.result.Result):
                 plt.tight_layout()
             except Exception:
                 pass
-            plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.png")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.pdf")
             plt.clf()
 
     def plot_log_red_noise_power(self, paper_style=True):
@@ -402,7 +402,7 @@ class GPResult(bilby.result.Result):
                 plt.tight_layout()
             except Exception:
                 pass
-            plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.png")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.pdf")
             plt.clf()
 
     def plot_log_qpo_power(self, paper_style=True):
@@ -426,7 +426,7 @@ class GPResult(bilby.result.Result):
                 plt.tight_layout()
             except Exception:
                 pass
-            plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.png")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.pdf")
             plt.clf()
 
     def plot_duration_posterior(self, paper_style=True):
@@ -450,7 +450,7 @@ class GPResult(bilby.result.Result):
                 plt.tight_layout()
             except Exception:
                 pass
-            plt.savefig(f"{self.corner_outdir}/{self.label}_duration_posterior.png")
+            plt.savefig(f"{self.corner_outdir}/{self.label}_duration_posterior.pdf")
             plt.clf()
 
     def plot_all(self, paper_style=True):
