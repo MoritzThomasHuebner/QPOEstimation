@@ -105,14 +105,14 @@ if len(sys.argv) > 1:
 else:
     # matplotlib.use("Qt5Agg")
 
-    data_source = "giant_flare"  # "magnetar_flare_binned"
-    run_mode = "select_time"
+    data_source = "hares_and_hounds"  # "magnetar_flare_binned"
+    run_mode = "entire_segment"
     sampling_frequency = 64
     data_mode = "normal"
     alpha = 0.02
     variance_stabilisation = False
 
-    hares_and_hounds_id = "612579"
+    hares_and_hounds_id = "455290"
     hares_and_hounds_round = "HH2"
 
     solar_flare_folder = "goes"
@@ -181,7 +181,7 @@ else:
     recovery_mode = "qpo_plus_red_noise"
     likelihood_model = "celerite_windowed"
     background_model = "skew_gaussian"
-    n_components = 3
+    n_components = 1
     jitter_term = False
     normalisation = False
 
@@ -195,8 +195,8 @@ else:
     nlive = 1000
     use_ratio = False
 
-    try_load = False
-    resume = False
+    try_load = True
+    resume = True
     plot = True
 
 if variance_stabilisation:
