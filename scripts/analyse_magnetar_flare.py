@@ -11,13 +11,13 @@ evidence_err_dict = dict()
 
 res_dict = {}
 
-linestyle_dict = dict(skew_exponential="solid", skew_gaussian="dotted", fred="dashed", fred_extended="dashdot")
-label_dict_mean = dict(skew_exponential="skew exp.", fred="FRED", fred_extended="FRED-x", skew_gaussian="skew gaus.")
+linestyle_dict = dict(skew_exponential="solid", skew_gaussian="dotted", fred="dashed")
+label_dict_mean = dict(skew_exponential="skew exp.", fred="FRED", skew_gaussian="skew gaus.")
 label_dict_kernel = dict(qpo_plus_red_noise="qpo+rn", red_noise="rn", double_qpo="qpo+qpo")
 
 # plt.figure(figsize=(9.2, 7.2))
 # # plt.figure(dpi=150)
-for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
+for mean_model in ["skew_exponential", "skew_gaussian", "fred"]:
     print(mean_model)
     for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
         evidences = []
@@ -53,7 +53,7 @@ plt.xlabel("Number of flare components")
 plt.ylabel(f"ln Z")
 plt.xticks(ticks=[0, 1, 2], labels=[1, 2, 3])
 # plt.xticks(ticks=[0, 1], labels=[1, 2])
-plt.ylim(-1002.25, -980)
+# plt.ylim(-1002.25, -980)
 
 # plt.ylim(-372, -357)
 plt.legend(ncol=2)
@@ -61,8 +61,9 @@ plt.tight_layout()
 plt.savefig(f"results/Magnetar_Ln_Z_plot.pdf")
 # plt.show()
 plt.close('all')
-#
-for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
+
+# plt.figure(figsize=(9.2, 7.2))
+for mean_model in ["skew_exponential", "skew_gaussian", "fred"]:
     print(mean_model)
     for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
         evidences = []
@@ -107,7 +108,8 @@ res_dict = {}
 recovery_mode = "qpo_plus_red_noise"
 ref_evidence = None
 
-for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
+plt.figure(figsize=(9.2, 7.2))
+for mean_model in ["skew_exponential", "skew_gaussian", "fred"]:
     evidences = []
     evidence_errs = []
     res_list = []

@@ -11,13 +11,13 @@ evidence_err_dict = dict()
 
 res_dict = {}
 
-linestyle_dict = dict(skew_exponential="solid", skew_gaussian="dotted", fred="dashed", fred_extended="dashdot")
-label_dict_mean = dict(skew_exponential="skew exp.", fred="FRED", fred_extended="FRED-x", skew_gaussian="skew gaus.")
+linestyle_dict = dict(skew_exponential="solid", skew_gaussian="dotted", fred="dashed")
+label_dict_mean = dict(skew_exponential="skew exp.", fred="FRED", skew_gaussian="skew gaus.")
 label_dict_kernel = dict(qpo_plus_red_noise="qpo+rn", red_noise="rn")
 
-# plt.figure(figsize=(9.2, 7.2))
+plt.figure(figsize=(9.2, 7.2))
 # plt.figure(dpi=150)
-for mean_model in ["skew_exponential", "fred", "fred_extended", "skew_gaussian"]:
+for mean_model in ["skew_exponential", "fred", "skew_gaussian"]:
     print(mean_model)
     for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
         evidences = []
@@ -59,8 +59,8 @@ plt.savefig(f"results/GRB_Ln_Z_plot.pdf")
 plt.show()
 plt.close('all')
 
-
-for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
+# plt.figure(figsize=(9.2, 7.2))
+for mean_model in ["skew_exponential", "skew_gaussian", "fred"]:
     print(mean_model)
     for recovery_mode in ["qpo_plus_red_noise", "red_noise"]:
         evidences = []
@@ -96,6 +96,7 @@ plt.legend(ncol=2)
 plt.tight_layout()
 plt.savefig(f"results/GRB_Ln_BF_plot.pdf")
 # plt.show()
+plt.close("all")
 
 
 evidence_dict = dict()
@@ -104,7 +105,8 @@ res_dict = {}
 ref_evidence = None
 recovery_mode = "qpo_plus_red_noise"
 
-for mean_model in ["skew_exponential", "skew_gaussian", "fred", "fred_extended"]:
+# plt.figure(figsize=(9.2, 7.2))
+for mean_model in ["skew_exponential", "skew_gaussian", "fred"]:
     print(mean_model)
     evidences = []
     evidence_errs = []
