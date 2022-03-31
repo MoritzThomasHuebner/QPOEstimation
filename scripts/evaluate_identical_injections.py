@@ -47,6 +47,7 @@ for injection_id in range(0, 1000):
         # ln_bfs_qpo_inj.append(res_qpo_qpo.log_evidence - res_qpo_red_noise.log_evidence)
         ln_bfs_high_amp_qpo_inj.append(res_high_amp_qpo_qpo.log_evidence - res_high_amp_qpo_red_noise.log_evidence)
         # ln_bfs_red_noise_inj.append(res_red_noise_qpo.log_evidence - res_red_noise_red_noise.log_evidence)
+        print(ln_bfs_high_amp_qpo_inj[-1])
     except (OSError, FileNotFoundError) as e:
         print(e)
         continue
