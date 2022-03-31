@@ -52,7 +52,7 @@ for injection_id in range(0, 1000):
         continue
 
 # np.savetxt("results/ln_bfs_qpo_inj_mss.txt", ln_bfs_qpo_inj)
-np.savetxt("results/ln_bfs_high_amp_qpo_inj_mss.txt", ln_bfs_qpo_inj)
+np.savetxt("results/ln_bfs_high_amp_qpo_inj_mss.txt", ln_bfs_high_amp_qpo_inj)
 # np.savetxt("results/ln_bfs_red_noise_inj_mss.txt", ln_bfs_red_noise_inj)
 
 ln_bfs_qpo_inj = np.loadtxt("results/ln_bfs_qpo_inj_mss.txt")
@@ -62,7 +62,7 @@ print(ln_bfs_red_noise_inj)
 bins = np.arange(-5, 25)
 # bins = "fd"
 plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise\n plus QPO")
-plt.hist(ln_bfs_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise\n plus high amp. QPO")
+plt.hist(ln_bfs_high_amp_qpo_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise\n plus high amp. QPO")
 plt.hist(ln_bfs_red_noise_inj, alpha=0.5, density=True, bins=bins, label="Simulated red noise")
 plt.semilogy()
 plt.xlabel("$\ln BF_{\mathrm{QPO}}$")
@@ -73,4 +73,5 @@ plt.savefig("results/mss_plot_with_mean.pdf")
 # plt.show()
 
 print(len(np.where(np.array(ln_bfs_qpo_inj) > 0)[0]))
+print(len(np.where(np.array(ln_bfs_high_amp_qpo_inj) > 0)[0]))
 print(len(np.where(np.array(ln_bfs_red_noise_inj) > 0)[0]))
