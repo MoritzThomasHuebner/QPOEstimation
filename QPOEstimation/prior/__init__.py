@@ -5,8 +5,19 @@ import bilby
 from . import minimum, psd, gp, mean
 
 
-def get_priors(**kwargs):
-    """ Catch all function"""
+def get_priors(**kwargs) -> dict:
+    """ Catch-all prior getter.
+
+    Parameters
+    ----------
+    kwargs:
+        All possible keyword arguments to construct the prior.
+
+    Returns
+    -------
+    The Prior dict.
+
+    """
 
     segment_length = kwargs["times"][-1] - kwargs["times"][0]
     sampling_frequency = 1 / (kwargs["times"][1] - kwargs["times"][0])
@@ -55,7 +66,7 @@ def get_priors(**kwargs):
     priors = bilby.core.prior.ConditionalPriorDict()
     mean_priors = mean.get_mean_prior(**kwargs)
     kernel_priors = gp.get_kernel_prior(**kwargs)
-    window_priors = gp.get_window_priors(**kwargs)
+    window_priors = gp._get_window_priors(**kwargs)
     priors.update(mean_priors)
     priors.update(kernel_priors)
     priors.update(window_priors)

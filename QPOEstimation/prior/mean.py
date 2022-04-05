@@ -7,7 +7,21 @@ from bilby.core.prior import ConditionalPriorDict, Uniform, Beta, DeltaFunction
 import QPOEstimation
 
 
-def get_mean_prior(model_type, **kwargs):
+def get_mean_prior(model_type: str, **kwargs) -> dict:
+    """
+
+    Parameters
+    ----------
+    model_type:
+        Must be a kew from `_N_COMPONENT_PRIORS`
+    kwargs:
+        Any other keywords to set prior boundaries.
+
+    Returns
+    -------
+    The Prior dict.
+
+    """
     minimum = np.min(kwargs["y"]) if kwargs.get("offset", False) else 0
     maximum = np.max(kwargs["y"])
     span = maximum - minimum
@@ -17,7 +31,7 @@ def get_mean_prior(model_type, **kwargs):
         kwargs["amplitude_max"] = 2 * span
 
     if model_type == "polynomial":
-        priors = get_polynomial_prior(**kwargs)
+        priors = _get_polynomial_prior(**kwargs)
     elif model_type in _N_COMPONENT_PRIORS:
         priors = _N_COMPONENT_PRIORS[model_type](**kwargs)
     else:
@@ -38,7 +52,8 @@ def get_mean_prior(model_type, **kwargs):
                                                         name="offset")
     return priors
 
-def get_polynomial_prior(n_components=4, **kwargs):
+
+def _get_polynomial_prior(n_components=4, **kwargs):
     priors = bilby.core.prior.PriorDict()
     for i in range(n_components):
         if kwargs["polynomial_max"] == 0:
@@ -49,7 +64,7 @@ def get_polynomial_prior(n_components=4, **kwargs):
     return priors
 
 
-def get_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
+def _get_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = ConditionalPriorDict()
     for ii in range(n_components):
         if n_components == 1:
@@ -72,7 +87,7 @@ def get_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
+def _get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = ConditionalPriorDict()
     for ii in range(n_components):
         if math.isclose(kwargs["t_0_min"], kwargs["t_0_max"]):
@@ -105,8 +120,8 @@ def get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-def get_skew_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+def _get_skew_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
+    priors = _get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
         del priors[f"mean:log_sigma_{ii}"]
         if math.isclose(np.log(kwargs["sigma_min"]), np.log(kwargs["sigma_max"])):
@@ -123,16 +138,16 @@ def get_skew_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-def get_log_normal_priors(n_components=1, minimum_spacing=0, **kwargs):
-    return get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+def _get_log_normal_priors(n_components=1, minimum_spacing=0, **kwargs):
+    return _get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
 
 
-def get_lorentzian_prior(n_components=1, minimum_spacing=0, **kwargs):
-    return get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+def _get_lorentzian_prior(n_components=1, minimum_spacing=0, **kwargs):
+    return _get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
 
 
-def get_skew_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+def _get_skew_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
+    priors = _get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for p in list(priors.keys()):
         if "sigma" in p:
             del priors[p]
@@ -158,8 +173,8 @@ def get_skew_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+def _get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
+    priors = _get_gaussian_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
         del priors[f"mean:log_sigma_{ii}"]
         priors[f"mean:log_psi_{ii}"] = bilby.core.prior.Uniform(minimum=np.log(2e-2),
@@ -169,8 +184,8 @@ def get_fred_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-def get_fred_extended_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = get_fred_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
+def _get_fred_extended_priors(n_components=1, minimum_spacing=0, **kwargs):
+    priors = _get_fred_priors(n_components=n_components, minimum_spacing=minimum_spacing, **kwargs)
     for ii in range(n_components):
         priors[f"mean:log_gamma_{ii}"] = bilby.core.prior.Uniform(minimum=np.log(1e-3), maximum=np.log(1e3),
                                                                   name=f"log_gamma_{ii}")
@@ -179,7 +194,7 @@ def get_fred_extended_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-_N_COMPONENT_PRIORS = dict(exponential=get_exponential_priors, gaussian=get_gaussian_priors,
-                           log_normal=get_log_normal_priors, lorentzian=get_lorentzian_prior,
-                           skew_exponential=get_skew_exponential_priors, skew_gaussian=get_skew_gaussian_priors,
-                           fred=get_fred_priors, fred_extended=get_fred_extended_priors)
+_N_COMPONENT_PRIORS = dict(exponential=_get_exponential_priors, gaussian=_get_gaussian_priors,
+                           log_normal=_get_log_normal_priors, lorentzian=_get_lorentzian_prior,
+                           skew_exponential=_get_skew_exponential_priors, skew_gaussian=_get_skew_gaussian_priors,
+                           fred=_get_fred_priors, fred_extended=_get_fred_extended_priors)
