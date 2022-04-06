@@ -9,7 +9,7 @@ import pandas as pd
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 from typing import Union
 
-from QPOEstimation import OSCILLATORY_MODELS
+from QPOEstimation.parse import OSCILLATORY_MODELS
 from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import WindowedCeleriteLikelihood, get_kernel, get_mean_model
 

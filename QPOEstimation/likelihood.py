@@ -5,8 +5,7 @@ import george
 from celerite import terms
 from typing import Union
 
-
-from QPOEstimation import LIKELIHOOD_MODELS
+from QPOEstimation.parse import LIKELIHOOD_MODELS
 from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 from QPOEstimation.model.celerite import get_n_component_mean_model

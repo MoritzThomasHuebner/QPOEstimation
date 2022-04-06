@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from QPOEstimation.utils import get_injection_outdir
-from QPOEstimation import MODES
+from QPOEstimation.parse import MODES
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
