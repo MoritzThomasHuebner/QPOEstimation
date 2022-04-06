@@ -105,7 +105,7 @@ if len(sys.argv) > 1:
 else:
     # matplotlib.use("Qt5Agg")
 
-    data_source = "hares_and_hounds"  # "magnetar_flare_binned"
+    data_source = "magnetar_flare_binned"  # "magnetar_flare_binned"
     run_mode = "entire_segment"
     sampling_frequency = 64
     data_mode = "normal"

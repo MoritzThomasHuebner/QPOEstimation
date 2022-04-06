@@ -5,7 +5,6 @@ import george
 from celerite import terms
 from typing import Union
 
-from QPOEstimation.parse import LIKELIHOOD_MODELS
 from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 from QPOEstimation.model.celerite import get_n_component_mean_model
@@ -436,4 +435,8 @@ def get_gp_likelihood(
     -------
     The instance of the likelihood class.
     """
-    return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)
+    return LIKELIHOOD_MODEL_DICT[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)
+
+
+LIKELIHOOD_MODEL_DICT = dict(
+    celerite=CeleriteLikelihood, celerite_windowed=WindowedCeleriteLikelihood, george=GeorgeLikelihood)
