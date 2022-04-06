@@ -12,6 +12,7 @@ class InjectionStudyPostProcessor(object):
     def __init__(self, start_times, end_times, durations, outdir, label, times, frequencies, normalisation, y,
                  outdir_noise_periodogram, outdir_qpo_periodogram, injection_parameters=None, injection_psds=None,
                  extension_mode=None):
+        """ This class is used for post-processing steps for the results for the "Pitfalls of periodograms" paper. """
         self.ln_bfs = np.array([])
         self.log_frequency_spreads = np.array([])
         self.durations_reduced = np.array([])
@@ -83,7 +84,7 @@ class InjectionStudyPostProcessor(object):
     def plot_snrs_and_ln_bfs(self, show=False):
         plot_snrs_and_ln_bfs(
             outdir=self.outdir, label=self.label, extension_factors=self.extension_factors, ln_bfs=self.ln_bfs,
-            snrs_optimal=self.snrs_optimal, snrs_max_like=self.snrs_max_like,
+            snrs_max_like=self.snrs_max_like,
             snrs_max_like_quantiles=self.snrs_max_like_quantiles, x_break=self.x_break, show=show)
 
     def plot_delta_bics(self, show=False):

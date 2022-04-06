@@ -1,9 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+"""
+This module contains a number of plotting utilities. Partly for the analysis of the 'Pitfalls of Periodograms' paper,
+in part plotting utilities for Gaussian processes.
+"""
 
-def plot_chi_squares(outdir, label, extension_factors, chi_squares=None, chi_squares_qpo=None,
-                     chi_squares_red_noise=None, chi_squares_high_freqs=None, show=False):
+
+def plot_chi_squares(
+        outdir: str, label: str, extension_factors: np.ndarray, chi_squares: np.ndarray = None,
+        chi_squares_qpo: np.ndarray = None, chi_squares_red_noise: np.ndarray = None,
+        chi_squares_high_freqs: np.ndarray = None, show: bool = False) -> None:
+    """ Plots the chi-square values against the extension factors. """
     if chi_squares is not None:
         plt.plot(extension_factors, chi_squares, label="Entire spectrum")
     if chi_squares_qpo is not None:
@@ -30,8 +38,11 @@ def plot_chi_squares(outdir, label, extension_factors, chi_squares=None, chi_squ
     plt.clf()
 
 
-def plot_snrs(outdir, label, extension_factors, snrs_optimal=None, snrs_max_like=None,
-              snrs_max_like_quantiles=None, x_break=None, show=False):
+def plot_snrs(
+        outdir: str, label: str, extension_factors: np.ndarray, snrs_optimal: np.ndarray = None,
+        snrs_max_like: np.ndarray = None, snrs_max_like_quantiles: np.ndarray = None, x_break: float = None,
+        show: bool = False) -> None:
+    """ Plots the SNR values against the extension factors. """
     if len(snrs_optimal) != 0:
         plt.plot(extension_factors, snrs_optimal, label="Optimal SNR")
     if snrs_max_like is not None:
@@ -50,7 +61,10 @@ def plot_snrs(outdir, label, extension_factors, snrs_optimal=None, snrs_max_like
     plt.clf()
 
 
-def plot_ln_bfs(outdir, label, extension_factors, ln_bfs, x_break=None, show=False):
+def plot_ln_bfs(
+        outdir: str, label: str, extension_factors: np.ndarray, ln_bfs: np.ndarray,
+        x_break: float = None, show: bool = False) -> None:
+    """ Plots the ln BF values against the extension factors. """
     plt.plot(extension_factors, ln_bfs)
     if x_break is not None:
         plt.axvline(x_break, color="red", linestyle="-.", label="$x_{\mathrm{break}}$")
@@ -63,8 +77,10 @@ def plot_ln_bfs(outdir, label, extension_factors, ln_bfs, x_break=None, show=Fal
     plt.clf()
 
 
-def plot_snrs_and_ln_bfs(outdir, label, extension_factors, ln_bfs, snrs_optimal=None, snrs_max_like=None,
-                         snrs_max_like_quantiles=None, x_break=None, show=False):
+def plot_snrs_and_ln_bfs(
+        outdir: str, label: str, extension_factors: np.ndarray, ln_bfs: np.ndarray, snrs_max_like: np.ndarray = None,
+        snrs_max_like_quantiles: np.ndarray = None, x_break: float = None, show: bool = False) -> None:
+    """ Plots the SNR and ln BF values against the extension factors. """
     colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     fig, ax = plt.subplots()
     # if len(snrs_optimal) != 0:
@@ -97,7 +113,10 @@ def plot_snrs_and_ln_bfs(outdir, label, extension_factors, ln_bfs, snrs_optimal=
     plt.clf()
 
 
-def plot_delta_bics(outdir, label, extension_factors, delta_bics, x_break=None, show=False):
+def plot_delta_bics(
+        outdir: str, label: str, extension_factors: np.ndarray, delta_bics: np.ndarray, x_break: float = None,
+        show: bool = False) -> None:
+    """ Plots the Delta BIC values against the extension factors. """
     plt.plot(extension_factors, delta_bics, label="Inferred $\Delta BIC$")
     if x_break is not None:
         plt.axvline(x_break, color="red", linestyle="-.", label="$x_{\mathrm{break}}$")
@@ -110,7 +129,10 @@ def plot_delta_bics(outdir, label, extension_factors, delta_bics, x_break=None, 
     plt.clf()
 
 
-def plot_log_frequency_spreads(outdir, label, extension_factors, log_frequency_spreads, x_break=None, show=False):
+def plot_log_frequency_spreads(
+        outdir: str, label: str, extension_factors: np.ndarray, log_frequency_spreads: np.ndarray,
+        x_break: float = None, show: bool = False) -> None:
+    """ Plots the log frequency spread values against the extension factors. """
     plt.plot(extension_factors, log_frequency_spreads)
     plt.xlabel("$x$")
     plt.ylabel("$\Delta (\ln f)$")

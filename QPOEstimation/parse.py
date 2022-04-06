@@ -4,7 +4,13 @@ from QPOEstimation import LIKELIHOOD_MODELS, MODES, DATA_SOURCES, RUN_MODES, BAC
     GRB_ENERGY_BANDS
 
 
-def parse_args():
+def parse_args() -> argparse.ArgumentParser:
+    """ Creates an argument parser for the analysis scripts.
+
+    Returns
+    -------
+    The argument parser.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_source", default="giant_flare", choices=DATA_SOURCES)
     parser.add_argument("--run_mode", default="sliding_window", choices=RUN_MODES)

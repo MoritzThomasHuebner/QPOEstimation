@@ -1,13 +1,12 @@
 import numpy as np
-from bilby.core.likelihood import Likelihood, function_to_celerite_mean_model
+from bilby.core.likelihood import Likelihood, function_to_celerite_mean_model, function_to_george_mean_model
 import celerite
+import george
 from celerite import terms
+from typing import Union
 
-try:
-    import george
-except ImportError:
-    pass
 
+from QPOEstimation import LIKELIHOOD_MODELS
 from QPOEstimation.model import mean_model_dict
 from QPOEstimation.model.psd import red_noise, white_noise, broken_power_law_noise, lorentzian
 from QPOEstimation.model.celerite import get_n_component_mean_model
@@ -16,12 +15,15 @@ from QPOEstimation.model.mean import polynomial
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
 
-def get_celerite_likelihood(mean_model, kernel, times, y, yerr, likelihood_model="celerite"):
-    return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)
-
-
 class ParameterAccessor(object):
-    def __init__(self, parameter_name):
+    def __init__(self, parameter_name: str) -> None:
+        """ Handy accessor for the likelihood parameter dict so we can call them as if they are attributes.
+
+        Parameters
+        ----------
+        parameter_name:
+            The name of the parameter.
+        """
         self.parameter_name = parameter_name
 
     def __get__(self, instance, owner):
@@ -44,7 +46,23 @@ class WhittleLikelihood(Likelihood):
     log_width = ParameterAccessor("log_width")
     log_frequency = ParameterAccessor("log_frequency")
 
-    def __init__(self, frequencies, periodogram, frequency_mask, noise_model="red_noise"):
+    def __init__(
+            self, frequencies: np.ndarray, periodogram: np.ndarray, frequency_mask: np.ndarray,
+            noise_model: str = "red_noise") -> None:
+        """ A Whittle likelihood class for use with `bilby`.
+
+        Parameters
+        ----------
+        frequencies:
+            The periodogram frequencies.
+        periodogram:
+            The periodogram powers.
+        frequency_mask:
+            A mask we can apply if we want to mask out certain frequencies/powers.
+            Provide as indices which to retain.
+        noise_model:
+            The noise model. Should be 'red_noise' or 'broken_power_law'.
+        """
         super(WhittleLikelihood, self).__init__(
             parameters=dict(alpha=0, alpha_1=0, alpha_2=0, log_beta=0, log_sigma=0, log_delta=0, rho=0,
                             log_amplitude=0, log_width=1, log_frequency=127))
@@ -54,59 +72,65 @@ class WhittleLikelihood(Likelihood):
         self.noise_model = noise_model
 
     @property
-    def beta(self):
+    def beta(self) -> Union[float, np.ndarray]:
         return np.exp(self.log_beta)
 
     @property
-    def sigma(self):
+    def sigma(self) -> Union[float, np.ndarray]:
         return np.exp(self.log_sigma)
 
     @property
-    def delta(self):
+    def delta(self) -> Union[float, np.ndarray]:
         return np.exp(self.log_delta)
 
     @property
-    def amplitude(self):
+    def amplitude(self) -> Union[float, np.ndarray]:
         return np.exp(self.log_amplitude)
 
     @property
-    def width(self):
+    def width(self) -> Union[float, np.ndarray]:
         return np.exp(self.log_width)
 
     @property
-    def frequency(self):
+    def frequency(self) -> Union[float, np.ndarray]:
         return np.exp(self.log_frequency)
 
     @property
-    def frequencies(self):
+    def frequencies(self) -> np.ndarray:
         return self._frequencies[self.frequency_mask]
 
     @frequencies.setter
-    def frequencies(self, frequencies):
+    def frequencies(self, frequencies: np.ndarray) -> None:
         self._frequencies = frequencies
 
     @property
-    def model(self):
+    def model(self) -> np.ndarray:
         return self.lorentzian
 
     @property
-    def periodogram(self):
+    def periodogram(self) -> np.ndarray:
         return self._periodogram[self.frequency_mask]
 
-    def log_likelihood(self):
+    def log_likelihood(self) -> float:
+        """ Calculates the log-likelihood.
+
+        Returns
+        -------
+        The log-likelihood.
+        """
         psd = self.psd + self.model
         return -np.sum(np.log(psd) + self.periodogram / psd)
 
     @property
-    def lorentzian(self):
+    def lorentzian(self) -> np.ndarray:
         return lorentzian(self.frequencies, self.amplitude, self.frequency, self.width)
 
     @property
-    def noise_model(self):
+    def noise_model(self) -> str:
         return self._noise_model
 
     @noise_model.setter
-    def noise_model(self, noise_model):
+    def noise_model(self, noise_model: str) -> None:
         if noise_model in self.VALID_NOISE_MODELS:
             self._noise_model = noise_model
         elif noise_model == "qpo_plus_red_noise":
@@ -115,7 +139,7 @@ class WhittleLikelihood(Likelihood):
             raise ValueError(f"Unknown noise model {noise_model}")
 
     @property
-    def psd(self):
+    def psd(self) -> np.ndarray:
         if self.noise_model == "red_noise":
             return red_noise(frequencies=self.frequencies, alpha=self.alpha, beta=self.beta) \
                    + white_noise(frequencies=self.frequencies, sigma=self.sigma)
@@ -129,8 +153,27 @@ class WhittleLikelihood(Likelihood):
 
 class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
-    def __init__(self, mean_model, kernel, t, y, yerr):
-        """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
+    def __init__(
+            self, mean_model: celerite.modeling.Model, kernel: celerite.terms.Term, t: np.ndarray,
+            y: np.ndarray, yerr: np.ndarray) -> None:
+        """
+        `celerite` to `bilby` likelihood interface for GP that has defined start and end time within series.
+        The likelihood adds two parameters 'window_minimum' and 'window_maximum'. Inside this window we apply the GP.
+        Outside we only assume white noise.
+
+        Parameters
+        ----------
+        mean_model:
+            The celerite mean model.
+        kernel:
+            The celerite kernel.
+        t:
+            The time coordinates.
+        y:
+            The y-values.
+        yerr:
+            The y-error-values.
+        """
         super(WindowedCeleriteLikelihood, self).__init__(
             kernel=kernel, mean_model=mean_model, t=t, y=y, yerr=yerr)
         self.parameters["window_minimum"] = t[0]
@@ -138,10 +181,16 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
 
         self._white_noise_kernel = celerite.terms.JitterTerm(log_sigma=-20)
         self.white_noise_gp = celerite.GP(kernel=self._white_noise_kernel, mean=self.mean_model)
-        self.white_noise_gp.compute(self.gp._t, self.yerr)
+        self.white_noise_gp.compute(self.gp._t, self.yerr) # noqa
         self.white_noise_log_likelihood = self.white_noise_gp.log_likelihood(y=y)
 
-    def log_likelihood(self):
+    def log_likelihood(self) -> Union[float, np.ndarray]:
+        """
+
+        Returns
+        -------
+        The log-likelihood.
+        """
         if self._check_valid_indices_distribution():
             return -np.inf
 
@@ -151,15 +200,15 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
             self.white_noise_gp.log_likelihood(self.y[self.edge_indices])
         return np.nan_to_num(log_l, nan=-np.inf)
 
-    def _check_valid_indices_distribution(self):
+    def _check_valid_indices_distribution(self) -> bool:
         return len(self.windowed_indices) == 0 or len(self.edge_indices) == 0
 
-    def _setup_gps(self):
+    def _setup_gps(self) -> None:
         self.gp.compute(self.t[self.windowed_indices], self.yerr[self.windowed_indices])
         self.white_noise_gp.compute(self.t[self.edge_indices], self.yerr[self.edge_indices] + self.jitter)
         self._set_parameters_to_gps()
 
-    def _set_parameters_to_gps(self):
+    def _set_parameters_to_gps(self) -> None:
         for name, value in self.parameters.items():
             if "window" in name:
                 continue
@@ -168,112 +217,51 @@ class WindowedCeleriteLikelihood(CeleriteLikelihood):
             self.gp.set_parameter(name=name, value=value)
 
     @property
-    def jitter(self):
+    def jitter(self) -> float:
         for k in self.parameters.keys():
             if k.endswith("log_sigma"):
                 return np.exp(self.parameters[k])
         return 0
 
     @property
-    def edge_indices(self):
+    def edge_indices(self) -> np.ndarray:
         return np.where(np.logical_or(self.window_minimum > self.t, self.t > self.window_maximum))[0]
 
     @property
-    def windowed_indices(self):
+    def windowed_indices(self) -> np.ndarray:
         return np.where(np.logical_and(self.window_minimum < self.t, self.t < self.window_maximum))[0]
 
     @property
-    def window_minimum(self):
+    def window_minimum(self) -> float:
         return self.parameters["window_minimum"]
 
     @property
-    def window_maximum(self):
+    def window_maximum(self) -> float:
         return self.parameters["window_maximum"]
 
-    def noise_log_likelihood(self):
+    def noise_log_likelihood(self) -> float:
+        """ log-likelihood assuming everything is white noise.
+
+        Returns
+        -------
+        The noise log-likelihood.
+        """
         return self.white_noise_log_likelihood
 
 
-class DoubleCeleriteLikelihood(Likelihood):
-
-    def __init__(self, mean_model, kernel_0, kernel_1, t, y, yerr, joint_parameters=None):
-        """ Celerite to bilby likelihood interface for GP that has defined start and end time within series. """
-        self.kernel_0 = kernel_0
-        self.kernel_1 = kernel_1
-        self.mean_model = mean_model
-        self.t = t
-        self.y = y
-        self.yerr = yerr
-
-        self.parameters = dict(transition_time=0)
-        self.gp_0 = celerite.GP(kernel=kernel_0, mean=mean_model, fit_mean=True)
-        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.yerr[self.before_transition_indices])
-        self.gp_1 = celerite.GP(kernel=kernel_1, mean=mean_model, fit_mean=True)
-        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.yerr[self.after_transition_indices])
-        if joint_parameters is None:
-            self.joint_parameters = []
-        else:
-            self.joint_parameters = joint_parameters
-        for name, val in self.gp_0.get_parameter_dict().items():
-            if "mean" in name:
-                self.joint_parameters.append(name)
-
-        parameters_0 = self.gp_0.get_parameter_dict()
-        parameters_1 = self.gp_1.get_parameter_dict()
-        parameters = dict()
-        for param in self.joint_parameters:
-            parameters[param] = parameters_0[param]
-            del parameters_0[param]
-            del parameters_1[param]
-
-        for param, val in parameters_0.items():
-            parameters[f"{param}_0"] = val
-
-        for param, val in parameters_1.items():
-            parameters[f"{param}_1"] = val
-
-        super().__init__(parameters=parameters)
-        self.parameters["transition_time"] = t[-1] - t[0]
-
-    @property
-    def before_transition_indices(self):
-        return np.where(self.t < self.parameters["transition_time"])[0]
-
-    @property
-    def after_transition_indices(self):
-        return np.where(self.t >= self.parameters["transition_time"])[0]
-
-    def log_likelihood(self):
-        if len(self.before_transition_indices) == 0 or len(self.after_transition_indices) == 0:
-            return -np.inf
-        self.gp_0.compute(t=self.t[self.before_transition_indices], yerr=self.yerr[self.before_transition_indices])
-        self.gp_1.compute(t=self.t[self.after_transition_indices], yerr=self.yerr[self.after_transition_indices])
-
-        for name, value in self.parameters.items():
-            if name in self.joint_parameters:
-                self.gp_0.set_parameter(name=name, value=value)
-                self.gp_1.set_parameter(name=name, value=value)
-            elif name.endswith("_0"):
-                self.gp_0.set_parameter(name=name.rstrip("_0"), value=value)
-            elif name.endswith("_1"):
-                self.gp_1.set_parameter(name=name.rstrip("_1"), value=value)
-
-        log_l = self.gp_0.log_likelihood(self.y[self.before_transition_indices]) + \
-            self.gp_1.log_likelihood(self.y[self.after_transition_indices])
-        return np.nan_to_num(log_l, nan=-np.inf)
-
-
 class QPOTerm(terms.Term):
+    """ Kernel with equal amplitude and damping time exponential and cosine component.
+    Proposed in the `celerite` paper, but we don't use it. """
     parameter_names = ("log_a", "log_b", "log_c", "log_f")
 
-    def get_real_coefficients(self, params):
+    def get_real_coefficients(self, params: tuple) -> tuple:
         log_a, log_b, log_c, log_f = params
         b = np.exp(log_b)
         return (
             np.exp(log_a) * (1.0 + b) / (2.0 + b), np.exp(log_c),
         )
 
-    def get_complex_coefficients(self, params):
+    def get_complex_coefficients(self, params: tuple) -> tuple:
         log_a, log_b, log_c, log_f = params
         b = np.exp(log_b)
         return (
@@ -286,16 +274,17 @@ class QPOTerm(terms.Term):
 
 
 class ExponentialTerm(terms.Term):
+    """ Exponential kernel that we use as our red noise model. """
     parameter_names = ("log_a", "log_c")
 
-    def get_real_coefficients(self, params):
+    def get_real_coefficients(self, params: tuple) -> tuple:
         log_a, log_c = params
         b = np.exp(10)
         return (
             np.exp(log_a) * (1.0 + b) / (2.0 + b), np.exp(log_c),
         )
 
-    def get_complex_coefficients(self, params):
+    def get_complex_coefficients(self, params: tuple) -> tuple:
         log_a, log_c = params
         b = np.exp(10)
         return (
@@ -308,13 +297,14 @@ class ExponentialTerm(terms.Term):
 
 
 class PureQPOTerm(terms.Term):
+    """ Exponential kernel that we use as our red noise model. """
     parameter_names = ("log_a", "log_c", "log_f")
 
-    def get_real_coefficients(self, params):
+    def get_real_coefficients(self, params: tuple) -> tuple:
         log_a, log_c, log_f = params
         return 0, np.exp(log_c),
 
-    def get_complex_coefficients(self, params):
+    def get_complex_coefficients(self, params: tuple) -> tuple:
         log_a, log_c, log_f = params
         a = np.exp(log_a)
         c = np.exp(log_c)
@@ -325,7 +315,18 @@ class PureQPOTerm(terms.Term):
         pass
 
 
-def get_kernel(kernel_type, jitter_term=False):
+def get_kernel(kernel_type: str, jitter_term: bool = False) -> Union[celerite.terms.Term, george.kernels.Kernel]:
+    """ Catch all kernel getter.
+
+    Parameters
+    ----------
+    kernel_type: The name of the kernel. Must be from `QPOEstimation.MODES`.
+    jitter_term: Whether to add a `JitterTerm`, i.e. an additional white noise term.
+
+    Returns
+    -------
+    The kernel.
+    """
     if kernel_type == "white_noise":
         return celerite.terms.JitterTerm(log_sigma=-20)
     elif kernel_type == "qpo":
@@ -372,9 +373,33 @@ def get_kernel(kernel_type, jitter_term=False):
     return res
 
 
-def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_model="celerite"):
+def get_mean_model(
+        model_type: str, n_components: int = 1, y: np.ndarray = None, offset: bool = False,
+        likelihood_model: str = "celerite") -> Union[celerite.modeling.Model, george.modeling.Model]: # noqa
+    """ Creates a mean model instance for use in the likelihood.
+
+    Parameters
+    ----------
+    model_type:
+        The model type as a string. Must be from `QPOEstimation.model.mean`.
+    n_components:
+        The number of flare shapes to use.
+    y:
+        The y-coordinates of the data. Only relevant if we use a constant mean as a mean model.
+    offset:
+        If we are using a constant offset component.
+    likelihood_model:
+        The likelihood model we use. Must be from ['celerite', 'celerite_windowed', 'george'].
+
+    Returns
+    -------
+    The mean model.
+    """
     if model_type == "polynomial":
-        return function_to_celerite_mean_model(polynomial)(a0=0, a1=0, a2=0, a3=0, a4=0)
+        if likelihood_model in ["celerite", "celerite_windowed"]:
+            return function_to_celerite_mean_model(polynomial)(a0=0, a1=0, a2=0, a3=0, a4=0)
+        elif likelihood_model == "george":
+            return function_to_george_mean_model(polynomial)(a0=0, a1=0, a2=0, a3=0, a4=0)
     elif model_type == "mean":
         return np.mean(y)
     elif isinstance(model_type, (int, float)) or model_type.isnumeric():
@@ -386,5 +411,30 @@ def get_mean_model(model_type, n_components=1, y=None, offset=False, likelihood_
         raise ValueError
 
 
-LIKELIHOOD_MODELS = dict(
-    celerite=CeleriteLikelihood, celerite_windowed=WindowedCeleriteLikelihood, george=GeorgeLikelihood)
+def get_gp_likelihood(
+        mean_model: Union[celerite.modeling.Model, george.modeling.Model], # noqa
+        kernel: Union[celerite.terms.Term, george.kernels.Kernel], times: np.ndarray, y: np.ndarray, yerr:
+        np.ndarray, likelihood_model: str = "celerite")\
+        -> Union[CeleriteLikelihood, GeorgeLikelihood, WindowedCeleriteLikelihood]:
+    """ Creates the correct likelihood instance for the inference process.
+    
+    Parameters
+    ----------
+    mean_model:
+        The mean model we use.
+    kernel:
+        The kernel function.
+    times:
+        The time coordinates.
+    y:
+        The y-values.
+    yerr:
+        The y-error values.
+    likelihood_model:
+        The likelihood model. Must be from `QPOEstimation.LIKELIHOOD_MODELS`.
+
+    Returns
+    -------
+    The instance of the likelihood class.
+    """
+    return LIKELIHOOD_MODELS[likelihood_model](mean_model=mean_model, kernel=kernel, t=times, y=y, yerr=yerr)

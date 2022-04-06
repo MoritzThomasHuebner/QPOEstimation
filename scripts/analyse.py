@@ -10,7 +10,7 @@ import numpy as np
 
 import QPOEstimation
 from QPOEstimation.get_data import *
-from QPOEstimation.likelihood import get_kernel, get_mean_model, get_celerite_likelihood
+from QPOEstimation.likelihood import get_kernel, get_mean_model, get_gp_likelihood
 from QPOEstimation.parse import parse_args
 from QPOEstimation.prior.gp import *
 from QPOEstimation.prior import get_priors
@@ -285,8 +285,6 @@ if plot:
     plt.legend()
     plt.show()
 
-mean_model = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset,
-                                      likelihood_model=likelihood_model)
 
 priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_model, kernel_type=recovery_mode,
                     min_log_a=min_log_a, max_log_a=max_log_a,
@@ -298,9 +296,11 @@ priors = get_priors(times=times, y=y, yerr=yerr, likelihood_model=likelihood_mod
 # priors["kernel:terms[0]:log_f"] = bilby.core.prior.Uniform(minimum=np.log(3000), maximum=8.517193191416348, name="kernel:terms[0]:log_f", latex_label="kernel:terms[0]:log_f", unit=None, boundary="reflective")
 # suffix += "restricted_freq"
 
+mean_model = get_mean_model(model_type=background_model, n_components=n_components, y=y, offset=offset,
+                            likelihood_model=likelihood_model)
 kernel = get_kernel(kernel_type=recovery_mode, jitter_term=jitter_term)
-likelihood = get_celerite_likelihood(mean_model=mean_model, kernel=kernel, times=times, y=y, yerr=yerr,
-                                     likelihood_model=likelihood_model)
+likelihood = get_gp_likelihood(mean_model=mean_model, kernel=kernel, times=times, y=y, yerr=yerr,
+                               likelihood_model=likelihood_model)
 
 meta_data = dict(kernel_type=recovery_mode, mean_model=background_model, times=times,
                  y=y, yerr=yerr, likelihood_model=likelihood_model, truths=truths, n_components=n_components,
