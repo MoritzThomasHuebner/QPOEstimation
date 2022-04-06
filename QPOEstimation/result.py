@@ -5,7 +5,7 @@ from pathlib import Path
 import bilby
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
 
-from QPOEstimation.parse import OSCILLATORY_MODELS
+from QPOEstimation import OSCILLATORY_MODELS
 from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import WindowedCeleriteLikelihood, get_kernel, get_mean_model
 

@@ -4,7 +4,7 @@ import numpy as np
 class MetaDataAccessor(object):
     """
     Generic descriptor class that allows handy access of properties without long
-    boilerplate code. Allows easy access to meta_data dict entries
+    boilerplate code. Allows easy access to meta_data dict entries.
     """
 
     def __init__(self, property_name, default=None):
@@ -23,6 +23,19 @@ class MetaDataAccessor(object):
 
 
 def get_injection_outdir(injection_mode, recovery_mode, likelihood_model, base_injection_outdir="injections/injection"):
+    """
+
+    Parameters
+    ----------
+    injection_mode: GP model used to create data.
+    recovery_mode: GP model used in the inference process.
+    likelihood_model:
+    base_injection_outdir
+
+    Returns
+    -------
+
+    """
     return f"{base_injection_outdir}/{injection_mode}_injection/{recovery_mode}_recovery/{likelihood_model}"
 
 

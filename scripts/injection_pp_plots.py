@@ -6,7 +6,7 @@ import bilby
 
 from QPOEstimation.result import GPResult
 from QPOEstimation.utils import get_injection_outdir, get_injection_label
-from QPOEstimation.parse import LIKELIHOOD_MODELS, MODES
+from QPOEstimation import LIKELIHOOD_MODELS, MODES
 import matplotlib.pyplot as plt
 
 plt.style.use("paper.mplstyle")
