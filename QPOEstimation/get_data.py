@@ -1,10 +1,13 @@
 import json
 import numpy as np
+from typing import Union
+
 from .utils import get_injection_outdir, get_injection_label
 
 
-def get_all_tte_magnetar_flare_data(magnetar_label, magnetar_tag, bin_size=0.001, subtract_t0=True,
-                                    unbarycentred_time=False, **kwargs):
+def get_all_tte_magnetar_flare_data(
+        magnetar_label: str, magnetar_tag: str, bin_size: float = 0.001, subtract_t0: bool = True,
+        unbarycentred_time: bool = False, **kwargs) -> tuple:
     data = np.loadtxt(f"data/magnetar_flares/{magnetar_label}/{magnetar_tag}_data.txt")
     column = 1 if unbarycentred_time else 0
     ttes = data[:, column]
@@ -16,15 +19,16 @@ def get_all_tte_magnetar_flare_data(magnetar_label, magnetar_tag, bin_size=0.001
     return times, counts
 
 
-def get_tte_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, magnetar_tag, bin_size=0.001,
-                                             subtract_t0=True, unbarycentred_time=False, **kwargs):
+def get_tte_magnetar_flare_data_from_segment(
+        start_time: float, end_time: float, magnetar_label: str, magnetar_tag: str, bin_size: float = 0.001,
+        subtract_t0: bool = True, unbarycentred_time: bool = False, **kwargs) -> object:
     times, counts = get_all_tte_magnetar_flare_data(
         magnetar_label=magnetar_label, magnetar_tag=magnetar_tag, bin_size=bin_size,
         subtract_t0=subtract_t0, unbarycentred_time=unbarycentred_time, **kwargs)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
-def rebin(times, counts, rebin_factor):
+def rebin(times: np.ndarray, counts: np.ndarray, rebin_factor: int) -> tuple:
     new_times = []
     new_counts = []
     for i in range(0, len(times), rebin_factor):
@@ -38,7 +42,8 @@ def rebin(times, counts, rebin_factor):
     return np.array(new_times), np.array(new_counts)
 
 
-def get_all_binned_magnetar_flare_data(magnetar_label, magnetar_tag, subtract_t0=True, rebin_factor=1, **kwargs):
+def get_all_binned_magnetar_flare_data(
+        magnetar_label: str, magnetar_tag: str, subtract_t0: bool = True, rebin_factor: int = 1, **kwargs) -> tuple:
     data = np.loadtxt(f"data/magnetar_flares/{magnetar_label}/{magnetar_tag}_data.txt")
     times, counts = rebin(times=data[:, 0], counts=data[:, 1], rebin_factor=rebin_factor)
     if subtract_t0:
@@ -46,20 +51,23 @@ def get_all_binned_magnetar_flare_data(magnetar_label, magnetar_tag, subtract_t0
     return times, counts
 
 
-def get_all_binned_magnetar_flare_data_from_segment(start_time, end_time, magnetar_label, magnetar_tag,
-                                                    subtract_t0=True, rebin_factor=1, **kwargs):
+def get_all_binned_magnetar_flare_data_from_segment(
+        start_time: float, end_time: float, magnetar_label: str, magnetar_tag: str,
+        subtract_t0: bool = True, rebin_factor: int = 1, **kwargs) -> tuple:
     times, counts = get_all_binned_magnetar_flare_data(
-        magnetar_label=magnetar_label, magnetar_tag=magnetar_tag, subtract_t0=subtract_t0, rebin_factor=rebin_factor, **kwargs)
+        magnetar_label=magnetar_label, magnetar_tag=magnetar_tag,
+        subtract_t0=subtract_t0, rebin_factor=rebin_factor, **kwargs)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
-def get_giant_flare_data(run_mode, **kwargs):
+def get_giant_flare_data(run_mode: str, **kwargs) -> tuple:
     """ Catch all function """
     return _GIANT_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
-def get_giant_flare_data_from_period(data_mode="normal", period_number=0, run_id=0, segment_step=0.54,
-                                     segment_length=1, sampling_frequency=256, alpha=0.02, **kwargs):
+def get_giant_flare_data_from_period(
+        data_mode: str = "normal", period_number: int = 0, run_id: int = 0, segment_step: float = 0.54,
+        segment_length: float = 1, sampling_frequency: float = 256, alpha: float = 0.02, **kwargs) -> tuple:
     pulse_period = 7.56  # see papers
     n_pulse_periods = 47
     time_offset = 20.0
@@ -72,13 +80,15 @@ def get_giant_flare_data_from_period(data_mode="normal", period_number=0, run_id
                                              sampling_frequency=sampling_frequency, alpha=alpha)
 
 
-def get_giant_flare_data_from_segment(start_time=10., end_time=400., data_mode="normal",
-                                      sampling_frequency=256, alpha=0.02, **kwargs):
+def get_giant_flare_data_from_segment(
+        start_time: float = 10., end_time: float = 400., data_mode: str = "normal",
+        sampling_frequency: float = 256, alpha: float = 0.02, **kwargs) -> tuple:
     times, counts = get_all_giant_flare_data(data_mode=data_mode, sampling_frequency=sampling_frequency, alpha=alpha)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
-def get_all_giant_flare_data(data_mode="normal", sampling_frequency=256, alpha=0.02, **kwargs):
+def get_all_giant_flare_data(
+        data_mode: str = "normal", sampling_frequency: float = 256, alpha: float = 0.02, **kwargs) -> tuple:
     if data_mode == "smoothed":
         data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat")
     elif data_mode == "smoothed_residual":
@@ -90,7 +100,7 @@ def get_all_giant_flare_data(data_mode="normal", sampling_frequency=256, alpha=0
     return data[:, 0], data[:, 1]
 
 
-def truncate_data(times, counts, start, stop, yerr=None):
+def truncate_data(times: np.ndarray, counts: np.ndarray, start: float, stop: float, yerr: np.ndarray = None) -> tuple:
     indices = np.where(np.logical_and(times > start, times < stop))[0]
     if yerr is None:
         return times[indices], counts[indices]
@@ -98,10 +108,12 @@ def truncate_data(times, counts, start, stop, yerr=None):
         return times[indices], counts[indices], yerr[indices]
 
 
-def get_injection_data(injection_file_dir="injection_files", injection_mode="qpo", recovery_mode="qpo",
-                       injection_likelihood_model="celerite", injection_id=0, start_time=None, end_time=None,
-                       run_mode="entire_segment", **kwargs):
-    data = np.loadtxt(f"{injection_file_dir}/{injection_mode}/{injection_likelihood_model}/{str(injection_id).zfill(2)}_data.txt")
+def get_injection_data(
+        injection_file_dir: str = "injection_files", injection_mode: str = "qpo", recovery_mode: str = "qpo",
+        injection_likelihood_model: str = "celerite", injection_id: Union[float, np.ndarray] = 0,
+        start_time: float = None, end_time: float = None, run_mode: str = "entire_segment", **kwargs) -> tuple:
+    data = np.loadtxt(
+        f"{injection_file_dir}/{injection_mode}/{injection_likelihood_model}/{str(injection_id).zfill(2)}_data.txt")
     if injection_mode == recovery_mode:
         with open(f"{injection_file_dir}/{injection_mode}/{injection_likelihood_model}/"
                   f"{str(injection_id).zfill(2)}_params.json", "r") as f:
@@ -123,15 +135,16 @@ def get_injection_data(injection_file_dir="injection_files", injection_mode="qpo
 
 
 def get_grb_data_from_segment(
-        grb_id, grb_binning, start_time, end_time, grb_detector=None, grb_energy_band="all", grb_label=None,
-        bin_size=None, **kwargs):
+        grb_id: str, grb_binning: str, start_time: float, end_time: float, grb_detector: str = None,
+        grb_energy_band: str = "all", grb_label: str = None, bin_size: str = None, **kwargs) -> tuple:
     times, y, yerr = get_all_grb_data(grb_binning=grb_binning, grb_id=grb_id, grb_detector=grb_detector,
                                       grb_label=grb_label, grb_energy_band=grb_energy_band, bin_size=bin_size)
     return truncate_data(times=times, counts=y, start=start_time, stop=end_time, yerr=yerr)
 
 
-def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band="all", grb_label=None,
-                     bin_size=None, **kwargs):
+def get_all_grb_data(
+        grb_id: str, grb_binning: str, grb_detector: str = None, grb_energy_band: str = "all", grb_label: str = None,
+        bin_size: str = None, **kwargs) -> tuple:
     if grb_detector in ["swift", "konus"]:
         data_file = f"data/GRBs/GRB{grb_id}/{grb_binning}_lc_ascii_{grb_detector}.txt"
         data = np.loadtxt(data_file)
@@ -174,27 +187,27 @@ def get_all_grb_data(grb_id, grb_binning, grb_detector=None, grb_energy_band="al
         return times, y, yerr
 
 
-def get_grb_data(run_mode, **kwargs):
+def get_grb_data(run_mode: str, **kwargs) -> tuple:
     """ Catch all function """
     return _GRB_RUN_MODES[run_mode](**kwargs)
 
 
-def get_tte_magnetar_flare_data(run_mode, **kwargs):
+def get_tte_magnetar_flare_data(run_mode: str, **kwargs) -> tuple:
     """ Catch all function """
     return _MAGNETAR_TTE_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
-def get_binned_magnetar_flare_data(run_mode, **kwargs):
+def get_binned_magnetar_flare_data(run_mode: str, **kwargs) -> tuple:
     """ Catch all function """
     return _MAGNETAR_BINNED_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
-def get_solar_flare_data(run_mode, **kwargs):
+def get_solar_flare_data(run_mode: str, **kwargs) -> tuple:
     """ Catch all function """
     return _SOLAR_FLARE_RUN_MODES[run_mode](**kwargs)
 
 
-def get_all_solar_flare_data(solar_flare_id="go1520110128", solar_flare_folder="goes", **kwargs):
+def get_all_solar_flare_data(solar_flare_id: str = "go1520110128", solar_flare_folder: str = "goes", **kwargs) -> tuple:
     from astropy.io import fits
     data = fits.open(f"data/SolarFlare/{solar_flare_folder}/{solar_flare_id}.fits")
 
@@ -205,17 +218,21 @@ def get_all_solar_flare_data(solar_flare_id="go1520110128", solar_flare_folder="
     return times, flux, flux_err
 
 
-def get_solar_flare_data_from_segment(solar_flare_id="go1520110128", solar_flare_folder="goes", start_time=None, end_time=None, **kwargs):
-    times, flux, flux_err = get_all_solar_flare_data(solar_flare_id=solar_flare_id, solar_flare_folder=solar_flare_folder)
+def get_solar_flare_data_from_segment(
+        solar_flare_id: str = "go1520110128", solar_flare_folder: str = "goes",
+        start_time: float = None, end_time: float = None, **kwargs) -> tuple:
+    times, flux, flux_err = get_all_solar_flare_data(
+        solar_flare_id=solar_flare_id, solar_flare_folder=solar_flare_folder)
     return truncate_data(times=times, counts=flux, start=start_time, stop=end_time, yerr=flux_err)
 
 
-def get_hares_and_hounds_data(run_mode, **kwargs):
+def get_hares_and_hounds_data(run_mode: str, **kwargs) -> tuple:
     """ Catch all function """
     return _HARES_AND_HOUNDS_RUN_MODES[run_mode](**kwargs)
 
 
-def get_all_hares_and_hounds_data(hares_and_hounds_id="5700", hares_and_hounds_round="HH2", **kwargs):
+def get_all_hares_and_hounds_data(
+        hares_and_hounds_id: str = "5700", hares_and_hounds_round: str = "HH2", **kwargs) -> tuple:
     from astropy.io import fits
     data = fits.open(f"data/hares_and_hounds/{hares_and_hounds_round}/flare{hares_and_hounds_id}.fits")
     lc = data[1].data
@@ -224,14 +241,16 @@ def get_all_hares_and_hounds_data(hares_and_hounds_id="5700", hares_and_hounds_r
     return times, flux
 
 
-def get_hares_and_hounds_data_from_segment(hares_and_hounds_id="5700", hares_and_hounds_round="HH2",
-                                           start_time=None, end_time=None, **kwargs):
+def get_hares_and_hounds_data_from_segment(
+        hares_and_hounds_id: str = "5700", hares_and_hounds_round: str = "HH2",
+        start_time: float = None, end_time: float = None, **kwargs) -> tuple:
     times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id,
                                                 hares_and_hounds_round=hares_and_hounds_round)
     return truncate_data(times=times, counts=flux, start=start_time, stop=end_time)
 
 
-def get_hares_and_hounds_data_from_maximum(hares_and_hounds_id="5700", hares_and_hounds_round="HH2", **kwargs):
+def get_hares_and_hounds_data_from_maximum(
+        hares_and_hounds_id: str = "5700", hares_and_hounds_round: str = "HH2", **kwargs) -> tuple:
     times, flux = get_all_hares_and_hounds_data(hares_and_hounds_id=hares_and_hounds_id,
                                                 hares_and_hounds_round=hares_and_hounds_round)
     max_index = np.argmax(flux)
@@ -259,7 +278,7 @@ _HARES_AND_HOUNDS_RUN_MODES = dict(select_time=get_hares_and_hounds_data_from_se
                                    from_maximum=get_hares_and_hounds_data_from_maximum)
 
 
-def get_data(data_source, **kwargs):
+def get_data(data_source: str, **kwargs) -> tuple:
     run_mode = kwargs["run_mode"]
     start_time = kwargs.get("start_time", 0)
     end_time = kwargs.get("end_time", 0)

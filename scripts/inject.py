@@ -9,7 +9,7 @@ import bilby
 from QPOEstimation.injection import create_injection
 from QPOEstimation.likelihood import get_kernel
 from QPOEstimation.parse import parse_args
-from QPOEstimation.prior.gp import get_kernel_prior, get_window_priors
+from QPOEstimation.prior.gp import get_kernel_prior, _get_window_priors
 from QPOEstimation.prior.mean import get_mean_prior
 from QPOEstimation.prior import get_priors
 

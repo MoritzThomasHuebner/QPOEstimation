@@ -372,7 +372,7 @@ def get_kernel(kernel_type: str, jitter_term: bool = False) -> Union[celerite.te
 
 
 def get_mean_model(
-        model_type: str, n_components: int = 1, y: np.ndarray = None, offset: bool = False,
+        model_type: Union[float, str], n_components: int = 1, y: Union[float, np.ndarray] = None, offset: bool = False,
         likelihood_model: str = "celerite") -> Union[celerite.modeling.Model, george.modeling.Model]: # noqa
     """ Creates a mean model instance for use in the likelihood.
 
