@@ -1,5 +1,6 @@
 import argparse
 
+
 LIKELIHOOD_MODELS = ["celerite", "celerite_windowed", "george", "whittle"]
 MODES = ["qpo", "white_noise", "red_noise", "pure_qpo", "qpo_plus_red_noise",
          "double_red_noise", "double_qpo", "matern32", "broken_power_law", "matern52", "exp_sine2",
@@ -11,9 +12,16 @@ BACKGROUND_MODELS = ["polynomial", "exponential", "skew_exponential", "gaussian"
                      "skew_gaussian", "fred", "fred_extended", "0"]
 DATA_MODES = ["normal", "smoothed", "smoothed_residual"]
 GRB_ENERGY_BANDS = ["15-25", "25-50", "50-100", "100-350", "15-350", "all"]
+OSCILLATORY_MODELS = ["qpo", "pure_qpo", "qpo_plus_red_noise", "fourier_series"]
 
 
-def parse_args():
+def parse_args() -> argparse.ArgumentParser:
+    """ Creates an argument parser for the analysis scripts.
+
+    Returns
+    -------
+    The argument parser.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_source", default="giant_flare", choices=DATA_SOURCES)
     parser.add_argument("--run_mode", default="sliding_window", choices=RUN_MODES)
@@ -100,6 +108,3 @@ def parse_args():
     parser.add_argument("--plot", default="True", type=str)
     parser.add_argument("--suffix", default="", type=str)
     return parser
-
-
-OSCILLATORY_MODELS = ["qpo", "pure_qpo", "qpo_plus_red_noise", "fourier_series"]

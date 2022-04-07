@@ -1,15 +1,22 @@
+import celerite.terms
+import george.kernels
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import bilby
+import pandas as pd
 from bilby.core.likelihood import CeleriteLikelihood, GeorgeLikelihood
+from typing import Union
 
 from QPOEstimation.parse import OSCILLATORY_MODELS
 from QPOEstimation.utils import MetaDataAccessor
 from QPOEstimation.likelihood import WindowedCeleriteLikelihood, get_kernel, get_mean_model
 
 style_file = f"{Path(__file__).parent.absolute()}/paper.mplstyle"
+
+_likelihood_classes = \
+    Union[bilby.likelihood.CeleriteLikelihood, bilby.likelihood.GeorgeLikelihood, WindowedCeleriteLikelihood]
 
 
 class GPResult(bilby.result.Result):
@@ -26,24 +33,50 @@ class GPResult(bilby.result.Result):
     offset = MetaDataAccessor("offset")
 
     def __init__(self, **kwargs):
+        """ An extension to the standard `bilby` result.
+        Implements a number of features that the regular `bilby` result can not do itself.
+        Saves meta information about the data and analysis settings in `meta_data` and provides
+        property-like access using the descriptors at the top of the class.
+
+        Parameters
+        ----------
+        kwargs: Any args/kwargs that the regular `bilby` result takes
+        """
         super().__init__(**kwargs)
 
     @property
-    def corner_outdir(self):
+    def corner_outdir(self) -> str:
         return self.outdir.replace("/results", "/corner")
 
     @property
-    def fits_outdir(self):
+    def fits_outdir(self) -> str:
         return self.outdir.replace("/results", "/fits")
 
     @property
-    def max_likelihood_parameters(self):
+    def max_likelihood_parameters(self) -> pd.Series:
         return self.posterior.iloc[-1]
 
-    def get_random_posterior_samples(self, n_samples=10):
+    def get_random_posterior_samples(self, n_samples: int = 10) -> list:
+        """ Returns a list of random posterior samples.
+
+        Parameters
+        ----------
+        n_samples:
+            The number of random samples  (Default_value = 10).
+
+        Returns
+        -------
+        The samples.
+        """
         return [self.posterior.iloc[np.random.randint(len(self.posterior))] for _ in range(n_samples)]
 
-    def get_likelihood(self):
+    def get_likelihood(self) -> _likelihood_classes:
+        """ Reconstructs the likelihood instance based on the `meta_data` information.
+
+        Returns
+        -------
+        The instance of the likelihood class used during the inference process.
+        """
         if self.likelihood_model == "celerite_windowed":
             likelihood = WindowedCeleriteLikelihood(mean_model=self.get_mean_model(), kernel=self.get_kernel(),
                                                     t=self.times, y=self.y, yerr=self.yerr)
@@ -58,7 +91,21 @@ class GPResult(bilby.result.Result):
         return self._set_likelihood_parameters(likelihood=likelihood, parameters=self.max_likelihood_parameters)
 
     @staticmethod
-    def _set_likelihood_parameters(likelihood, parameters):
+    def _set_likelihood_parameters(
+            likelihood: _likelihood_classes, parameters: Union[dict, pd.Series]) -> _likelihood_classes:
+        """ Sets the parameters for the likelihood.
+
+        Parameters
+        ----------
+        likelihood:
+            The likelihood class instance.
+        parameters:
+            The parameters in a dict-like format.
+
+        Returns
+        -------
+        The likelihood with the set parameters.
+        """
         for name, value in parameters.items():
             try:
                 likelihood.gp.set_parameter(name=name, value=value)
@@ -74,23 +121,40 @@ class GPResult(bilby.result.Result):
                 pass
         return likelihood
 
-    def get_kernel(self):
+    def get_kernel(self) -> Union[celerite.terms.Term, george.kernels.Kernel]:
+        """ Small wrapper for getting the kernel based on the `meta_data` information.
+
+        Returns
+        -------
+        The kernel used during the inference process.
+        """
         return get_kernel(kernel_type=self.kernel_type)
 
-    def get_mean_model(self):
-        mean_model = get_mean_model(
+    def get_mean_model(self) -> Union[celerite.modeling.Model, george.modeling.Model]: # noqa
+        """ Small wrapper for getting the mean model based on the `meta_data` information.
+
+        Returns
+        -------
+        The mean model used during the inference process.
+        """
+        return get_mean_model(
             model_type=self.mean_model, n_components=self.n_components, y=self.y, offset=self.offset)
-        return mean_model
 
     @property
-    def sampling_frequency(self):
+    def sampling_frequency(self) -> float:
         return 1 / (self.times[1] - self.times[0])
 
     @property
-    def segment_length(self):
+    def segment_length(self) -> float:
         return self.times[-1] - self.times[0]
 
-    def plot_max_likelihood_psd(self, paper_style=True):
+    def plot_max_likelihood_psd(self, paper_style: bool = True) -> None:
+        """ Plots the maximum likelihood psd.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
             plt.style.use(style_file)
@@ -114,13 +178,19 @@ class GPResult(bilby.result.Result):
         plt.savefig(f"{self.fits_outdir}/{self.label}_psd.png")
         plt.clf()
 
-    def plot_kernel(self, paper_style):
+    def plot_kernel(self, paper_style: bool = True) -> None:
+        """ Plots the maximum likelihood kernel function.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
             plt.style.use(style_file)
         Path(self.fits_outdir).mkdir(parents=True, exist_ok=True)
         likelihood = self.get_likelihood()
-        taus = np.linspace(-0.5*self.segment_length, 0.5*self.segment_length, 1000)
+        taus = np.linspace(-0.5 * self.segment_length, 0.5 * self.segment_length, 1000)
         plt.plot(taus, likelihood.gp.kernel.get_value(taus), color="blue")
         plt.xlabel("tau [s]")
         plt.ylabel("kernel")
@@ -131,7 +201,18 @@ class GPResult(bilby.result.Result):
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.pdf")
         plt.clf()
 
-    def plot_lightcurve(self, start_time=None, end_time=None, paper_style=True):
+    def plot_lightcurve(self, start_time: float = None, end_time: float = None, paper_style: bool = True) -> None:
+        """ Plots the lightcurve and the maximum likelihood fit.
+
+        Parameters
+        ----------
+        start_time:
+            The start time from which to plot the data/fit.
+        end_time:
+            The start time up to which to plot the data/fit.
+        paper_style:
+            Whether to use the `paper.mplstyle` style file.
+        """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
             plt.style.use(style_file)
@@ -196,7 +277,18 @@ class GPResult(bilby.result.Result):
         plt.show()
         plt.clf()
 
-    def plot_residual(self, start_time=None, end_time=None, paper_style=True):
+    def plot_residual(self, start_time: float = None, end_time: float = None, paper_style: bool = True) -> None:
+        """ Plots the lightcurve minus the maximum likelihood mean model and the maximum likelihood prediction.
+
+        Parameters
+        ----------
+        start_time:
+            The start time from which to plot the data/fit.
+        end_time:
+            The start time up to which to plot the data/fit.
+        paper_style:
+            Whether to use the `paper.mplstyle` style file.
+        """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
             plt.style.use(style_file)
@@ -258,13 +350,25 @@ class GPResult(bilby.result.Result):
         plt.show()
         plt.clf()
 
-    def plot_corner(self, **kwargs):
+    def plot_corner(self, **kwargs) -> None:
+        """ Corner plotting utility. Calls to `bilby` implemented `plot_corner`.
+
+        Parameters
+        ----------
+        kwargs: All keyword arguments the bilby `plot_corner` method takes except for `outdir` and `truths`.
+        """
         try:
             super().plot_corner(outdir=self.corner_outdir, truths=self.truths, **kwargs)
         except Exception:
             super().plot_corner(outdir=self.corner_outdir, **kwargs)
 
-    def plot_frequency_posterior(self, paper_style=True):
+    def plot_frequency_posterior(self, paper_style: bool = True) -> None:
+        """ Plots the frequency posterior.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
             plt.style.use(style_file)
@@ -309,7 +413,13 @@ class GPResult(bilby.result.Result):
                 plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.pdf")
                 plt.clf()
 
-    def plot_period_posterior(self, paper_style=True):
+    def plot_period_posterior(self, paper_style: bool = True) -> None:
+        """ Plots the period posterior.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
             plt.style.use(style_file)
@@ -336,7 +446,13 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_period_posterior.pdf")
             plt.clf()
 
-    def plot_qpo_log_amplitude(self, paper_style=True):
+    def plot_qpo_log_amplitude(self, paper_style: bool = True) -> None:
+        """ Plots the QPO log amplitude posterior.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
@@ -359,7 +475,13 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.pdf")
             plt.clf()
 
-    def plot_amplitude_ratio(self, paper_style=True):
+    def plot_amplitude_ratio(self, paper_style: bool = True) -> None:
+        """ Plots the amplitude ratio posterior.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
@@ -382,7 +504,13 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.pdf")
             plt.clf()
 
-    def plot_log_red_noise_power(self, paper_style=True):
+    def plot_log_red_noise_power(self, paper_style: bool = True) -> None:
+        """ Plots red noise power posterior. This is not very well reasoned and we did not implement it in our paper.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
@@ -405,7 +533,13 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.pdf")
             plt.clf()
 
-    def plot_log_qpo_power(self, paper_style=True):
+    def plot_log_qpo_power(self, paper_style: bool = True) -> None:
+        """ Plots the QPO log power posterior. This is not very well reasoned and we did not implement it in our paper.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
@@ -429,7 +563,13 @@ class GPResult(bilby.result.Result):
             plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.pdf")
             plt.clf()
 
-    def plot_duration_posterior(self, paper_style=True):
+    def plot_duration_posterior(self, paper_style: bool = True) -> None:
+        """ Plots the duration posterior for the `celerite_windowed` likelihood class.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
         if self.likelihood_model == "celerite_windowed":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
             if paper_style:
@@ -454,6 +594,13 @@ class GPResult(bilby.result.Result):
             plt.clf()
 
     def plot_all(self, paper_style=True):
+        """ Plots all relevant posteriors.
+
+        Parameters
+        ----------
+        paper_style: Whether to use the `paper.mplstyle` style file.
+        """
+
         self.plot_corner()
         try:
             self.plot_max_likelihood_psd(paper_style=paper_style)
@@ -465,18 +612,32 @@ class GPResult(bilby.result.Result):
             pass
         self.plot_lightcurve(paper_style=paper_style)
         self.plot_residual(paper_style=paper_style)
-        # self.plot_qpo_log_amplitude(paper_style=paper_style)
-        # self.plot_log_red_noise_power(paper_style=paper_style)
-        # self.plot_log_qpo_power(paper_style=paper_style)
         self.plot_frequency_posterior(paper_style=paper_style)
         self.plot_period_posterior(paper_style=paper_style)
         self.plot_duration_posterior(paper_style=paper_style)
+        # self.plot_qpo_log_amplitude(paper_style=paper_style)
+        # self.plot_log_red_noise_power(paper_style=paper_style)
+        # self.plot_log_qpo_power(paper_style=paper_style)
         # self.plot_amplitude_ratio(paper_style=paper_style)
 
 
-def power_qpo(a, c, f):
+def power_qpo(
+        a: Union[float, np.ndarray], c: Union[float, np.ndarray], f: Union[float, np.ndarray])\
+        -> Union[float, np.ndarray]:
+    """ Effect size of the QPO. This is not very well reasoned and we did not implement it in our paper.
+
+    Returns
+    -------
+    The integral of the square of the kernel.
+    """
     return a * np.sqrt((c**2 + 2 * np.pi**2 * f**2)/(c * (c**2 + 4 * np.pi**2 * f**2)))
 
 
-def power_red_noise(a, c):
+def power_red_noise(a: Union[float, np.ndarray], c: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    """ Effect size of the red noise. This is not very well reasoned and we did not implement it in our paper.
+
+    Returns
+    -------
+    The integral of the square of the kernel.
+    """
     return a / c**0.5

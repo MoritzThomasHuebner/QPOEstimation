@@ -1,7 +1,24 @@
 import numpy as np
 
+"""
+This module contains a number of smoothing functions. 
+Using these in the search for QPOs is probably not a good idea.
+See Auchere et al. 2016.
+"""
 
-def moving_average(ys, n=64):
+
+def moving_average(ys: np.ndarray, n: int = 64) -> np.ndarray:
+    """ A simple moving-average filter.
+
+    Parameters
+    ----------
+    ys: The data points are assumed to be equally spaced.
+    n: The number of data points left and right of the current data point to use for the average.
+
+    Returns
+    -------
+    The smoothed array.
+    """
     res = np.zeros(len(ys))
     for i in range(len(ys)):
         if i < n:
@@ -17,6 +34,17 @@ def moving_average(ys, n=64):
 
 
 def exponential_smoothing(ys, alpha):
+    """ A simple exponential filter.
+
+    Parameters
+    ----------
+    ys: The data points are assumed to be equally spaced.
+    alpha: The smoothing parameter in the interval [0, 1]. alpha = 1 is returns the initial time series exactly.
+
+    Returns
+    -------
+    The smoothed array.
+    """
     s = np.zeros(len(ys))
     s[0] = ys[0]
     for i in range(1, len(ys)):
@@ -25,6 +53,18 @@ def exponential_smoothing(ys, alpha):
 
 
 def second_order_exponential_smoothing(ys, alpha, beta):
+    """ A second-order exponential filter.
+
+    Parameters
+    ----------
+    ys: The data points are assumed to be equally spaced.
+    alpha: The first smoothing parameter in the interval [0, 1].
+    beta: The second smoothing parameter in the interval [0, 1].
+
+    Returns
+    -------
+    The smoothed array.
+    """
     s = np.zeros(len(ys))
     b = np.zeros(len(ys))
     s[0] = ys[0]
@@ -36,20 +76,56 @@ def second_order_exponential_smoothing(ys, alpha, beta):
 
 
 def two_sided_exponential_smoothing(ys, alpha):
+    """ Applies the simple exponential filter in both directions and takes the average.
+    Exponential filtering is not symmetric and the smoothed time series often trails the actual data somewhat.
+
+    Parameters
+    ----------
+    ys: The data points are assumed to be equally spaced.
+    alpha: The smoothing parameter in the interval [0, 1]. alpha = 1 is returns the initial time series exactly.
+
+    Returns
+    -------
+    The smoothed array.
+    """
+
     forward = exponential_smoothing(ys, alpha)
     backwards = exponential_smoothing(ys[::-1], alpha)[::-1]
-    res = (forward + backwards)/2
-    return res
+    return (forward + backwards)/2
 
 
 def two_sided_second_order_exponential_smoothing(ys, alpha, beta):
+    """ Applies the second-order exponential filter in both directions and takes the average.
+    Exponential filtering is not symmetric and the smoothed time series often trails the actual data somewhat.
+
+    Parameters
+    ----------
+    ys: The data points are assumed to be equally spaced.
+    alpha: The smoothing parameter in the interval [0, 1].
+    beta: The second smoothing parameter in the interval [0, 1].
+
+    Returns
+    -------
+    The smoothed array.
+    """
     forward = second_order_exponential_smoothing(ys, alpha, beta)
     backwards = second_order_exponential_smoothing(ys[::-1], alpha, beta)[::-1]
-    res = (forward + backwards)/2
-    return res
+    return (forward + backwards)/2
 
 
 def boxcar_filter(ys, n):
+    """ A simple boxcar filter.
+
+    Parameters
+    ----------
+    ys: The data points are assumed to be equally spaced.
+    n: The number of data points left and right of the current data point to use for the average.
+
+    Returns
+    -------
+    The smoothed array.
+    """
+
     res = np.zeros(len(ys))
     for i, c in enumerate(ys):
         if i < (n - 1)/2:
@@ -59,5 +135,4 @@ def boxcar_filter(ys, n):
         else:
             boxcar = ys[int(i - (n - 1) / 2): int(i + (n - 1) / 2)]
         res[i] = sum(boxcar) / len(boxcar)
-
     return res
