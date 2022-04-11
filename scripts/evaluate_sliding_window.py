@@ -20,7 +20,6 @@ pulse_period = 7.56
 segment_step = 0.945
 segment_length = 2.8
 kernel_type = "qpo_plus_red_noise"
-data_mode = "normal"
 likelihood_model = "celerite_windowed"
 alpha = 0.02
 
@@ -35,16 +34,11 @@ else:
 
 band = f"{band_minimum}_{band_maximum}Hz"
 suffix = ""
-outdir = f"results/SGR_1806_20/{run_mode}/{band}/{data_mode}"
+outdir = f"results/SGR_1806_20/{run_mode}/{band}"
 outdir_qpo_model = f"{outdir}/{kernel_type}/{likelihood_model}/"
 outdir_red_noise = f"{outdir}/red_noise/{likelihood_model}/"
 
-if data_mode == "smoothed":
-    data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat")
-elif data_mode == "smoothed_residual":
-    data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz_exp_residual_alpha_{alpha}.dat")
-else:
-    data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz.dat")
+data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz.dat")
 
 times = data[:, 0]
 counts = data[:, 1]

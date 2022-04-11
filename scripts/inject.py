@@ -35,8 +35,6 @@ if len(sys.argv) > 1:
     sigma_max = args.sigma_max
     t_0_min = args.t_0_min
     t_0_max = args.t_0_max
-    tau_min = args.tau_min
-    tau_max = args.tau_max
 
     min_log_a = args.min_log_a
     max_log_a = args.max_log_a
@@ -77,8 +75,6 @@ else:
     sigma_max = 1.0
     t_0_min = 0
     t_0_max = 1
-    tau_min = 0
-    tau_max = 3
 
     min_log_a_red_noise = -1
     max_log_a_red_noise = 1
@@ -109,9 +105,7 @@ mean_prior_bounds_dict = dict(
     sigma_min=sigma_min,
     sigma_max=sigma_max,
     t_0_min=t_0_min,
-    t_0_max=t_0_max,
-    tau_min=tau_min,
-    tau_max=tau_max
+    t_0_max=t_0_max
 )
 
 # times = np.linspace(0, segment_length, int(sampling_frequency * segment_length))

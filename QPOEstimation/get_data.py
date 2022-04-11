@@ -66,8 +66,8 @@ def get_giant_flare_data(run_mode: str, **kwargs) -> tuple:
 
 
 def get_giant_flare_data_from_period(
-        data_mode: str = "normal", period_number: int = 0, run_id: int = 0, segment_step: float = 0.54,
-        segment_length: float = 1, sampling_frequency: float = 256, alpha: float = 0.02, **kwargs) -> tuple:
+        period_number: int = 0, run_id: int = 0, segment_step: float = 0.54,
+        segment_length: float = 1, sampling_frequency: float = 256, **kwargs) -> tuple:
     pulse_period = 7.56  # see papers
     n_pulse_periods = 47
     time_offset = 20.0
@@ -76,27 +76,19 @@ def get_giant_flare_data_from_period(
         interpulse_periods.append((time_offset + i * pulse_period, time_offset + (i + 1) * pulse_period))
     start = interpulse_periods[period_number][0] + run_id * segment_step
     stop = start + segment_length
-    return get_giant_flare_data_from_segment(start_time=start, end_time=stop, data_mode=data_mode,
-                                             sampling_frequency=sampling_frequency, alpha=alpha)
+    return get_giant_flare_data_from_segment(start_time=start, end_time=stop,
+                                             sampling_frequency=sampling_frequency)
 
 
 def get_giant_flare_data_from_segment(
-        start_time: float = 10., end_time: float = 400., data_mode: str = "normal",
-        sampling_frequency: float = 256, alpha: float = 0.02, **kwargs) -> tuple:
-    times, counts = get_all_giant_flare_data(data_mode=data_mode, sampling_frequency=sampling_frequency, alpha=alpha)
+        start_time: float = 10., end_time: float = 400.,
+        sampling_frequency: float = 256, **kwargs) -> tuple:
+    times, counts = get_all_giant_flare_data(sampling_frequency=sampling_frequency)
     return truncate_data(times=times, counts=counts, start=start_time, stop=end_time)
 
 
-def get_all_giant_flare_data(
-        data_mode: str = "normal", sampling_frequency: float = 256, alpha: float = 0.02, **kwargs) -> tuple:
-    if data_mode == "smoothed":
-        data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz_exp_smoothed_alpha_{alpha}.dat")
-    elif data_mode == "smoothed_residual":
-        data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz_exp_residual_alpha_{alpha}.dat")
-    elif data_mode == "blind_injection":
-        data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz_{data_mode}.dat")
-    else:
-        data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz.dat")
+def get_all_giant_flare_data(sampling_frequency: float = 256, **kwargs) -> tuple:
+    data = np.loadtxt(f"data/sgr1806_{sampling_frequency}Hz.dat")
     return data[:, 0], data[:, 1]
 
 
@@ -285,9 +277,10 @@ def get_data(data_source: str, **kwargs) -> tuple:
     likelihood_model = kwargs.get("likelihood_model", None)
     recovery_mode_str = kwargs.get("recovery_mode_str", None)
     recovery_mode = kwargs.get("recovery_mode", None)
-    yerr = None
     if data_source == "giant_flare":
         times, y = get_giant_flare_data(**kwargs)
+        yerr = np.sqrt(y)
+        yerr[np.where(yerr == 0)[0]] = 1
         outdir = f"results/SGR_1806_20/{run_mode}/{kwargs['band']}/{recovery_mode_str}/{likelihood_model}/"
         if run_mode == "sliding_window":
             outdir += f"period_{kwargs['period_number']}/"
@@ -300,6 +293,8 @@ def get_data(data_source: str, **kwargs) -> tuple:
             raise ValueError
     elif data_source == "magnetar_flare":
         times, y = get_tte_magnetar_flare_data(**kwargs)
+        yerr = np.sqrt(y)
+        yerr[np.where(yerr == 0)[0]] = 1
         outdir = f"results/magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
                  f"{recovery_mode_str}/{likelihood_model}/"
         if run_mode == "select_time":
@@ -308,6 +303,8 @@ def get_data(data_source: str, **kwargs) -> tuple:
             label = run_mode
     elif data_source == "magnetar_flare_binned":
         times, y = get_binned_magnetar_flare_data(**kwargs)
+        yerr = np.sqrt(y)
+        yerr[np.where(yerr == 0)[0]] = 1
         outdir = f"results/magnetar_flares/{kwargs['magnetar_label']}/{kwargs['magnetar_tag']}/{run_mode}/" \
                  f"{recovery_mode_str}/{likelihood_model}/"
         if run_mode == "select_time":
@@ -332,15 +329,17 @@ def get_data(data_source: str, **kwargs) -> tuple:
         if kwargs["grb_energy_band"] != "all":
             label += f"_{kwargs['grb_energy_band']}keV"
         # times -= times[0]
-
     elif data_source == "injection":
         times, y, yerr, truths = get_injection_data(**kwargs)
+        if yerr is None:
+            yerr = np.zeros(len(y))
         outdir = get_injection_outdir(
             injection_mode=kwargs["injection_mode"], recovery_mode=recovery_mode,
             likelihood_model=kwargs["likelihood_model"], base_injection_outdir=kwargs["base_injection_outdir"])
         label = get_injection_label(run_mode, kwargs["injection_id"], start_time, end_time)
     elif data_source == "hares_and_hounds":
         times, y = get_hares_and_hounds_data(**kwargs)
+        yerr = np.zeros(len(y))
         times -= times[0]
         outdir = f"results/hares_and_hounds_{kwargs['hares_and_hounds_round']}/" \
                  f"{kwargs['hares_and_hounds_id']}/{run_mode}/" \

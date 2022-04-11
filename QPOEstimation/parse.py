@@ -10,7 +10,6 @@ DATA_SOURCES = ["injection", "giant_flare", "solar_flare", "grb", "magnetar_flar
 RUN_MODES = ["select_time", "sliding_window", "entire_segment", "from_maximum"]
 BACKGROUND_MODELS = ["polynomial", "exponential", "skew_exponential", "gaussian", "log_normal", "lorentzian", "mean",
                      "skew_gaussian", "fred", "fred_extended", "0"]
-DATA_MODES = ["normal", "smoothed", "smoothed_residual"]
 GRB_ENERGY_BANDS = ["15-25", "25-50", "50-100", "100-350", "15-350", "all"]
 OSCILLATORY_MODELS = ["qpo", "pure_qpo", "qpo_plus_red_noise", "fourier_series"]
 
@@ -26,8 +25,6 @@ def parse_args() -> argparse.ArgumentParser:
     parser.add_argument("--data_source", default="giant_flare", choices=DATA_SOURCES)
     parser.add_argument("--run_mode", default="sliding_window", choices=RUN_MODES)
     parser.add_argument("--sampling_frequency", default=None, type=int)
-    parser.add_argument("--data_mode", choices=DATA_MODES, default="normal", type=str)
-    parser.add_argument("--alpha", default=0.02, type=float)
     parser.add_argument("--variance_stabilisation", default="False", type=str)
 
     parser.add_argument("--hares_and_hounds_id", default="5700", type=str)
@@ -70,8 +67,6 @@ def parse_args() -> argparse.ArgumentParser:
     parser.add_argument("--offset_max", default=None, type=float)
     parser.add_argument("--sigma_min", default=None, type=float)
     parser.add_argument("--sigma_max", default=None, type=float)
-    parser.add_argument("--tau_min", default=None, type=float)
-    parser.add_argument("--tau_max", default=None, type=float)
     parser.add_argument("--t_0_min", default=None, type=float)
     parser.add_argument("--t_0_max", default=None, type=float)
 

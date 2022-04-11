@@ -64,29 +64,6 @@ def _get_polynomial_prior(n_components=4, **kwargs):
     return priors
 
 
-def _get_exponential_priors(n_components=1, minimum_spacing=0, **kwargs):
-    priors = ConditionalPriorDict()
-    for ii in range(n_components):
-        if n_components == 1:
-            priors[f"mean:tau_{ii}"] = Uniform(kwargs["tau_min"], kwargs["tau_max"], name=f"mean:tau_{ii}")
-        elif ii == 0:
-            priors[f"mean:tau_{ii}"] = Beta(minimum=kwargs["tau_min"], maximum=kwargs["tau_max"],
-                                            alpha=1, beta=n_components, name=f"mean:tau_{ii}")
-        else:
-            priors[f"mean:tau_{ii}"] = QPOEstimation.prior.minimum.MinimumPrior(
-                order=n_components - ii, minimum_spacing=minimum_spacing, minimum=kwargs["tau_min"],
-                maximum=kwargs["tau_max"], name=f"mean:tau_{ii}")
-
-        if math.isclose(np.log(kwargs["amplitude_min"]), np.log(kwargs["amplitude_max"])):
-            priors[f"mean:log_amplitude_{ii}"] = \
-                bilby.prior.DeltaFunction(peak=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
-        else:
-            priors[f"mean:log_amplitude_{ii}"] = bilby.core.prior.Uniform(
-                minimum=np.log(kwargs["amplitude_min"]),
-                maximum=np.log(kwargs["amplitude_max"]), name=f"ln A_{ii}")
-    return priors
-
-
 def _get_gaussian_priors(n_components=1, minimum_spacing=0, **kwargs):
     priors = ConditionalPriorDict()
     for ii in range(n_components):

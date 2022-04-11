@@ -20,8 +20,6 @@ if len(sys.argv) > 1:
     data_source = args.data_source
     run_mode = args.run_mode
     sampling_frequency = args.sampling_frequency
-    data_mode = args.data_mode
-    alpha = args.alpha
     variance_stabilisation = boolean_string(args.variance_stabilisation)
 
     hares_and_hounds_id = args.hares_and_hounds_id
@@ -57,8 +55,6 @@ if len(sys.argv) > 1:
     sigma_max = args.sigma_max
     t_0_min = args.t_0_min
     t_0_max = args.t_0_max
-    tau_min = args.tau_min
-    tau_max = args.tau_max
 
     minimum_window_spacing = args.minimum_window_spacing
 
@@ -95,8 +91,6 @@ else:
     data_source = "grb"
     run_mode = "select_time"
     sampling_frequency = 4096
-    data_mode = "normal"
-    alpha = 0.02
     variance_stabilisation = False
 
     hares_and_hounds_id = "612579"
@@ -143,8 +137,6 @@ else:
     # t_0_max = 1000
     t_0_min = None
     t_0_max = None
-    tau_min = None
-    tau_max = None
 
     minimum_window_spacing = 0
 
@@ -182,8 +174,8 @@ truths = None
 recovery_mode_str = recovery_mode
 
 times, y, _, outdir, label = get_data(
-    data_source=data_source, band=band, data_mode=data_mode, segment_length=segment_length,
-    sampling_frequency=sampling_frequency, alpha=alpha,
+    data_source=data_source, band=band, segment_length=segment_length,
+    sampling_frequency=sampling_frequency,
     period_number=period_number, run_id=run_id, segment_step=segment_step, start_time=start_time, end_time=end_time,
     run_mode=run_mode, recovery_mode=recovery_mode, recovery_mode_str=recovery_mode_str,
     likelihood_model=likelihood_model, magnetar_label=magnetar_label, magnetar_tag=magnetar_tag,
