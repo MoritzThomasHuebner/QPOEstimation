@@ -171,7 +171,7 @@ def _get_fred_extended_priors(n_components=1, minimum_spacing=0, **kwargs):
     return priors
 
 
-_N_COMPONENT_PRIORS = dict(exponential=_get_exponential_priors, gaussian=_get_gaussian_priors,
-                           log_normal=_get_log_normal_priors, lorentzian=_get_lorentzian_prior,
-                           skew_exponential=_get_skew_exponential_priors, skew_gaussian=_get_skew_gaussian_priors,
-                           fred=_get_fred_priors, fred_extended=_get_fred_extended_priors)
+_N_COMPONENT_PRIORS = dict(
+    gaussian=_get_gaussian_priors, log_normal=_get_log_normal_priors, lorentzian=_get_lorentzian_prior,
+    skew_exponential=_get_skew_exponential_priors, skew_gaussian=_get_skew_gaussian_priors,
+    fred=_get_fred_priors, fred_extended=_get_fred_extended_priors)
