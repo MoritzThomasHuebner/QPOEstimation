@@ -148,12 +148,13 @@ class GPResult(bilby.result.Result):
     def segment_length(self) -> float:
         return self.times[-1] - self.times[0]
 
-    def plot_max_likelihood_psd(self, paper_style: bool = True) -> None:
+    def plot_max_likelihood_psd(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the maximum likelihood psd.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
@@ -176,14 +177,17 @@ class GPResult(bilby.result.Result):
         except Exception:
             pass
         plt.savefig(f"{self.fits_outdir}/{self.label}_psd.png")
+        if show:
+            plt.show()
         plt.clf()
 
-    def plot_kernel(self, paper_style: bool = True) -> None:
+    def plot_kernel(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the maximum likelihood kernel function.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
@@ -199,9 +203,13 @@ class GPResult(bilby.result.Result):
         except Exception:
             pass
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_kernel.pdf")
+        if show:
+            plt.show()
         plt.clf()
 
-    def plot_lightcurve(self, start_time: float = None, end_time: float = None, paper_style: bool = True) -> None:
+    def plot_lightcurve(
+            self, start_time: float = None, end_time: float = None,
+            paper_style: bool = True, show: bool = True) -> None:
         """ Plots the lightcurve and the maximum likelihood fit.
 
         Parameters
@@ -212,6 +220,7 @@ class GPResult(bilby.result.Result):
             The start time up to which to plot the data/fit.
         paper_style:
             Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
@@ -274,10 +283,13 @@ class GPResult(bilby.result.Result):
         except Exception:
             pass
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_fit.pdf")
-        plt.show()
+        if show:
+            plt.show()
         plt.clf()
 
-    def plot_residual(self, start_time: float = None, end_time: float = None, paper_style: bool = True) -> None:
+    def plot_residual(
+            self, start_time: float = None, end_time: float = None,
+            paper_style: bool = True, show: bool = True) -> None:
         """ Plots the lightcurve minus the maximum likelihood mean model and the maximum likelihood prediction.
 
         Parameters
@@ -288,6 +300,7 @@ class GPResult(bilby.result.Result):
             The start time up to which to plot the data/fit.
         paper_style:
             Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
@@ -347,10 +360,11 @@ class GPResult(bilby.result.Result):
         except Exception:
             pass
         plt.savefig(f"{self.fits_outdir}/{self.label}_max_like_residual_fit.pdf")
-        plt.show()
+        if show:
+            plt.show()
         plt.clf()
 
-    def plot_corner(self, **kwargs) -> None:
+    def plot_corner(self, show: bool = True, **kwargs) -> None:
         """ Corner plotting utility. Calls to `bilby` implemented `plot_corner`.
 
         Parameters
@@ -361,13 +375,16 @@ class GPResult(bilby.result.Result):
             super().plot_corner(outdir=self.corner_outdir, truths=self.truths, **kwargs)
         except Exception:
             super().plot_corner(outdir=self.corner_outdir, **kwargs)
+        if show:
+            plt.show()
 
-    def plot_frequency_posterior(self, paper_style: bool = True) -> None:
+    def plot_frequency_posterior(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the frequency posterior.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
@@ -393,6 +410,8 @@ class GPResult(bilby.result.Result):
             except Exception:
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior.pdf")
+            if show:
+                plt.show()
             plt.clf()
         elif self.kernel_type == "double_qpo":
             frequency_samples_1 = np.exp(np.array(self.posterior["kernel:terms[0]:log_f"]))
@@ -411,14 +430,17 @@ class GPResult(bilby.result.Result):
                 except Exception:
                     pass
                 plt.savefig(f"{self.corner_outdir}/{self.label}_frequency_posterior_{i}.pdf")
+                if show:
+                    plt.show()
                 plt.clf()
 
-    def plot_period_posterior(self, paper_style: bool = True) -> None:
+    def plot_period_posterior(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the period posterior.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         if paper_style:
@@ -444,14 +466,17 @@ class GPResult(bilby.result.Result):
             except Exception:
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_period_posterior.pdf")
+            if show:
+                plt.show()
             plt.clf()
 
-    def plot_qpo_log_amplitude(self, paper_style: bool = True) -> None:
+    def plot_qpo_log_amplitude(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the QPO log amplitude posterior.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -473,14 +498,17 @@ class GPResult(bilby.result.Result):
             except Exception:
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_log_amplitude_posterior.pdf")
+            if show:
+                plt.show()
             plt.clf()
 
-    def plot_amplitude_ratio(self, paper_style: bool = True) -> None:
+    def plot_amplitude_ratio(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the amplitude ratio posterior.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -502,14 +530,17 @@ class GPResult(bilby.result.Result):
             except Exception:
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_amplitude_ratio_posterior.pdf")
+            if show:
+                plt.show()
             plt.clf()
 
-    def plot_log_red_noise_power(self, paper_style: bool = True) -> None:
+    def plot_log_red_noise_power(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots red noise power posterior. This is not very well reasoned and we did not implement it in our paper.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -531,14 +562,17 @@ class GPResult(bilby.result.Result):
             except Exception:
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_red_noise_power_samples.pdf")
+            if show:
+                plt.show()
             plt.clf()
 
-    def plot_log_qpo_power(self, paper_style: bool = True) -> None:
+    def plot_log_qpo_power(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the QPO log power posterior. This is not very well reasoned and we did not implement it in our paper.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         if self.kernel_type == "qpo_plus_red_noise":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -561,14 +595,17 @@ class GPResult(bilby.result.Result):
             except Exception:
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_qpo_power_samples.pdf")
+            if show:
+                plt.show()
             plt.clf()
 
-    def plot_duration_posterior(self, paper_style: bool = True) -> None:
+    def plot_duration_posterior(self, paper_style: bool = True, show: bool = True) -> None:
         """ Plots the duration posterior for the `celerite_windowed` likelihood class.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plot.
         """
         if self.likelihood_model == "celerite_windowed":
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -591,34 +628,36 @@ class GPResult(bilby.result.Result):
             except Exception:
                 pass
             plt.savefig(f"{self.corner_outdir}/{self.label}_duration_posterior.pdf")
+            if show:
+                plt.show()
             plt.clf()
 
-    def plot_all(self, paper_style=True):
+    def plot_all(self, paper_style=True, show: bool = True):
         """ Plots all relevant posteriors.
 
         Parameters
         ----------
         paper_style: Whether to use the `paper.mplstyle` style file.
+        show: Whether to show the plots.
         """
-
-        self.plot_corner()
+        self.plot_corner(show=show)
         try:
-            self.plot_max_likelihood_psd(paper_style=paper_style)
+            self.plot_max_likelihood_psd(paper_style=paper_style, show=show)
         except Exception:
             pass
         try:
-            self.plot_kernel(paper_style=paper_style)
+            self.plot_kernel(paper_style=paper_style, show=show)
         except Exception:
             pass
-        self.plot_lightcurve(paper_style=paper_style)
-        self.plot_residual(paper_style=paper_style)
-        self.plot_frequency_posterior(paper_style=paper_style)
-        self.plot_period_posterior(paper_style=paper_style)
-        self.plot_duration_posterior(paper_style=paper_style)
-        # self.plot_qpo_log_amplitude(paper_style=paper_style)
-        # self.plot_log_red_noise_power(paper_style=paper_style)
-        # self.plot_log_qpo_power(paper_style=paper_style)
-        # self.plot_amplitude_ratio(paper_style=paper_style)
+        self.plot_lightcurve(paper_style=paper_style, show=show)
+        self.plot_residual(paper_style=paper_style, show=show)
+        self.plot_frequency_posterior(paper_style=paper_style, show=show)
+        self.plot_period_posterior(paper_style=paper_style, show=show)
+        self.plot_duration_posterior(paper_style=paper_style, show=show)
+        # self.plot_qpo_log_amplitude(paper_style=paper_style, show=show)
+        # self.plot_log_red_noise_power(paper_style=paper_style, show=show)
+        # self.plot_log_qpo_power(paper_style=paper_style, show=show)
+        # self.plot_amplitude_ratio(paper_style=paper_style, show=show)
 
 
 def power_qpo(
