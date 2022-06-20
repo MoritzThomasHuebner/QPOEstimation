@@ -17,3 +17,7 @@ The intended usage is shown in `analyse.py` and `analyse_periodogram.py`. `injec
 Most of the keywords should be fairly self-explanatory. 
 Most other scripts are for creating plots or post-processing of results.
 I also provide a jupyter notebook in the `scripts` folder, which mostly follows `analyse.py`.
+
+## Arxiv Link
+Here is the arxiv link for the paper titled 'Searching for quasi-periodic oscillations in astrophysical transients using Gaussian processes':
+https://arxiv.org/abs/2205.12716
